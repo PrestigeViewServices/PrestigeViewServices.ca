@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand tokens — dark by default */
+    --background: 220 35% 6%;            /* #0A0E17 */
+    --foreground: 214 20% 97%;           /* #F5F7FA */
+
+    --surface: 222 32% 11%;              /* #111726 */
+    --surface-border: 220 24% 17%;       /* #1E2738 */
+
+    --muted: 222 22% 14%;
+    --muted-foreground: 218 17% 67%;     /* #9AA7BD */
+
+    --primary: 217 91% 60%;              /* #3B82F6 */
+    --primary-foreground: 0 0% 100%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 217 91% 60%;
+    --border: 220 24% 17%;
+    --input: 222 28% 14%;
+
+    --radius: 16px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 110% 10%, rgba(34, 197, 94, 0.06), transparent 60%);
+    background-attachment: fixed;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container-max {
+    @apply mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .surface-card {
+    @apply rounded-2xl border border-surface-border bg-surface/80 backdrop-blur-sm transition-all duration-300;
+  }
+
+  .surface-card-hover {
+    @apply hover:border-white/15 hover:-translate-y-0.5 hover:shadow-card;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em];
+  }
+
+  .heading-display {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05];
+  }
+
+  .heading-section {
+    @apply text-3xl sm:text-4xl font-bold tracking-tight;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

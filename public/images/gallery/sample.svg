@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1067" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Sample photo placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F1626"/>
+      <stop offset="100%" stop-color="#1A2742"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="rgba(59,130,246,0.25)"/>
+      <stop offset="100%" stop-color="rgba(59,130,246,0)"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1067" fill="url(#bg)"/>
+  <rect width="1600" height="1067" fill="url(#glow)"/>
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#9AA7BD" text-anchor="middle">
+    <text x="800" y="500" font-size="64" font-weight="700" letter-spacing="2" fill="#F5F7FA">Sample photo</text>
+    <text x="800" y="560" font-size="24" letter-spacing="1">Replace /public/images/gallery/sample.svg with your image</text>
+    <text x="800" y="600" font-size="20" opacity="0.7">Recommended: 1600 × 1067 JPG</text>
+  </g>
+</svg>
