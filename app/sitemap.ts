@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
 import { divisions } from "@/lib/content/divisions";
+import { activeRoles } from "@/lib/content/careers";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
@@ -13,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/reviews`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/careers`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
   ];
 
   const divisionRoutes: MetadataRoute.Sitemap = divisions.map((d) => ({
@@ -22,5 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  return [...staticRoutes, ...divisionRoutes];
+  const roleRoutes: MetadataRoute.Sitemap = activeRoles().map((r) => ({
+    url: `${base}/careers/${r.slug}`,
+    lastModified: new Date(r.datePosted),
+    changeFrequency: "weekly",
+    priority: 0.75,
+  }));
+
+  return [...staticRoutes, ...divisionRoutes, ...roleRoutes];
 }

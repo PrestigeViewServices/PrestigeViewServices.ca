@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { OfferModal } from "@/components/offer-modal";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
+import { isClerkConfigured } from "@/lib/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -71,6 +75,7 @@ export default function RootLayout({
     ],
     address: {
       "@type": "PostalAddress",
+      streetAddress: siteConfig.address.streetAddress,
       addressLocality: siteConfig.address.locality,
       addressRegion: siteConfig.address.region,
       addressCountry: siteConfig.address.country,
@@ -91,7 +96,7 @@ export default function RootLayout({
     sameAs: [siteConfig.social.facebook, siteConfig.social.instagram],
   };
 
-  return (
+  const tree = (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
         <script
@@ -110,7 +115,16 @@ export default function RootLayout({
         </main>
         <Footer />
         <OfferModal />
+
+        {/* Analytics — both providers self-disable when their env vars are unset */}
+        <VercelAnalytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
+
+  // Only wrap in ClerkProvider when keys exist. Without keys, the provider
+  // throws at runtime — better to render the marketing site cleanly and
+  // surface a "Clerk not configured" message on auth-gated pages.
+  return isClerkConfigured() ? <ClerkProvider>{tree}</ClerkProvider> : tree;
 }

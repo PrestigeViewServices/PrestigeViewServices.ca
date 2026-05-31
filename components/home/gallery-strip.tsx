@@ -1,13 +1,61 @@
 import Image from "next/image";
-import { gallery } from "@/lib/content/gallery";
+import { gallery as staticGallery } from "@/lib/content/gallery";
+import { getDb, isDbReady } from "@/lib/db";
 import { SectionHeading } from "@/components/section-heading";
 
 /**
- * Recent Work gallery — driven entirely by lib/content/gallery.ts.
- * Hidden if the array is empty.
+ * Recent Work gallery. Tries the DB first (managed via /admin/site/photos);
+ * falls back to the static lib/content/gallery.ts entries if no DB photos
+ * exist (or the DB isn't configured yet).
+ *
+ * Hidden entirely when neither source has anything to show.
  */
-export function GalleryStrip() {
-  if (gallery.length === 0) return null;
+
+type GalleryItem = {
+  key: string;
+  src: string;
+  alt: string;
+  caption?: string | null;
+  width?: number;
+  height?: number;
+};
+
+async function loadGallery(): Promise<GalleryItem[]> {
+  if (isDbReady()) {
+    const db = getDb();
+    if (db) {
+      try {
+        const dbPhotos = await db.galleryImage.findMany({
+          where: { section: "home", active: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        });
+        if (dbPhotos.length > 0) {
+          return dbPhotos.map((p) => ({
+            key: p.id,
+            src: p.url,
+            alt: p.alt,
+            caption: p.caption,
+          }));
+        }
+      } catch {
+        // Swallow — fall through to static gallery if DB query fails.
+      }
+    }
+  }
+
+  return staticGallery.map((g) => ({
+    key: g.id,
+    src: g.src,
+    alt: g.alt,
+    caption: g.caption,
+    width: g.width,
+    height: g.height,
+  }));
+}
+
+export async function GalleryStrip() {
+  const items = await loadGallery();
+  if (items.length === 0) return null;
 
   return (
     <section className="container-max py-20 sm:py-24">
@@ -17,9 +65,9 @@ export function GalleryStrip() {
         description="Real homes across Petawawa, Pembroke, and the Ottawa Valley — cleaned, mowed, and cleared by the PVS team."
       />
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {gallery.map((photo) => (
+        {items.map((photo) => (
           <figure
-            key={photo.id}
+            key={photo.key}
             className="group relative overflow-hidden rounded-2xl border border-surface-border bg-surface/60"
           >
             <div className="relative aspect-[3/2]">

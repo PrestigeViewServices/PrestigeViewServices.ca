@@ -1,0 +1,174 @@
+// Prisma schema — Phase 1 portal.
+//
+// Run `npm run db:generate` after `npm install`.
+// Run `npm run db:migrate` once you have a DATABASE_URL pointed at a
+// Postgres instance (Neon or Supabase recommended for v1).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// Users
+// -----------------------------------------------------------------------------
+// Mirrored from Clerk via webhook (see app/api/clerk/webhook/route.ts).
+// `role` is the canonical authorization signal — Clerk's publicMetadata.role
+// is kept in sync so middleware can gate routes without a DB hit on every
+// request.
+//
+// `ULTIMATE_ADMIN` is never assignable via UI — only via the env allowlist
+// (ULTIMATE_ADMIN_EMAILS) on user creation in the Clerk webhook.
+
+enum Role {
+  ULTIMATE_ADMIN
+  SUPER_ADMIN     // Photo + hiring management only; cannot change roles or access billing.
+  ADMIN
+  EMPLOYEE
+  CUSTOMER
+}
+
+enum SignupMethod {
+  GOOGLE
+  APPLE
+  EMAIL
+  PHONE
+  OTHER
+}
+
+model User {
+  id                String    @id // Clerk user id
+  email             String    @unique
+  firstName         String?
+  lastName          String?
+  phone             String?
+  // Customer profile fields. Optional on every role; only the customer area
+  // exposes / edits them. Editing is Phase 2 (see /account TODO).
+  streetAddress     String?
+  city              String?
+  region            String?
+  postalCode        String?
+  role              Role      @default(CUSTOMER)
+  signupMethod      SignupMethod @default(OTHER)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  assignedSupport   SupportRequest[] @relation("AssignedSupport")
+  uploadedPhotos    GalleryImage[]   @relation("UploadedPhotos")
+}
+
+// -----------------------------------------------------------------------------
+// Careers applications
+// -----------------------------------------------------------------------------
+// Written by /api/apply when DB is configured. Falls back to email-only
+// (lib/send-application-email.ts) when DATABASE_URL is missing — applications
+// are NEVER silently dropped.
+
+enum ApplicationStatus {
+  NEW
+  CONTACTED
+  HIRED
+  REJECTED
+}
+
+model Application {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  email           String
+  roleSlug        String   // slug from lib/content/careers.ts
+  availability    String
+  validLicense    String
+  reliableCommute String
+  yearsExperience String
+  whyJoin         String?
+  resumeUrl       String?
+  status          ApplicationStatus @default(NEW)
+  /// Internal hiring notes. Factual only — visible to admins.
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([roleSlug])
+  @@index([createdAt])
+}
+
+// -----------------------------------------------------------------------------
+// Support requests
+// -----------------------------------------------------------------------------
+// NOTE: This may duplicate functionality in AuroraSuite (our CRM for sales
+// leads). Confirm with the team before treating this as the source of truth
+// for customer issues. For Phase 1 we ship it because /support needs SOME
+// backend — we can migrate to Aurora later if it fits.
+
+enum SupportType {
+  QUOTE
+  ISSUE
+  DISPATCH
+  GENERAL
+}
+
+enum SupportStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+// -----------------------------------------------------------------------------
+// Gallery images
+// -----------------------------------------------------------------------------
+// Managed by ultimate_admin + super_admin via /admin/site/photos. Photos
+// themselves live on Cloudinary (see lib/cloudinary.ts) — we only store the
+// hosted URL + metadata here.
+//
+// Soft-delete via `active`. Keeps history reversible and lets us audit
+// who pulled what.
+
+model GalleryImage {
+  id            String   @id @default(cuid())
+  /// Full hosted URL (Cloudinary)
+  url           String
+  /// Cloudinary public_id, used to delete from the host on hard-purge
+  publicId      String?
+  /// Required alt text — accessibility + SEO
+  alt           String
+  /// Which on-site section this image belongs to (e.g. "home", "lawnpros")
+  section       String
+  /// Optional caption shown under the photo on the public site
+  caption       String?
+  /// Lower = earlier in the grid
+  sortOrder     Int      @default(0)
+  /// Soft delete flag — hidden from public + admin grid when false
+  active        Boolean  @default(true)
+  /// Clerk userId of whoever uploaded (FK to User)
+  uploadedById  String?
+  uploadedBy    User?    @relation("UploadedPhotos", fields: [uploadedById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([section, active, sortOrder])
+}
+
+model SupportRequest {
+  id              String        @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  type            SupportType
+  propertyAddress String?
+  details         String
+  status          SupportStatus @default(NEW)
+  assignedToId    String?
+  assignedTo      User?         @relation("AssignedSupport", fields: [assignedToId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}

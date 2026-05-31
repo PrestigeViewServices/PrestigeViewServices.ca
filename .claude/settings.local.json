@@ -1,7 +1,37 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(rm -rf .next)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(rm -f app/admin/admin-login.tsx app/api/admin/login/route.ts)",
+      "Bash(rmdir app/api/admin/login)",
+      "Bash(rmdir app/api/admin)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' --max-time 180 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' --max-time 60 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(cat \"C:/Users/guerl/AppData/Local/npm-cache/_logs/2026-05-31T19_34_45_707Z-eresolve-report.txt\" 2>/dev/null | head -40)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' --max-time 240 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(curl -s -o /dev/null --max-time 10 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(curl -s --max-time 10 \"http://localhost:3000/admin/loyalty\")",
+      "Bash(curl -s --max-time 10 \"http://localhost:3000/admin/site\")",
+      "Bash(npm run *)",
+      "Bash(echo \"=== exit code: $? ===\")",
+      "Bash(curl -s --max-time 10 \"http://localhost:3000/admin\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' --max-time 30 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(node scripts/setup-check.mjs)",
+      "Bash(echo \"exit: $?\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/api/admin/photos\")",
+      "Bash(curl -s -X POST -F \"alt=test\" -F \"section=home\" \"http://localhost:3000/api/admin/photos\" -w \"\\\\nHTTP %{http_code}\\\\n\")",
+      "Bash(curl -s -X POST -F \"alt=test\" -F \"section=home\" -w \"\\\\nHTTP %{http_code}\\\\n\" \"http://localhost:3000/api/admin/photos\")",
+      "Bash(curl -s -X DELETE -w \"\\\\nHTTP %{http_code}\\\\n\" \"http://localhost:3000/api/admin/photos/abc\")",
+      "Bash(curl -s --max-time 30 http://localhost:3000__TRACKED_VAR__)",
+      "Bash(curl -s --max-time 30 \"http://localhost:3000/admin/reviews\")",
+      "Bash(node -e \"import\\('./lib/qrcode.ts'\\).catch\\(\\(\\)=>require\\('qrcode'\\).toDataURL\\('https://g.page/r/CQB2PdKcBZl-EAE/review',{width:64}\\).then\\(s=>console.log\\('QR data URL length:',s.length,'ok'\\)\\)\\)\")",
+      "Bash(node -e \"require\\('qrcode'\\).toDataURL\\('https://g.page/r/CQB2PdKcBZl-EAE/review',{width:128}\\).then\\(s=>console.log\\('QR generated, data URL length:', s.length, 'starts with:', s.slice\\(0,30\\)\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

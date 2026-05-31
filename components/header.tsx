@@ -7,7 +7,6 @@ import {
   Menu,
   Phone,
   LifeBuoy,
-  User,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
+import { AuthControls } from "@/components/auth-controls";
 import { divisions } from "@/lib/content/divisions";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -31,6 +31,8 @@ import { formatPhone } from "@/lib/utils";
 const exploreLinks = [
   { href: "/services", label: "All Services" },
   { href: "/reviews", label: "Reviews" },
+  { href: "/careers", label: "Careers" },
+  { href: "/support", label: "Customer Support" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -100,14 +102,7 @@ export function Header() {
           <Button asChild size="md">
             <Link href="/quote">Get Quote</Link>
           </Button>
-          <Link
-            href="/admin"
-            className="ml-1 inline-flex items-center gap-1 text-[11px] uppercase tracking-wider text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-            aria-label="Admin"
-          >
-            <User className="h-3 w-3" />
-            <span className="sr-only sm:not-sr-only">Admin</span>
-          </Link>
+          <AuthControls />
         </div>
 
         {/* Mobile actions */}
@@ -180,13 +175,9 @@ export function Header() {
                     </a>
                   </Button>
                 </div>
-                <Link
-                  href="/admin"
-                  onClick={() => setOpen(false)}
-                  className="text-[11px] uppercase tracking-wider text-muted-foreground/70 px-3 py-2 hover:text-muted-foreground"
-                >
-                  Admin
-                </Link>
+                <div className="px-3 py-2">
+                  <AuthControls compact />
+                </div>
               </div>
             </SheetContent>
           </Sheet>

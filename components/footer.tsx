@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
 import { BrandLockup } from "@/components/brand-lockup";
+import { ReviewCta } from "@/components/review-cta";
 import { divisions } from "@/lib/content/divisions";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/site";
@@ -111,13 +112,17 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <ReviewCta variant="link" />
             <Link href="/about" className="hover:text-foreground">
               About
+            </Link>
+            <Link href="/careers" className="hover:text-foreground">
+              Careers
             </Link>
             <Link href="/contact" className="hover:text-foreground">
               Contact

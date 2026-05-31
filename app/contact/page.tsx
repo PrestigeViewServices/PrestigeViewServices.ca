@@ -40,6 +40,11 @@ export default function ContactPage() {
             />
             <ContactCard
               icon={<MapPin className="h-5 w-5" />}
+              label="Address"
+              value={`${siteConfig.address.streetAddress}, ${siteConfig.address.locality}, ${siteConfig.address.region}`}
+            />
+            <ContactCard
+              icon={<MapPin className="h-5 w-5" />}
               label="Service Area"
               value={siteConfig.serviceArea}
             />

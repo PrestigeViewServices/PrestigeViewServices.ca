@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Phone, Mail, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { SectionHeading } from "@/components/section-heading";
+import { ReviewCta } from "@/components/review-cta";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -61,6 +62,15 @@ export default function QuotePage() {
               Add any extras in the form's notes — we'll price them together.
             </p>
           </aside>
+
+          {/* "While you wait" nudge — Aurora's success state lives inside the
+              iframe so we can't hook it directly. This is the next-best
+              touch point for happy returning customers. */}
+          <ReviewCta
+            className="mx-auto w-full max-w-[750px]"
+            label="Already a PVS customer?"
+            body="If we've taken care of your property before, a quick Google review would help your neighbours find us."
+          />
         </div>
 
         <aside className="lg:col-span-5 space-y-5">

@@ -4,6 +4,7 @@ import { reviews, averageRating } from "@/lib/content/reviews";
 import { ReviewCard } from "@/components/review-card";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
+import { ReviewCta } from "@/components/review-cta";
 
 export const metadata: Metadata = {
   title: "Reviews — What Petawawa & Pembroke Are Saying",
@@ -11,6 +12,16 @@ export const metadata: Metadata = {
     "Real customer reviews from across the Ottawa Valley. See why homeowners trust Prestige View Services for lawn care, window cleaning, and snow removal.",
   alternates: { canonical: "/reviews" },
 };
+
+// TODO: replace static reviews with live Google reviews. Two paths to choose
+// from when we're ready:
+//   - Third-party widget (Elfsight / Trustindex) — drop-in <script>, no API
+//     keys, free tier covers ~3–5 reviews. Fast but limited customization.
+//   - Google Places API — pulls latest reviews + rating via Place ID. Needs
+//     an API key with Places enabled + billing turned on (still free up to
+//     quota). More control + can cache server-side.
+// Until then, /lib/content/reviews.ts is the source of truth and the
+// "Leave Us a Google Review" CTA below drives net-new reviews into Google.
 
 export default function ReviewsPage() {
   const avg = averageRating();
@@ -28,10 +39,7 @@ export default function ReviewsPage() {
           className="mt-10 mx-auto flex max-w-md items-center justify-center gap-4 rounded-2xl border border-surface-border bg-surface/60 px-6 py-4"
           aria-label={`Average rating ${avg} out of 5 from ${reviews.length} reviews`}
         >
-          <div
-            className="flex items-center gap-1"
-            aria-hidden
-          >
+          <div className="flex items-center gap-1" aria-hidden>
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
@@ -46,6 +54,13 @@ export default function ReviewsPage() {
               · {reviews.length}+ verified reviews
             </span>
           </div>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center gap-3 text-center">
+          <ReviewCta variant="button" />
+          <p className="text-xs text-muted-foreground">
+            Opens Google in a new tab. Takes about 30 seconds.
+          </p>
         </div>
       </section>
 
