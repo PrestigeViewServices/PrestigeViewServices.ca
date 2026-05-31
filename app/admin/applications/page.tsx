@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { Mail, Phone } from "lucide-react";
+import type { ApplicationStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole, isClerkConfigured } from "@/lib/auth";
 import { getRole as getCareerRole, roles as careerRoles } from "@/lib/content/careers";
@@ -320,8 +321,10 @@ async function updateApplicationStatus(id: string, status: string) {
   if (!APPLICATION_STATUSES.some((s) => s.value === status)) {
     throw new Error("Invalid status");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await db.application.update({ where: { id }, data: { status: status as any } });
+  await db.application.update({
+    where: { id },
+    data: { status: status as ApplicationStatus },
+  });
   revalidatePath("/admin/applications");
 }
 

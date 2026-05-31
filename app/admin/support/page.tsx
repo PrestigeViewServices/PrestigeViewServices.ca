@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { Mail, Phone, MapPin } from "lucide-react";
+import type { SupportStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole, isClerkConfigured } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
@@ -168,11 +169,9 @@ async function updateSupportStatus(id: string, status: string) {
   if (!SUPPORT_STATUSES.some((s) => s.value === status)) {
     throw new Error("Invalid status");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await db.supportRequest.update({
     where: { id },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { status: status as any },
+    data: { status: status as SupportStatus },
   });
   revalidatePath("/admin/support");
 }

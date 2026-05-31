@@ -13,8 +13,8 @@ type Props = Omit<ImageProps, "onError"> & {
  * so the page still renders cleanly when the logo file hasn't been dropped
  * into /public/images/ yet.
  */
-export function LogoWithFallback({ fallback, ...imageProps }: Props) {
+export function LogoWithFallback({ fallback, alt, ...imageProps }: Props) {
   const [errored, setErrored] = useState(false);
   if (errored) return <>{fallback}</>;
-  return <Image {...imageProps} onError={() => setErrored(true)} />;
+  return <Image alt={alt} {...imageProps} onError={() => setErrored(true)} />;
 }
