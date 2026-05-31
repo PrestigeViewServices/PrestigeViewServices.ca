@@ -9,7 +9,7 @@ import { parseRole } from "./roles";
  * where role-specific logic lives.
  */
 
-/** Names of env vars Clerk needs at minimum. Order matters for display. */
+/** Names of env vars Clerk reads for production keys. Order matters for display. */
 export const CLERK_ENV_VARS = [
   "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
   "CLERK_SECRET_KEY",
@@ -20,6 +20,15 @@ export function missingClerkEnvVars(): string[] {
   return CLERK_ENV_VARS.filter((k) => !process.env[k]);
 }
 
+/**
+ * True when production Clerk env vars are set. Keyless mode (which works
+ * for `next dev` only) is intentionally NOT counted here because Vercel
+ * builds can't write to .clerk/ during prerender.
+ *
+ * Pages and the root layout use this to skip ClerkProvider when keys are
+ * absent so the marketing site still builds + deploys cleanly. /admin and
+ * /portal show a "Clerk not configured" notice in that mode.
+ */
 export function isClerkConfigured(): boolean {
   return missingClerkEnvVars().length === 0;
 }

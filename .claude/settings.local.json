@@ -31,7 +31,14 @@
       "Bash(node -e \"import\\('./lib/qrcode.ts'\\).catch\\(\\(\\)=>require\\('qrcode'\\).toDataURL\\('https://g.page/r/CQB2PdKcBZl-EAE/review',{width:64}\\).then\\(s=>console.log\\('QR data URL length:',s.length,'ok'\\)\\)\\)\")",
       "Bash(node -e \"require\\('qrcode'\\).toDataURL\\('https://g.page/r/CQB2PdKcBZl-EAE/review',{width:128}\\).then\\(s=>console.log\\('QR generated, data URL length:', s.length, 'starts with:', s.slice\\(0,30\\)\\)\\)\")",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git check-ignore *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/@clerk/nextjs/package.json'\\).version\\)\")",
+      "Bash(node -e \"const c = require\\('@clerk/nextjs'\\); console.log\\('Show:', typeof c.Show, '| SignedIn:', typeof c.SignedIn, '| SignedOut:', typeof c.SignedOut, '| UserButton:', typeof c.UserButton, '| SignInButton:', typeof c.SignInButton\\)\")",
+      "Bash(npm view *)",
+      "Bash(node -e \"const c = require\\('@clerk/nextjs'\\); console.log\\('Clerk v7 exports — Show:', typeof c.Show, '| SignedIn:', typeof c.SignedIn, '| SignedOut:', typeof c.SignedOut, '| UserButton:', typeof c.UserButton, '| SignInButton:', typeof c.SignInButton, '| version:', require\\('./node_modules/@clerk/nextjs/package.json'\\).version\\)\")",
+      "Bash(perl -i -0pe 's/  if \\\\\\(!isClerkConfigured\\\\\\(\\\\\\)\\\\\\) \\\\{\\\\n    return NextResponse\\\\.json\\\\\\(\\\\n      \\\\{ ok: false, error: \"Authentication is not configured\" \\\\},\\\\n      \\\\{ status: 401 \\\\}\\\\n    \\\\\\);\\\\n  \\\\}\\\\n//g' app/api/admin/photos/\\\\[id\\\\]/route.ts)"
     ]
   }
 }

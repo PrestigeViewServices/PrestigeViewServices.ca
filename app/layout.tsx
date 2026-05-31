@@ -123,8 +123,8 @@ export default function RootLayout({
     </html>
   );
 
-  // Only wrap in ClerkProvider when keys exist. Without keys, the provider
-  // throws at runtime — better to render the marketing site cleanly and
-  // surface a "Clerk not configured" message on auth-gated pages.
+  // Only wrap in ClerkProvider when env vars are set. Without them,
+  // ClerkProvider throws at static-prerender time, which would break Vercel
+  // builds for the marketing site. Keyless mode is a `next dev`-only convenience.
   return isClerkConfigured() ? <ClerkProvider>{tree}</ClerkProvider> : tree;
 }

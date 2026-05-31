@@ -13,7 +13,7 @@ export default function SignInPage() {
       <section className="container-max py-16">
         <NotConfigured
           service="Clerk"
-          reason="Sign-in is powered by Clerk. Open SETUP.md for click-by-click setup."
+          reason="Sign-in is powered by Clerk. See SETUP.md for the click-by-click setup."
           envVars={["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY"]}
           missing={missingClerkEnvVars()}
           docHref="https://clerk.com/docs/quickstarts/nextjs"
@@ -21,9 +21,10 @@ export default function SignInPage() {
       </section>
     );
   }
+
   return (
     <section className="container-max py-16 flex justify-center">
-      <SignIn appearance={{ baseTheme: undefined }} />
+      <SignIn />
     </section>
   );
 }

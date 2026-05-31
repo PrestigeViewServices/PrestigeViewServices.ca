@@ -34,7 +34,6 @@ const FROM_PRISMA: Record<string, Role> = {
 };
 
 export default async function UsersPage() {
-  if (!isClerkConfigured()) return null;
   // Page-level access: both admin tiers can VIEW.
   // Middleware already enforces ultimate_admin-only on /admin/users for WRITES;
   // we double-check here so admins land on a read-only view if they bypass.
@@ -42,6 +41,7 @@ export default async function UsersPage() {
   const canEdit = isUltimateAdmin(session.role);
 
   if (!isDbReady()) {
+  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

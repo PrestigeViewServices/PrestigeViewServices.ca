@@ -1,15 +1,16 @@
 import { redirect } from "next/navigation";
-import {
-  getSession,
-  isClerkConfigured,
-  missingClerkEnvVars,
-} from "@/lib/auth";
+import { getSession, isClerkConfigured } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 
 export const metadata = {
   title: "Employee Portal",
   robots: { index: false, follow: false },
 };
+
+const PORTAL_ENV_VARS = [
+  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+  "CLERK_SECRET_KEY",
+];
 
 export default async function PortalLayout({
   children,
@@ -22,9 +23,8 @@ export default async function PortalLayout({
         <NotConfigured
           service="Clerk"
           reason="The employee portal is gated by Clerk. Open SETUP.md for the click-by-click setup."
-          envVars={["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY"]}
-          missing={missingClerkEnvVars()}
-          docHref="https://clerk.com/docs/quickstarts/nextjs"
+          envVars={PORTAL_ENV_VARS}
+          missing={PORTAL_ENV_VARS.filter((k) => !process.env[k])}
         />
       </section>
     );

@@ -36,7 +36,6 @@ Cheers,
 The PVS team`;
 
 export default async function ReviewsAdminPage() {
-  if (!isClerkConfigured()) return null;
   const session = await requireRole(["ultimate_admin", "super_admin", "admin"]);
   if (!canReachAdmin(session.role)) return null;
 
@@ -159,6 +158,7 @@ function TemplateCard({
   subject?: string;
   body: string;
 }) {
+  if (!isClerkConfigured()) return null;
   return (
     <div className="surface-card p-6 flex flex-col">
       <div className="flex items-center gap-3">

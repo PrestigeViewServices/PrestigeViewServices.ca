@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
-import { getSession, isClerkConfigured } from "@/lib/auth";
-import { homePathForRole } from "@/lib/roles";
+import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
+import { isClerkConfigured } from "@/lib/auth";
+import {
+  homePathForRole,
+  isUltimateAdminEmail,
+  parseRole,
+  type Role,
+} from "@/lib/roles";
 
 export const metadata = {
   title: "Signing you in…",
@@ -10,19 +16,44 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 /**
- * Central role-based redirect after Clerk sign-in or sign-up.
+ * Central role-router after Clerk sign-in / sign-up. The user is
+ * server-side redirected to /admin, /portal, or /account based on their
+ * role.
  *
- * Clerk's NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL + NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
- * point here. The middleware also bounces wrong-role visitors here.
- * From here, the user is server-side redirected to /admin, /portal, or /account
- * based on the role in their Clerk session claims.
+ * **JIT role assignment.** If the user's primary email is on
+ * `ULTIMATE_ADMIN_EMAILS`, we promote them to `ultimate_admin` on first
+ * arrival. That removes the dependency on the Clerk webhook for the
+ * happy path — the webhook still does the same thing in the background
+ * once it's configured.
  *
- * Users cannot self-select a portal — they only ever land on the one their
- * role allows.
+ * Users cannot self-select a portal. Clerk's after-sign-in URL points
+ * here, and the role decides the destination.
  */
 export default async function PostSignInPage() {
   if (!isClerkConfigured()) redirect("/");
-  const session = await getSession();
-  if (!session) redirect("/sign-in");
-  redirect(homePathForRole(session.role));
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
+
+  const email = user.primaryEmailAddress?.emailAddress ?? "";
+  let role: Role =
+    parseRole((user.publicMetadata as { role?: unknown } | null)?.role) ??
+    "customer";
+
+  if (isUltimateAdminEmail(email) && role !== "ultimate_admin") {
+    try {
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(userId, {
+        publicMetadata: { role: "ultimate_admin" },
+      });
+      role = "ultimate_admin";
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[post-sign-in] role assignment failed", err);
+    }
+  }
+
+  redirect(homePathForRole(role));
 }

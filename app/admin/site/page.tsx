@@ -21,7 +21,6 @@ export const dynamic = "force-dynamic";
 // =============================================================================
 
 export default async function SiteModificationsPage() {
-  if (!isClerkConfigured()) return null;
   // Top-level Site Modifications is ultimate_admin only. Photos has its own
   // subroute gated to super_admin + ultimate_admin.
   await requireRole("ultimate_admin");
@@ -93,6 +92,7 @@ function Tile({
   body: string;
   status: "live" | "phase-2";
 }) {
+  if (!isClerkConfigured()) return null;
   const inner = (
     <>
       <div className="flex items-start justify-between gap-3">

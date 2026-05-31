@@ -33,11 +33,7 @@ export default async function AccountLayout({
 
   const session = await getSession();
   if (!session) redirect("/sign-in");
-
-  // Customers only. Any other role gets sent to their proper landing.
-  if (session.role !== "customer") {
-    redirect(homePathForRole(session.role));
-  }
+  if (session.role !== "customer") redirect(homePathForRole(session.role));
 
   return (
     <section className="container-max py-10 sm:py-12">{children}</section>

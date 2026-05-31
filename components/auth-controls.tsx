@@ -4,13 +4,14 @@ import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 /**
- * Renders only when Clerk is configured (publishable key is exposed to the
- * client via NEXT_PUBLIC_*). The marketing site is fully usable without
- * Clerk; we simply hide this UI in that mode.
+ * Header sign-in / user button. Renders the Clerk widget when signed in,
+ * a "Sign in" link to /sign-in when signed out.
+ *
+ * Skipped when no NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY — without ClerkProvider
+ * mounted, the SignedIn/SignedOut components would crash at runtime.
  */
 export function AuthControls({ compact = false }: { compact?: boolean }) {
-  const configured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  if (!configured) return null;
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) return null;
 
   return (
     <div className="flex items-center gap-2">

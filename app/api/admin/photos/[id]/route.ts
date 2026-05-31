@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { canManagePhotos } from "@/lib/roles";
 import { getDb } from "@/lib/db";
 import { deletePhotoByPublicId } from "@/lib/cloudinary";
@@ -21,12 +21,6 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isClerkConfigured()) {
-    return NextResponse.json(
-      { ok: false, error: "Authentication is not configured" },
-      { status: 401 }
-    );
-  }
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
@@ -65,12 +59,6 @@ export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!isClerkConfigured()) {
-    return NextResponse.json(
-      { ok: false, error: "Authentication is not configured" },
-      { status: 401 }
-    );
-  }
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });

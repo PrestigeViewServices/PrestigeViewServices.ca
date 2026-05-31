@@ -19,11 +19,11 @@ export const metadata = {
 };
 
 export default async function PhotosPage() {
-  if (!isClerkConfigured()) return null;
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) return null;
 
   if (!isDbReady()) {
+  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

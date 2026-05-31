@@ -20,7 +20,6 @@ export const dynamic = "force-dynamic";
 // =============================================================================
 
 export default async function LoyaltyPage() {
-  if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "admin"]);
 
   return (
@@ -88,6 +87,7 @@ function PlaceholderCard({
   body: string;
   note: string;
 }) {
+  if (!isClerkConfigured()) return null;
   return (
     <div className="surface-card p-6 opacity-90">
       <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { canManagePhotos } from "@/lib/roles";
 import { getDb } from "@/lib/db";
 import {
@@ -38,12 +38,6 @@ const metadataSchema = z.object({
  * persists a GalleryImage record.
  */
 export async function POST(request: Request) {
-  if (!isClerkConfigured()) {
-    return NextResponse.json(
-      { ok: false, error: "Authentication is not configured" },
-      { status: 401 }
-    );
-  }
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });

@@ -25,10 +25,10 @@ const SUPPORT_TYPES = [
 ];
 
 export default async function SupportAdminPage() {
-  if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "admin"]);
 
   if (!isDbReady()) {
+  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

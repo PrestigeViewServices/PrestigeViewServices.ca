@@ -64,6 +64,7 @@ function PortalCard({
   body: string;
   note?: string;
 }) {
+  if (!isClerkConfigured()) return null;
   return (
     <div className="surface-card p-6">
       <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">

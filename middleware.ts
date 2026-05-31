@@ -24,20 +24,21 @@ import {
  *   /admin/site/photos      → ultimate_admin + super_admin (photo management)
  *   /portal                 → employee only
  *   /account                → customer only
- *   /post-sign-in           → any signed-in user (redirects to their portal)
+ *   /post-sign-in           → any signed-in user (role-router)
  *
- * Mismatched roles get redirected to /post-sign-in which sends them to the
- * right portal for their actual role — users can never land on the wrong
- * portal by URL guessing.
+ * Mismatched roles bounce to /post-sign-in — users can never URL-guess
+ * into the wrong portal.
  *
- * Pass-through when Clerk isn't configured so the marketing site still runs.
+ * Clerk runs in **keyless mode** when env vars are absent: it auto-generates
+ * temporary keys so sign-in works immediately. A "Configure your application"
+ * prompt appears in the Clerk UI to claim the app for production.
  */
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 const isPhotoRoute = createRouteMatcher(["/admin/site/photos(.*)"]);
 const isUltimateAdminRoute = createRouteMatcher([
   "/admin/users(.*)",
-  "/admin/site", // top-level site surface; photos handled separately
+  "/admin/site",
 ]);
 const isAdminGeneralRoute = createRouteMatcher([
   "/admin/support(.*)",
@@ -47,73 +48,66 @@ const isPortalRoute = createRouteMatcher(["/portal(.*)"]);
 const isAccountRoute = createRouteMatcher(["/account(.*)"]);
 const isPostSignInRoute = createRouteMatcher(["/post-sign-in"]);
 
-const CLERK_CONFIGURED = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-const passthrough = (_req: NextRequest) => NextResponse.next();
-
-function bounceToPostSignIn(req: NextRequest) {
-  return NextResponse.redirect(new URL("/post-sign-in", req.url));
+function bounceToPostSignIn(reqUrl: string) {
+  return NextResponse.redirect(new URL("/post-sign-in", reqUrl));
 }
+
+const CLERK_CONFIGURED = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const passthrough = (_req: NextRequest) => NextResponse.next();
 
 export default CLERK_CONFIGURED
   ? clerkMiddleware(async (auth, req) => {
-      const gated =
-        isAdminRoute(req) ||
-        isPortalRoute(req) ||
-        isAccountRoute(req) ||
-        isPostSignInRoute(req);
-      if (!gated) return;
+  const gated =
+    isAdminRoute(req) ||
+    isPortalRoute(req) ||
+    isAccountRoute(req) ||
+    isPostSignInRoute(req);
+  if (!gated) return;
 
-      const { userId, sessionClaims, redirectToSignIn } = await auth();
-      if (!userId) return redirectToSignIn({ returnBackUrl: req.url });
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
+  if (!userId) return redirectToSignIn({ returnBackUrl: req.url });
 
-      const claimRole = (
-        sessionClaims as { publicMetadata?: { role?: unknown } } | null
-      )?.publicMetadata?.role;
-      const role: Role = parseRole(claimRole) ?? "customer";
+  // /post-sign-in is the central role-router — anyone signed in may hit it.
+  if (isPostSignInRoute(req)) return;
 
-      // /post-sign-in is the central role-router. Anyone authenticated may hit it.
-      if (isPostSignInRoute(req)) return;
+  const claimRole = (
+    sessionClaims as { publicMetadata?: { role?: unknown } } | null
+  )?.publicMetadata?.role;
+  const role: Role = parseRole(claimRole) ?? "customer";
 
-      // Photo subroute first (overlaps with isUltimateAdminRoute /admin/site).
-      if (isPhotoRoute(req)) {
-        if (!canManagePhotos(role)) return bounceToPostSignIn(req);
-        return;
-      }
-
-      // Top-level Site Modifications + Users: ultimate_admin only.
-      if (isUltimateAdminRoute(req)) {
-        if (!isUltimateAdmin(role)) return bounceToPostSignIn(req);
-        return;
-      }
-
-      // Support + Loyalty: super_admin is intentionally blocked (focused role).
-      if (isAdminGeneralRoute(req)) {
-        if (!canManageAdminGeneral(role)) return bounceToPostSignIn(req);
-        return;
-      }
-
-      // Generic /admin (overview, applications, etc): admin family.
-      if (isAdminRoute(req)) {
-        if (!canReachAdmin(role)) return bounceToPostSignIn(req);
-        return;
-      }
-
-      if (isPortalRoute(req)) {
-        if (role !== "employee") return bounceToPostSignIn(req);
-        return;
-      }
-
-      if (isAccountRoute(req)) {
-        if (role !== "customer") return bounceToPostSignIn(req);
-        return;
-      }
-    })
+  if (isPhotoRoute(req)) {
+    if (!canManagePhotos(role)) return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isUltimateAdminRoute(req)) {
+    if (!isUltimateAdmin(role)) return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isAdminGeneralRoute(req)) {
+    if (!canManageAdminGeneral(role)) return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isAdminRoute(req)) {
+    if (!canReachAdmin(role)) return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isPortalRoute(req)) {
+    if (role !== "employee") return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isAccountRoute(req)) {
+    if (role !== "customer") return bounceToPostSignIn(req.url);
+    return;
+  }
+})
   : passthrough;
 
 export const config = {
+  // Includes /__clerk/(.*) so keyless mode's internal endpoints reach
+  // clerkMiddleware.
   matcher: [
-    "/((?!_next|images|favicon\\.ico|.*\\.(?:png|jpg|jpeg|webp|svg|gif|ico|css|js|map)$).*)",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
+    "/__clerk/(.*)",
   ],
 };
