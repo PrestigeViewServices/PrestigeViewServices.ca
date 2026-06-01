@@ -17,53 +17,56 @@ export type GalleryPhoto = {
   height: number;
 };
 
+// Home page "Recent Work" strip — one or two picks per service so the
+// strip showcases the full range of PVS work at a glance. For the full
+// per-service galleries, see lib/content/work-categories.ts.
 export const gallery: GalleryPhoto[] = [
   {
     id: "windows-interior-team",
     src: "/images/gallery/window-cleaning/interior-team-action.jpg",
     alt: "Two PVS technicians cleaning interior glass partitions on ladders",
-    caption: "Interior commercial · Petawawa",
+    caption: "Window cleaning · Petawawa",
     width: 1200,
     height: 1600,
   },
   {
-    id: "windows-aw-rain",
-    src: "/images/gallery/window-cleaning/aw-exterior-rain.jpg",
-    alt: "PVS technician cleaning A&W storefront windows on a rainy day",
-    caption: "A&W exterior · Petawawa",
+    id: "lawn-aerial",
+    src: "/images/gallery/lawn-mowing/aerial-drone-property.jpg",
+    alt: "Aerial drone view of a freshly mowed residential property",
+    caption: "Lawn care · aerial",
+    width: 1600,
+    height: 1200,
+  },
+  {
+    id: "snow-tractor",
+    src: "/images/gallery/snow-removal/snow-job-05.jpg",
+    alt: "PVS SnowLand tractor with snowblower clearing a residential driveway",
+    caption: "Snow removal · Ottawa Valley",
     width: 1200,
     height: 1600,
+  },
+  {
+    id: "pressure-soffit",
+    src: "/images/gallery/pressure-washing/pressure-job-01.jpg",
+    alt: "PVS technician soft-washing exterior siding and soffit",
+    caption: "Pressure & soft wash",
+    width: 1200,
+    height: 1600,
+  },
+  {
+    id: "junk-trailer",
+    src: "/images/gallery/junk-removal/junk-job-01.jpg",
+    alt: "PVS trailer loaded with junk and debris ready for disposal",
+    caption: "Junk removal · loaded",
+    width: 1600,
+    height: 1200,
   },
   {
     id: "windows-residential-uniform",
     src: "/images/gallery/window-cleaning/residential-pvs-uniform.jpg",
     alt: "PVS technician in branded uniform cleaning a residential window",
-    caption: "Residential exterior · Ottawa Valley",
+    caption: "Residential window care",
     width: 1600,
     height: 1200,
-  },
-  {
-    id: "windows-neighbours",
-    src: "/images/gallery/window-cleaning/neighbours-storefront.jpg",
-    alt: "PVS technician cleaning Neighbours storefront windows from a ladder",
-    caption: "Neighbours storefront",
-    width: 1200,
-    height: 1600,
-  },
-  {
-    id: "windows-pembroke-victorian",
-    src: "/images/gallery/window-cleaning/pembroke-victorian-home.jpg",
-    alt: "Cleaned exterior of a red brick Victorian home in Pembroke",
-    caption: "Pembroke Victorian · finished",
-    width: 1200,
-    height: 1600,
-  },
-  {
-    id: "windows-cape-cod",
-    src: "/images/gallery/window-cleaning/cape-cod-home.jpg",
-    alt: "Cleaned exterior of a white Cape Cod home with garden beds",
-    caption: "Cape Cod residence · finished",
-    width: 1200,
-    height: 1600,
   },
 ];

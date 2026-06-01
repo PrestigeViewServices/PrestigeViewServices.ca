@@ -1,5 +1,14 @@
 import type { LucideIcon } from "lucide-react";
-import { Sparkles, Leaf, Snowflake, Droplets, Wind, Waves } from "lucide-react";
+import {
+  Sparkles,
+  Leaf,
+  Snowflake,
+  Droplets,
+  Wind,
+  Waves,
+  Scissors,
+  Trash2,
+} from "lucide-react";
 import type { DivisionSlug } from "./divisions";
 
 /**
@@ -117,43 +126,92 @@ export const workCategories: WorkCategory[] = [
       },
     ],
   },
-  // Add more categories here as photos come in:
-  // {
-  //   slug: "gutter-cleaning",
-  //   name: "Gutter Cleaning",
-  //   shortName: "Gutters",
-  //   division: "clearview",
-  //   description: "...",
-  //   icon: Droplets,
-  //   photos: [],
-  // },
-  // {
-  //   slug: "pressure-washing",
-  //   name: "Pressure Washing",
-  //   shortName: "Pressure Wash",
-  //   division: "clearview",
-  //   description: "...",
-  //   icon: Waves,
-  //   photos: [],
-  // },
-  // {
-  //   slug: "lawn-care",
-  //   name: "Lawn Care",
-  //   shortName: "Lawn",
-  //   division: "lawnpros",
-  //   description: "...",
-  //   icon: Leaf,
-  //   photos: [],
-  // },
-  // {
-  //   slug: "snow-removal",
-  //   name: "Snow Removal",
-  //   shortName: "Snow",
-  //   division: "snowland",
-  //   description: "...",
-  //   icon: Snowflake,
-  //   photos: [],
-  // },
+  {
+    slug: "lawn-mowing",
+    name: "Lawn Mowing & Care",
+    shortName: "Lawn",
+    division: "lawnpros",
+    description:
+      "Recurring lawn mowing, edging, and seasonal cleanups for homes across Petawawa, Pembroke, and the Ottawa Valley.",
+    icon: Scissors,
+    photos: [
+      {
+        src: "/images/gallery/lawn-mowing/aerial-drone-property.jpg",
+        alt: "Aerial drone view of a freshly mowed residential property",
+        caption: "Aerial · drone capture",
+        width: 1600,
+        height: 1200,
+      },
+      ...Array.from({ length: 9 }, (_, i) => {
+        const n = String(i + 1).padStart(2, "0");
+        return {
+          src: `/images/gallery/lawn-mowing/lawn-job-${n}.jpg`,
+          alt: `PVS LawnPros crew on a residential lawn — Ottawa Valley`,
+          caption: `Lawn job · Ottawa Valley`,
+          width: 1600,
+          height: 1200,
+        };
+      }),
+    ],
+  },
+  {
+    slug: "snow-removal",
+    name: "Snow Removal & Plowing",
+    shortName: "Snow",
+    division: "snowland",
+    description:
+      "Residential and commercial snow plowing, walkway clearing, and seasonal contracts to keep your property safe all winter.",
+    icon: Snowflake,
+    photos: Array.from({ length: 14 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      return {
+        src: `/images/gallery/snow-removal/snow-job-${n}.jpg`,
+        alt: `PVS SnowLand crew clearing a property after a snowfall — Ottawa Valley`,
+        caption: `Winter callout · Ottawa Valley`,
+        width: 1600,
+        height: 1200,
+      };
+    }),
+  },
+  {
+    slug: "pressure-washing",
+    name: "Pressure & Soft Washing",
+    shortName: "Pressure Wash",
+    division: "clearview",
+    description:
+      "Exterior siding, soffit, deck, and driveway cleaning — bring your property's finish back to brand-new.",
+    icon: Waves,
+    photos: Array.from({ length: 2 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      return {
+        src: `/images/gallery/pressure-washing/pressure-job-${n}.jpg`,
+        alt: `PVS technician soft-washing exterior siding and soffit`,
+        caption: `Exterior wash · Ottawa Valley`,
+        width: 1200,
+        height: 1600,
+      };
+    }),
+  },
+  {
+    slug: "junk-removal",
+    name: "Junk & Debris Removal",
+    shortName: "Junk Removal",
+    division: "clearview",
+    description:
+      "Single-item pickups, full property cleanouts, and post-project debris hauls — loaded, strapped, and disposed of responsibly.",
+    icon: Trash2,
+    photos: Array.from({ length: 5 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      return {
+        src: `/images/gallery/junk-removal/junk-job-${n}.jpg`,
+        alt: `PVS trailer loaded with junk and debris ready for disposal`,
+        caption: `Loaded & ready for disposal`,
+        width: 1600,
+        height: 1200,
+      };
+    }),
+  },
+  // Add more categories here as photos come in.
 ];
 
 export function getWorkCategory(slug: string): WorkCategory | undefined {
