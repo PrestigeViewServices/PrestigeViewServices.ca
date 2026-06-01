@@ -50,7 +50,12 @@ export function ServiceCard({
         </div>
       </div>
       <h3 className="mt-5 text-xl font-semibold leading-tight">
-        {service.name}
+        <Link
+          href={`/services/${service.slug}`}
+          className="hover:text-primary transition-colors"
+        >
+          {service.name}
+        </Link>
       </h3>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
         {service.shortDescription}

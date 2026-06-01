@@ -4,6 +4,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { ReviewCta } from "@/components/review-cta";
 import { divisions } from "@/lib/content/divisions";
 import { services } from "@/lib/content/services";
+import { serviceAreas } from "@/lib/content/service-areas";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -61,6 +62,27 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+            <h3 className="text-sm font-semibold mb-4 mt-7">Service Areas</h3>
+            <ul className="space-y-2.5 text-sm">
+              {serviceAreas.slice(0, 6).map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/service-areas/${a.slug}`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {a.name}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link
+                  href="/service-areas"
+                  className="text-primary hover:text-foreground transition-colors"
+                >
+                  All areas →
+                </Link>
+              </li>
+            </ul>
           </div>
 
           <div className="md:col-span-3">
@@ -69,7 +91,7 @@ export function Footer() {
               {featured.map((s) => (
                 <li key={s.slug}>
                   <Link
-                    href={`/quote?service=${s.slug}`}
+                    href={`/services/${s.slug}`}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {s.name}

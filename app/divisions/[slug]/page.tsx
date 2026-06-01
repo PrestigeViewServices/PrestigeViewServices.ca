@@ -8,6 +8,7 @@ import { ServiceCard } from "@/components/service-card";
 import { OfferCard } from "@/components/offer-card";
 import { SectionHeading } from "@/components/section-heading";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { siteConfig } from "@/lib/site";
 
 type Params = { slug: DivisionSlug };
 
@@ -22,10 +23,16 @@ export function generateMetadata({
 }): Metadata {
   const division = divisions.find((d) => d.slug === params.slug);
   if (!division) return {};
+  const title = `${division.name} · ${division.tagline} in Petawawa & Pembroke`;
   return {
-    title: `${division.name} — ${division.tagline}`,
-    description: division.description,
+    title,
+    description: `${division.description} Serving Petawawa, Pembroke & the Ottawa Valley year-round.`,
     alternates: { canonical: `/divisions/${division.slug}` },
+    openGraph: {
+      title,
+      description: division.description,
+      url: `${siteConfig.url}/divisions/${division.slug}`,
+    },
   };
 }
 
@@ -42,8 +49,47 @@ export default function DivisionPage({ params }: { params: Params }) {
   const divisionServices = servicesByDivision(division.slug);
   const divisionOffers = offersForDivision(division.slug);
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: division.name,
+          item: `${siteConfig.url}/divisions/${division.slug}`,
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: `${division.name} services`,
+      itemListElement: divisionServices.map((s, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Service",
+          name: s.name,
+          description: s.shortDescription,
+          url: `${siteConfig.url}/services/${s.slug}`,
+          areaServed: [
+            { "@type": "City", name: "Petawawa" },
+            { "@type": "City", name: "Pembroke" },
+          ],
+        },
+      })),
+    },
+  ];
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <DivisionHero division={division} />
 
       <section className="container-max py-16 sm:py-20">

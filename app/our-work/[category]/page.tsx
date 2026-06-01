@@ -11,6 +11,7 @@ import { getDivision } from "@/lib/content/divisions";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { CtaBand } from "@/components/cta-band";
+import { siteConfig } from "@/lib/site";
 
 type Params = { category: string };
 
@@ -25,10 +26,16 @@ export function generateMetadata({
 }): Metadata {
   const category = getWorkCategory(params.category);
   if (!category) return {};
+  const title = `${category.name} — Recent Work in Petawawa & Pembroke`;
   return {
-    title: `${category.name} — Recent Work`,
-    description: category.description,
+    title,
+    description: `${category.description} Real PVS jobs across Petawawa, Pembroke, and the Ottawa Valley.`,
     alternates: { canonical: `/our-work/${category.slug}` },
+    openGraph: {
+      title,
+      description: category.description,
+      url: `${siteConfig.url}/our-work/${category.slug}`,
+    },
   };
 }
 
@@ -42,8 +49,33 @@ export default function CategoryGalleryPage({
 
   const division = getDivision(category.division);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Our Work",
+        item: `${siteConfig.url}/our-work`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: category.name,
+        item: `${siteConfig.url}/our-work/${category.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <section className="container-max pt-14 sm:pt-20 pb-2">
         <Link
           href="/our-work"
