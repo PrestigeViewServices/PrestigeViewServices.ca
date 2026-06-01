@@ -141,7 +141,7 @@ export const workCategories: WorkCategory[] = [
     description:
       "Hand-clearing leaves, shingle grit, and debris from gutters and downspouts — keep rainwater flowing away from your foundation.",
     icon: Droplets,
-    photos: Array.from({ length: 10 }, (_, i) => {
+    photos: Array.from({ length: 14 }, (_, i) => {
       const n = String(i + 1).padStart(2, "0");
       return {
         src: `/images/gallery/gutter-cleaning/gutter-job-${n}.jpg`,
