@@ -149,9 +149,6 @@ export function Footer() {
             <Link href="/contact" className="hover:text-foreground">
               Contact
             </Link>
-            <Link href="/admin" className="hover:text-foreground">
-              Admin
-            </Link>
           </div>
         </div>
       </div>

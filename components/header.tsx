@@ -37,6 +37,7 @@ const exploreLinks = [
   { href: "/support", label: "Customer Support" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/admin", label: "Admin Dashboard" },
 ];
 
 export function Header() {

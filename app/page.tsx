@@ -5,7 +5,9 @@ import { OffersBand } from "@/components/home/offers-band";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { GalleryStrip } from "@/components/home/gallery-strip";
 import { ReviewsPreview } from "@/components/home/reviews-preview";
+import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import { homeFaqs } from "@/lib/content/faq";
 
 export const metadata: Metadata = {
   title:
@@ -32,6 +34,12 @@ export default function HomePage() {
       <TrustStrip />
       <GalleryStrip />
       <ReviewsPreview />
+      <FaqSection
+        items={homeFaqs}
+        eyebrow="Questions Petawawa & Pembroke Homeowners Ask"
+        title="Frequently Asked Questions"
+        description="Quick answers about how PVS books, prices, and shows up — across the Ottawa Valley."
+      />
       <CtaBand />
     </>
   );
