@@ -124,7 +124,33 @@ export const workCategories: WorkCategory[] = [
         width: 1200,
         height: 1600,
       },
+      {
+        src: "/images/gallery/window-cleaning/stone-residence-after.jpg",
+        alt: "Streak-free residential window on a stone exterior with patio view",
+        caption: "Stone residence · streak-free finish",
+        width: 1200,
+        height: 1600,
+      },
     ],
+  },
+  {
+    slug: "gutter-cleaning",
+    name: "Gutter Cleaning",
+    shortName: "Gutters",
+    division: "clearview",
+    description:
+      "Hand-clearing leaves, shingle grit, and debris from gutters and downspouts — keep rainwater flowing away from your foundation.",
+    icon: Droplets,
+    photos: Array.from({ length: 10 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      return {
+        src: `/images/gallery/gutter-cleaning/gutter-job-${n}.jpg`,
+        alt: `PVS gutter cleaning callout — Ottawa Valley`,
+        caption: `Gutter callout · Ottawa Valley`,
+        width: 1200,
+        height: 1600,
+      };
+    }),
   },
   {
     slug: "lawn-mowing",

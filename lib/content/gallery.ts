@@ -62,11 +62,11 @@ export const gallery: GalleryPhoto[] = [
     height: 1200,
   },
   {
-    id: "windows-residential-uniform",
-    src: "/images/gallery/window-cleaning/residential-pvs-uniform.jpg",
-    alt: "PVS technician in branded uniform cleaning a residential window",
-    caption: "Residential window care",
-    width: 1600,
-    height: 1200,
+    id: "gutter-callout",
+    src: "/images/gallery/gutter-cleaning/gutter-job-01.jpg",
+    alt: "Residential gutter being inspected and cleared of leaves and debris",
+    caption: "Gutter cleaning · before",
+    width: 1200,
+    height: 1600,
   },
 ];

@@ -6,9 +6,20 @@ import { cn } from "@/lib/utils";
 
 type LockupVariant = "master" | DivisionSlug;
 type LockupSize = "sm" | "md" | "lg";
+/**
+ * Pick the right logo file for the surrounding background.
+ * - "dark" (default): white-outlined wordmark, designed for dark backgrounds
+ *   (header, footer, hero sections, admin shell).
+ * - "light": solid black wordmark, designed for light/white backgrounds
+ *   (e.g. printable views, light-themed sub-pages).
+ */
+type LockupTheme = "dark" | "light";
 
 type VariantConfig = {
-  src: string;       // logo image path under /public
+  /** Logo image path under /public. For "master", we swap per `theme`. */
+  src: string;
+  /** Light-bg override for "master"; other variants fall back to `src`. */
+  srcLight?: string;
   alt: string;
   textTitle: string; // fallback wordmark
   textSub: string;   // fallback sub-line
@@ -21,6 +32,7 @@ type VariantConfig = {
 const VARIANTS: Record<LockupVariant, VariantConfig> = {
   master: {
     src: "/images/logo.png",
+    srcLight: "/images/logo-light.png",
     alt: "Prestige View Services",
     textTitle: "Prestige View Services",
     textSub: "Year-Round Property Care",
@@ -80,14 +92,17 @@ export function BrandLockup({
   className,
   href = "/",
   size = "sm",
+  theme = "dark",
 }: {
   variant?: LockupVariant;
   className?: string;
   href?: string;
   size?: LockupSize;
+  theme?: LockupTheme;
 }) {
   const v = VARIANTS[variant];
   const s = SIZES[size];
+  const src = theme === "light" && v.srcLight ? v.srcLight : v.src;
 
   return (
     <Link
@@ -99,7 +114,7 @@ export function BrandLockup({
       )}
     >
       <LogoWithFallback
-        src={v.src}
+        src={src}
         alt={v.alt}
         width={s.w}
         height={s.h}
