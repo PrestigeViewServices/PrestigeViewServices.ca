@@ -63,6 +63,17 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    // Pasted from Google Search Console → Settings → Ownership → HTML tag.
+    // Set GOOGLE_SITE_VERIFICATION in .env.local + Vercel env. When unset,
+    // Next.js simply omits the meta tag.
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    // Bing Webmaster Tools verification (Settings → Site Owner Verification
+    // → Meta tag). Set BING_SITE_VERIFICATION when ready.
+    other: {
+      "msvalidate.01": process.env.BING_SITE_VERIFICATION || "",
+    },
+  },
 };
 
 export default function RootLayout({
