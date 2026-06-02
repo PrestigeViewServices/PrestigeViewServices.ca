@@ -10,7 +10,12 @@ The notebook is split in two:
 - **Operator Track (01–13)** — what the team does day-to-day. Vision,
   org, SOPs, training, customer scripts, payroll, inventory, social.
 
-Start with `00-start-here.md`.
+Start with `00-start-here.md`. For the printable cheat-sheet, see
+`00a-weekly-playbook.md`.
+
+> **Need it in OneNote?** Ready-to-import `.docx` versions of every
+> file live in `docx/`. Drag the folder into OneNote and the structure
+> imports automatically. Re-generate anytime with `npm run notebook:docx`.
 
 ---
 
@@ -21,8 +26,12 @@ Start with `00-start-here.md`.
 | File | OneNote section |
 |---|---|
 | `00-start-here.md` | **Start Here** — orientation, how to use this notebook |
+| `00a-weekly-playbook.md` | **Weekly Playbook** — printable cheat-sheet (pin above desk) |
 | `14-owner-operating-system.md` | Owner Operating System — daily/weekly/monthly rhythm |
 | `15-marketing-playbook.md` | Marketing Playbook — channels, lead gen, referrals, GBP |
+| `15a-marketing-email-runbook.md` | Email Runbook — every template you'll send |
+| `15b-marketing-paid-ads-runbook.md` | Paid Ads Runbook — Google Ads step-by-step |
+| `15c-marketing-content-calendar.md` | 90-Day Content Calendar — pre-filled post ideas |
 | `16-annual-calendar.md` | Annual Business Calendar — month-by-month plan |
 | `17-financial-management.md` | Financial Management — pricing, P&L, cash flow, tax |
 | `18-kpis-scorecard.md` | KPIs & Scorecard — 12 numbers to watch + templates |
@@ -54,32 +63,41 @@ Start with `00-start-here.md`.
 
 ## How to import into OneNote
 
-### Easiest path — copy/paste each section
-1. Create a new notebook in OneNote called **PVS Operations**
-2. Add two **Section Groups**: "Owner Track" and "Operator Track"
-3. For each `.md` file:
-   - Add a OneNote Section to the matching group, named for the file
-   - Open the `.md` in VS Code / Notepad, copy all
-   - Paste into the OneNote section — OneNote keeps headings as
-     page breaks
+### Recommended path — drag the `docx/` folder into OneNote
 
-### Cleaner path — convert to .docx first
-OneNote imports `.docx` natively, preserving structure.
+The `docx/` folder ships pre-built. Every markdown file is mirrored
+as a properly-styled Word document. OneNote imports them with
+headings, lists, tables, blockquotes, and code blocks preserved.
+
+1. Open OneNote → Create a notebook called **PVS Operations**
+2. Optional: create two **Section Groups** — "Owner Track" and
+   "Operator Track" — for organization
+3. For each `.docx` in `docs/onenote-notebook/docx/`:
+   - In OneNote: **Insert → File Printout → pick the `.docx`**
+   - Or: drag the file straight into the section
+4. Rename each imported section to match the filename without
+   the number prefix (e.g. `00-start-here` → "Start Here")
+
+### Re-build the DOCX folder anytime
+
+When you update a markdown file (or I do), regenerate the matching
+DOCX with:
 
 ```powershell
-# One-time: install pandoc from https://pandoc.org/installing.html
-cd "docs\onenote-notebook"
-foreach ($f in Get-ChildItem -Filter *.md) {
-  pandoc $f.Name -o "$($f.BaseName).docx"
-}
+npm run notebook:docx
 ```
 
-Then drag each `.docx` into OneNote, or **Insert → File Printout**.
+Takes about 20 seconds for the whole notebook.
 
-### Live-link path — keep this folder as source of truth
-This folder is already in OneDrive AND under git. Edit in VS Code,
-push changes, and re-import or re-paste when SOPs change. Every
-update has a diff history.
+### Alternative paths
+
+**Copy / paste the markdown directly:** OneNote handles markdown
+headings as page breaks. Slower but works if you want to skip the
+docx step entirely.
+
+**Live-link path:** This folder is already in OneDrive AND under
+git. Edit markdown in VS Code, push changes, re-run
+`npm run notebook:docx`, re-import. Every update has a diff history.
 
 ---
 
