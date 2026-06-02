@@ -42,3 +42,8 @@ next-env.d.ts
 # Source / unprocessed photos. The site reads from /public/images/ — drop
 # originals here and copy/rename into /public/images/gallery/<category>/.
 /Photos/
+
+# OneNote operations notebook — local-only. Contains internal SOPs,
+# financial guidance, scripts, and owner playbooks that shouldn't live
+# in a public repo. Files stay on disk; just not tracked in git.
+/docs/onenote-notebook/
