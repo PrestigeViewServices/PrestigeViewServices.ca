@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Briefcase, LifeBuoy, Users, ArrowRight, Mail } from "lucide-react";
+import { Briefcase, LifeBuoy, Users, ArrowRight, Mail, Snowflake } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
@@ -38,7 +38,7 @@ export default async function AdminOverviewPage() {
   const session = await getSession();
 
   // Open applications by status + totals + recent activity
-  const [byStatus, userCount, openSupport, recentApps, recentSupport] =
+  const [byStatus, userCount, openSupport, openWinter, recentApps, recentSupport] =
     await Promise.all([
       db.application.groupBy({
         by: ["status"],
@@ -46,6 +46,7 @@ export default async function AdminOverviewPage() {
       }),
       db.user.count(),
       db.supportRequest.count({ where: { status: "NEW" } }),
+      db.winterReservation.count({ where: { status: "NEW" } }),
       db.application.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
@@ -88,12 +89,18 @@ export default async function AdminOverviewPage() {
       </header>
 
       {/* Top-line counts */}
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Open applications"
           value={openApplications}
           icon={<Briefcase className="h-5 w-5" />}
           href="/admin/applications?status=NEW"
+        />
+        <StatCard
+          label="New winter reservations"
+          value={openWinter}
+          icon={<Snowflake className="h-5 w-5" />}
+          href="/admin/winter-reservations?status=NEW"
         />
         <StatCard
           label="Open support requests"

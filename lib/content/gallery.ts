@@ -22,10 +22,10 @@ export type GalleryPhoto = {
 // per-service galleries, see lib/content/work-categories.ts.
 export const gallery: GalleryPhoto[] = [
   {
-    id: "windows-interior-team",
-    src: "/images/gallery/window-cleaning/interior-team-action.jpg",
-    alt: "Two PVS technicians cleaning interior glass partitions on ladders",
-    caption: "Window cleaning · Petawawa",
+    id: "windows-picture-row",
+    src: "/images/gallery/window-cleaning/window-job-03.jpg",
+    alt: "A row of four large picture windows reflecting blue sky, trees, and a PVS truck after exterior cleaning",
+    caption: "Window cleaning · sky reveal",
     width: 1200,
     height: 1600,
   },
@@ -46,12 +46,12 @@ export const gallery: GalleryPhoto[] = [
     height: 1600,
   },
   {
-    id: "pressure-soffit",
-    src: "/images/gallery/pressure-washing/pressure-job-01.jpg",
-    alt: "PVS technician soft-washing exterior siding and soffit",
-    caption: "Pressure & soft wash",
-    width: 1200,
-    height: 1600,
+    id: "pressure-deck-after",
+    src: "/images/gallery/pressure-washing/pressure-job-07.jpg",
+    alt: "Freshly soft-washed wood deck with hot tub and chiminea in golden afternoon light — Ottawa Valley",
+    caption: "Pressure wash · deck reveal",
+    width: 1600,
+    height: 1200,
   },
   {
     id: "junk-trailer",

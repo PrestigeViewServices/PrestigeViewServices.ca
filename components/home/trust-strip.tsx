@@ -1,10 +1,16 @@
+"use client";
+
 import {
   ShieldCheck,
   RotateCcw,
   MapPin,
   HeartHandshake,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/section-heading";
+import { AnimatedCounter } from "@/components/animated-counter";
+import { TiltCard } from "@/components/ui/tilt-card";
+import { reviews, averageRating } from "@/lib/content/reviews";
 
 const items = [
   {
@@ -30,26 +36,72 @@ const items = [
 ];
 
 export function TrustStrip() {
+  const stats = [
+    { value: reviews.length, suffix: "+", label: "Local reviews" },
+    { value: averageRating(), suffix: "★", label: "Average rating", isFloat: true },
+    { value: 8, label: "Service divisions" },
+    { value: 100, suffix: "%", label: "Insured & guaranteed" },
+  ];
+
   return (
     <section className="container-max py-20 sm:py-24">
       <SectionHeading
         eyebrow="Why PVS"
         title="Built for Property Owners Who Want It Handled"
       />
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map(({ icon: Icon, title, body }) => (
-          <div
-            key={title}
-            className="surface-card p-6"
+
+      {/* Big animated stats row */}
+      <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-2xl border border-surface-border bg-surface/50 backdrop-blur-sm p-5 text-center"
           >
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">
-              <Icon className="h-5 w-5" />
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-primary bg-clip-text text-transparent">
+              <AnimatedCounter
+                to={s.value}
+                suffix={s.suffix ?? ""}
+                format={
+                  s.isFloat
+                    ? (n) => n.toFixed(1)
+                    : undefined
+                }
+              />
             </div>
-            <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-              {body}
-            </p>
-          </div>
+            <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
+              {s.label}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map(({ icon: Icon, title, body }, i) => (
+          <motion.div
+            key={title}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.4, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{ y: -4 }}
+            className="group"
+          >
+            <TiltCard className="rounded-2xl">
+              <div className="surface-card p-6 h-full">
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary transition-transform duration-300 group-hover:scale-110">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                  {body}
+                </p>
+              </div>
+            </TiltCard>
+          </motion.div>
         ))}
       </div>
     </section>

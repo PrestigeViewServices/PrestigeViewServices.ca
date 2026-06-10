@@ -11,6 +11,7 @@ import {
   Settings,
   Image as ImageIcon,
   MessageSquareQuote,
+  Snowflake,
 } from "lucide-react";
 import type { Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,12 @@ const items: NavItem[] = [
     href: "/admin/applications",
     label: "Applications",
     icon: Briefcase,
+  },
+  {
+    href: "/admin/winter-reservations",
+    label: "Winter Reservations",
+    icon: Snowflake,
+    show: (r) => r === "ultimate_admin" || r === "admin",
   },
   {
     href: "/admin/site/photos",

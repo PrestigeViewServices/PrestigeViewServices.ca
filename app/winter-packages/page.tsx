@@ -1,0 +1,206 @@
+import type { Metadata } from "next";
+import { Check, X, Snowflake, Shovel } from "lucide-react";
+import { SectionHeading } from "@/components/section-heading";
+import { CtaBand } from "@/components/cta-band";
+import { EstimatorForm } from "@/components/winter/estimator-form";
+import {
+  DRIVEWAY_TIER_DEFS,
+  SHOVELING_TIER_DEFS,
+  DRIVEWAY_SIZE_LABELS,
+  formatCents,
+  type DrivewayTier,
+  type DrivewaySize,
+} from "@/lib/content/winter-packages";
+import { siteConfig } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Winter Packages — Snow Removal Pricing | Prestige View Services",
+  description:
+    "Choose a seasonal snow removal package for your Petawawa, Pembroke, or Ottawa Valley driveway. Get an instant estimate and reserve your spot in one form.",
+  alternates: { canonical: "/winter-packages" },
+};
+
+const TIER_ACCENTS: Record<DrivewayTier, string> = {
+  BRONZE: "from-amber-700/30 to-amber-900/10 border-amber-500/30",
+  SILVER: "from-slate-300/20 to-slate-500/10 border-slate-300/30",
+  GOLD: "from-yellow-400/20 to-yellow-700/10 border-yellow-400/40",
+  PLATINUM: "from-sky-300/20 to-blue-600/10 border-sky-300/40",
+};
+
+export default function WinterPackagesPage() {
+  return (
+    <>
+      <section className="container-max pt-14 sm:pt-20 pb-4">
+        <SectionHeading
+          eyebrow="Year-Round Property Care, Modernized"
+          title="Winter Packages for Ottawa Valley Driveways"
+          description={`Pick a tier that matches how proactive you want us to be — Bronze for budget, Platinum for white-glove storm management. Add walkway shoveling if you need it. Get an instant estimate below and reserve your spot in one step.`}
+        />
+      </section>
+
+      <section className="container-max py-10" id="compare">
+        <div className="flex items-center gap-2 mb-6">
+          <Snowflake className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-semibold">Driveway plowing tiers</h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {DRIVEWAY_TIER_DEFS.map((t) => (
+            <article
+              key={t.slug}
+              className={`relative rounded-3xl border bg-gradient-to-br p-6 ${TIER_ACCENTS[t.slug]}`}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold tracking-tight">{t.name}</h3>
+                <span className="rounded-full border border-surface-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Seasonal
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                {t.blurb}
+              </p>
+
+              <div className="mt-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Starts at
+                </p>
+                <p className="mt-1 text-3xl font-bold">
+                  {formatCents(
+                    Math.min(
+                      ...(Object.values(t.priceCents) as number[])
+                    )
+                  )}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {DRIVEWAY_SIZE_LABELS.ONE_CAR}
+                </p>
+              </div>
+
+              <ul className="mt-5 space-y-2 text-sm">
+                {t.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 mt-0.5 shrink-0 text-emerald-300" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+                {t.excluded.map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-muted-foreground"
+                  >
+                    <X className="h-4 w-4 mt-0.5 shrink-0 text-rose-400/80" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-6 pt-5 border-t border-surface-border text-xs text-muted-foreground">
+                <p className="font-semibold text-foreground/80 uppercase tracking-wider mb-1">
+                  All sizes
+                </p>
+                <SizeTable priceCents={t.priceCents} />
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-max py-10">
+        <div className="flex items-center gap-2 mb-6">
+          <Shovel className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-semibold">
+            Walkway shoveling (optional add-on)
+          </h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 max-w-3xl">
+          {SHOVELING_TIER_DEFS.map((t) => (
+            <article
+              key={t.slug}
+              className="surface-card p-6"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold tracking-tight">{t.name}</h3>
+                <span className="rounded-full border border-surface-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Add-on
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                {t.blurb}
+              </p>
+              <div className="mt-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Starts at
+                </p>
+                <p className="mt-1 text-3xl font-bold">
+                  {formatCents(t.priceCents)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Seasonal flat rate
+                </p>
+              </div>
+              <ul className="mt-5 space-y-2 text-sm">
+                {t.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 mt-0.5 shrink-0 text-emerald-300" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+                {t.excluded.map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-muted-foreground"
+                  >
+                    <X className="h-4 w-4 mt-0.5 shrink-0 text-rose-400/80" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-max py-12" id="reserve">
+        <SectionHeading
+          eyebrow="Estimate & Reserve"
+          title="Get Your Approximate Price"
+          description={`Pick your package, see your seasonal estimate, and reserve your spot in one form. We'll confirm the final price after a quick property check — usually within one business day. No payment is collected today.`}
+        />
+        <div className="mt-10 mx-auto max-w-3xl">
+          <EstimatorForm />
+        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Prices shown are estimates for {siteConfig.serviceArea}. Final pricing
+          depends on driveway dimensions, slope, and accessibility.
+        </p>
+      </section>
+
+      <CtaBand
+        title="Not Sure Which Tier Fits?"
+        description="Call us and we'll walk through your driveway in 5 minutes."
+        primaryLabel="Talk to Us"
+        primaryHref="/contact"
+      />
+    </>
+  );
+}
+
+function SizeTable({
+  priceCents,
+}: {
+  priceCents: Record<DrivewaySize, number>;
+}) {
+  return (
+    <ul className="space-y-1">
+      {(Object.entries(priceCents) as [DrivewaySize, number][]).map(
+        ([size, cents]) => (
+          <li key={size} className="flex items-center justify-between">
+            <span>{DRIVEWAY_SIZE_LABELS[size]}</span>
+            <span className="text-foreground/90 font-medium">
+              {formatCents(cents)}
+            </span>
+          </li>
+        )
+      )}
+    </ul>
+  );
+}

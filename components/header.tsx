@@ -7,6 +7,7 @@ import {
   Menu,
   Phone,
   LifeBuoy,
+  Snowflake,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,6 +28,13 @@ import { AuthControls } from "@/components/auth-controls";
 import { divisions } from "@/lib/content/divisions";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
+
+// Top-tier conversion routes — pinned at the top of the mobile sheet AND
+// the desktop "Explore" dropdown. Pushing the estimator + reservation
+// flow is more valuable than any informational page.
+const featuredLinks = [
+  { href: "/winter-packages", label: "Winter Packages", icon: Snowflake },
+] as const;
 
 const exploreLinks = [
   { href: "/services", label: "All Services" },
@@ -72,6 +80,20 @@ export function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {featuredLinks.map((l) => {
+            const Icon = l.icon;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+              >
+                <Icon className="h-4 w-4" />
+                {l.label}
+              </Link>
+            );
+          })}
 
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
@@ -134,7 +156,27 @@ export function Header() {
                 <BrandLockup />
               </SheetHeader>
               <div className="flex flex-col gap-1 p-4 overflow-y-auto">
-                <p className="px-2 pt-2 text-xs uppercase tracking-wider text-muted-foreground">
+                <p className="px-2 pt-2 text-xs uppercase tracking-wider text-primary">
+                  Get a Quote
+                </p>
+                {featuredLinks.map((l) => {
+                  const Icon = l.icon;
+                  return (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/10 px-3 py-3 hover:bg-primary/20 transition-colors"
+                    >
+                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/20 text-primary shrink-0">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="font-semibold">{l.label}</span>
+                    </Link>
+                  );
+                })}
+                <div className="h-px bg-surface-border my-3 mx-2" />
+                <p className="px-2 text-xs uppercase tracking-wider text-muted-foreground">
                   Divisions
                 </p>
                 {divisions.map((d) => (

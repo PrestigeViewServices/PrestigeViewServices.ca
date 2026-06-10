@@ -172,3 +172,117 @@ model SupportRequest {
   @@index([type])
   @@index([createdAt])
 }
+
+// -----------------------------------------------------------------------------
+// Winter package reservations
+// -----------------------------------------------------------------------------
+// Customer-facing reservation requests submitted from /winter-packages.
+// "Reserve" here means quote request, not paid booking — admin follows up
+// to confirm price and take payment offline. Pricing is defined in
+// lib/content/winter-packages.ts; the estimate captured at submission is
+// frozen in `estimateLowCents` / `estimateHighCents` so we can compare to
+// the final price the customer ultimately pays.
+
+enum DrivewayTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum DrivewaySize {
+  ONE_CAR
+  TWO_CAR
+  THREE_PLUS_CAR
+}
+
+enum ShovelingTier {
+  NONE
+  STANDARD
+  PREMIUM
+}
+
+enum ReservationStatus {
+  NEW
+  CONTACTED
+  CONFIRMED
+  DECLINED
+  COMPLETED
+}
+
+// -----------------------------------------------------------------------------
+// Multi-service quote requests
+// -----------------------------------------------------------------------------
+// Submitted from /estimate — customer can bundle window cleaning, pressure
+// washing, and/or gutter cleaning. `services` is a JSON array because the
+// shape of each line item is service-specific (different inputs per service).
+// Server-side, we recompute the price + bundle discount on every submission
+// using lib/content/service-estimator.ts so the customer can't tamper.
+
+enum QuoteStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  BOOKED
+  DECLINED
+  COMPLETED
+}
+
+model QuoteRequest {
+  id                String   @id @default(cuid())
+  name              String
+  email             String
+  phone             String
+  streetAddress     String
+  city              String
+  region            String   @default("ON")
+  postalCode        String?
+
+  /// JSON array: [{ slug, selections: {...}, priceCents }]
+  services          Json
+  subtotalCents     Int
+  discountCents     Int
+  estimateLowCents  Int
+  estimateHighCents Int
+
+  customerNotes     String?
+  notes             String?
+  status            QuoteStatus @default(NEW)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model WinterReservation {
+  id                String   @id @default(cuid())
+  name              String
+  email             String
+  phone             String
+  streetAddress     String
+  city              String
+  region            String   @default("ON")
+  postalCode        String?
+
+  drivewayTier      DrivewayTier
+  drivewaySize      DrivewaySize
+  shovelingTier     ShovelingTier @default(NONE)
+
+  /// Estimate captured at submission time, in CAD cents.
+  estimateLowCents  Int
+  estimateHighCents Int
+
+  /// Optional notes from the customer (gate code, dogs, etc.)
+  customerNotes     String?
+  /// Internal admin notes — visible to admins only.
+  notes             String?
+  status            ReservationStatus @default(NEW)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

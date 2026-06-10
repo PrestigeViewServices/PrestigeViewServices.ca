@@ -149,6 +149,9 @@ export function Footer() {
             <Link href="/contact" className="hover:text-foreground">
               Contact
             </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
           </div>
         </div>
       </div>

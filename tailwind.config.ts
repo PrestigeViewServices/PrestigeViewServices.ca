@@ -99,11 +99,32 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(calc(-50% - 1.5rem))" },
+        },
+        "marquee-reverse": {
+          "0%": { transform: "translateX(calc(-50% - 1.5rem))" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "blob-drift": {
+          "0%, 100%": { transform: "translate(0,0) scale(1)" },
+          "33%": { transform: "translate(40px,-30px) scale(1.05)" },
+          "66%": { transform: "translate(-30px,20px) scale(0.97)" },
+        },
+        "ambient-float": {
+          "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
+          "50%": { transform: "translateY(-12px) rotate(-0.6deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 0.4s ease-out both",
+        marquee: "marquee linear infinite",
+        "marquee-reverse": "marquee-reverse linear infinite",
+        "blob-drift": "blob-drift 18s ease-in-out infinite",
+        "ambient-float": "ambient-float 6s ease-in-out infinite",
       },
     },
   },

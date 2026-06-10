@@ -5,7 +5,10 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { OfferModal } from "@/components/offer-modal";
+import { StickyCta } from "@/components/sticky-cta";
+import { ScrollProgress } from "@/components/scroll-progress";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
 import { reviews, averageRating } from "@/lib/content/reviews";
@@ -149,16 +152,19 @@ export default function RootLayout({
         >
           Skip to content
         </a>
+        <ScrollProgress />
         <Header />
         <main id="main" className="flex-1">
           {children}
         </main>
         <Footer />
         <OfferModal />
+        <StickyCta />
 
-        {/* Analytics — both providers self-disable when their env vars are unset */}
+        {/* Analytics — providers self-disable when their env vars are unset */}
         <VercelAnalytics />
         <GoogleAnalytics />
+        <MetaPixel />
       </body>
     </html>
   );
