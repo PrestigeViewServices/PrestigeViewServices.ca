@@ -30,17 +30,6 @@ export const offers: Offer[] = [
     division: "clearview",
   },
   {
-    id: "spring-lawn",
-    active: true,
-    eyebrow: "Spring Season",
-    headline: "Spring Season Is Here",
-    body: "Book your lawn care package before spots fill up.",
-    ctaLabel: "Book Lawn Care",
-    ctaHref: "/quote?offer=spring-lawn&service=spring-cleanup",
-    accent: "clearview",
-    division: "lawnpros",
-  },
-  {
     id: "snow-early",
     active: true,
     eyebrow: "Early Bird",

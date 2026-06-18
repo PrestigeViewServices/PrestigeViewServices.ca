@@ -120,7 +120,7 @@ export const CARE_PLANS: CarePlan[] = [
     ],
     bestFor: "Dirty siding + treed / leafy lots",
     calendar: [
-      { month: "May", items: ["House soft-wash", "Spring gutter clean"] },
+      { month: "June", items: ["House soft-wash", "Spring gutter clean"] },
       { month: "October", items: ["Fall gutter clean"] },
     ],
   },
@@ -135,7 +135,7 @@ export const CARE_PLANS: CarePlan[] = [
     ],
     bestFor: "Curb appeal + a clear view",
     calendar: [
-      { month: "May", items: ["House soft-wash", "Spring exterior windows"] },
+      { month: "June", items: ["House soft-wash", "Spring exterior windows"] },
       { month: "September", items: ["Fall exterior windows"] },
     ],
   },
@@ -153,7 +153,7 @@ export const CARE_PLANS: CarePlan[] = [
     ],
     bestFor: "The whole exterior, handled",
     calendar: [
-      { month: "May", items: ["House wash", "Spring windows", "Spring gutters"] },
+      { month: "June", items: ["House wash", "Spring windows", "Spring gutters"] },
       { month: "July", items: ["Driveway wash"] },
       { month: "October", items: ["Fall windows", "Fall gutters"] },
     ],
