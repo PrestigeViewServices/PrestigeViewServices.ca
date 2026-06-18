@@ -11,6 +11,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
+import { AutopilotPlans } from "@/components/care-plans/autopilot-plans";
+import { servicePlanMap } from "@/lib/content/care-plans";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -116,6 +119,14 @@ export default function ServiceDetailPage({
 
   const Icon = service.icon;
 
+  // Care Plans placement — only the four exterior-cleaning services map to a
+  // config, so LawnPros & SnowLand service pages render unchanged.
+  const planConfig = servicePlanMap[service.slug];
+
+  // The draggable before/after hero lives on House Washing only. Swap the real
+  // photos by replacing the files at the paths below (same names).
+  const showBeforeAfter = service.slug === "house-washing";
+
   return (
     <>
       <script
@@ -162,6 +173,21 @@ export default function ServiceDetailPage({
           </div>
         </div>
       </section>
+
+      {showBeforeAfter && (
+        <section className="container-max pt-6 pb-2">
+          <BeforeAfterSlider
+            beforeSrc="/images/beforeafter/house-before.jpg"
+            afterSrc="/images/beforeafter/house-after.jpg"
+            beforeAlt="House siding before soft-washing — algae and grime"
+            afterAlt="Same house siding after soft-washing — clean and bright"
+            className="max-w-4xl"
+          />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Drag the slider — real Petawawa &amp; Pembroke soft-wash results.
+          </p>
+        </section>
+      )}
 
       <section className="container-max py-14 sm:py-20">
         <SectionHeading
@@ -272,6 +298,14 @@ export default function ServiceDetailPage({
             ))}
           </div>
         </section>
+      )}
+
+      {planConfig && (
+        <AutopilotPlans
+          serviceName={service.name}
+          serviceSlug={service.slug}
+          config={planConfig}
+        />
       )}
 
       <CtaBand />

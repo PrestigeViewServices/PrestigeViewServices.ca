@@ -19,18 +19,6 @@ export type Offer = {
 
 export const offers: Offer[] = [
   {
-    id: "lawn50",
-    active: true,
-    eyebrow: "Limited Time Offer",
-    headline: "50% Off Your First Month of Lawn Mowing",
-    body: "Seasonal contracts filling fast — lock in your rate today.",
-    ctaLabel: "Claim This Offer",
-    ctaHref: "/quote?offer=lawn50&service=lawn-mowing",
-    accent: "lawn",
-    division: "lawnpros",
-    showInModal: true,
-  },
-  {
     id: "exterior15",
     active: true,
     eyebrow: "Bundle & Save",

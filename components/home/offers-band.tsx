@@ -3,7 +3,7 @@ import { OfferCard } from "@/components/offer-card";
 import { SectionHeading } from "@/components/section-heading";
 
 export function OffersBand() {
-  // Lead with the lawn 50% offer (recurring revenue priority), then the rest.
+  // Lead with the modal-featured offer (recurring revenue priority), then the rest.
   const sorted = [...activeOffers].sort((a, b) => {
     if (a.showInModal && !b.showInModal) return -1;
     if (!a.showInModal && b.showInModal) return 1;

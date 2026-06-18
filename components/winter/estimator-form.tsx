@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Check, Loader2, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,6 @@ import {
   DRIVEWAY_TIER_DEFS,
   SHOVELING_LABELS,
   SHOVELING_TIER_DEFS,
-  estimateCents,
-  formatCents,
-  formatRange,
   type DrivewaySize,
   type DrivewayTier,
   type ShovelingTier,
@@ -49,11 +46,6 @@ export function EstimatorForm() {
   const [hp, setHp] = useState(""); // honeypot
 
   const [state, setState] = useState<SubmitState>({ kind: "idle" });
-
-  const estimate = useMemo(
-    () => estimateCents(drivewayTier, drivewaySize, shovelingTier),
-    [drivewayTier, drivewaySize, shovelingTier]
-  );
 
   const driveDef = DRIVEWAY_TIER_DEFS.find((t) => t.slug === drivewayTier)!;
   const shovelDef = SHOVELING_TIER_DEFS.find((t) => t.slug === shovelingTier);
@@ -112,8 +104,7 @@ export function EstimatorForm() {
               with <strong className="text-foreground">{shovelDef.name}</strong>{" "}
             </>
           ) : null}
-          and the final price within one business day. Estimated{" "}
-          {formatRange(estimate)} for the season.
+          and send your custom seasonal quote within one business day.
         </p>
       </div>
     );
@@ -137,7 +128,8 @@ export function EstimatorForm() {
         <header>
           <h3 className="text-lg font-semibold">1. Pick your package</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Adjust the dropdowns to see your seasonal estimate update live.
+            Choose the tier and size that fit — we&apos;ll quote it for your
+            property.
           </p>
         </header>
 
@@ -202,12 +194,10 @@ export function EstimatorForm() {
           </Field>
         </div>
 
-        <EstimateCallout
+        <SelectionCallout
           drivewayTierName={driveDef.name}
           drivewaySizeLabel={DRIVEWAY_SIZE_LABELS[drivewaySize]}
           shovelingName={shovelDef?.name ?? null}
-          rangeLabel={formatRange(estimate)}
-          midLabel={formatCents(Math.round((estimate.low + estimate.high) / 2))}
         />
       </section>
 
@@ -335,43 +325,35 @@ function Field({
   );
 }
 
-function EstimateCallout({
+function SelectionCallout({
   drivewayTierName,
   drivewaySizeLabel,
   shovelingName,
-  rangeLabel,
-  midLabel,
 }: {
   drivewayTierName: string;
   drivewaySizeLabel: string;
   shovelingName: string | null;
-  rangeLabel: string;
-  midLabel: string;
 }) {
   return (
     <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="eyebrow text-primary">Estimated season cost</p>
-          <p className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight">
-            {rangeLabel}
+          <p className="eyebrow text-primary">Your selection</p>
+          <p className="mt-2 text-xl sm:text-2xl font-bold tracking-tight">
+            {drivewayTierName} · {drivewaySizeLabel}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            About {midLabel} typical · final price confirmed after we review your
-            property.
+            We&apos;ll send your custom seasonal quote after a quick property
+            check — usually within one business day.
           </p>
         </div>
-        <div className="text-sm text-muted-foreground sm:text-right">
-          <p>
-            <strong className="text-foreground">{drivewayTierName}</strong> ·{" "}
-            {drivewaySizeLabel}
-          </p>
-          {shovelingName && (
-            <p className="mt-0.5 inline-flex items-center gap-1">
+        {shovelingName && (
+          <div className="text-sm text-muted-foreground sm:text-right">
+            <p className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5 opacity-70" />+ {shovelingName}
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

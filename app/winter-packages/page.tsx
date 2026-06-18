@@ -6,10 +6,7 @@ import { EstimatorForm } from "@/components/winter/estimator-form";
 import {
   DRIVEWAY_TIER_DEFS,
   SHOVELING_TIER_DEFS,
-  DRIVEWAY_SIZE_LABELS,
-  formatCents,
   type DrivewayTier,
-  type DrivewaySize,
 } from "@/lib/content/winter-packages";
 import { siteConfig } from "@/lib/site";
 
@@ -34,7 +31,7 @@ export default function WinterPackagesPage() {
         <SectionHeading
           eyebrow="Year-Round Property Care, Modernized"
           title="Winter Packages for Ottawa Valley Driveways"
-          description={`Pick a tier that matches how proactive you want us to be — Bronze for budget, Platinum for white-glove storm management. Add walkway shoveling if you need it. Get an instant estimate below and reserve your spot in one step.`}
+          description={`Pick a tier that matches how proactive you want us to be — Bronze for budget, Platinum for white-glove storm management. Add walkway shoveling if you need it. Reserve your spot below and we'll send a custom quote for your driveway.`}
         />
       </section>
 
@@ -61,17 +58,11 @@ export default function WinterPackagesPage() {
 
               <div className="mt-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Starts at
+                  Seasonal flat rate
                 </p>
-                <p className="mt-1 text-3xl font-bold">
-                  {formatCents(
-                    Math.min(
-                      ...(Object.values(t.priceCents) as number[])
-                    )
-                  )}
-                </p>
+                <p className="mt-1 text-2xl font-bold">Custom quote</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {DRIVEWAY_SIZE_LABELS.ONE_CAR}
+                  Priced to your driveway — free, no obligation
                 </p>
               </div>
 
@@ -92,13 +83,6 @@ export default function WinterPackagesPage() {
                   </li>
                 ))}
               </ul>
-
-              <div className="mt-6 pt-5 border-t border-surface-border text-xs text-muted-foreground">
-                <p className="font-semibold text-foreground/80 uppercase tracking-wider mb-1">
-                  All sizes
-                </p>
-                <SizeTable priceCents={t.priceCents} />
-              </div>
             </article>
           ))}
         </div>
@@ -128,13 +112,11 @@ export default function WinterPackagesPage() {
               </p>
               <div className="mt-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Starts at
-                </p>
-                <p className="mt-1 text-3xl font-bold">
-                  {formatCents(t.priceCents)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
                   Seasonal flat rate
+                </p>
+                <p className="mt-1 text-2xl font-bold">Custom quote</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Priced to your property — free, no obligation
                 </p>
               </div>
               <ul className="mt-5 space-y-2 text-sm">
@@ -161,16 +143,17 @@ export default function WinterPackagesPage() {
 
       <section className="container-max py-12" id="reserve">
         <SectionHeading
-          eyebrow="Estimate & Reserve"
-          title="Get Your Approximate Price"
-          description={`Pick your package, see your seasonal estimate, and reserve your spot in one form. We'll confirm the final price after a quick property check — usually within one business day. No payment is collected today.`}
+          eyebrow="Reserve"
+          title="Reserve Your Spot"
+          description={`Pick your package and reserve your spot in one form. We'll send your custom seasonal quote after a quick property check — usually within one business day. No payment is collected today.`}
         />
         <div className="mt-10 mx-auto max-w-3xl">
           <EstimatorForm />
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Prices shown are estimates for {siteConfig.serviceArea}. Final pricing
-          depends on driveway dimensions, slope, and accessibility.
+          Serving {siteConfig.serviceArea}. Your seasonal price depends on
+          driveway dimensions, slope, and accessibility — we&apos;ll confirm it
+          after a quick property check.
         </p>
       </section>
 
@@ -181,26 +164,5 @@ export default function WinterPackagesPage() {
         primaryHref="/contact"
       />
     </>
-  );
-}
-
-function SizeTable({
-  priceCents,
-}: {
-  priceCents: Record<DrivewaySize, number>;
-}) {
-  return (
-    <ul className="space-y-1">
-      {(Object.entries(priceCents) as [DrivewaySize, number][]).map(
-        ([size, cents]) => (
-          <li key={size} className="flex items-center justify-between">
-            <span>{DRIVEWAY_SIZE_LABELS[size]}</span>
-            <span className="text-foreground/90 font-medium">
-              {formatCents(cents)}
-            </span>
-          </li>
-        )
-      )}
-    </ul>
   );
 }
