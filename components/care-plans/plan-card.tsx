@@ -14,6 +14,11 @@ export type PlanCardProps = {
   period?: string;
   /** Prefix the price with "from". */
   isFrom?: boolean;
+  /**
+   * Show a "Starts at" label + caption and de-emphasize the number, so the
+   * price reads as a starting point, not a fixed/definitive quote.
+   */
+  startsAt?: boolean;
   tagline: string;
   includes: PlanCardItem[];
   bestFor: string;
@@ -36,6 +41,7 @@ export function PlanCard({
   price,
   period,
   isFrom,
+  startsAt,
   tagline,
   includes,
   bestFor,
@@ -65,17 +71,36 @@ export function PlanCard({
         {tagline}
       </p>
 
-      <div className="mt-4 flex items-end gap-1">
-        {isFrom && (
-          <span className="mb-1 text-sm font-medium text-muted-foreground">
-            from
-          </span>
+      <div className="mt-4">
+        {startsAt && (
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Starts at
+          </p>
         )}
-        <span className="text-4xl font-bold tracking-tight">{price}</span>
-        {period && (
-          <span className="mb-1 text-sm font-medium text-muted-foreground">
-            {period}
+        <div className="flex items-end gap-1">
+          {isFrom && (
+            <span className="mb-1 text-sm font-medium text-muted-foreground">
+              from
+            </span>
+          )}
+          <span
+            className={cn(
+              "tracking-tight",
+              startsAt ? "text-3xl font-semibold" : "text-4xl font-bold"
+            )}
+          >
+            {price}
           </span>
+          {period && (
+            <span className="mb-1 text-sm font-medium text-muted-foreground">
+              {period}
+            </span>
+          )}
+        </div>
+        {startsAt && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Final price scoped to your home &amp; siding — free quote.
+          </p>
         )}
       </div>
 

@@ -53,6 +53,7 @@ export function AutopilotPlans({
             name={p.name}
             price={formatDollars(p.monthly)}
             period="/mo"
+            startsAt
             tagline={p.tagline}
             includes={p.includes}
             bestFor={p.bestFor}

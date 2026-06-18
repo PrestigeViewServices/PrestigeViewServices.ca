@@ -37,10 +37,12 @@ export type ServiceDef = {
   monthlyFrom: number;
 };
 
+// oneOffFrom = real minimum one-off ticket (the credible "from" floor shown on
+// service pages). monthlyFrom = Build-Your-Own monthly building-block price.
 export const SERVICE_DEFS: ServiceDef[] = [
   { key: "house-wash", label: "House Wash", icon: Home, oneOffFrom: 349, monthlyFrom: 39 },
-  { key: "windows", label: "Windows", icon: Sparkles, oneOffFrom: 179, monthlyFrom: 32 },
-  { key: "gutters", label: "Gutters", icon: Droplets, oneOffFrom: 179, monthlyFrom: 32 },
+  { key: "windows", label: "Windows", icon: Sparkles, oneOffFrom: 280, monthlyFrom: 32 },
+  { key: "gutters", label: "Gutters", icon: Droplets, oneOffFrom: 325, monthlyFrom: 32 },
   { key: "driveway", label: "Driveway", icon: Waves, oneOffFrom: 179, monthlyFrom: 32 },
 ];
 
@@ -112,7 +114,7 @@ export const CARE_PLANS: CarePlan[] = [
   {
     slug: "house-gutter",
     name: "House & Gutter Plan",
-    monthly: 49,
+    monthly: 69,
     tagline: "Keep your siding fresh and your gutters flowing.",
     includes: [
       { icon: Home, label: "House soft-wash (spring)" },
@@ -127,7 +129,7 @@ export const CARE_PLANS: CarePlan[] = [
   {
     slug: "house-view",
     name: "House & View Plan",
-    monthly: 49,
+    monthly: 69,
     tagline: "Curb appeal up front, a clear view all season.",
     includes: [
       { icon: Home, label: "House soft-wash (spring)" },
@@ -142,7 +144,7 @@ export const CARE_PLANS: CarePlan[] = [
   {
     slug: "total-exterior",
     name: "Total Exterior Plan",
-    monthly: 99,
+    monthly: 119,
     mostPopular: true,
     tagline: "The whole exterior, handled — nothing left on your list.",
     includes: [
@@ -223,7 +225,7 @@ export const ONE_OFF_PACKAGES: OneOffPackage[] = [
   {
     slug: "full-shine",
     name: "Full Shine",
-    price: 649,
+    price: 849,
     mostPopular: true,
     tagline: "The popular all-rounder — house, glass, and gutters in one visit.",
     includes: [
@@ -236,7 +238,7 @@ export const ONE_OFF_PACKAGES: OneOffPackage[] = [
   {
     slug: "top-to-bottom",
     name: "Top-to-Bottom",
-    price: 899,
+    price: 1099,
     tagline: "Everything we do, top to bottom — inside-and-out glass included.",
     includes: [
       { icon: Home, label: "House wash" },

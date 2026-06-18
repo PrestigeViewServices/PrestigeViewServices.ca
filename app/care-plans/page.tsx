@@ -181,7 +181,10 @@ export default function CarePlansPage() {
                       <span className="block text-base font-bold">
                         {plan.name}
                       </span>
-                      <span className="mt-1 block text-2xl font-bold text-primary">
+                      <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Starts at
+                      </span>
+                      <span className="block text-2xl font-bold text-primary">
                         {formatDollars(plan.monthly)}
                         <span className="text-xs font-medium text-muted-foreground">
                           /mo

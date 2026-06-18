@@ -19,6 +19,8 @@ const PLAN_CARDS: PlanCardProps[] = CARE_PLANS.map((p) => ({
   price: formatDollars(p.monthly),
   period: "/mo",
   isFrom: p.isFrom,
+  // Build-Your-Own already reads "from $X"; the rest get a "Starts at" label.
+  startsAt: !p.isFrom,
   tagline: p.tagline,
   includes: p.includes,
   bestFor: p.bestFor,
@@ -35,6 +37,7 @@ const PACKAGE_CARDS: PlanCardProps[] = ONE_OFF_PACKAGES.map((p) => ({
   name: p.name,
   price: formatDollars(p.price),
   period: "once",
+  startsAt: true,
   tagline: p.tagline,
   includes: p.includes,
   bestFor: p.bestFor,
