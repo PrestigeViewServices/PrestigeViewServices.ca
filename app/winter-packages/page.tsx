@@ -89,22 +89,28 @@ export default function WinterPackagesPage() {
       </section>
 
       <section className="container-max py-10">
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-3">
           <Shovel className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-semibold">
-            Walkway shoveling (optional add-on)
+            Walkway shovelling pass packs (optional add-on)
           </h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 max-w-3xl">
+        <p className="mb-6 max-w-2xl text-sm text-muted-foreground leading-relaxed">
+          Buy a pack of shovelling visits — each visit covers your walkway, porch
+          &amp; back deck. Storms often need two passes, so bigger packs are built
+          for 2-passes-per-event coverage all winter. Per-visit pricing is scoped
+          to your property, so we&apos;ll send a custom quote.
+        </p>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SHOVELING_TIER_DEFS.map((t) => (
             <article
               key={t.slug}
               className="surface-card p-6"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold tracking-tight">{t.name}</h3>
+                <h3 className="text-lg font-bold tracking-tight">{t.name}</h3>
                 <span className="rounded-full border border-surface-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Add-on
+                  Pass pack
                 </span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
@@ -112,11 +118,16 @@ export default function WinterPackagesPage() {
               </p>
               <div className="mt-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Seasonal flat rate
+                  Pack size
                 </p>
-                <p className="mt-1 text-2xl font-bold">Custom quote</p>
+                <p className="mt-1 text-3xl font-bold">
+                  {t.passes}
+                  <span className="ml-1.5 text-sm font-medium text-muted-foreground">
+                    visits
+                  </span>
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Priced to your property — free, no obligation
+                  Custom quote — priced per visit by walkway size
                 </p>
               </div>
               <ul className="mt-5 space-y-2 text-sm">

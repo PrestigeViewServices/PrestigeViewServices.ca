@@ -173,7 +173,7 @@ export function EstimatorForm() {
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Walkway shoveling (optional)">
+          <Field label="Walkway shovelling pack (optional)">
             <Select
               value={shovelingTier}
               onValueChange={(v) => setShovelingTier(v as ShovelingTier)}

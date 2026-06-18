@@ -26,7 +26,17 @@ export const DRIVEWAY_SIZES = [
 
 export type DrivewaySize = (typeof DRIVEWAY_SIZES)[number];
 
-export const SHOVELING_TIERS = ["NONE", "STANDARD", "PREMIUM"] as const;
+// Walkway shovelling is sold as prepaid PASS PACKS. Each "pass" is one
+// shovelling visit (walkway + porch + back deck). Storms often need 2 passes
+// per event, so larger packs suit full-season / 2-passes-per-event coverage.
+// NONE = customer declines shovelling.
+export const SHOVELING_TIERS = [
+  "NONE",
+  "PASS_10",
+  "PASS_15",
+  "PASS_25",
+  "PASS_50",
+] as const;
 export type ShovelingTier = (typeof SHOVELING_TIERS)[number];
 
 export const DRIVEWAY_SIZE_LABELS: Record<DrivewaySize, string> = {
@@ -36,9 +46,11 @@ export const DRIVEWAY_SIZE_LABELS: Record<DrivewaySize, string> = {
 };
 
 export const SHOVELING_LABELS: Record<ShovelingTier, string> = {
-  NONE: "No walkway shoveling",
-  STANDARD: "Standard shoveling",
-  PREMIUM: "Premium shoveling",
+  NONE: "No walkway shovelling",
+  PASS_10: "10-pass pack",
+  PASS_15: "15-pass pack",
+  PASS_25: "25-pass pack",
+  PASS_50: "50-pass pack",
 };
 
 export type DrivewayTierDef = {
@@ -140,45 +152,77 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
 export type ShovelingTierDef = {
   slug: Exclude<ShovelingTier, "NONE">;
   name: string;
+  /** Number of shovelling visits in the pack. */
+  passes: number;
   blurb: string;
   features: string[];
   excluded: string[];
-  /** Add-on seasonal price in cents. PLACEHOLDER. */
+  /**
+   * Internal pack total in cents (passes × starting per-pass rate). NOT shown
+   * to customers — the site shows "Custom quote" because the real per-pass
+   * rate (~$10 and easing down with bigger packs) depends on walkway/porch/deck
+   * size. Used only for the server-side estimate captured with a lead.
+   * PLACEHOLDER VALUES — confirm before launch.
+   */
   priceCents: number;
 };
 
 export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
   {
-    slug: "STANDARD",
-    name: "Standard Shoveling",
-    blurb: "One pass after the snowfall ends — front entrance, walkway, steps.",
+    slug: "PASS_10",
+    name: "10-Pass Pack",
+    passes: 10,
+    blurb: "A starter pack of 10 shovelling visits — walkway, porch & back deck.",
     features: [
-      "1 pass AFTER snowfall ends",
-      "Completion within 12 hours",
-      "Front entrance",
-      "Main walkway",
-      "Steps",
-      "Routed efficiently",
+      "10 shovelling visits",
+      "Walkway + porch + back deck",
+      "Use anytime through the season",
+      "Top up whenever you run low",
     ],
-    excluded: ["Multiple passes if needed", "Storm management"],
-    priceCents: 35000,
+    excluded: ["Best for 1 pass per event"],
+    priceCents: 10000, // 10 × ~$10 starting (internal — not shown)
   },
   {
-    slug: "PREMIUM",
-    name: "Premium Shoveling",
-    blurb: "Storm-managed walkway clearing with multi-pass coverage.",
+    slug: "PASS_15",
+    name: "15-Pass Pack",
+    passes: 15,
+    blurb: "Fifteen visits — a comfortable buffer for an average Valley winter.",
     features: [
-      "Storm management",
-      "Cleared at 3-5 cm discretion",
-      "Multiple passes if needed",
-      "Max 2 passes within 24 hours",
-      "Completion within 8 hours",
-      "Front entrance + steps",
-      "Main walkway",
-      "Routed efficiently",
+      "15 shovelling visits",
+      "Walkway + porch + back deck",
+      "Better value per visit",
+      "Priority over single visits",
     ],
     excluded: [],
-    priceCents: 55000,
+    priceCents: 14250, // 15 × ~$9.50 starting (internal — not shown)
+  },
+  {
+    slug: "PASS_25",
+    name: "25-Pass Pack",
+    passes: 25,
+    blurb: "Enough for two passes per event through a busy winter.",
+    features: [
+      "25 shovelling visits",
+      "Great for 2 passes per storm",
+      "Walkway + porch + back deck",
+      "Priority routing",
+    ],
+    excluded: [],
+    priceCents: 22500, // 25 × ~$9 starting (internal — not shown)
+  },
+  {
+    slug: "PASS_50",
+    name: "50-Pass Pack",
+    passes: 50,
+    blurb: "Full-season storm management — two passes per event all winter.",
+    features: [
+      "50 shovelling visits",
+      "2 passes per event all season",
+      "Best value per visit",
+      "Priority routing",
+    ],
+    excluded: [],
+    priceCents: 42500, // 50 × ~$8.50 starting (internal — not shown)
   },
 ];
 

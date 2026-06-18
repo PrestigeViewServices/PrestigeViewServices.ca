@@ -198,8 +198,10 @@ enum DrivewaySize {
 
 enum ShovelingTier {
   NONE
-  STANDARD
-  PREMIUM
+  PASS_10
+  PASS_15
+  PASS_25
+  PASS_50
 }
 
 enum ReservationStatus {
