@@ -3,6 +3,7 @@ import { Check, X, Snowflake, Shovel } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
 import { ServiceAmbience } from "@/components/service-ambience";
+import { BenefitMatcher } from "@/components/winter/benefit-matcher";
 import { EstimatorForm } from "@/components/winter/estimator-form";
 import {
   DRIVEWAY_TIER_DEFS,
@@ -37,7 +38,11 @@ export default function WinterPackagesPage() {
         />
       </section>
 
-      <section className="container-max py-10" id="compare">
+      <section className="container-max pb-8 relative" id="match">
+        <BenefitMatcher />
+      </section>
+
+      <section className="container-max py-10 relative" id="compare">
         <div className="flex items-center gap-2 mb-6">
           <Snowflake className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-semibold">Driveway plowing tiers</h2>

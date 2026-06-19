@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Loader2, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,22 @@ export function EstimatorForm() {
   const [hp, setHp] = useState(""); // honeypot
 
   const [state, setState] = useState<SubmitState>({ kind: "idle" });
+
+  // Pre-fill from the BenefitMatcher CTA up the page. The matcher dispatches
+  // a window CustomEvent right before scrolling here, so the user lands with
+  // the recommended tier + shoveling pack already selected in the form.
+  useEffect(() => {
+    function onPrefill(e: Event) {
+      const detail = (e as CustomEvent<{
+        drivewayTier?: DrivewayTier;
+        shovelingTier?: ShovelingTier;
+      }>).detail;
+      if (detail?.drivewayTier) setDrivewayTier(detail.drivewayTier);
+      if (detail?.shovelingTier) setShovelingTier(detail.shovelingTier);
+    }
+    window.addEventListener("pvs:winter-prefill", onPrefill);
+    return () => window.removeEventListener("pvs:winter-prefill", onPrefill);
+  }, []);
 
   const driveDef = DRIVEWAY_TIER_DEFS.find((t) => t.slug === drivewayTier)!;
   const shovelDef = SHOVELING_TIER_DEFS.find((t) => t.slug === shovelingTier);
