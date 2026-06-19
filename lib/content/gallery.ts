@@ -22,11 +22,11 @@ export type GalleryPhoto = {
 // per-service galleries, see lib/content/work-categories.ts.
 export const gallery: GalleryPhoto[] = [
   {
-    id: "windows-picture-row",
-    src: "/images/gallery/window-cleaning/window-job-03.jpg",
-    alt: "A row of four large picture windows reflecting blue sky, trees, and a PVS truck after exterior cleaning",
-    caption: "Window cleaning · sky reveal",
-    width: 1200,
+    id: "windows-timber-home",
+    src: "/images/gallery/window-cleaning/timber-home-streakfree.jpg",
+    alt: "Large timber-frame home with streak-free windows after professional exterior window cleaning in the Ottawa Valley",
+    caption: "Window cleaning · streak-free",
+    width: 900,
     height: 1600,
   },
   {
@@ -62,10 +62,10 @@ export const gallery: GalleryPhoto[] = [
     height: 1200,
   },
   {
-    id: "gutter-callout",
-    src: "/images/gallery/gutter-cleaning/gutter-job-01.jpg",
-    alt: "Residential gutter being inspected and cleared of leaves and debris",
-    caption: "Gutter cleaning · before",
+    id: "gutter-clean-after",
+    src: "/images/gallery/gutter-cleaning/gutter-clean-after.jpg",
+    alt: "Spotless residential gutter and downspout flowing freely after a PVS gutter cleaning in the Ottawa Valley",
+    caption: "Gutter cleaning · after",
     width: 1200,
     height: 1600,
   },

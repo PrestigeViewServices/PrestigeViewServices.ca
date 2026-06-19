@@ -110,11 +110,7 @@ export function PricingToggle() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className={`mt-10 grid gap-5 sm:gap-6 ${
-            mode === "plan"
-              ? "sm:grid-cols-2 lg:grid-cols-4"
-              : "sm:grid-cols-2 lg:grid-cols-3"
-          }`}
+          className="mt-10 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"
         >
           {cards.map((c) => (
             <PlanCard key={c.name} {...c} />

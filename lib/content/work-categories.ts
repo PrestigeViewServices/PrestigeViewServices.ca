@@ -48,6 +48,41 @@ export const workCategories: WorkCategory[] = [
     icon: Sparkles,
     photos: [
       {
+        src: "/images/gallery/window-cleaning/timber-home-streakfree.jpg",
+        alt: "Large timber-frame home with streak-free windows after professional exterior window cleaning in the Ottawa Valley",
+        caption: "Timber home · streak-free finish",
+        width: 900,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/window-cleaning/commercial-glass-tower.jpg",
+        alt: "Floor-to-ceiling commercial windows cleaned streak-free by Prestige View Services in Pembroke",
+        caption: "Commercial glass · Pembroke",
+        width: 900,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/window-cleaning/residential-dormer.jpg",
+        alt: "Crisp dormer window on white siding after residential window cleaning in Petawawa",
+        caption: "Residential dormer · Petawawa",
+        width: 1600,
+        height: 1200,
+      },
+      {
+        src: "/images/gallery/window-cleaning/residential-home-exterior.jpg",
+        alt: "Residential home with clean, streak-free exterior windows in the Ottawa Valley",
+        caption: "Residential exterior · Ottawa Valley",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/window-cleaning/storefront-squeegee.jpg",
+        alt: "Prestige View Services technician squeegeeing a storefront window in Petawawa",
+        caption: "Storefront detail · Petawawa",
+        width: 900,
+        height: 1600,
+      },
+      {
         src: "/images/gallery/window-cleaning/aw-exterior-rain.jpg",
         alt: "PVS technician cleaning A&W storefront windows on a rainy day",
         caption: "A&W exterior · Petawawa",
@@ -141,16 +176,53 @@ export const workCategories: WorkCategory[] = [
     description:
       "Hand-clearing leaves, shingle grit, and debris from gutters and downspouts — keep rainwater flowing away from your foundation.",
     icon: Droplets,
-    photos: Array.from({ length: 14 }, (_, i) => {
-      const n = String(i + 1).padStart(2, "0");
-      return {
-        src: `/images/gallery/gutter-cleaning/gutter-job-${n}.jpg`,
-        alt: `PVS gutter cleaning callout — Ottawa Valley`,
-        caption: `Gutter callout · Ottawa Valley`,
+    photos: [
+      {
+        src: "/images/gallery/gutter-cleaning/gutter-debris-before.jpg",
+        alt: "Residential gutter packed with leaves and shingle grit before a Prestige View Services gutter cleaning in the Ottawa Valley",
+        caption: "Clogged gutter · before",
         width: 1200,
         height: 1600,
-      };
-    }),
+      },
+      {
+        src: "/images/gallery/gutter-cleaning/gutter-clean-after.jpg",
+        alt: "Spotless gutter and downspout flowing freely after a Prestige View Services gutter cleaning in the Ottawa Valley",
+        caption: "Cleared & flowing · after",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/gutter-cleaning/gutter-clean-run.jpg",
+        alt: "Long residential gutter run cleared of leaves and debris in Petawawa",
+        caption: "Full run cleared · Petawawa",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg",
+        alt: "Prestige View Services crew on ladders clearing residential gutters in Petawawa",
+        caption: "PVS crew on site",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/gutter-cleaning/gutter-hand-clearing.jpg",
+        alt: "Technician hand-clearing leaves and debris from a residential gutter in the Ottawa Valley",
+        caption: "Hand-clearing debris",
+        width: 1200,
+        height: 1600,
+      },
+      ...Array.from({ length: 14 }, (_, i) => {
+        const n = String(i + 1).padStart(2, "0");
+        return {
+          src: `/images/gallery/gutter-cleaning/gutter-job-${n}.jpg`,
+          alt: `Residential gutter cleaning callout by Prestige View Services in the Ottawa Valley`,
+          caption: `Gutter callout · Ottawa Valley`,
+          width: 1200,
+          height: 1600,
+        };
+      }),
+    ],
   },
   {
     slug: "lawn-mowing",

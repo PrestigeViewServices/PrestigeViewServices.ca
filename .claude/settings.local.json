@@ -89,7 +89,12 @@
       "Bash(cp \"C:\\\\Users\\\\guerl\\\\.claude.json\" \"C:\\\\Users\\\\guerl\\\\.claude.json.pre-magic-mcp\" && echo \"backup created\")",
       "PowerShell($c = Get-Content \"$env:USERPROFILE\\\\.claude.json\" -Raw | ConvertFrom-Json; $c.mcpServers | ConvertTo-Json -Depth 10)",
       "Bash(grep -rEn \"vcp_[A-Za-z0-9]{20,}\" --include=\"*.json\" --include=\"*.tsx\" --include=\"*.ts\" --include=\"*.md\" .)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(cp -R /tmp/marketingskills/skills/. \"C:\\\\Users\\\\guerl\\\\.claude\\\\skills/\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\guerl\\\\.claude\\\\skills\\\\stop-slop\")",
+      "Bash(cp /tmp/stop-slop/SKILL.md /tmp/stop-slop/README.md /tmp/stop-slop/CHANGELOG.md /tmp/stop-slop/LICENSE \"C:\\\\Users\\\\guerl\\\\.claude\\\\skills\\\\stop-slop/\")",
+      "Bash(cp -R /tmp/stop-slop/references \"C:\\\\Users\\\\guerl\\\\.claude\\\\skills\\\\stop-slop/\")",
+      "Bash(awk '/\\\\.jpg/ {print $5, $NF}')"
     ]
   }
 }

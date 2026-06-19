@@ -15,7 +15,7 @@
  */
 
 import type { LucideIcon } from "lucide-react";
-import { Home, Sparkles, Droplets, Waves } from "lucide-react";
+import { Home, Sparkles, Droplets, Waves, Frame } from "lucide-react";
 
 /* ----------------------------------------------------------------------------
  * À-la-carte services — the building blocks shared by plans, packages, and the
@@ -84,6 +84,8 @@ export function buildYourOwnTotal(keys: ServiceKey[]): {
 export type CarePlanSlug =
   | "house-gutter"
   | "house-view"
+  | "clear-view"
+  | "crystal-clear"
   | "total-exterior"
   | "build-your-own";
 
@@ -139,6 +141,39 @@ export const CARE_PLANS: CarePlan[] = [
     calendar: [
       { month: "June", items: ["House soft-wash", "Spring exterior windows"] },
       { month: "September", items: ["Fall exterior windows"] },
+    ],
+  },
+  {
+    slug: "clear-view",
+    name: "Clear View Plan",
+    monthly: 39,
+    tagline: "Crystal-clear exterior glass, spring and fall.",
+    includes: [
+      { icon: Sparkles, label: "Exterior windows — spring & fall (2×)" },
+      { icon: Frame, label: "Sills & frames wiped each visit" },
+    ],
+    bestFor: "A clear view, windows only",
+    calendar: [
+      { month: "June", items: ["Spring exterior windows"] },
+      { month: "September", items: ["Fall exterior windows"] },
+    ],
+  },
+  {
+    slug: "crystal-clear",
+    name: "Crystal Clear Plan",
+    monthly: 59,
+    tagline: "Spotless glass inside and out — plus screens & tracks.",
+    includes: [
+      { icon: Sparkles, label: "Windows inside & out (2×)" },
+      { icon: Frame, label: "Screens, tracks & sills detailed" },
+    ],
+    bestFor: "Flawless glass, inside and out",
+    calendar: [
+      {
+        month: "June",
+        items: ["Spring windows in & out", "Screens & tracks"],
+      },
+      { month: "September", items: ["Fall windows in & out"] },
     ],
   },
   {
@@ -303,7 +338,7 @@ export const servicePlanMap: Partial<Record<string, ServicePlanConfig>> = {
     aLaCarte: ["gutters"],
   },
   "window-cleaning": {
-    planSlugs: ["house-view", "total-exterior"],
+    planSlugs: ["clear-view", "crystal-clear", "total-exterior"],
     aLaCarte: ["windows"],
   },
   "pressure-washing": {

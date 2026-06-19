@@ -28,45 +28,95 @@ export const metadata: Metadata = {
 const COMPARE_SLUGS: CarePlanSlug[] = [
   "house-gutter",
   "house-view",
+  "clear-view",
+  "crystal-clear",
   "total-exterior",
 ];
 
 // Comparison matrix. Each row maps a feature to a per-plan value:
 //   true → included · false → not included · string → a quantity/note.
+// Record requires every CarePlanSlug, so build-your-own is included even though
+// it's excluded from COMPARE_SLUGS (it has its own calculator).
 type Row = { label: string; values: Record<CarePlanSlug, boolean | string> };
+const allTrue = {
+  "house-gutter": true,
+  "house-view": true,
+  "clear-view": true,
+  "crystal-clear": true,
+  "total-exterior": true,
+  "build-your-own": true,
+} as const;
 const COMPARE_ROWS: Row[] = [
   {
     label: "House soft-wash",
-    values: { "house-gutter": "1×", "house-view": "1×", "total-exterior": "1×", "build-your-own": false },
+    values: {
+      "house-gutter": "1×",
+      "house-view": "1×",
+      "clear-view": false,
+      "crystal-clear": false,
+      "total-exterior": "1×",
+      "build-your-own": false,
+    },
   },
   {
     label: "Exterior windows",
-    values: { "house-gutter": false, "house-view": "2×", "total-exterior": "2×", "build-your-own": false },
+    values: {
+      "house-gutter": false,
+      "house-view": "2×",
+      "clear-view": "2×",
+      "crystal-clear": "2×",
+      "total-exterior": "2×",
+      "build-your-own": false,
+    },
+  },
+  {
+    label: "Interior windows",
+    values: {
+      "house-gutter": false,
+      "house-view": false,
+      "clear-view": false,
+      "crystal-clear": "2×",
+      "total-exterior": false,
+      "build-your-own": false,
+    },
+  },
+  {
+    label: "Screens & tracks",
+    values: {
+      "house-gutter": false,
+      "house-view": false,
+      "clear-view": false,
+      "crystal-clear": true,
+      "total-exterior": false,
+      "build-your-own": false,
+    },
   },
   {
     label: "Gutter clean",
-    values: { "house-gutter": "2×", "house-view": false, "total-exterior": "2×", "build-your-own": false },
+    values: {
+      "house-gutter": "2×",
+      "house-view": false,
+      "clear-view": false,
+      "crystal-clear": false,
+      "total-exterior": "2×",
+      "build-your-own": false,
+    },
   },
   {
     label: "Driveway wash",
-    values: { "house-gutter": false, "house-view": false, "total-exterior": "1×", "build-your-own": false },
+    values: {
+      "house-gutter": false,
+      "house-view": false,
+      "clear-view": false,
+      "crystal-clear": false,
+      "total-exterior": "1×",
+      "build-your-own": false,
+    },
   },
-  {
-    label: "We schedule & call you",
-    values: { "house-gutter": true, "house-view": true, "total-exterior": true, "build-your-own": true },
-  },
-  {
-    label: "Priority booking",
-    values: { "house-gutter": true, "house-view": true, "total-exterior": true, "build-your-own": true },
-  },
-  {
-    label: "10% off extra services",
-    values: { "house-gutter": true, "house-view": true, "total-exterior": true, "build-your-own": true },
-  },
-  {
-    label: "Locked-in pricing",
-    values: { "house-gutter": true, "house-view": true, "total-exterior": true, "build-your-own": true },
-  },
+  { label: "We schedule & call you", values: { ...allTrue } },
+  { label: "Priority booking", values: { ...allTrue } },
+  { label: "10% off extra services", values: { ...allTrue } },
+  { label: "Locked-in pricing", values: { ...allTrue } },
 ];
 
 export default function CarePlansPage() {
@@ -163,7 +213,7 @@ export default function CarePlansPage() {
           description="The quick version — what each recurring plan covers."
         />
         <div className="mt-10 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-sm">
+          <table className="w-full min-w-[860px] border-collapse text-sm">
             <thead>
               <tr>
                 <th className="sticky left-0 bg-background py-4 pr-4 text-left font-semibold">
