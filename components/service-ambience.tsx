@@ -126,7 +126,7 @@ export function ambienceForService(slug: string): Theme | null {
     slug === "dethatching" ||
     slug === "overseeding" ||
     slug === "property-maintenance" ||
-    slug === "small-landscaping"
+    slug === "landscaping-services"
   ) {
     return "lawn";
   }

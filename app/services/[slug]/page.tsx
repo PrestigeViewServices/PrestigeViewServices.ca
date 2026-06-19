@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, MapPin } from "lucide-react";
 import { services, getService } from "@/lib/content/services";
 import { getDivision } from "@/lib/content/divisions";
 import { serviceAreas } from "@/lib/content/service-areas";
-import { getWorkCategory } from "@/lib/content/work-categories";
+import { getGalleryForService } from "@/lib/content/work-categories";
 import { serviceFaqs } from "@/lib/content/faq";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
@@ -66,8 +67,10 @@ export default function ServiceDetailPage({
     a.topServices.includes(service.slug)
   );
 
-  // If we have a matching work-category gallery, deep-link to it.
-  const gallery = getWorkCategory(service.slug);
+  // Photos for the inline strip + "View full gallery" CTA. Resolves the
+  // service's own gallery first, then falls back to a related category so
+  // every service page has at least one real PVS photo on it.
+  const gallery = getGalleryForService(service.slug);
 
   const jsonLd = [
     {
@@ -222,20 +225,39 @@ export default function ServiceDetailPage({
       </section>
 
       {gallery && gallery.photos.length > 0 && (
-        <section className="container-max pb-14 sm:pb-20">
-          <div className="surface-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold">
-                See recent {service.name.toLowerCase()} work
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Real {service.name.toLowerCase()} jobs across Petawawa,
-                Pembroke, and the Ottawa Valley.
-              </p>
-            </div>
+        <section className="container-max pb-14 sm:pb-20 relative">
+          <SectionHeading
+            eyebrow="Recent Work"
+            title={`See recent ${service.name.toLowerCase()} jobs`}
+            description={`Real PVS work across Petawawa, Pembroke, and the Ottawa Valley.`}
+            align="left"
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {gallery.photos.slice(0, 3).map((p) => (
+              <Link
+                key={p.src}
+                href={`/our-work/${gallery.slug}`}
+                className="group/photo relative aspect-[4/3] overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
+              >
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover/photo:scale-105"
+                />
+                {p.caption && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 text-xs font-medium text-white">
+                    {p.caption}
+                  </div>
+                )}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-6">
             <Button asChild variant="outline">
               <Link href={`/our-work/${gallery.slug}`}>
-                View gallery
+                View full gallery
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>

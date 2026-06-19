@@ -318,3 +318,35 @@ export function getWorkCategory(slug: string): WorkCategory | undefined {
 
 export const populatedWorkCategories = (): WorkCategory[] =>
   workCategories.filter((c) => c.photos.length > 0);
+
+/**
+ * Many service slugs don't have a dedicated photo gallery yet. We alias them
+ * to the closest-matching populated category so every service detail page can
+ * still display real PVS work. The alias is a soft mapping for UI only — the
+ * /our-work pages are still driven off the real `slug` field.
+ */
+const SERVICE_GALLERY_ALIAS: Record<string, string> = {
+  "landscaping-services": "lawn-mowing",
+  "spring-cleanup": "lawn-mowing",
+  aeration: "lawn-mowing",
+  dethatching: "lawn-mowing",
+  overseeding: "lawn-mowing",
+  "property-maintenance": "lawn-mowing",
+  "house-washing": "pressure-washing",
+  "property-touch-ups": "pressure-washing",
+  "property-cleanouts": "junk-removal",
+  "seasonal-snow-contract": "snow-removal",
+  "walkway-clearing": "snow-removal",
+};
+
+/**
+ * Resolve a service slug to the gallery used on its service detail page. Falls
+ * back to an aliased category when the service doesn't have its own photos.
+ */
+export function getGalleryForService(slug: string): WorkCategory | undefined {
+  const direct = getWorkCategory(slug);
+  if (direct && direct.photos.length > 0) return direct;
+  const alias = SERVICE_GALLERY_ALIAS[slug];
+  if (alias) return getWorkCategory(alias);
+  return undefined;
+}

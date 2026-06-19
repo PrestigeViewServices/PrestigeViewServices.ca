@@ -45,21 +45,19 @@ export const services: Service[] = [
       "Blow-clean of walkways & drive",
     ],
     icon: Scissors,
-    // small-landscaping pulled to the front so it shows up as the primary
-    // upsell on the lawn-mowing page (the "Customers often add" strip).
-    pairsWith: ["small-landscaping", "aeration", "overseeding"],
+    pairsWith: ["landscaping-services", "aeration", "overseeding"],
   },
   {
-    slug: "small-landscaping",
-    name: "Small Landscaping Projects",
+    slug: "landscaping-services",
+    name: "Landscaping Services",
     division: "lawnpros",
     shortDescription:
-      "Mulch refresh, clean edges, and small planting — handled by the crew that already knows your property.",
+      "Mulch refresh, crisp bed edges, and seasonal planting — design-light landscaping handled by the crew that already maintains your property.",
     features: [
-      "Mulch top-up & installation",
+      "Mulch top-up & fresh installations",
       "Bed & border edging",
-      "Small planting — perennials & shrubs",
-      "Free on-site estimate",
+      "Perennial, shrub & seasonal planting",
+      "Free on-site estimate & design notes",
     ],
     icon: Shovel,
     pairsWith: ["lawn-mowing", "spring-cleanup", "property-maintenance"],
