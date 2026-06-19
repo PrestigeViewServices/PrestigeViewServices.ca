@@ -15,6 +15,7 @@ import {
   Snowflake,
   CalendarCheck,
   Footprints,
+  Shovel,
 } from "lucide-react";
 import type { DivisionSlug } from "./divisions";
 
@@ -44,7 +45,24 @@ export const services: Service[] = [
       "Blow-clean of walkways & drive",
     ],
     icon: Scissors,
-    pairsWith: ["aeration", "overseeding", "window-cleaning"],
+    // small-landscaping pulled to the front so it shows up as the primary
+    // upsell on the lawn-mowing page (the "Customers often add" strip).
+    pairsWith: ["small-landscaping", "aeration", "overseeding"],
+  },
+  {
+    slug: "small-landscaping",
+    name: "Small Landscaping Projects",
+    division: "lawnpros",
+    shortDescription:
+      "Mulch refresh, clean edges, and small planting — handled by the crew that already knows your property.",
+    features: [
+      "Mulch top-up & installation",
+      "Bed & border edging",
+      "Small planting — perennials & shrubs",
+      "Free on-site estimate",
+    ],
+    icon: Shovel,
+    pairsWith: ["lawn-mowing", "spring-cleanup", "property-maintenance"],
   },
   {
     slug: "spring-cleanup",

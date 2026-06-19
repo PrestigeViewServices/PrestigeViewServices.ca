@@ -96,7 +96,8 @@
       "Bash(cp -R /tmp/stop-slop/references \"C:\\\\Users\\\\guerl\\\\.claude\\\\skills\\\\stop-slop/\")",
       "Bash(awk '/\\\\.jpg/ {print $5, $NF}')",
       "Bash(perl -i -pe 's|^NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC=.*$|NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC=https://cdn.trustindex.io/loader.js?9cd81f2737d7533daa46d2698af|' .env.local)",
-      "Bash(grep -nB1 -A2 \"name: \\\\\"\\\\|price:\" lib/content/care-plans.ts)"
+      "Bash(grep -nB1 -A2 \"name: \\\\\"\\\\|price:\" lib/content/care-plans.ts)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\('Shovel exists:', typeof l.Shovel\\)\")"
     ]
   }
 }
