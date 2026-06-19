@@ -20,7 +20,7 @@ const items = [
   {
     icon: MapPin,
     title: "Locally Owned",
-    body: "Born in the Ottawa Valley. Crews you'll recognize.",
+    body: "Two trucks, two crews — born in the Ottawa Valley, faces you'll recognize.",
   },
   {
     icon: RotateCcw,
@@ -42,7 +42,7 @@ export function TrustStrip() {
     { value: 100, suffix: "%", label: "Insured & guaranteed" },
     { value: 4, label: "Seasons covered" },
     { value: 7, label: "Ottawa Valley service areas" },
-    { value: 1, label: "Local PVS crew" },
+    { value: 2, label: "Local PVS crews" },
   ];
 
   return (
