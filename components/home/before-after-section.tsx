@@ -1,9 +1,9 @@
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { SectionHeading } from "@/components/section-heading";
 
-// Real PVS ClearView job — same window, same angle, before/after a single visit.
-const BEFORE_SRC = "/images/beforeafter/window-before.jpg";
-const AFTER_SRC = "/images/beforeafter/window-after.jpg";
+// Real PVS ClearView job — modern dark-framed windows after a single visit.
+const BEFORE_SRC = "/images/gallery/window-cleaning/modern-dark-frame-01.jpg";
+const AFTER_SRC = "/images/gallery/window-cleaning/modern-dark-frame-02.jpg";
 
 export function BeforeAfterSection() {
   return (

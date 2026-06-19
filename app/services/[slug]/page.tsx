@@ -134,6 +134,21 @@ export default function ServiceDetailPage({
   // photos by replacing the files at the paths below (same names).
   const showBeforeAfter = service.slug === "house-washing";
 
+  // Window Cleaning gets a short-form video reel showing real crew work. The
+  // files live on Cloudinary (uploaded via scripts/upload-video.js) so the
+  // repo + Vercel CLI deploy stay small.
+  const showVideoReel = service.slug === "window-cleaning";
+  const CLEAR_VIEW_VIDEOS = [
+    {
+      src: "https://res.cloudinary.com/dd0eudc0t/video/upload/q_auto,f_auto/v1781847470/pvs/videos/windows/ijdnxk5airkxznwg2qvq.mp4",
+      caption: "Up-close glass detail",
+    },
+    {
+      src: "https://res.cloudinary.com/dd0eudc0t/video/upload/q_auto,f_auto/v1781847687/pvs/videos/windows/iqu8vgtpplo6ydrp0c89.mp4",
+      caption: "Storefront pass — start to finish",
+    },
+  ];
+
   // Auto-derive an ambient theme from the service slug — snow / lawn / water
   // / autumn. Returns null for "property-touch-ups" so that page stays plain.
   const ambience = ambienceForService(service.slug);
@@ -223,6 +238,38 @@ export default function ServiceDetailPage({
           ))}
         </ul>
       </section>
+
+      {showVideoReel && (
+        <section className="container-max pb-14 sm:pb-20 relative">
+          <SectionHeading
+            eyebrow="In Motion"
+            title="Watch the Crew at Work"
+            description="Short clips from real PVS ClearView jobs across the Ottawa Valley — tap any clip to unmute."
+            align="left"
+          />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 max-w-3xl">
+            {CLEAR_VIEW_VIDEOS.map((v) => (
+              <div
+                key={v.src}
+                className="group/clip relative aspect-[9/16] overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
+              >
+                <video
+                  src={v.src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 text-xs font-medium text-white">
+                  {v.caption}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {gallery && gallery.photos.length > 0 && (
         <section className="container-max pb-14 sm:pb-20 relative">
