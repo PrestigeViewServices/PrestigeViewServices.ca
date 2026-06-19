@@ -249,11 +249,11 @@ export const ONE_OFF_PACKAGES: OneOffPackage[] = [
   {
     slug: "curb-appeal",
     name: "Curb Appeal",
-    price: 499,
+    price: 649,
     tagline: "A quick, high-impact refresh for the front of the house.",
     includes: [
       { icon: Home, label: "House wash" },
-      { icon: Waves, label: "Driveway / concrete wash" },
+      { icon: Sparkles, label: "Exterior window cleaning" },
     ],
     bestFor: "Listing your home or hosting soon",
   },
