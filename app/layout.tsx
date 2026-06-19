@@ -11,7 +11,6 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
-import { reviews, averageRating } from "@/lib/content/reviews";
 import { isClerkConfigured } from "@/lib/auth";
 import "./globals.css";
 
@@ -125,25 +124,10 @@ export default function RootLayout({
         },
       })),
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: averageRating(),
-      reviewCount: reviews.length,
-      bestRating: 5,
-      worstRating: 1,
-    },
-    review: reviews.slice(0, 5).map((r) => ({
-      "@type": "Review",
-      author: { "@type": "Person", name: r.name },
-      datePublished: r.date,
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: r.rating,
-        bestRating: 5,
-        worstRating: 1,
-      },
-      reviewBody: r.quote,
-    })),
+    // AggregateRating + review JSON-LD removed. Per Google's rich-result
+    // policy, fabricated review data violates structured-data guidelines.
+    // Once Trustindex (or the Places API) exposes real review counts +
+    // ratings, we can re-add these blocks driven from the live data.
     sameAs: [siteConfig.social.facebook, siteConfig.social.instagram],
   };
 

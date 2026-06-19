@@ -57,7 +57,7 @@ export const roles: Role[] = [
     shortPitch:
       "Mow, edge, and finish properties across the Valley. Seasonal start with a path to year-round work across our snow team.",
     longPitch:
-      "Spend your days outdoors on a tight crew, making properties look their best. We start most lawn crew members in the spring and roll the right people into our SnowLand division for the winter — so the work doesn't stop in October.",
+      "Spend your days outdoors on a tight crew, making properties look their best. We start most lawn crew members in the spring and roll the right people into our snow team for the winter — so the work doesn't stop in October.",
     responsibilities: [
       "Operate mowers, trimmers, and blowers safely and efficiently",
       "Edge, trim, and blow-clean every visit to a finished standard",
@@ -224,9 +224,12 @@ export function generalApplication(): Role {
   return r;
 }
 
+// User-facing category labels. We dropped the sub-brand naming
+// (LawnPros / ClearView / SnowLand) — PVS is one brand, these are
+// service categories the role rolls up to.
 export const divisionLabel: Record<CareerDivision, string> = {
-  lawnpros: "PVS LawnPros",
-  clearview: "PVS ClearView",
-  snowland: "PVS SnowLand",
+  lawnpros: "Lawn Care",
+  clearview: "Exterior Cleaning",
+  snowland: "Snow & Ice",
   "company-wide": "Company-wide",
 };

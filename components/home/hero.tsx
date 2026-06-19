@@ -7,7 +7,6 @@ import { ArrowRight, Phone, ShieldCheck, MapPin, Star } from "lucide-react";
 import { useRef } from "react";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
-import { averageRating, reviews } from "@/lib/content/reviews";
 
 /**
  * Hero — text + CTA render statically (no entrance animation, instant for
@@ -19,7 +18,6 @@ import { averageRating, reviews } from "@/lib/content/reviews";
  * All motion respects prefers-reduced-motion.
  */
 export function Hero() {
-  const rating = averageRating();
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -114,7 +112,7 @@ export function Hero() {
             <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-xs sm:text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                {rating} avg · {reviews.length}+ local reviews
+                Top-rated on Google
               </span>
               <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-muted-foreground/40" />
               <span className="inline-flex items-center gap-1.5">

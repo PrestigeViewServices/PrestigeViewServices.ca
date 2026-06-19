@@ -10,7 +10,6 @@ import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/section-heading";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { reviews, averageRating } from "@/lib/content/reviews";
 
 const items = [
   {
@@ -36,11 +35,14 @@ const items = [
 ];
 
 export function TrustStrip() {
+  // Static, non-fabricated trust signals. Removed the review-derived counts
+  // (we now pull real reviews from Google via the Trustindex embed) and the
+  // "Service divisions" stat (PVS is one brand, not three sub-brands).
   const stats = [
-    { value: reviews.length, suffix: "+", label: "Local reviews" },
-    { value: averageRating(), suffix: "★", label: "Average rating", isFloat: true },
-    { value: 8, label: "Service divisions" },
     { value: 100, suffix: "%", label: "Insured & guaranteed" },
+    { value: 4, label: "Seasons covered" },
+    { value: 7, label: "Ottawa Valley service areas" },
+    { value: 1, label: "Local PVS crew" },
   ];
 
   return (
@@ -62,15 +64,7 @@ export function TrustStrip() {
             className="rounded-2xl border border-surface-border bg-surface/50 backdrop-blur-sm p-5 text-center"
           >
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-primary bg-clip-text text-transparent">
-              <AnimatedCounter
-                to={s.value}
-                suffix={s.suffix ?? ""}
-                format={
-                  s.isFloat
-                    ? (n) => n.toFixed(1)
-                    : undefined
-                }
-              />
+              <AnimatedCounter to={s.value} suffix={s.suffix ?? ""} />
             </div>
             <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
               {s.label}

@@ -1,60 +1,38 @@
 import type { Metadata } from "next";
 import { Star } from "lucide-react";
-import { reviews, averageRating } from "@/lib/content/reviews";
-import { ReviewCard } from "@/components/review-card";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
 import { ReviewCta } from "@/components/review-cta";
+import { GoogleReviewsEmbed } from "@/components/home/google-reviews-embed";
+import { siteConfig } from "@/lib/site";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Reviews — What Petawawa & Pembroke Are Saying",
   description:
-    "Real customer reviews from across the Ottawa Valley. See why homeowners trust Prestige View Services for lawn care, window cleaning, and snow removal.",
+    "Real Google reviews from Prestige View Services customers across Petawawa, Pembroke, and the Ottawa Valley.",
   alternates: { canonical: "/reviews" },
 };
 
-// TODO: replace static reviews with live Google reviews. Two paths to choose
-// from when we're ready:
-//   - Third-party widget (Elfsight / Trustindex) — drop-in <script>, no API
-//     keys, free tier covers ~3–5 reviews. Fast but limited customization.
-//   - Google Places API — pulls latest reviews + rating via Place ID. Needs
-//     an API key with Places enabled + billing turned on (still free up to
-//     quota). More control + can cache server-side.
-// Until then, /lib/content/reviews.ts is the source of truth and the
-// "Leave Us a Google Review" CTA below drives net-new reviews into Google.
-
+/**
+ * Real Google reviews via Trustindex embed. Configure the widget by setting
+ * NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC (and optionally _CONTAINER_CLASS)
+ * in env. When the widget URL is missing, the page renders an empty state
+ * with the "Leave us a Google review" CTA — we never invent reviews.
+ */
 export default function ReviewsPage() {
-  const avg = averageRating();
+  const widgetEnabled = Boolean(
+    process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC
+  );
 
   return (
     <>
       <section className="container-max pt-14 sm:pt-20 pb-4">
         <SectionHeading
-          eyebrow="Customer Stories"
+          eyebrow="Real Google Reviews"
           title="What Neighbours Are Saying"
-          description="Honest feedback from real PVS customers across Petawawa, Pembroke, and the Ottawa Valley."
+          description="Every review below is pulled live from our Google Business profile."
         />
-
-        <div
-          className="mt-10 mx-auto flex max-w-md items-center justify-center gap-4 rounded-2xl border border-surface-border bg-surface/60 px-6 py-4"
-          aria-label={`Average rating ${avg} out of 5 from ${reviews.length} reviews`}
-        >
-          <div className="flex items-center gap-1" aria-hidden>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className="h-5 w-5 text-yellow-400 fill-yellow-400"
-              />
-            ))}
-          </div>
-          <div className="text-sm">
-            <span className="font-semibold">{avg}</span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {reviews.length}+ verified reviews
-            </span>
-          </div>
-        </div>
 
         <div className="mt-8 flex flex-col items-center gap-3 text-center">
           <ReviewCta variant="button" />
@@ -65,11 +43,33 @@ export default function ReviewsPage() {
       </section>
 
       <section className="container-max py-16">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {reviews.map((r) => (
-            <ReviewCard key={r.id} review={r} />
-          ))}
-        </div>
+        {widgetEnabled ? (
+          <GoogleReviewsEmbed />
+        ) : (
+          <div className="mx-auto max-w-xl surface-card p-8 sm:p-10 text-center">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-yellow-500/15 text-yellow-300">
+              <Star className="h-6 w-6 fill-current" />
+            </div>
+            <h3 className="mt-5 text-xl font-semibold">
+              Live reviews coming online
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Our Google reviews feed is being wired up. Until then, you can
+              read them all — or leave one — straight on Google.
+            </p>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
+              <Button asChild variant="outline">
+                <a
+                  href={siteConfig.googleReviewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  See all on Google
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
 
       <CtaBand />
