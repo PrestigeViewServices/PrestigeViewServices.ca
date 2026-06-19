@@ -7,6 +7,7 @@ import { TrustStrip } from "@/components/home/trust-strip";
 import { FreshFromField } from "@/components/home/fresh-from-field";
 import { GalleryStrip } from "@/components/home/gallery-strip";
 import { BeforeAfterSection } from "@/components/home/before-after-section";
+import { ActionShots } from "@/components/home/action-shots";
 import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
@@ -51,6 +52,9 @@ export default function HomePage() {
       </Reveal>
       <Reveal delay={60}>
         <BeforeAfterSection />
+      </Reveal>
+      <Reveal>
+        <ActionShots />
       </Reveal>
       <Reveal>
         <ReviewsPreview />
