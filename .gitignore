@@ -42,6 +42,12 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
+# Local working files — raw camera shoots, untouched videos
+/Photos/
+*.mov
+*.mp4
+IMG_*
+
 .vercel
 
 # Source / unprocessed photos. The site reads from /public/images/ — drop

@@ -1,0 +1,29 @@
+# Files / dirs to exclude from Vercel CLI uploads.
+# Keeps the upload tarball under Vercel's 100 MB CLI limit and avoids
+# shipping local working files (raw camera shoots, dev notes) to prod.
+
+# ---------------------------------------------------------------------------
+# Local raw shoots / working photo library (~400 MB)
+# Final, optimized photos live in public/images/
+# ---------------------------------------------------------------------------
+Photos/
+
+# ---------------------------------------------------------------------------
+# Stray camera video files left at the project root (~180 MB)
+# ---------------------------------------------------------------------------
+*.mov
+*.mp4
+IMG_*
+
+# ---------------------------------------------------------------------------
+# Internal docs that don't belong on the live site
+# ---------------------------------------------------------------------------
+docs/
+
+# ---------------------------------------------------------------------------
+# Other dev cruft
+# ---------------------------------------------------------------------------
+.clerk/
+.claude/
+*.log
+.env*.local
