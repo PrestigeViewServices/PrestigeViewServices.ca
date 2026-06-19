@@ -117,6 +117,13 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0) rotate(0deg)" },
           "50%": { transform: "translateY(-12px) rotate(-0.6deg)" },
         },
+        spotlight: {
+          "0%": { opacity: "0", transform: "translate(-72%, -62%) scale(0.5)" },
+          "100%": {
+            opacity: "1",
+            transform: "translate(-50%,-40%) scale(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -126,6 +133,7 @@ const config: Config = {
         "marquee-reverse": "marquee-reverse linear infinite",
         "blob-drift": "blob-drift 18s ease-in-out infinite",
         "ambient-float": "ambient-float 6s ease-in-out infinite",
+        spotlight: "spotlight 2s ease .75s 1 forwards",
       },
     },
   },

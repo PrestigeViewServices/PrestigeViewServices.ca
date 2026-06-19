@@ -147,3 +147,16 @@
 .animate-ambience-fall-tumble { animation: ambience-fall-tumble linear infinite; }
 .animate-ambience-rise        { animation: ambience-rise        linear infinite; }
 
+/* Spinner shown while a Spline 3D scene loads — used by <SplineScene />. */
+.loader {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
+  animation: loader-spin 0.8s linear infinite;
+}
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
