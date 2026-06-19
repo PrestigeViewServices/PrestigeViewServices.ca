@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
 import { TrustMarquee } from "@/components/home/trust-marquee";
-import { DivisionsOverview } from "@/components/home/divisions-overview";
+import { ServicesOverview } from "@/components/home/services-overview";
 import { OffersBand } from "@/components/home/offers-band";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { FreshFromField } from "@/components/home/fresh-from-field";
@@ -35,7 +35,7 @@ export default function HomePage() {
       <Hero />
       <TrustMarquee />
       <Reveal>
-        <DivisionsOverview />
+        <ServicesOverview />
       </Reveal>
       <Reveal delay={60}>
         <OffersBand />

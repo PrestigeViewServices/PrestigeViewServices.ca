@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
-import { divisions } from "@/lib/content/divisions";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
 import { workCategories } from "@/lib/content/work-categories";
@@ -24,13 +23,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/winter-packages`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
-
-  const divisionRoutes: MetadataRoute.Sitemap = divisions.map((d) => ({
-    url: `${base}/divisions/${d.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.85,
-  }));
 
   const serviceRoutes: MetadataRoute.Sitemap = services.map((s) => ({
     url: `${base}/services/${s.slug}`,
@@ -76,7 +68,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...staticRoutes,
-    ...divisionRoutes,
     ...serviceRoutes,
     ...areaRoutes,
     ...comboRoutes,

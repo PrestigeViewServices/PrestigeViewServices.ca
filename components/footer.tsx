@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ReviewCta } from "@/components/review-cta";
-import { divisions } from "@/lib/content/divisions";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
 import { siteConfig } from "@/lib/site";
@@ -49,18 +48,32 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold mb-4">Divisions</h3>
+            <h3 className="text-sm font-semibold mb-4">Services</h3>
             <ul className="space-y-2.5 text-sm">
-              {divisions.map((d) => (
-                <li key={d.slug}>
-                  <Link
-                    href={`/divisions/${d.slug}`}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {d.shortName}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/services#lawn-care"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Lawn Care
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services#exterior-cleaning"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Exterior Cleaning
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/services#snow-and-ice"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Snow &amp; Ice
+                </Link>
+              </li>
             </ul>
             <h3 className="text-sm font-semibold mb-4 mt-7">Service Areas</h3>
             <ul className="space-y-2.5 text-sm">

@@ -26,7 +26,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { AuthControls } from "@/components/auth-controls";
-import { divisions } from "@/lib/content/divisions";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -61,27 +60,12 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
-              Divisions
-              <ChevronDown className="h-4 w-4 opacity-70" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {divisions.map((d) => (
-                <DropdownMenuItem key={d.slug} asChild>
-                  <Link
-                    href={`/divisions/${d.slug}`}
-                    className="flex flex-col items-start gap-0.5"
-                  >
-                    <span className="font-semibold">{d.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {d.tagline}
-                    </span>
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+          >
+            Services
+          </Link>
 
           {featuredLinks.map((l) => {
             const Icon = l.icon;
@@ -178,23 +162,6 @@ export function Header() {
                   );
                 })}
                 <div className="h-px bg-surface-border my-3 mx-2" />
-                <p className="px-2 text-xs uppercase tracking-wider text-muted-foreground">
-                  Divisions
-                </p>
-                {divisions.map((d) => (
-                  <Link
-                    key={d.slug}
-                    href={`/divisions/${d.slug}`}
-                    onClick={() => setOpen(false)}
-                    className="flex flex-col gap-0.5 rounded-lg px-3 py-2.5 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="font-semibold">{d.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {d.tagline}
-                    </span>
-                  </Link>
-                ))}
-                <div className="h-px bg-surface-border my-2 mx-2" />
                 <p className="px-2 text-xs uppercase tracking-wider text-muted-foreground">
                   Explore
                 </p>
