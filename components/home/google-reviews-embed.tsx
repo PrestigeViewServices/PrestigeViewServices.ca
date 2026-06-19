@@ -21,10 +21,21 @@ import { useEffect, useRef } from "react";
  * renders nothing (so the existing static review cards remain the source
  * of truth until you wire it up).
  */
-export function GoogleReviewsEmbed() {
+export function GoogleReviewsEmbed({
+  scriptSrc: scriptSrcProp,
+  containerClass: containerClassProp,
+}: {
+  /** Override the env-var widget URL — useful when you want to embed multiple
+   *  Trustindex widgets (e.g. one badge + one review feed) on the same page. */
+  scriptSrc?: string;
+  containerClass?: string;
+} = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scriptSrc = process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC;
-  const containerClass = process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_CONTAINER_CLASS;
+  const scriptSrc =
+    scriptSrcProp ?? process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC;
+  const containerClass =
+    containerClassProp ??
+    process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_CONTAINER_CLASS;
 
   useEffect(() => {
     if (!scriptSrc) return;

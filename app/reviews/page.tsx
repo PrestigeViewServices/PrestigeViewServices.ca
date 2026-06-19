@@ -72,6 +72,18 @@ export default function ReviewsPage() {
         )}
       </section>
 
+      <section className="container-max pb-16">
+        <SectionHeading
+          eyebrow="On Instagram"
+          title="Latest From the Crew"
+          description="Recent jobs, before-and-afters, and behind-the-scenes from our Petawawa & Pembroke crews — straight from our Instagram."
+          align="left"
+        />
+        <div className="mt-10">
+          <GoogleReviewsEmbed scriptSrc="https://cdn.trustindex.io/loader-feed.js?1ecf5017441a6415de665eeab98" />
+        </div>
+      </section>
+
       <CtaBand />
     </>
   );
