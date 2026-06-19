@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Check, X, Snowflake, Shovel } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
+import { ServiceAmbience } from "@/components/service-ambience";
 import { EstimatorForm } from "@/components/winter/estimator-form";
 import {
   DRIVEWAY_TIER_DEFS,
@@ -27,7 +28,8 @@ const TIER_ACCENTS: Record<DrivewayTier, string> = {
 export default function WinterPackagesPage() {
   return (
     <>
-      <section className="container-max pt-14 sm:pt-20 pb-4">
+      <ServiceAmbience theme="snow" />
+      <section className="container-max pt-14 sm:pt-20 pb-4 relative">
         <SectionHeading
           eyebrow="Year-Round Property Care, Modernized"
           title="Winter Packages for Ottawa Valley Driveways"

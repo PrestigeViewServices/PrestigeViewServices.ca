@@ -9,6 +9,10 @@ import { getWorkCategory } from "@/lib/content/work-categories";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { CtaBand } from "@/components/cta-band";
+import {
+  ServiceAmbience,
+  ambienceForService,
+} from "@/components/service-ambience";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string; area: string };
@@ -138,6 +142,9 @@ export default function ServiceAreaCombinationPage({
 
   const Icon = service.icon;
 
+  // Same theming as the parent service page — snow / lawn / water / autumn.
+  const ambience = ambienceForService(service.slug);
+
   return (
     <>
       <script
@@ -145,7 +152,9 @@ export default function ServiceAreaCombinationPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="container-max pt-14 sm:pt-20 pb-2">
+      {ambience && <ServiceAmbience theme={ambience} />}
+
+      <section className="container-max pt-14 sm:pt-20 pb-2 relative">
         <Link
           href={`/services/${service.slug}`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"

@@ -117,3 +117,33 @@
     @apply bg-gradient-primary bg-clip-text text-transparent;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Service ambience particles.
+ * Used by <ServiceAmbience /> on service detail + winter-packages pages.
+ * Each keyframe drifts a particle across the viewport over 9–15s.
+ * Particles use CSS vars --p-drift and --p-rotate set by inline styles.
+ * --------------------------------------------------------------------------- */
+@keyframes ambience-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  100% { transform: translate3d(var(--p-drift, 30px), 110vh, 0) rotate(var(--p-rotate, 360deg)); }
+}
+@keyframes ambience-fall-fast {
+  0%   { transform: translate3d(0, -10vh, 0); }
+  100% { transform: translate3d(var(--p-drift, 20px), 110vh, 0); }
+}
+@keyframes ambience-fall-tumble {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  50%  { transform: translate3d(calc(var(--p-drift, 30px) * 0.6), 50vh, 0) rotate(180deg); }
+  100% { transform: translate3d(var(--p-drift, 30px), 110vh, 0) rotate(var(--p-rotate, 540deg)); }
+}
+@keyframes ambience-rise {
+  0%   { transform: translate3d(0, 110vh, 0); }
+  100% { transform: translate3d(var(--p-drift, -30px), -10vh, 0); }
+}
+
+.animate-ambience-fall        { animation: ambience-fall        linear infinite; }
+.animate-ambience-fall-fast   { animation: ambience-fall-fast   linear infinite; }
+.animate-ambience-fall-tumble { animation: ambience-fall-tumble linear infinite; }
+.animate-ambience-rise        { animation: ambience-rise        linear infinite; }
+

@@ -11,6 +11,10 @@ import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import {
+  ServiceAmbience,
+  ambienceForService,
+} from "@/components/service-ambience";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { AutopilotPlans } from "@/components/care-plans/autopilot-plans";
 import { servicePlanMap } from "@/lib/content/care-plans";
@@ -127,6 +131,10 @@ export default function ServiceDetailPage({
   // photos by replacing the files at the paths below (same names).
   const showBeforeAfter = service.slug === "house-washing";
 
+  // Auto-derive an ambient theme from the service slug — snow / lawn / water
+  // / autumn. Returns null for "property-touch-ups" so that page stays plain.
+  const ambience = ambienceForService(service.slug);
+
   return (
     <>
       <script
@@ -134,7 +142,9 @@ export default function ServiceDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="container-max pt-14 sm:pt-20 pb-2">
+      {ambience && <ServiceAmbience theme={ambience} />}
+
+      <section className="container-max pt-14 sm:pt-20 pb-2 relative">
         <Link
           href="/services"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
