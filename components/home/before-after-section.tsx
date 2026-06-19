@@ -1,13 +1,9 @@
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { SectionHeading } from "@/components/section-heading";
 
-// TODO: Replace these placeholders with real ClearView before/after photos.
-// Drop the production files into /public/images/before-after/ and update the
-// two constants below. Both images should share the same aspect ratio (3:2
-// looks best) so the divider lines up exactly between them.
-const BEFORE_SRC = "/images/gallery/window-cleaning/aw-exterior-rain.jpg";
-const AFTER_SRC =
-  "/images/gallery/window-cleaning/stone-residence-after.jpg";
+// Real PVS ClearView job — same window, same angle, before/after a single visit.
+const BEFORE_SRC = "/images/beforeafter/window-before.jpg";
+const AFTER_SRC = "/images/beforeafter/window-after.jpg";
 
 export function BeforeAfterSection() {
   return (
@@ -15,14 +11,14 @@ export function BeforeAfterSection() {
       <SectionHeading
         eyebrow="See the difference"
         title="ClearView Results — Drag to Compare"
-        description="Drag the handle on the image below to see what a single PVS ClearView visit does to filmy windows and weather-stained siding."
+        description="Drag the handle below to see what a single PVS ClearView visit does to filmy, water-stained windows."
       />
       <div className="mt-10 mx-auto max-w-3xl">
         <BeforeAfterSlider
           beforeSrc={BEFORE_SRC}
           afterSrc={AFTER_SRC}
-          beforeAlt="Window exterior before PVS ClearView cleaning (placeholder)"
-          afterAlt="Window exterior after PVS ClearView cleaning (placeholder)"
+          beforeAlt="Residential window with water staining and film before PVS ClearView cleaning"
+          afterAlt="Same residential window crystal clear after a PVS ClearView window cleaning"
         />
         <p className="mt-4 text-center text-xs text-muted-foreground">
           Drag the handle, or focus it and use the ← → arrow keys.
