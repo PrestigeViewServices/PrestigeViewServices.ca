@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { Truck, Clock, MapPin, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { CrewAssignSelect } from "@/components/admin/crew-assign-select";
 import {
@@ -18,7 +18,6 @@ export const dynamic = "force-dynamic";
 const DISPATCH_ROLES = ["ultimate_admin", "admin", "manager"] as const;
 
 export default async function DispatchPage() {
-  if (!isClerkConfigured()) return null;
   await requireRole([...DISPATCH_ROLES]);
 
   if (!isDbReady()) {

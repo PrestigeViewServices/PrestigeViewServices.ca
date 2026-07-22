@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
-import { serviceAreas } from "@/lib/content/service-areas";
+import { serviceAreas, serviceOfferedInArea } from "@/lib/content/service-areas";
 import { workCategories } from "@/lib/content/work-categories";
 import { activeRoles } from "@/lib/content/careers";
 
@@ -40,10 +40,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Service + Area combination pages, captures "<service> + <city>"
-  // search intent. 16 services × 8 areas = 128 pages.
+  // search intent. Snow combos only exist where snow coverage does
+  // (Petawawa active, Pembroke expanding).
   const comboRoutes: MetadataRoute.Sitemap = [];
   for (const s of services) {
     for (const a of serviceAreas) {
+      if (!serviceOfferedInArea(s.slug, a)) continue;
       comboRoutes.push({
         url: `${base}/services/${s.slug}/${a.slug}`,
         lastModified: now,

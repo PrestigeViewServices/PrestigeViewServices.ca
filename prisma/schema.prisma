@@ -797,3 +797,31 @@ model HangerSession {
   @@index([repId, startedAt])
   @@index([startedAt])
 }
+
+// =============================================================================
+// FIRST-PARTY WEB ANALYTICS
+// =============================================================================
+// Privacy-friendly page-view tracking stored in our own database — no external
+// analytics service. One row per page view; `visitorId` is an anonymous
+// HMAC of (ip + user-agent + UTC day) so uniques can be counted per day
+// without storing anything personally identifying. Admin traffic is excluded
+// at the API layer.
+
+model PageView {
+  id        String   @id @default(cuid())
+  /// Pathname only — never query strings (they can carry personal data).
+  path      String
+  /// Referrer hostname (e.g. "google.com"), null for direct visits.
+  referrer  String?
+  /// Anonymous daily-rotating visitor hash.
+  visitorId String
+  /// "mobile" | "tablet" | "desktop"
+  device    String?
+  /// ISO country code from the hosting edge, when available.
+  country   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([visitorId, createdAt])
+}

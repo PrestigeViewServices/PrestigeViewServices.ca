@@ -1,5 +1,5 @@
 import { Star, Sparkles, AlertTriangle } from "lucide-react";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -87,7 +87,6 @@ function PlaceholderCard({
   body: string;
   note: string;
 }) {
-  if (!isClerkConfigured()) return null;
   return (
     <div className="surface-card p-6 opacity-90">
       <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">

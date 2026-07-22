@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, MapPin, Medal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MapPin, Medal, Snowflake } from "lucide-react";
 import { services, getService } from "@/lib/content/services";
 import type { DivisionSlug } from "@/lib/content/divisions";
-import { serviceAreas, getServiceArea } from "@/lib/content/service-areas";
+import {
+  serviceAreas,
+  getServiceArea,
+  serviceOfferedInArea,
+  isSnowService,
+} from "@/lib/content/service-areas";
 import { getGalleryForService } from "@/lib/content/work-categories";
 import { getLocalCopy } from "@/lib/content/local-copy";
 import { SectionHeading } from "@/components/section-heading";
@@ -28,14 +33,16 @@ type Params = { slug: string; area: string };
 
 /**
  * Service+Area combination pages, e.g. /services/window-cleaning/petawawa.
- * Captures "<service> + <city>" search intent directly. 16 services × 8
- * areas = 128 pre-rendered pages, each with its own H1, intro, schema, and
- * cross-linking to the parent service and area.
+ * Captures "<service> + <city>" search intent directly. Each pre-rendered
+ * page gets its own H1, intro, schema, and cross-linking to the parent
+ * service and area. Snow-division combos only exist where the area actually
+ * has snow coverage (Petawawa active, Pembroke expanding this season).
  */
 export function generateStaticParams() {
   const out: Params[] = [];
   for (const s of services) {
     for (const a of serviceAreas) {
+      if (!serviceOfferedInArea(s.slug, a)) continue;
       out.push({ slug: s.slug, area: a.slug });
     }
   }
@@ -82,7 +89,9 @@ export default async function ServiceAreaCombinationPage(
   const service = getService(params.slug);
   const area = getServiceArea(params.area);
   if (!service || !area) notFound();
+  if (!serviceOfferedInArea(service.slug, area)) notFound();
 
+  const snowExpanding = isSnowService(service.slug) && area.snowStatus === "expanding";
   const categoryLabel = CATEGORY_LABEL[service.division];
   const local = getLocalCopy(service.slug, area.slug);
   const isPetawawa = area.slug === "petawawa";
@@ -245,6 +254,23 @@ export default async function ServiceAreaCombinationPage(
               families, and first responders save 10% on{" "}
               {service.name.toLowerCase()}. Not combinable with other offers
               above 10%. Mention your service when you request a quote.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {snowExpanding && (
+        <section className="container-max pt-10">
+          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 p-6">
+            <Snowflake className="mt-0.5 h-5 w-5 shrink-0 text-sky-300" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed text-sky-50">
+              <span className="font-semibold text-white">
+                New this season: {service.name.toLowerCase()} is expanding into{" "}
+                {area.name}.
+              </span>{" "}
+              Our snow routes have been Petawawa-only until now. This winter
+              they reach {area.name}, and spots are limited while we build the
+              route. Reserve early to lock in your driveway.
             </p>
           </div>
         </section>

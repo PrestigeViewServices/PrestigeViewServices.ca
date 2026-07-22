@@ -33,7 +33,35 @@ export type ServiceArea = {
   localNotes?: string[];
   /** 1-3 town-specific FAQs (also emitted as FAQPage JSON-LD). */
   faqs?: { q: string; a: string }[];
+  /**
+   * Snow-removal availability. "active" = full snow coverage (Petawawa only),
+   * "expanding" = launching this season, reservations open (Pembroke).
+   * Undefined = snow is not offered in this town, snow pages and links are
+   * suppressed everywhere for it.
+   */
+  snowStatus?: "active" | "expanding";
 };
+
+/** Service slugs that belong to the snow division. Kept here (not imported
+ * from services.ts) to avoid a circular content dependency. */
+export const SNOW_SERVICE_SLUGS = [
+  "snow-removal",
+  "seasonal-snow-contract",
+  "walkway-clearing",
+] as const;
+
+export function isSnowService(slug: string): boolean {
+  return (SNOW_SERVICE_SLUGS as readonly string[]).includes(slug);
+}
+
+/** Whether a service/area combination page should exist at all. */
+export function serviceOfferedInArea(
+  serviceSlug: string,
+  area: ServiceArea
+): boolean {
+  if (!isSnowService(serviceSlug)) return true;
+  return area.snowStatus !== undefined;
+}
 
 export const serviceAreas: ServiceArea[] = [
   {
@@ -65,6 +93,7 @@ export const serviceAreas: ServiceArea[] = [
     ],
     distanceFromHqKm: 0,
     geo: { lat: 45.8956, lng: -77.2814 },
+    snowStatus: "active",
     localNotes: [
       "Petawawa is our home base, and it shows in the routing: most streets in town see a PVS truck weekly. We are veteran operated and built around the Garrison Petawawa community, which is why serving members, veterans, and military families get 10% off every service we offer.",
       "We know the housing here because we work on all of it: PMQs and newer builds around the base, family homes in Civic Centre and along Doran Road, and the bigger riverfront lots out toward Black Bay and Petawawa Point. Sandy soil means lawns dry out fast in July, so we adjust cut heights through the season instead of scalping turf on a fixed setting.",
@@ -90,8 +119,8 @@ export const serviceAreas: ServiceArea[] = [
       "From downtown Pembroke heritage homes to the new builds along Pembroke Street West, PVS is the year-round property care team Pembroke families call first.",
     whyHere: [
       "Specialists in historic Pembroke window and gutter restorations",
-      "Recurring lawn + snow contracts with locked-in seasonal pricing",
-      "Crews insured for both residential and small commercial",
+      "Recurring lawn care with locked-in seasonal pricing",
+      "Snow removal launching in Pembroke this season, reservations open now",
     ],
     neighbourhoods: [
       "Downtown Pembroke",
@@ -109,10 +138,11 @@ export const serviceAreas: ServiceArea[] = [
     ],
     distanceFromHqKm: 16,
     geo: { lat: 45.8266, lng: -77.1106 },
+    snowStatus: "expanding",
     localNotes: [
       "Pembroke has some of the best housing stock in the Valley, and some of the most demanding. The older brick homes downtown and around the heritage district have tall original windows, deep soffits, and gutters that sit under mature maples. That combination keeps our crews busy: window detail work in spring, and gutter cleaning that actually matters in fall because those trees drop everything.",
       "West-end subdivisions off Pembroke Street West are a different job entirely: newer vinyl siding that shows algae on the shaded side within a few seasons, bigger driveways worth pressure washing, and families who want the lawn handled on a set weekly rhythm. Same crew, different toolkit.",
-      "We also look after small commercial fronts downtown and rental properties around the Algonquin College campus, where owners want one insured contact for glass, gutters, and snow instead of three phone numbers.",
+      "We also look after small commercial fronts downtown and rental properties around the Algonquin College campus, where owners want one insured contact for glass, gutters, and exterior washing instead of three phone numbers. And this winter, Pembroke joins our snow routes: seasonal snow removal is expanding here from our Petawawa base, and reservations are open now.",
     ],
     faqs: [
       {
@@ -134,7 +164,7 @@ export const serviceAreas: ServiceArea[] = [
       "Laurentian Valley wraps around Pembroke with country lots, newer subdivisions, and hobby farms. PVS covers all of it: big lawns, long driveways, and exteriors that face real weather.",
     whyHere: [
       "Acreage mowing with the right equipment, not a homeowner mower on a big lot",
-      "Tractor snow clearing sized for long rural driveways",
+      "Hedge and exterior care sized for country properties",
       "On the same daily routes as Pembroke, no rural call-out premium",
     ],
     neighbourhoods: [
@@ -147,17 +177,17 @@ export const serviceAreas: ServiceArea[] = [
     ],
     topServices: [
       "lawn-mowing",
-      "snow-removal",
       "hedge-trimming",
       "gutter-cleaning",
       "house-washing",
+      "spring-cleanup",
     ],
     distanceFromHqKm: 13,
     geo: { lat: 45.7734, lng: -77.2036 },
     localNotes: [
       "Laurentian Valley is township living: half-acre-and-up lots, newer builds off Forest Lea and Golf Course Road, and working properties out toward Alice and Pleasant Valley. The lawns are bigger, the hedgerows are longer, and the driveways do not quit. We size the equipment to match, so a property that takes a homeowner all Saturday takes our crew an hour.",
-      "Because the township wraps right around Pembroke, your address is already on our daily routes. That means acreage service at in-town frequency: weekly mowing that actually holds a schedule, and snow clearing that reaches rural driveways the same morning as the in-town runs.",
-      "Wind and open exposure are the local quirks. Snow drifts harder across open lots, and siding on the weather side greens up faster than in town. Seasonal contracts here usually pair snow clearing with a spring house wash for exactly those reasons.",
+      "Because the township wraps right around Pembroke, your address is already on our daily routes. That means acreage service at in-town frequency: weekly mowing that actually holds a schedule, and gutter or window visits bundled onto the same runs.",
+      "Wind and open exposure are the local quirks. Siding on the weather side greens up faster than in town, and open lots collect a season's worth of debris by April. Recurring plans here usually pair a spring house wash with a proper spring cleanup for exactly those reasons.",
     ],
     faqs: [
       {
@@ -176,10 +206,10 @@ export const serviceAreas: ServiceArea[] = [
     region: "ON",
     tagline: "Deep River Property Care That Shows Up",
     intro:
-      "Deep River homeowners trust PVS for the unglamorous work that keeps a home looking sharp, lawns mowed, gutters clear, walkways shoveled before sunrise.",
+      "Deep River homeowners trust PVS for the unglamorous work that keeps a home looking sharp, lawns mowed, gutters clear, glass spotless.",
     whyHere: [
       "Reliable Deep River routes, even up Chalk River way",
-      "Storm-response snow contracts for waterfront and ridge properties",
+      "Gutter care built for the town's tall pines and treed lots",
       "Exterior wash + window care that handles river-air buildup",
     ],
     neighbourhoods: [
@@ -190,22 +220,22 @@ export const serviceAreas: ServiceArea[] = [
     ],
     topServices: [
       "lawn-mowing",
-      "snow-removal",
       "gutter-cleaning",
       "window-cleaning",
       "pressure-washing",
+      "spring-cleanup",
     ],
     distanceFromHqKm: 50,
     geo: { lat: 46.1004, lng: -77.4979 },
     localNotes: [
-      "Deep River sits right on the Ottawa River, and riverside living leaves a signature on a house: a fine film on the windows from river air, gutters that work overtime under the town's tall pines, and winter winds that drift snow across driveways within an hour of a plow pass. Our service calendar here is built around exactly those three things.",
-      "A lot of our Deep River customers commute to CNL and want property care that runs without supervision: lawn crews that come while you are at work, snow routes that have the driveway open before the morning shift, and a photo after the visit instead of a conversation you do not have time for.",
+      "Deep River sits right on the Ottawa River, and riverside living leaves a signature on a house: a fine film on the windows from river air, gutters that work overtime under the town's tall pines, and siding that weathers fast on the water-facing side. Our service calendar here is built around exactly those three things.",
+      "A lot of our Deep River customers commute to CNL and want property care that runs without supervision: lawn crews that come while you are at work, gutter and window visits handled on route day, and a photo after the visit instead of a conversation you do not have time for.",
       "From Riverside Drive down to Holm Park, the properties here are established and treed, which we love. It also means spring cleanups are a real event: needles, cones, and a winter's worth of branches, gone in one visit.",
     ],
     faqs: [
       {
-        q: "Will my driveway be clear before the morning commute to CNL?",
-        a: "That is how the Deep River route is built. Contract driveways get cleared through the storm and re-checked before typical shift times, so you are not digging at 6 a.m.",
+        q: "Do you run regular service routes up to Deep River?",
+        a: "Yes. Deep River is a scheduled weekly route, not an occasional detour, so recurring lawn, gutter, and window customers get the same steady rhythm as our Petawawa base.",
       },
       {
         q: "Why do my windows film up so fast near the river?",
@@ -217,36 +247,36 @@ export const serviceAreas: ServiceArea[] = [
     slug: "chalk-river",
     name: "Chalk River",
     region: "ON",
-    tagline: "Chalk River Lawn, Snow & Exterior Care",
+    tagline: "Chalk River Lawn & Exterior Care",
     intro:
       "Whether you're on Plant Road or off the highway, PVS covers Chalk River with the same routing as our Deep River runs, reliable, year-round.",
     whyHere: [
       "Bundled Chalk River + Deep River routes, better pricing on recurring plans",
-      "Snow contracts built for the colder valley nights",
+      "Acreage lawn care built for long rural lots",
       "Window + gutter care for cottage and year-round properties",
     ],
     neighbourhoods: ["Plant Road", "Highway 17 corridor", "Manitou Lake"],
     topServices: [
-      "snow-removal",
       "lawn-mowing",
       "gutter-cleaning",
       "window-cleaning",
+      "pressure-washing",
     ],
     distanceFromHqKm: 35,
     geo: { lat: 46.0167, lng: -77.4467 },
     localNotes: [
-      "Chalk River properties run bigger and more rural than most of our service area: long driveways off the Highway 17 corridor, deep lots backing onto bush, and a mix of year-round homes and cottages out toward Manitou Lake. That changes the work. Snow contracts here are about horsepower and route timing, not a quick pass with a plow blade.",
+      "Chalk River properties run bigger and more rural than most of our service area: long driveways off the Highway 17 corridor, deep lots backing onto bush, and a mix of year-round homes and cottages out toward Manitou Lake. That changes the work. Lawn and exterior care here is about the right equipment and route timing, not a quick in-town pass.",
       "Because our Chalk River visits ride on the same routes as Deep River, recurring customers get better pricing than a one-off call-out would suggest. Lawn, gutter, and window visits get bundled onto the same runs, which is how a rural address gets in-town service costs.",
       "For plant workers on rotation, we keep scheduling simple: the work happens on route day whether you are home or not, and the invoice and photos land in your inbox.",
     ],
     faqs: [
       {
-        q: "Can you clear a long rural driveway in Chalk River?",
-        a: "Yes, long drives are normal here and our tractor-mounted blowers are the right machine for them: snow gets thrown well off the driveway instead of piled into banks that close in by February.",
+        q: "Can you handle a large rural property in Chalk River?",
+        a: "Yes, big lots are normal here. Commercial mowers and a full crew mean multi-acre lawns, long hedgerows, and deep gutters get handled in a single scheduled visit.",
       },
       {
         q: "Do you charge extra to come out to Chalk River?",
-        a: "No call-out premium. Chalk River rides on our Deep River routes, so recurring lawn, gutter, window, and snow services are priced the same way as anywhere else on the run.",
+        a: "No call-out premium. Chalk River rides on our Deep River routes, so recurring lawn, gutter, and window services are priced the same way as anywhere else on the run.",
       },
     ],
   },
@@ -254,11 +284,11 @@ export const serviceAreas: ServiceArea[] = [
     slug: "cobden",
     name: "Cobden",
     region: "ON",
-    tagline: "Cobden Property Care, From Lawn to Snow",
+    tagline: "Cobden Property Care, Lawn to Gutters",
     intro:
       "Cobden homes along Muskrat Lake and County Road 8 get the same dialled-in service we run for Petawawa, recurring care that just shows up.",
     whyHere: [
-      "Recurring Cobden lawn + snow contracts",
+      "Recurring Cobden lawn care plans",
       "Lakefront gutter and exterior wash specialists",
       "Same-day quotes, fully insured",
     ],
@@ -270,9 +300,9 @@ export const serviceAreas: ServiceArea[] = [
     ],
     topServices: [
       "lawn-mowing",
-      "snow-removal",
       "gutter-cleaning",
       "pressure-washing",
+      "window-cleaning",
     ],
     distanceFromHqKm: 35,
     geo: { lat: 45.6256, lng: -76.8853 },
@@ -281,13 +311,13 @@ export const serviceAreas: ServiceArea[] = [
     slug: "renfrew",
     name: "Renfrew",
     region: "ON",
-    tagline: "Renfrew Lawn, Snow & Window Cleaning",
+    tagline: "Renfrew Lawn & Window Cleaning",
     intro:
       "From Stewart Park to Plaunt Street, Renfrew families count on PVS for steady, reliable property care, no missed weeks, no surprise bills.",
     whyHere: [
-      "Flat-rate seasonal snow contracts for Renfrew driveways",
       "Recurring lawn plans with edging and full cleanup",
       "Window + gutter care from heritage to new-build homes",
+      "Scheduled weekly Renfrew routes, not occasional detours",
     ],
     neighbourhoods: [
       "Stewart Park",
@@ -296,26 +326,26 @@ export const serviceAreas: ServiceArea[] = [
       "Renfrew downtown",
     ],
     topServices: [
-      "snow-removal",
       "lawn-mowing",
       "window-cleaning",
       "gutter-cleaning",
+      "house-washing",
     ],
     distanceFromHqKm: 65,
     geo: { lat: 45.4733, lng: -76.6822 },
     localNotes: [
-      "Renfrew rewards a crew that can handle both ends of the housing spectrum. The century homes around Plaunt Street and the downtown core have steep rooflines, original eaves, and gutters that were not designed for maple keys. The newer streets up toward Hall Avenue are all about recurring lawn care and flat-rate snow contracts that survive a commuter's schedule.",
-      "Steel roofs are common here, and they change winter completely: snow sheds off in slabs and buries walkways and entrances that were clear an hour earlier. Our walkway clearing add-on exists for exactly this, and Renfrew books more of it than any other town we serve.",
+      "Renfrew rewards a crew that can handle both ends of the housing spectrum. The century homes around Plaunt Street and the downtown core have steep rooflines, original eaves, and gutters that were not designed for maple keys. The newer streets up toward Hall Avenue are all about recurring lawn care that survives a commuter's schedule.",
+      "Steel roofs are common here, and they shed onto siding and splash grime up the lower walls all winter. A spring soft wash clears that tide line, which is why Renfrew books more house washing off the winter than any other town we serve.",
       "We run Renfrew as a scheduled route, not an occasional detour, so recurring customers get the same steady weekly rhythm as our Petawawa base. From Stewart Park to O'Brien Road, the truck is already in town.",
     ],
     faqs: [
       {
         q: "Do you actually service Renfrew every week?",
-        a: "Yes. Renfrew is a scheduled route with recurring lawn, window, gutter, and snow customers, so weekly service holds all season. It is not a we-will-come-if-enough-people-call arrangement.",
+        a: "Yes. Renfrew is a scheduled route with recurring lawn, window, and gutter customers, so weekly service holds all season. It is not a we-will-come-if-enough-people-call arrangement.",
       },
       {
-        q: "My steel roof dumps snow on the walkway. Can you handle that?",
-        a: "That is a Renfrew classic. Add walkway clearing to a snow contract and we re-clear entrances and paths on our passes, including the slabs a steel roof sheds after the storm ends.",
+        q: "Can you get the winter grime off my lower siding in spring?",
+        a: "That is a Renfrew classic. Steel roofs shed all winter and splash a grey tide line up the bottom courses. A spring soft wash takes it off completely and gets the house ready to be looked at again.",
       },
     ],
   },
@@ -325,9 +355,9 @@ export const serviceAreas: ServiceArea[] = [
     region: "ON",
     tagline: "Arnprior Property Care, Year-Round",
     intro:
-      "Arnprior homes from Madawaska Boulevard to Daniel Street get full-service property care from PVS, lawn, exterior, and snow on a schedule you don't have to manage.",
+      "Arnprior homes from Madawaska Boulevard to Daniel Street get full-service property care from PVS, lawn and exterior on a schedule you don't have to manage.",
     whyHere: [
-      "Recurring lawn + snow built for Arnprior commuter schedules",
+      "Recurring lawn care built for Arnprior commuter schedules",
       "Soft-wash exterior + window care for waterfront homes",
       "Bundled gutter and pressure washing pricing",
     ],
@@ -339,10 +369,10 @@ export const serviceAreas: ServiceArea[] = [
     ],
     topServices: [
       "lawn-mowing",
-      "snow-removal",
       "window-cleaning",
       "pressure-washing",
       "house-washing",
+      "gutter-cleaning",
     ],
     distanceFromHqKm: 95,
     geo: { lat: 45.4332, lng: -76.3463 },
@@ -351,11 +381,11 @@ export const serviceAreas: ServiceArea[] = [
     slug: "eganville",
     name: "Eganville",
     region: "ON",
-    tagline: "Eganville Lawn, Snow & Gutter Care",
+    tagline: "Eganville Lawn & Gutter Care",
     intro:
-      "Eganville and the surrounding Bonnechere River homes, PVS handles the lawns, gutters, and snow that keep small-town homes looking their best.",
+      "Eganville and the surrounding Bonnechere River homes, PVS handles the lawns, gutters, and windows that keep small-town homes looking their best.",
     whyHere: [
-      "Recurring Eganville lawn + snow routes",
+      "Recurring Eganville lawn care routes",
       "Bonnechere riverfront gutter and exterior wash specialists",
       "Free quotes within one business day",
     ],
@@ -366,9 +396,9 @@ export const serviceAreas: ServiceArea[] = [
     ],
     topServices: [
       "lawn-mowing",
-      "snow-removal",
       "gutter-cleaning",
       "window-cleaning",
+      "house-washing",
     ],
     distanceFromHqKm: 55,
     geo: { lat: 45.5388, lng: -77.0997 },

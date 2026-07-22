@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
+import { TrackPageview } from "@/components/track-pageview";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { OfferModal } from "@/components/offer-modal";
@@ -174,6 +175,8 @@ export default function RootLayout({
         <VercelAnalytics />
         <GoogleAnalytics />
         <MetaPixel />
+        {/* First-party page views → our own DB, feeds /admin/traffic */}
+        <TrackPageview />
       </body>
     </html>
   );

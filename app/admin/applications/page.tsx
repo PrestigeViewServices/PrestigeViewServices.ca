@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { Mail, Phone } from "lucide-react";
 import type { ApplicationStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { getRole as getCareerRole, roles as careerRoles } from "@/lib/content/careers";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { StatusSelect } from "@/components/admin/status-select";
@@ -26,9 +26,6 @@ export default async function ApplicationsPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  if (!isClerkConfigured()) return null;
-  // Layout renders a NotConfigured notice when Clerk is off, bail here so we
-  // don't try to read a session that doesn't exist yet.
   await requireRole(["ultimate_admin", "super_admin", "admin"]);
 
   if (!isDbReady()) {

@@ -37,8 +37,14 @@ export async function generateMetadata(
   const params = await props.params;
   const service = getService(params.slug);
   if (!service) return {};
-  const title = `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
-  const description = `${service.shortDescription} Trusted by Petawawa & Pembroke homeowners, free quote within one business day.`;
+  const title =
+    service.division === "snowland"
+      ? `${service.name} in Petawawa · Expanding to Pembroke`
+      : `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
+  const description =
+    service.division === "snowland"
+      ? `${service.shortDescription} Petawawa snow routes, expanding into Pembroke this season. Free custom quote within one business day.`
+      : `${service.shortDescription} Trusted by Petawawa & Pembroke homeowners, free quote within one business day.`;
   return {
     title,
     description,
@@ -100,11 +106,17 @@ export default async function ServiceDetailPage(
         url: siteConfig.url,
         telephone: siteConfig.phone,
       },
-      areaServed: [
-        { "@type": "City", name: "Petawawa" },
-        { "@type": "City", name: "Pembroke" },
-        { "@type": "AdministrativeArea", name: "Ottawa Valley" },
-      ],
+      areaServed:
+        service.division === "snowland"
+          ? [
+              { "@type": "City", name: "Petawawa" },
+              { "@type": "City", name: "Pembroke" },
+            ]
+          : [
+              { "@type": "City", name: "Petawawa" },
+              { "@type": "City", name: "Pembroke" },
+              { "@type": "AdministrativeArea", name: "Ottawa Valley" },
+            ],
       offers: {
         "@type": "Offer",
         availability: "https://schema.org/InStock",
@@ -209,10 +221,14 @@ export default async function ServiceDetailPage(
             </div>
             <div>
               <p className="eyebrow text-primary mb-2">
-                {categoryLabel} · Petawawa & Pembroke
+                {service.division === "snowland"
+                  ? `${categoryLabel} · Petawawa, now expanding to Pembroke`
+                  : `${categoryLabel} · Petawawa & Pembroke`}
               </p>
               <h1 className="heading-section text-balance">
-                {service.name} in the Ottawa Valley
+                {service.division === "snowland"
+                  ? `${service.name} in Petawawa`
+                  : `${service.name} in the Ottawa Valley`}
               </h1>
               <p className="mt-4 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
                 {service.shortDescription}
@@ -246,6 +262,32 @@ export default async function ServiceDetailPage(
           )}
         </div>
       </section>
+
+      {service.division === "snowland" && (
+        <section className="container-max pt-8 pb-2">
+          <div className="flex flex-col gap-4 rounded-2xl border border-surface-border bg-surface/50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+            <div className="flex items-start gap-3">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+              <p className="text-sm sm:text-base leading-relaxed">
+                <span className="font-semibold">Winter coverage:</span>{" "}
+                snow routes run in <span className="font-semibold">Petawawa</span>{" "}
+                (our home base) and are{" "}
+                <span className="font-semibold">
+                  expanding into Pembroke this season
+                </span>
+                , Pembroke spots are limited while the route is built. Other
+                Valley towns aren&apos;t on snow routes yet.
+              </p>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link href="/winter-packages">
+                See the seasonal passes
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {showSnowPromo && snowOffer && (
         <section className="container-max pt-8 pb-2">

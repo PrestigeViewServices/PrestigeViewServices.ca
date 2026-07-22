@@ -8,17 +8,12 @@ export type PlanCardItem = { icon: LucideIcon; label: string };
 
 export type PlanCardProps = {
   name: string;
-  /** Already-formatted price, e.g. "$49" or "$499". */
-  price: string;
-  /** Period suffix, e.g. "/mo" or "once". Omit for none. */
-  period?: string;
-  /** Prefix the price with "from". */
-  isFrom?: boolean;
   /**
-   * Show a "Starts at" label + caption and de-emphasize the number, so the
-   * price reads as a starting point, not a fixed/definitive quote.
+   * Label above the "Custom quote" line, e.g. "Billed monthly" or
+   * "One-time visit". Public pricing is intentionally not shown, every plan
+   * is quoted per home.
    */
-  startsAt?: boolean;
+  billingLabel?: string;
   tagline: string;
   includes: PlanCardItem[];
   bestFor: string;
@@ -38,10 +33,7 @@ export type PlanCardProps = {
  */
 export function PlanCard({
   name,
-  price,
-  period,
-  isFrom,
-  startsAt,
+  billingLabel = "Billed monthly",
   tagline,
   includes,
   bestFor,
@@ -72,36 +64,15 @@ export function PlanCard({
       </p>
 
       <div className="mt-4">
-        {startsAt && (
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Starts at
-          </p>
-        )}
-        <div className="flex items-end gap-1">
-          {isFrom && (
-            <span className="mb-1 text-sm font-medium text-muted-foreground">
-              from
-            </span>
-          )}
-          <span
-            className={cn(
-              "tracking-tight",
-              startsAt ? "text-3xl font-semibold" : "text-4xl font-bold"
-            )}
-          >
-            {price}
-          </span>
-          {period && (
-            <span className="mb-1 text-sm font-medium text-muted-foreground">
-              {period}
-            </span>
-          )}
-        </div>
-        {startsAt && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            Final price scoped to your home &amp; siding, free quote.
-          </p>
-        )}
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {billingLabel}
+        </p>
+        <p className="mt-1 text-3xl font-semibold tracking-tight">
+          Custom quote
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Priced to your home, free, no obligation.
+        </p>
       </div>
 
       <ul className="mt-5 space-y-2.5 text-sm">

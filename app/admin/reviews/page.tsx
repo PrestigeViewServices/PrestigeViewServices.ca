@@ -1,5 +1,5 @@
 import { Download, MessageSquare, Mail, Star, ExternalLink } from "lucide-react";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { canReachAdmin } from "@/lib/roles";
 import { siteConfig } from "@/lib/site";
 import { generateReviewQrPng } from "@/lib/qrcode";
@@ -157,7 +157,6 @@ function TemplateCard({
   subject?: string;
   body: string;
 }) {
-  if (!isClerkConfigured()) return null;
   return (
     <div className="surface-card p-6 flex flex-col">
       <div className="flex items-center gap-3">

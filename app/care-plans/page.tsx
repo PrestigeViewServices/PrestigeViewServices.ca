@@ -8,9 +8,7 @@ import { BuildYourOwn } from "@/components/care-plans/build-your-own";
 import { ServiceCalendar } from "@/components/care-plans/service-calendar";
 import { DiscountBadges } from "@/components/care-plans/discount-badges";
 import {
-  CARE_PLANS,
   PLAN_PERKS,
-  formatDollars,
   getCarePlan,
   type CarePlanSlug,
 } from "@/lib/content/care-plans";
@@ -19,7 +17,7 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Care Plans & Packages, Exterior Cleaning Memberships",
   description:
-    "Put your home's exterior on autopilot. Recurring Care Plans from $49/mo spread house washing, windows, gutters & driveway across the year, or pay once with a one-off package. Petawawa, Pembroke & the Ottawa Valley.",
+    "Put your home's exterior on autopilot. Recurring Care Plans spread house washing, windows, gutters & driveway across the year on one monthly payment, or pay once with a one-off package. Custom-quoted free. Petawawa, Pembroke & the Ottawa Valley.",
   alternates: { canonical: "/care-plans" },
 };
 
@@ -170,8 +168,8 @@ export default function CarePlansPage() {
       >
         <SectionHeading
           eyebrow="Build-Your-Own"
-          title="Mix your own plan, see the price instantly"
-          description="Pick your services and watch the monthly price update live, the more you bundle, the more you save."
+          title="Mix your own plan, exactly what you need"
+          description="Pick your services and we'll bundle them into one monthly payment, the more you bundle, the bigger the discount on your quote."
         />
         <div className="mx-auto mt-10 max-w-4xl">
           <BuildYourOwn />
@@ -191,12 +189,7 @@ export default function CarePlansPage() {
               <div className="surface-card p-6 sm:p-8">
                 <div className="mb-6 flex items-center gap-2">
                   <CalendarClock className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold">
-                    {plan.name}
-                    <span className="ml-2 text-sm font-normal text-muted-foreground">
-                      {formatDollars(plan.monthly)}/mo
-                    </span>
-                  </h3>
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
                 </div>
                 <ServiceCalendar stops={plan.calendar} />
               </div>
@@ -232,13 +225,10 @@ export default function CarePlansPage() {
                         {plan.name}
                       </span>
                       <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Starts at
+                        Billed monthly
                       </span>
-                      <span className="block text-2xl font-bold text-primary">
-                        {formatDollars(plan.monthly)}
-                        <span className="text-xs font-medium text-muted-foreground">
-                          /mo
-                        </span>
+                      <span className="block text-sm font-bold text-primary">
+                        Custom quote
                       </span>
                     </th>
                   );

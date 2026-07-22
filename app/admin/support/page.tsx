@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { Mail, Phone, MapPin } from "lucide-react";
 import type { SupportStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { StatusSelect } from "@/components/admin/status-select";
 
@@ -28,7 +28,6 @@ export default async function SupportAdminPage() {
   await requireRole(["ultimate_admin", "admin"]);
 
   if (!isDbReady()) {
-  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

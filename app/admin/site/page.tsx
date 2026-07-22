@@ -7,7 +7,7 @@ import {
   Lock,
   AlertTriangle,
 } from "lucide-react";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +92,6 @@ function Tile({
   body: string;
   status: "live" | "phase-2";
 }) {
-  if (!isClerkConfigured()) return null;
   const inner = (
     <>
       <div className="flex items-start justify-between gap-3">

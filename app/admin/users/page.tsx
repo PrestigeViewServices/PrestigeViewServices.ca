@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { clerkClient } from "@clerk/nextjs/server";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import {
   ROLE_LABELS,
   ULTIMATE_ADMIN_ASSIGNABLE_ROLES,
@@ -51,7 +51,6 @@ export default async function UsersPage() {
   const canEdit = isUltimateAdmin(session.role);
 
   if (!isDbReady()) {
-  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

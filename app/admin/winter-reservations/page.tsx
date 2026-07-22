@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { Mail, Phone, MapPin, Snowflake, Shovel } from "lucide-react";
 import type { ReservationStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { StatusSelect } from "@/components/admin/status-select";
 import { NotesEditor } from "@/components/admin/notes-editor";
@@ -41,7 +41,6 @@ export default async function WinterReservationsPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "super_admin", "admin"]);
 
   if (!isDbReady()) {

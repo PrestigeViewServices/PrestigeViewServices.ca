@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Role } from "./roles";
 import { parseRole } from "./roles";
+import { hasAdminSession, isAdminAuthConfigured } from "./admin-session";
 
 /**
  * Server-side Clerk helpers. Pages call these to get the current user's
@@ -39,11 +40,18 @@ export type Session = {
 };
 
 /**
- * Returns the current session with the role read from Clerk's session
- * claims. Returns null when Clerk isn't configured or the user isn't
- * signed in.
+ * Returns the current session.
+ *
+ * The INTERNAL admin session (password login, signed cookie — see
+ * lib/admin-session.ts) is checked first: the owner's cookie grants
+ * `ultimate_admin`, which passes every admin role gate, so the whole
+ * dashboard works with zero external auth services. Clerk remains the
+ * fallback for the customer/employee portals.
  */
 export async function getSession(): Promise<Session | null> {
+  if (isAdminAuthConfigured() && (await hasAdminSession())) {
+    return { userId: "internal-admin", role: "ultimate_admin" };
+  }
   if (!isClerkConfigured()) return null;
   const { userId, sessionClaims } = await auth();
   if (!userId) return null;

@@ -1,51 +1,58 @@
-import { redirect } from "next/navigation";
-import { getSession, isClerkConfigured } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/sidebar";
-import { NotConfigured } from "@/components/admin/not-configured";
-import { isAdminLike } from "@/lib/roles";
-
-const ADMIN_ENV_VARS = [
-  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-  "CLERK_SECRET_KEY",
-  "CLERK_WEBHOOK_SECRET",
-  "ULTIMATE_ADMIN_EMAILS",
-];
+import { AdminLoginForm } from "@/components/admin/login-form";
+import { hasAdminSession, isAdminAuthConfigured } from "@/lib/admin-session";
 
 export const metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
 };
 
+/**
+ * Internal admin shell. Auth is fully in-house: one owner password
+ * (ADMIN_PASSWORD) and a signed session cookie, no external auth service.
+ * Signed-out visitors see the login screen on any /admin URL; the URL is
+ * preserved so a successful login lands exactly where they were headed.
+ */
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  if (!isClerkConfigured()) {
+  if (!isAdminAuthConfigured()) {
     return (
       <section className="container-max py-16">
-        <NotConfigured
-          service="Clerk"
-          reason="Admin authentication is provided by Clerk. Open SETUP.md for the click-by-click setup, about 10 minutes."
-          envVars={ADMIN_ENV_VARS}
-          missing={ADMIN_ENV_VARS.filter((k) => !process.env[k])}
-          docHref="https://clerk.com/docs/quickstarts/nextjs"
-        />
+        <div className="mx-auto max-w-lg surface-card p-8 text-center">
+          <h1 className="text-xl font-bold">Admin password not set</h1>
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            The dashboard is locked until an owner password exists. Add{" "}
+            <code className="rounded bg-surface px-1.5 py-0.5 text-xs">
+              ADMIN_PASSWORD=your-strong-password
+            </code>{" "}
+            to <code className="rounded bg-surface px-1.5 py-0.5 text-xs">.env.local</code>{" "}
+            (and to the Vercel project&apos;s environment variables for the
+            live site), then reload this page.
+          </p>
+        </div>
       </section>
     );
   }
 
-  const session = await getSession();
-  if (!session) redirect("/sign-in");
-  if (!isAdminLike(session.role)) redirect("/post-sign-in");
+  const signedIn = await hasAdminSession();
+  if (!signedIn) {
+    return (
+      <section className="container-max flex min-h-[70vh] items-center py-16">
+        <AdminLoginForm />
+      </section>
+    );
+  }
 
   return (
     <section className="container-max py-10 sm:py-12">
-      <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start surface-card p-4">
-          <AdminSidebar role={session.role} />
+          <AdminSidebar />
         </aside>
-        <div>{children}</div>
+        <div className="min-w-0">{children}</div>
       </div>
     </section>
   );

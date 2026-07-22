@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import type { JobStatus, LeadStatus } from "@prisma/client";
 import { Truck, Clock, DollarSign } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { StatusSelect } from "@/components/admin/status-select";
 import {
@@ -22,7 +22,6 @@ const LEAD_OPTIONS = LEAD_STATUS_META.map((m) => ({ value: m.value, label: m.lab
 const JOB_OPTIONS = JOB_STATUS_META.map((m) => ({ value: m.value, label: m.label }));
 
 export default async function PipelinePage() {
-  if (!isClerkConfigured()) return null;
   await requireRole([...DISPATCH_ROLES]);
 
   if (!isDbReady()) {

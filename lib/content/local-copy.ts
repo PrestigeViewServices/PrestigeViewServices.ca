@@ -560,63 +560,22 @@ export const localCopy: Record<string, LocalCopy> = {
       },
     ],
   },
+  // Snow coverage is Petawawa-only, with Pembroke opening this season, so
+  // snow local copy exists for exactly those two towns. Other towns' snow
+  // combo pages are not generated (see serviceOfferedInArea).
   "snow-removal/pembroke": {
     intro: [
-      "Pembroke snow has a habit of arriving wet and heavy off the river, the kind that wrecks backs and burns out little snowblowers. Our tractors do not care. Seasonal contracts cover the driveway and apron at one flat rate, with walkway clearing available for the older homes whose front steps face the street.",
-      "The city plow's windrow across your driveway mouth is included in every pass. That alone sells most Pembroke contracts.",
+      "New for this season: our snow routes are expanding into Pembroke. Pembroke snow has a habit of arriving wet and heavy off the river, the kind that wrecks backs and burns out little snowblowers. Our tractors do not care. Seasonal passes cover the driveway and apron at one flat rate, with walkway shovelling pass packs available for the older homes whose front steps face the street.",
+      "Because this is the first Pembroke winter on our routes, spots are capped while we build the run. Reserve early and the city plow's windrow across your driveway mouth is included in every pass, that alone sells most seasonal passes.",
     ],
     faqs: [
+      {
+        q: "Is PVS snow removal really available in Pembroke now?",
+        a: "Yes, this is the first season our Petawawa snow routes reach Pembroke. Route spots are limited while we build the run, so early reservations get priority placement.",
+      },
       {
         q: "Do you clear the plow windrow at the end of my Pembroke driveway?",
         a: "Every pass. The heavy berm the municipal plow leaves across the apron is part of the job, not an extra.",
-      },
-    ],
-  },
-  "snow-removal/laurentian-valley": {
-    intro: [
-      "Township driveways are long, and drifting is the real opponent: an open-field wind can close a cleared lane in an hour. Our tractor blowers are the right machine for it, throwing snow well off the driveway so the banks never squeeze the lane narrower month by month.",
-      "Laurentian Valley routes run with our Pembroke runs, so rural addresses get storm service at town frequency, staked in the fall and cleared through to spring.",
-    ],
-    faqs: [
-      {
-        q: "Can you keep a 200-metre laneway open all winter?",
-        a: "Yes, long laneways are exactly what the tractors are for. Blown snow lands metres off the lane, so February looks like December instead of a canyon.",
-      },
-    ],
-  },
-  "snow-removal/deep-river": {
-    intro: [
-      "Deep River winters are long, cold, and productive, and half the town needs the driveway open before an early shift at CNL. Contract routes here are timed for commuters: cleared through the storm, re-checked before typical departure hours, walkways shovelled where booked.",
-      "River-effect drifting along the exposed streets is a routing fact we plan for, not a surprise. Stakes go in before freeze-up so the operator knows your edges in a whiteout.",
-    ],
-    faqs: [
-      {
-        q: "What counts as a qualifying snowfall for Deep River contracts?",
-        a: "The threshold is set in your contract, typically around five centimetres. Storms above it trigger your route automatically, with unlimited qualifying visits all winter on the flat rate.",
-      },
-    ],
-  },
-  "snow-removal/chalk-river": {
-    intro: [
-      "Chalk River driveways are rural-length with bush on both sides, which means snow storage runs out fast if it is pushed instead of blown. Our tractor blowers throw it into the trees where it belongs, keeping the lane full width into March.",
-      "Riding with the Deep River routes, Chalk River contract homes get the same through-storm service, with cottage laneways handled for owners who come up on winter weekends.",
-    ],
-    faqs: [
-      {
-        q: "Can you keep a seasonal cottage laneway open near Chalk River?",
-        a: "Yes. Weekend-use laneways can be on the full storm route or on a lighter clear-before-Friday schedule, whichever suits how you use the place.",
-      },
-    ],
-  },
-  "snow-removal/renfrew": {
-    intro: [
-      "Renfrew commuters leave early and the snow does not care, so our contract routes clear through the storm with driveways open for the morning run down Highway 17. Flat-rate seasonal pricing means a heavy winter costs the same as a light one.",
-      "The town's steel roofs shed slabs onto walks and entrances hours after the sky clears. Walkway clearing is the add-on Renfrew books most, and our passes come back for exactly that.",
-    ],
-    faqs: [
-      {
-        q: "My steel roof buries the walkway after every storm. Is that covered?",
-        a: "With the walkway add-on, yes. We re-clear entrances and paths on our return passes, including the roof-shed piles that show up after the driveway is already done.",
       },
     ],
   },

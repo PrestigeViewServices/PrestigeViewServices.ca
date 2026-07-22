@@ -6,8 +6,6 @@ import {
   LayoutDashboard,
   Briefcase,
   LifeBuoy,
-  Users,
-  Star,
   Settings,
   Image as ImageIcon,
   MessageSquareQuote,
@@ -15,128 +13,100 @@ import {
   KanbanSquare,
   Contact,
   Truck,
+  Inbox,
+  BarChart3,
 } from "lucide-react";
-import { canDispatch, type Role } from "@/lib/roles";
+import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
-  /** If set, the item only renders when the predicate returns true. */
-  show?: (role: Role | null) => boolean;
 };
 
-const items: NavItem[] = [
+type NavGroup = { title: string; items: NavItem[] };
+
+/**
+ * Single-owner dashboard, the password unlocks everything, so there is no
+ * per-role filtering. Grouped so the daily surfaces sit on top.
+ */
+const groups: NavGroup[] = [
   {
-    href: "/admin",
-    label: "Command Center",
-    icon: LayoutDashboard,
+    title: "Overview",
+    items: [
+      { href: "/admin", label: "Command Center", icon: LayoutDashboard },
+      { href: "/admin/traffic", label: "Website Traffic", icon: BarChart3 },
+    ],
   },
   {
-    href: "/admin/pipeline",
-    label: "Job Pipeline",
-    icon: KanbanSquare,
-    // Ops roles: ultimate_admin, admin, manager (super_admin is photos/hiring only).
-    show: (r) => canDispatch(r),
+    title: "Inbound",
+    items: [
+      { href: "/admin/leads", label: "Quote Requests", icon: Inbox },
+      {
+        href: "/admin/winter-reservations",
+        label: "Winter Reservations",
+        icon: Snowflake,
+      },
+      { href: "/admin/applications", label: "Applications", icon: Briefcase },
+      { href: "/admin/support", label: "Support", icon: LifeBuoy },
+    ],
   },
   {
-    href: "/admin/accounts",
-    label: "Accounts",
-    icon: Contact,
-    show: (r) => canDispatch(r),
+    title: "Operations",
+    items: [
+      { href: "/admin/pipeline", label: "Job Pipeline", icon: KanbanSquare },
+      { href: "/admin/accounts", label: "Accounts", icon: Contact },
+      { href: "/admin/dispatch", label: "Crew Dispatch", icon: Truck },
+    ],
   },
   {
-    href: "/admin/dispatch",
-    label: "Crew Dispatch",
-    icon: Truck,
-    show: (r) => canDispatch(r),
-  },
-  {
-    href: "/admin/applications",
-    label: "Applications",
-    icon: Briefcase,
-  },
-  {
-    href: "/admin/winter-reservations",
-    label: "Winter Reservations",
-    icon: Snowflake,
-    show: (r) => r === "ultimate_admin" || r === "admin",
-  },
-  {
-    href: "/admin/site/photos",
-    label: "Photos",
-    icon: ImageIcon,
-    // super_admin + ultimate_admin only, admin doesn't manage photos.
-    show: (r) => r === "ultimate_admin" || r === "super_admin",
-  },
-  {
-    href: "/admin/reviews",
-    label: "Reviews",
-    icon: MessageSquareQuote,
-    // QR + templates are useful for everyone in the admin family.
-    show: (r) =>
-      r === "ultimate_admin" || r === "admin" || r === "super_admin",
-  },
-  {
-    href: "/admin/support",
-    label: "Support",
-    icon: LifeBuoy,
-    // admin + ultimate_admin only, super_admin is intentionally excluded.
-    show: (r) => r === "ultimate_admin" || r === "admin",
-  },
-  {
-    href: "/admin/loyalty",
-    label: "Loyalty",
-    icon: Star,
-    // Billing-adjacent, same gate as support, super_admin excluded.
-    show: (r) => r === "ultimate_admin" || r === "admin",
-  },
-  {
-    href: "/admin/users",
-    label: "Users",
-    icon: Users,
-    show: (r) => r === "ultimate_admin",
-  },
-  {
-    href: "/admin/site",
-    label: "Site Modifications",
-    icon: Settings,
-    show: (r) => r === "ultimate_admin",
+    title: "Website",
+    items: [
+      { href: "/admin/site/photos", label: "Photos", icon: ImageIcon },
+      { href: "/admin/reviews", label: "Reviews", icon: MessageSquareQuote },
+      { href: "/admin/site", label: "Site Settings", icon: Settings },
+    ],
   },
 ];
 
-export function AdminSidebar({ role }: { role: Role | null }) {
+export function AdminSidebar() {
   const pathname = usePathname();
-  const visible = items.filter((i) => !i.show || i.show(role));
 
   return (
-    <nav className="space-y-1">
-      <p className="px-3 pb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-        Admin
-      </p>
-      {visible.map((item) => {
-        const active =
-          item.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(item.href);
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              active
-                ? "bg-primary/15 text-foreground"
-                : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            {item.label}
-          </Link>
-        );
-      })}
+    <nav className="space-y-5">
+      {groups.map((group) => (
+        <div key={group.title} className="space-y-1">
+          <p className="px-3 pb-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+            {group.title}
+          </p>
+          {group.items.map((item) => {
+            const active =
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname.startsWith(item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-primary/15 text-foreground"
+                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+      <div className="border-t border-surface-border pt-3">
+        <AdminLogoutButton />
+      </div>
     </nav>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, MapPin, Check, Medal } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Check, Medal, Snowflake } from "lucide-react";
 import {
   serviceAreas,
   getServiceArea,
@@ -15,7 +15,11 @@ import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
 import { siteConfig } from "@/lib/site";
 
-/** The 8 core services every town hub links out to (service-in-town pages). */
+/**
+ * The core services every town hub links out to (service-in-town pages).
+ * Snow removal is NOT in this list, it's appended per-town only where the
+ * area's snowStatus allows it (Petawawa active, Pembroke expanding).
+ */
 const CORE_SERVICE_SLUGS = [
   "window-cleaning",
   "gutter-cleaning",
@@ -24,7 +28,6 @@ const CORE_SERVICE_SLUGS = [
   "lawn-mowing",
   "hedge-trimming",
   "landscaping-services",
-  "snow-removal",
 ];
 
 type Params = { area: string };
@@ -41,7 +44,9 @@ export async function generateMetadata(
   const params = await props.params;
   const area = getServiceArea(params.area);
   if (!area) return {};
-  const title = `${area.name} Property Care · Lawn, Window & Snow Services`;
+  const title = area.snowStatus
+    ? `${area.name} Property Care · Lawn, Window & Snow Services`
+    : `${area.name} Property Care · Lawn, Window & Exterior Services`;
   const description = `${area.intro} Free quote within one business day.`;
   return {
     title,
@@ -68,7 +73,11 @@ export default async function ServiceAreaPage(
     .map((slug) => getService(slug))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
-  const coreServices = CORE_SERVICE_SLUGS.map((slug) => getService(slug))
+  const coreSlugs = area.snowStatus
+    ? [...CORE_SERVICE_SLUGS, "snow-removal"]
+    : CORE_SERVICE_SLUGS;
+  const coreServices = coreSlugs
+    .map((slug) => getService(slug))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   const isPetawawa = area.slug === "petawawa";
@@ -207,6 +216,30 @@ export default async function ServiceAreaPage(
               windows to snow (not combinable with other offers above 10%).
               Mention your service when you request a quote.
             </p>
+          </div>
+        </section>
+      )}
+
+      {area.snowStatus === "expanding" && (
+        <section className="container-max pt-10">
+          <div className="flex flex-col gap-4 rounded-2xl border border-sky-400/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+            <div className="flex items-start gap-3">
+              <Snowflake className="mt-0.5 h-5 w-5 shrink-0 text-sky-300" aria-hidden />
+              <p className="text-sm sm:text-base leading-relaxed text-sky-50">
+                <span className="font-semibold text-white">
+                  New this season: snow removal comes to {area.name}.
+                </span>{" "}
+                Our Petawawa snow routes are expanding into {area.name} this
+                winter. Seasonal passes are limited, reserve your driveway
+                before the routes fill.
+              </p>
+            </div>
+            <Button asChild className="shrink-0">
+              <Link href="/winter-packages">
+                Reserve a snow pass
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </section>
       )}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { canManagePhotos } from "@/lib/roles";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import {
@@ -23,7 +23,6 @@ export default async function PhotosPage() {
   if (!canManagePhotos(session.role)) return null;
 
   if (!isDbReady()) {
-  if (!isClerkConfigured()) return null;
     return (
       <NotConfigured
         service="Database"

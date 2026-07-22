@@ -6,21 +6,17 @@ import { PlanCard, type PlanCardProps } from "./plan-card";
 import {
   CARE_PLANS,
   ONE_OFF_PACKAGES,
-  formatDollars,
   quoteHref,
 } from "@/lib/content/care-plans";
 
 type Mode = "plan" | "once";
 
 // Care Plans → card props. The Build-Your-Own card points at the calculator
-// section instead of straight to /quote.
+// section instead of straight to /quote. Prices are never shown publicly,
+// every card reads "Custom quote".
 const PLAN_CARDS: PlanCardProps[] = CARE_PLANS.map((p) => ({
   name: p.name,
-  price: formatDollars(p.monthly),
-  period: "/mo",
-  isFrom: p.isFrom,
-  // Build-Your-Own already reads "from $X"; the rest get a "Starts at" label.
-  startsAt: !p.isFrom,
+  billingLabel: "Billed monthly",
   tagline: p.tagline,
   includes: p.includes,
   bestFor: p.bestFor,
@@ -35,9 +31,7 @@ const PLAN_CARDS: PlanCardProps[] = CARE_PLANS.map((p) => ({
 // One-off Packages → card props.
 const PACKAGE_CARDS: PlanCardProps[] = ONE_OFF_PACKAGES.map((p) => ({
   name: p.name,
-  price: formatDollars(p.price),
-  period: "once",
-  startsAt: true,
+  billingLabel: "One-time visit",
   tagline: p.tagline,
   includes: p.includes,
   bestFor: p.bestFor,

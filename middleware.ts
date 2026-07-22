@@ -3,48 +3,26 @@ import {
   clerkMiddleware,
   createRouteMatcher,
 } from "@clerk/nextjs/server";
-import {
-  parseRole,
-  canReachAdmin,
-  canManagePhotos,
-  isUltimateAdmin,
-  canManageAdminGeneral,
-  canCanvass,
-  type Role,
-} from "@/lib/roles";
+import { parseRole, canCanvass, type Role } from "@/lib/roles";
 
 /**
  * Route protection model:
  *
- *   /admin                  → admin family (admin, super_admin, ultimate_admin)
- *   /admin/applications     → admin family (hiring management)
- *   /admin/support          → admin + ultimate_admin only (super_admin excluded)
- *   /admin/loyalty          → admin + ultimate_admin only (billing — super_admin excluded)
- *   /admin/users            → ultimate_admin only (role changes)
- *   /admin/site             → ultimate_admin only (top-level CMS surface)
- *   /admin/site/photos      → ultimate_admin + super_admin (photo management)
- *   /portal                 → employee only
- *   /account                → customer only
- *   /post-sign-in           → any signed-in user (role-router)
- *
- * Mismatched roles bounce to /post-sign-in — users can never URL-guess
- * into the wrong portal.
+ *   /admin(.*)   → INTERNAL password auth, not Clerk. The admin layout
+ *                  (app/admin/layout.tsx) verifies the signed session cookie
+ *                  server-side and renders the login screen when absent, and
+ *                  every admin page/action still calls requireRole(), which
+ *                  resolves the internal cookie to `ultimate_admin`
+ *                  (lib/auth.ts). Middleware deliberately leaves /admin alone.
+ *   /portal      → employee only (Clerk)
+ *   /rep         → canvassing roles (Clerk)
+ *   /account     → customer only (Clerk)
+ *   /post-sign-in→ any signed-in Clerk user (role-router)
  *
  * Clerk runs in **keyless mode** when env vars are absent: it auto-generates
- * temporary keys so sign-in works immediately. A "Configure your application"
- * prompt appears in the Clerk UI to claim the app for production.
+ * temporary keys so sign-in works immediately.
  */
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-const isPhotoRoute = createRouteMatcher(["/admin/site/photos(.*)"]);
-const isUltimateAdminRoute = createRouteMatcher([
-  "/admin/users(.*)",
-  "/admin/site",
-]);
-const isAdminGeneralRoute = createRouteMatcher([
-  "/admin/support(.*)",
-  "/admin/loyalty(.*)",
-]);
 const isPortalRoute = createRouteMatcher(["/portal(.*)"]);
 const isRepRoute = createRouteMatcher(["/rep(.*)"]);
 const isAccountRoute = createRouteMatcher(["/account(.*)"]);
@@ -60,7 +38,6 @@ const passthrough = (_req: NextRequest) => NextResponse.next();
 export default CLERK_CONFIGURED
   ? clerkMiddleware(async (auth, req) => {
   const gated =
-    isAdminRoute(req) ||
     isPortalRoute(req) ||
     isRepRoute(req) ||
     isAccountRoute(req) ||
@@ -78,22 +55,6 @@ export default CLERK_CONFIGURED
   )?.publicMetadata?.role;
   const role: Role = parseRole(claimRole) ?? "customer";
 
-  if (isPhotoRoute(req)) {
-    if (!canManagePhotos(role)) return bounceToPostSignIn(req.url);
-    return;
-  }
-  if (isUltimateAdminRoute(req)) {
-    if (!isUltimateAdmin(role)) return bounceToPostSignIn(req.url);
-    return;
-  }
-  if (isAdminGeneralRoute(req)) {
-    if (!canManageAdminGeneral(role)) return bounceToPostSignIn(req.url);
-    return;
-  }
-  if (isAdminRoute(req)) {
-    if (!canReachAdmin(role)) return bounceToPostSignIn(req.url);
-    return;
-  }
   if (isPortalRoute(req)) {
     if (role !== "employee") return bounceToPostSignIn(req.url);
     return;

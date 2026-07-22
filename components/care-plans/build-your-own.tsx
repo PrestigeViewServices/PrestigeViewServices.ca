@@ -2,13 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Sparkles, TrendingDown } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingDown, Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   SERVICE_DEFS,
-  buildYourOwnTotal,
-  formatDollars,
+  stackingDiscount,
   quoteHref,
   type ServiceKey,
 } from "@/lib/content/care-plans";
@@ -16,12 +15,11 @@ import {
 const REDUCE_MOTION = { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const };
 
 /**
- * Build-Your-Own live calculator, the centerpiece.
+ * Build-Your-Own plan builder.
  *
- * Toggle services on/off; the monthly price recalculates instantly and applies
- * the stacking discount (2 = 10% off, 3+ = 15% off). No page reload, no submit
- * to see the number, the math lives in `buildYourOwnTotal` so the UI and the
- * data file never drift.
+ * Toggle services on/off; the bundle discount updates instantly (2 = 10% off,
+ * 3+ = 15% off). Prices are never shown publicly, the selection feeds the
+ * quote request and we price it per home.
  */
 export function BuildYourOwn() {
   const [selected, setSelected] = useState<ServiceKey[]>(["house-wash"]);
@@ -31,8 +29,8 @@ export function BuildYourOwn() {
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
 
-  const { subtotal, discountRate, savings, total } = useMemo(
-    () => buildYourOwnTotal(selected),
+  const discountRate = useMemo(
+    () => stackingDiscount(selected.length),
     [selected]
   );
 
@@ -72,45 +70,46 @@ export function BuildYourOwn() {
                   <Checkbox
                     checked={isOn}
                     onCheckedChange={() => toggle(s.key)}
-                    aria-label={`Add ${s.label}, from ${formatDollars(
-                      s.monthlyFrom
-                    )} per month`}
+                    aria-label={`Add ${s.label} to your plan`}
                   />
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
                     <Icon className="h-4 w-4" />
                   </span>
                   <span className="flex-1 text-sm font-medium">{s.label}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDollars(s.monthlyFrom)}
-                    <span className="text-xs">/mo</span>
-                  </span>
+                  {isOn && (
+                    <Check
+                      className="h-4 w-4 text-primary"
+                      strokeWidth={3}
+                      aria-hidden
+                    />
+                  )}
                 </label>
               );
             })}
           </div>
         </fieldset>
 
-        {/* ---- Live total ---- */}
+        {/* ---- Live summary ---- */}
         <div className="flex flex-col bg-surface/40 p-6 sm:p-8">
-          <p className="eyebrow text-muted-foreground mb-2">Your monthly price</p>
+          <p className="eyebrow text-muted-foreground mb-2">Your plan</p>
 
           <div className="flex items-end gap-1.5" aria-live="polite">
             <span className="text-5xl font-bold tracking-tight tabular-nums">
               <AnimatePresence mode="popLayout" initial={false}>
                 <motion.span
-                  key={total}
+                  key={selected.length}
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -10, opacity: 0 }}
                   transition={REDUCE_MOTION}
                   className="inline-block"
                 >
-                  {formatDollars(total)}
+                  {selected.length}
                 </motion.span>
               </AnimatePresence>
             </span>
             <span className="mb-1.5 text-sm font-medium text-muted-foreground">
-              /mo
+              service{selected.length === 1 ? "" : "s"} selected
             </span>
           </div>
 
@@ -125,10 +124,8 @@ export function BuildYourOwn() {
               >
                 <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
                   <TrendingDown className="h-3.5 w-3.5" />
-                  {Math.round(discountRate * 100)}% bundle discount, {" "}
-                  <span className="tabular-nums">
-                    save {formatDollars(savings)}/mo
-                  </span>
+                  {Math.round(discountRate * 100)}% bundle discount applied to
+                  your quote
                 </p>
               </motion.div>
             )}
@@ -136,12 +133,16 @@ export function BuildYourOwn() {
 
           <dl className="mt-5 space-y-1.5 border-t border-surface-border pt-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
-              <dt>Services selected</dt>
-              <dd className="tabular-nums">{selected.length}</dd>
+              <dt>One monthly payment</dt>
+              <dd>Custom quote</dd>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <dt>Subtotal</dt>
-              <dd className="tabular-nums">{formatDollars(subtotal)}/mo</dd>
+              <dt>Add a 2nd service</dt>
+              <dd className="tabular-nums">10% off</dd>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <dt>Add a 3rd or more</dt>
+              <dd className="tabular-nums">15% off</dd>
             </div>
           </dl>
 

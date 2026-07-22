@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Search, Snowflake, MapPin, Mail, Phone, TrendingUp, Users } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { requireRole, isClerkConfigured } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import {
   formatCents,
@@ -20,7 +20,6 @@ export default async function AccountsPage(
   }
 ) {
   const searchParams = await props.searchParams;
-  if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "admin", "manager"]);
 
   if (!isDbReady()) {
