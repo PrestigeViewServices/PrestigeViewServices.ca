@@ -42,10 +42,10 @@
     "framer-motion": "^11.11.0",
     "lucide-react": "^0.456.0",
     "maplibre-gl": "^5.24.0",
-    "next": "^14.2.35",
+    "next": "^15.5.16",
     "qrcode": "^1.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-hook-form": "^7.53.2",
     "svix": "^1.41.0",
     "tailwind-merge": "^2.5.4",
@@ -55,12 +55,12 @@
   "devDependencies": {
     "@types/node": "^20.17.6",
     "@types/qrcode": "^1.5.5",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.20",
     "dotenv-cli": "^11.0.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "14.2.25",
+    "eslint-config-next": "^15.5.16",
     "heic-convert": "^2.1.0",
     "html-to-docx": "^1.8.0",
     "marked": "^18.0.4",
@@ -84,6 +84,7 @@
     "path-to-regexp@6": "^6.3.0",
     "path-to-regexp@8": "^8.3.1",
     "postcss": "^8.5.10",
-    "undici": "^6.27.0"
+    "undici": "^6.27.0",
+    "sharp": "^0.35.3"
   }
 }

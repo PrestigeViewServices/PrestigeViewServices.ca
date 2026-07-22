@@ -19,11 +19,12 @@ export function generateStaticParams() {
   return workCategories.map((c) => ({ category: c.slug }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Metadata {
+export async function generateMetadata(
+  props: {
+    params: Promise<Params>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const category = getWorkCategory(params.category);
   if (!category) return {};
   const title = `${category.name}, Recent Work in Petawawa & Pembroke`;
@@ -39,11 +40,12 @@ export function generateMetadata({
   };
 }
 
-export default function CategoryGalleryPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function CategoryGalleryPage(
+  props: {
+    params: Promise<Params>;
+  }
+) {
+  const params = await props.params;
   const category = getWorkCategory(params.category);
   if (!category) notFound();
 

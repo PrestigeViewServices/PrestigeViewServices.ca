@@ -33,11 +33,12 @@ export function generateStaticParams() {
   return serviceAreas.map((a) => ({ area: a.slug }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Metadata {
+export async function generateMetadata(
+  props: {
+    params: Promise<Params>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const area = getServiceArea(params.area);
   if (!area) return {};
   const title = `${area.name} Property Care · Lawn, Window & Snow Services`;
@@ -54,11 +55,12 @@ export function generateMetadata({
   };
 }
 
-export default function ServiceAreaPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function ServiceAreaPage(
+  props: {
+    params: Promise<Params>;
+  }
+) {
+  const params = await props.params;
   const area = getServiceArea(params.area);
   if (!area) notFound();
 

@@ -26,11 +26,12 @@ export function generateStaticParams() {
   return activeRoles().map((r) => ({ slug: r.slug }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Metadata {
+export async function generateMetadata(
+  props: {
+    params: Promise<Params>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const role = getRole(params.slug);
   if (!role || !role.active) return {};
   return {
@@ -40,7 +41,8 @@ export function generateMetadata({
   };
 }
 
-export default function RoleDetailPage({ params }: { params: Params }) {
+export default async function RoleDetailPage(props: { params: Promise<Params> }) {
+  const params = await props.params;
   const role = getRole(params.slug);
   if (!role || !role.active) notFound();
 

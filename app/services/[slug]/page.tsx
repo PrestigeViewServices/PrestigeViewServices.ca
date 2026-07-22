@@ -29,11 +29,12 @@ export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Metadata {
+export async function generateMetadata(
+  props: {
+    params: Promise<Params>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const service = getService(params.slug);
   if (!service) return {};
   const title = `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
@@ -50,11 +51,12 @@ export function generateMetadata({
   };
 }
 
-export default function ServiceDetailPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function ServiceDetailPage(
+  props: {
+    params: Promise<Params>;
+  }
+) {
+  const params = await props.params;
   const service = getService(params.slug);
   if (!service) notFound();
 

@@ -42,11 +42,12 @@ export function generateStaticParams() {
   return out;
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Metadata {
+export async function generateMetadata(
+  props: {
+    params: Promise<Params>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const service = getService(params.slug);
   const area = getServiceArea(params.area);
   if (!service || !area) return {};
@@ -72,11 +73,12 @@ export function generateMetadata({
   };
 }
 
-export default function ServiceAreaCombinationPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function ServiceAreaCombinationPage(
+  props: {
+    params: Promise<Params>;
+  }
+) {
+  const params = await props.params;
   const service = getService(params.slug);
   const area = getServiceArea(params.area);
   if (!service || !area) notFound();

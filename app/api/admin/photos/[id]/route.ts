@@ -17,10 +17,8 @@ export const runtime = "nodejs";
  *   JSON body { sortOrder: number } reorders the photo.
  */
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
@@ -55,10 +53,8 @@ export async function DELETE(
   return NextResponse.json({ ok: true, purged: purge });
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await requireRole(["ultimate_admin", "super_admin"]);
   if (!canManagePhotos(session.role)) {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });

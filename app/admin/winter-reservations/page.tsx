@@ -35,11 +35,12 @@ const STATUS_COLOR: Record<string, string> = {
 
 type SearchParams = { status?: string };
 
-export default async function WinterReservationsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function WinterReservationsPage(
+  props: {
+    searchParams: Promise<SearchParams>;
+  }
+) {
+  const searchParams = await props.searchParams;
   if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "super_admin", "admin"]);
 

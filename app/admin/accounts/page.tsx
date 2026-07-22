@@ -14,11 +14,12 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = { q?: string; view?: string };
 
-export default async function AccountsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function AccountsPage(
+  props: {
+    searchParams: Promise<SearchParams>;
+  }
+) {
+  const searchParams = await props.searchParams;
   if (!isClerkConfigured()) return null;
   await requireRole(["ultimate_admin", "admin", "manager"]);
 

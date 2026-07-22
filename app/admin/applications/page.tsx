@@ -20,11 +20,12 @@ const APPLICATION_STATUSES = [
 
 type SearchParams = { status?: string; role?: string };
 
-export default async function ApplicationsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function ApplicationsPage(
+  props: {
+    searchParams: Promise<SearchParams>;
+  }
+) {
+  const searchParams = await props.searchParams;
   if (!isClerkConfigured()) return null;
   // Layout renders a NotConfigured notice when Clerk is off, bail here so we
   // don't try to read a session that doesn't exist yet.
