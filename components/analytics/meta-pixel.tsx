@@ -4,7 +4,7 @@ import Script from "next/script";
  * Meta (Facebook) Pixel.
  *
  * Pixel ID is baked in by default because it identifies our ad account and
- * isn't sensitive — every site using a pixel exposes it in page source. Set
+ * isn't sensitive, every site using a pixel exposes it in page source. Set
  * NEXT_PUBLIC_META_PIXEL_ID in .env.local / Vercel env to override (e.g.
  * a separate dev pixel), or to "" to disable entirely.
  *

@@ -16,7 +16,7 @@ export function Qualifier() {
       <SectionHeading
         eyebrow="Is this you?"
         title="What we look for"
-        description="If most of these sound like you, apply. Experience matters less than dependability — we'll train the rest."
+        description="If most of these sound like you, apply. Experience matters less than dependability, we'll train the rest."
       />
 
       <ul className="mt-12 mx-auto max-w-2xl grid gap-3 sm:grid-cols-2">

@@ -30,7 +30,7 @@ type SubmitState =
   | { kind: "error"; message: string };
 
 export function EstimatorForm() {
-  // Selection state — drives both the live estimate display and the
+  // Selection state, drives both the live estimate display and the
   // payload posted to /api/winter-reservations on submit.
   const [drivewayTier, setDrivewayTier] = useState<DrivewayTier>("SILVER");
   const [drivewaySize, setDrivewaySize] = useState<DrivewaySize>("TWO_CAR");
@@ -101,7 +101,7 @@ export function EstimatorForm() {
     const message =
       body?.issues?.[0]?.message ??
       body?.error ??
-      "Something went wrong — please call us.";
+      "Something went wrong, please call us.";
     setState({ kind: "error", message });
   }
 
@@ -113,7 +113,7 @@ export function EstimatorForm() {
         </div>
         <h3 className="mt-5 text-xl font-semibold">Reservation received</h3>
         <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-          Thanks, {name.split(" ")[0] || "neighbour"} — we&apos;ll confirm your{" "}
+          Thanks, {name.split(" ")[0] || "neighbour"}, we&apos;ll confirm your{" "}
           <strong className="text-foreground">{driveDef.name}</strong> package{" "}
           {shovelDef ? (
             <>
@@ -128,7 +128,7 @@ export function EstimatorForm() {
 
   return (
     <form onSubmit={onSubmit} className="surface-card p-6 sm:p-8 space-y-8">
-      {/* Honeypot — hidden from real users */}
+      {/* Honeypot, hidden from real users */}
       <input
         type="text"
         name="hp"
@@ -144,7 +144,7 @@ export function EstimatorForm() {
         <header>
           <h3 className="text-lg font-semibold">1. Pick your package</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Choose the tier and size that fit — we&apos;ll quote it for your
+            Choose the tier and size that fit, we&apos;ll quote it for your
             property.
           </p>
         </header>
@@ -360,7 +360,7 @@ function SelectionCallout({
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             We&apos;ll send your custom seasonal quote after a quick property
-            check — usually within one business day.
+            check, usually within one business day.
           </p>
         </div>
         {shovelingName && (

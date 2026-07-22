@@ -1,16 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, MapPin, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Check, Medal } from "lucide-react";
 import {
   serviceAreas,
   getServiceArea,
 } from "@/lib/content/service-areas";
 import { services, getService } from "@/lib/content/services";
+import { getGalleryForService } from "@/lib/content/work-categories";
+import Image from "next/image";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
+import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
 import { siteConfig } from "@/lib/site";
+
+/** The 8 core services every town hub links out to (service-in-town pages). */
+const CORE_SERVICE_SLUGS = [
+  "window-cleaning",
+  "gutter-cleaning",
+  "pressure-washing",
+  "house-washing",
+  "lawn-mowing",
+  "hedge-trimming",
+  "landscaping-services",
+  "snow-removal",
+];
 
 type Params = { area: string };
 
@@ -51,14 +66,22 @@ export default function ServiceAreaPage({
     .map((slug) => getService(slug))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
+  const coreServices = CORE_SERVICE_SLUGS.map((slug) => getService(slug))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+  const isPetawawa = area.slug === "petawawa";
+
+  // Representative photo: the gallery of this town's top service.
+  const heroPhoto = getGalleryForService(area.topServices[0])?.photos[0];
+
   // Per-area LocalBusiness override so each town gets its own structured
-  // signal — adds geo, areaServed, and the town-specific URL.
+  // signal, adds geo, areaServed, and the town-specific URL.
   const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "@id": `${siteConfig.url}/service-areas/${area.slug}#business`,
-      name: `${siteConfig.name} — ${area.name}`,
+      name: `${siteConfig.name}, ${area.name}`,
       description: area.intro,
       url: `${siteConfig.url}/service-areas/${area.slug}`,
       telephone: siteConfig.phone,
@@ -77,6 +100,19 @@ export default function ServiceAreaPage({
       },
       openingHours: "Mo-Sa 07:00-19:00",
     },
+    ...(area.faqs && area.faqs.length > 0
+      ? [
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: area.faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]
+      : []),
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -119,28 +155,74 @@ export default function ServiceAreaPage({
           All Service Areas
         </Link>
 
-        <div className="mt-6">
-          <p className="eyebrow text-primary mb-3 inline-flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5" />
-            {area.name}, {area.region} · Ottawa Valley
-          </p>
-          <h1 className="heading-section text-balance">{area.tagline}</h1>
-          <p className="mt-4 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
-            {area.intro}
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href={`/quote?area=${area.slug}`}>
-                Get a Free {area.name} Quote
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href={`tel:${siteConfig.phone}`}>{siteConfig.phoneDisplay}</a>
-            </Button>
+        <div className="mt-6 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
+          <div>
+            <p className="eyebrow text-primary mb-3 inline-flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5" />
+              {area.name}, {area.region} · Ottawa Valley
+            </p>
+            <h1 className="heading-section text-balance">{area.tagline}</h1>
+            <p className="mt-4 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
+              {area.intro}
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href={`/quote?area=${area.slug}`}>
+                  Get a Free {area.name} Quote
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <a href={`tel:${siteConfig.phone}`}>{siteConfig.phoneDisplay}</a>
+              </Button>
+            </div>
           </div>
+          {heroPhoto && (
+            <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl border border-surface-border lg:block">
+              <Image
+                src={heroPhoto.src}
+                alt={heroPhoto.alt}
+                fill
+                priority
+                sizes="(min-width:1024px) 40vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+          )}
         </div>
       </section>
+
+      {isPetawawa && (
+        <section className="container-max pt-10">
+          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-6">
+            <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed">
+              <span className="font-semibold">
+                Garrison Petawawa: your discount lives here.
+              </span>{" "}
+              PVS is veteran operated. Serving members, veterans, military
+              families, and first responders save 10% on every service, from
+              windows to snow (not combinable with other offers above 10%).
+              Mention your service when you request a quote.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {area.localNotes && area.localNotes.length > 0 && (
+        <section className="container-max pt-10 sm:pt-14">
+          <div className="max-w-3xl space-y-5">
+            {area.localNotes.map((p) => (
+              <p
+                key={p.slice(0, 40)}
+                className="text-base sm:text-lg text-muted-foreground leading-relaxed"
+              >
+                {p}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="container-max py-14 sm:py-20">
         <SectionHeading
@@ -195,6 +277,37 @@ export default function ServiceAreaPage({
           ))}
         </div>
       </section>
+
+      <section className="container-max pb-14 sm:pb-20">
+        <SectionHeading
+          eyebrow="Every Service, Locally"
+          title={`All PVS Services in ${area.name}`}
+          description={`Dedicated local pages for every service we run in ${area.name}.`}
+          align="left"
+        />
+        <ul className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {coreServices.map((s) => (
+            <li key={s.slug}>
+              <Link
+                href={`/services/${s.slug}/${area.slug}`}
+                className="flex items-center gap-2 rounded-xl border border-surface-border bg-surface/60 px-4 py-3 text-sm hover:bg-surface transition-colors"
+              >
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
+                {s.name} in {area.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {area.faqs && area.faqs.length > 0 && (
+        <FaqSection
+          items={area.faqs}
+          eyebrow={`${area.name} FAQs`}
+          title={`Questions ${area.name} Homeowners Ask`}
+          description={`Straight answers about how PVS works in ${area.name}.`}
+        />
+      )}
 
       {area.neighbourhoods.length > 0 && (
         <section className="container-max pb-14 sm:pb-20">

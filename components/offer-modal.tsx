@@ -30,8 +30,8 @@ const ctaVariant = {
 } as const;
 
 /**
- * Session-gated promo modal. Shows ONCE per browser session — never re-nags.
- * Reads from /lib/content/offers — flip `showInModal: false` to disable.
+ * Session-gated promo modal. Shows ONCE per browser session, never re-nags.
+ * Reads from /lib/content/offers, flip `showInModal: false` to disable.
  */
 export function OfferModal() {
   const offer = modalOffer();

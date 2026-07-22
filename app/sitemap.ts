@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/our-work`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/reviews`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/insurance`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/support`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/careers`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
@@ -38,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  // Service + Area combination pages — captures "<service> + <city>"
+  // Service + Area combination pages, captures "<service> + <city>"
   // search intent. 16 services × 8 areas = 128 pages.
   const comboRoutes: MetadataRoute.Sitemap = [];
   for (const s of services) {

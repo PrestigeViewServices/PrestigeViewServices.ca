@@ -12,7 +12,7 @@ type RevealProps = {
 /**
  * Scroll-triggered fade + ~16px upward translate. Fires ONCE per element via
  * IntersectionObserver. Honors prefers-reduced-motion by rendering visible
- * immediately. No animation library — just a CSS transition.
+ * immediately. No animation library, just a CSS transition.
  */
 export function Reveal({ children, delay = 0, className }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);

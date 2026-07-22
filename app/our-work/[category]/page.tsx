@@ -26,7 +26,7 @@ export function generateMetadata({
 }): Metadata {
   const category = getWorkCategory(params.category);
   if (!category) return {};
-  const title = `${category.name} — Recent Work in Petawawa & Pembroke`;
+  const title = `${category.name}, Recent Work in Petawawa & Pembroke`;
   return {
     title,
     description: `${category.description} Real PVS jobs across Petawawa, Pembroke, and the Ottawa Valley.`,

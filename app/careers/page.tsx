@@ -7,7 +7,7 @@ import { Qualifier } from "@/components/careers/qualifier";
 import { CtaBand } from "@/components/cta-band";
 
 export const metadata: Metadata = {
-  title: "Careers — Lawn Care, Property & Snow Removal Jobs in Petawawa",
+  title: "Careers, Lawn Care, Property & Snow Removal Jobs in Petawawa",
   description:
     "Join Prestige View Services and build a year-round career in property care across Petawawa, Pembroke, and the Ottawa Valley. Lawn, exterior, and snow removal jobs hiring now.",
   alternates: { canonical: "/careers" },

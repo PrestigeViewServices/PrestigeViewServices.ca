@@ -8,6 +8,8 @@ import {
   Waves,
   Scissors,
   Trash2,
+  TreeDeciduous,
+  Home,
 } from "lucide-react";
 import type { DivisionSlug } from "./divisions";
 
@@ -47,6 +49,27 @@ export const workCategories: WorkCategory[] = [
       "Streak-free interior and exterior window cleaning for homes and storefronts across Petawawa, Pembroke, and the Ottawa Valley.",
     icon: Sparkles,
     photos: [
+      {
+        src: "/images/gallery/window-cleaning/ladder-squeegee-cottage-upper-window.webp",
+        alt: "Technician on an extension ladder squeegeeing an upper window of a wood-sided cottage in the Ottawa Valley",
+        caption: "Cottage glass · upper storey",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/window-cleaning/ladder-second-storey-window-cleaning.webp",
+        alt: "PVS crew member on an extension ladder cleaning a second-storey window of a wood-sided Ottawa Valley home",
+        caption: "Second storey · no problem",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/window-cleaning/squeegee-exterior-window-bungalow.webp",
+        alt: "Crew member squeegeeing an exterior window of a bungalow in Petawawa",
+        caption: "Squeegee finish · streak-free",
+        width: 1201,
+        height: 1600,
+      },
       {
         src: "/images/gallery/window-cleaning/timber-home-streakfree.jpg",
         alt: "Large timber-frame home with streak-free windows after professional exterior window cleaning in the Ottawa Valley",
@@ -230,7 +253,7 @@ export const workCategories: WorkCategory[] = [
     shortName: "Gutters",
     division: "clearview",
     description:
-      "Hand-clearing leaves, shingle grit, and debris from gutters and downspouts — keep rainwater flowing away from your foundation.",
+      "Hand-clearing leaves, shingle grit, and debris from gutters and downspouts, keep rainwater flowing away from your foundation.",
     icon: Droplets,
     photos: [
       {
@@ -290,6 +313,34 @@ export const workCategories: WorkCategory[] = [
     icon: Scissors,
     photos: [
       {
+        src: "/images/gallery/lawn-mowing/pvs-crew-fertilizer-spreader-modern-home.webp",
+        alt: "PVS lawn care crew in branded shirts running a fertilizer spreader at a modern Petawawa home",
+        caption: "Turf program · PVS crew",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/lawn-mowing/mow-stripes-backyard-brick-home.webp",
+        alt: "Fresh mow stripes across a manicured backyard of a brick home in the Ottawa Valley",
+        caption: "Backyard stripes · weekly plan",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/lawn-mowing/fresh-mow-stripes-front-lawn.webp",
+        alt: "Freshly mowed front lawn with crisp mowing stripes in Pembroke Ontario",
+        caption: "Fresh stripes · weekly cut",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/lawn-mowing/striped-backyard-evergreens-deep-river.webp",
+        alt: "Striped freshly mowed backyard framed by mature evergreens near Deep River",
+        caption: "Backyard stripes · Deep River",
+        width: 1201,
+        height: 1600,
+      },
+      {
         src: "/images/gallery/lawn-mowing/aerial-drone-property.jpg",
         alt: "Aerial drone view of a freshly mowed residential property",
         caption: "Aerial · drone capture",
@@ -300,7 +351,7 @@ export const workCategories: WorkCategory[] = [
         const n = String(i + 1).padStart(2, "0");
         return {
           src: `/images/gallery/lawn-mowing/lawn-job-${n}.jpg`,
-          alt: `PVS LawnPros crew on a residential lawn — Ottawa Valley`,
+          alt: `PVS lawn care crew mowing a residential lawn, Ottawa Valley`,
           caption: `Lawn job · Ottawa Valley`,
           width: 1600,
           height: 1200,
@@ -316,16 +367,95 @@ export const workCategories: WorkCategory[] = [
     description:
       "Residential and commercial snow plowing, walkway clearing, and seasonal contracts to keep your property safe all winter.",
     icon: Snowflake,
-    photos: Array.from({ length: 14 }, (_, i) => {
-      const n = String(i + 1).padStart(2, "0");
-      return {
-        src: `/images/gallery/snow-removal/snow-job-${n}.jpg`,
-        alt: `PVS SnowLand crew clearing a property after a snowfall — Ottawa Valley`,
-        caption: `Winter callout · Ottawa Valley`,
-        width: 1600,
-        height: 1200,
-      };
-    }),
+    photos: [
+      {
+        src: "/images/gallery/snow-removal/tractor-cleared-estate-driveway-winter.webp",
+        alt: "PVS tractor beside a freshly cleared estate driveway on a sunny winter day near Pembroke",
+        caption: "Estate driveway · cleared & open",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/drone-tractor-snowblowing-driveway.webp",
+        alt: "Aerial drone view of a PVS tractor snow-blowing a long residential driveway in Petawawa",
+        caption: "Drone view · mid-storm clearing",
+        width: 1440,
+        height: 981,
+      },
+      {
+        src: "/images/gallery/snow-removal/aerial-tractor-plowing-snowy-street.webp",
+        alt: "Aerial view of a tractor plowing a snowbound residential street in the Ottawa Valley",
+        caption: "Route clearing · Ottawa Valley",
+        width: 900,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
+        alt: "John Deere tractor snow-blowing a driveway at night with headlights on in Pembroke",
+        caption: "Night shift · storm response",
+        width: 900,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/snow-removal/tractor-sunny-cleared-driveway.webp",
+        alt: "PVS tractor beside a freshly cleared residential driveway on a sunny winter day in Petawawa",
+        caption: "Bluebird morning · driveway open",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/tractor-blade-clearing-driveway-blue-sky.webp",
+        alt: "Tractor with front blade clearing a residential driveway under a blue winter sky in the Ottawa Valley",
+        caption: "Blade work · clean pass",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/tractors-staged-night-snowfall.webp",
+        alt: "Two PVS tractors with snowblowers staged at night in falling snow, ready for the storm",
+        caption: "Staged & ready · storm night",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/box-plow-townhouse-driveway.webp",
+        alt: "Tractor with box plow clearing a townhouse driveway after a snowfall in Pembroke",
+        caption: "Townhouse route · cleared",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/night-snow-plume-tractor.webp",
+        alt: "Tractor throwing an arc of snow during a night clearing run in the Ottawa Valley",
+        caption: "Snow plume · night run",
+        width: 1081,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/tractor-night-street-snowblowing.webp",
+        alt: "PVS tractor snow-blowing along a residential street at night in Petawawa",
+        caption: "Street pass · after dark",
+        width: 1081,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/snow-removal/snowy-ranch-home-blue-sky.webp",
+        alt: "Snow-covered ranch home with a cleared driveway under a blue winter sky near Deep River",
+        caption: "After the storm · all clear",
+        width: 1441,
+        height: 1920,
+      },
+      ...Array.from({ length: 14 }, (_, i) => {
+        const n = String(i + 1).padStart(2, "0");
+        return {
+          src: `/images/gallery/snow-removal/snow-job-${n}.jpg`,
+          alt: `PVS snow removal crew clearing a property after a snowfall, Ottawa Valley`,
+          caption: `Winter callout · Ottawa Valley`,
+          width: 1600,
+          height: 1200,
+        };
+      }),
+    ],
   },
   {
     slug: "pressure-washing",
@@ -333,7 +463,7 @@ export const workCategories: WorkCategory[] = [
     shortName: "Pressure Wash",
     division: "clearview",
     description:
-      "Exterior siding, soffit, deck, and driveway cleaning — bring your property's finish back to brand-new.",
+      "Exterior siding, soffit, deck, and driveway cleaning, bring your property's finish back to brand-new.",
     icon: Waves,
     photos: Array.from({ length: 2 }, (_, i) => {
       const n = String(i + 1).padStart(2, "0");
@@ -352,7 +482,7 @@ export const workCategories: WorkCategory[] = [
     shortName: "Junk Removal",
     division: "clearview",
     description:
-      "Single-item pickups, full property cleanouts, and post-project debris hauls — loaded, strapped, and disposed of responsibly.",
+      "Single-item pickups, full property cleanouts, and post-project debris hauls, loaded, strapped, and disposed of responsibly.",
     icon: Trash2,
     photos: Array.from({ length: 5 }, (_, i) => {
       const n = String(i + 1).padStart(2, "0");
@@ -364,6 +494,165 @@ export const workCategories: WorkCategory[] = [
         height: 1200,
       };
     }),
+  },
+  {
+    slug: "hedge-trimming",
+    name: "Hedge Trimming & Shrub Care",
+    shortName: "Hedges",
+    division: "lawnpros",
+    description:
+      "Crisp hedge lines, healthy shrubs, and total cleanup across Petawawa, Pembroke, and the Ottawa Valley.",
+    icon: TreeDeciduous,
+    photos: [
+      {
+        src: "/images/gallery/hedge-trimming/pole-trimmer-tall-cedar-hedge.webp",
+        alt: "Crew member trimming a tall cedar hedge with a pole trimmer in the Ottawa Valley",
+        caption: "Tall cedars · pole trimmer work",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/hedge-trimming/cedar-hedge-squared-sunrise-petawawa.webp",
+        alt: "Freshly squared cedar hedge at sunrise with clippings collected on tarps in the Ottawa Valley",
+        caption: "Cedar hedge · squared & cleaned",
+        width: 1600,
+        height: 1201,
+      },
+      {
+        src: "/images/gallery/hedge-trimming/shrub-pruning-crew-ottawa-valley.webp",
+        alt: "PVS crew member pruning a large shrub beside a home in the Ottawa Valley",
+        caption: "Shrub shaping · Ottawa Valley",
+        width: 900,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/hedge-trimming/hedge-trimming-cleanup-crew-pembroke.webp",
+        alt: "Crew member loading fresh cedar trimmings into a bin beside a tall hedge near Pembroke",
+        caption: "Full cleanup · every clipping hauled",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/hedge-trimming/trimmed-shrubs-ottawa-valley-view.webp",
+        alt: "Hilltop view over freshly trimmed shrubs to the Ottawa Valley treeline",
+        caption: "Trimmed & tidy · Valley view",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/hedge-trimming/ladder-shaping-towering-cedar-hedge.webp",
+        alt: "PVS crew member on a ladder shaping a towering cedar hedge under a blue sky",
+        caption: "Towering cedars · shaped by hand",
+        width: 1441,
+        height: 1920,
+      },
+    ],
+  },
+  {
+    slug: "landscaping",
+    name: "Landscaping Projects",
+    shortName: "Landscaping",
+    division: "lawnpros",
+    description:
+      "Garden bed refreshes, edging, planting, and small hardscape repairs that transform curb appeal in a day or two.",
+    icon: Leaf,
+    photos: [
+      {
+        src: "/images/gallery/landscaping/stone-estate-manicured-lawn-gardens.webp",
+        alt: "Manicured lawn and fresh garden beds at a stone estate home on the water in the Ottawa Valley",
+        caption: "Estate grounds · full care",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/landscaping/beige-two-storey-manicured-property.webp",
+        alt: "Beige two-storey home with manicured lawn and landscaped beds under blue sky near Pembroke",
+        caption: "Curb appeal · complete",
+        width: 1920,
+        height: 1440,
+      },
+      {
+        src: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
+        alt: "Neatly trimmed hedge line and cleared green space after a landscaping refresh in the Ottawa Valley",
+        caption: "Cleared & defined · after",
+        width: 1600,
+        height: 1201,
+      },
+      {
+        src: "/images/gallery/landscaping/hillside-garden-refresh-laurentian-valley.webp",
+        alt: "Tidied hillside garden with fresh grading and pines on a Laurentian Valley property",
+        caption: "Hillside garden refresh",
+        width: 1600,
+        height: 1201,
+      },
+      {
+        src: "/images/gallery/landscaping/backyard-cleared-rock-border-after.webp",
+        alt: "Backyard cleared and finished with a rock border after brush removal, Ottawa Valley",
+        caption: "Backyard reclaim · after",
+        width: 1201,
+        height: 1600,
+      },
+    ],
+  },
+  {
+    slug: "house-washing",
+    name: "House & Soft Washing",
+    shortName: "House Wash",
+    division: "clearview",
+    description:
+      "Low-pressure soft washing that lifts algae and grime off siding, soffits, and fascia without damaging the finish.",
+    icon: Home,
+    photos: [
+      {
+        src: "/images/gallery/house-washing/soft-wash-siding-crew-petawawa.webp",
+        alt: "PVS crew member in branded shirt soft-washing white siding of a Petawawa home",
+        caption: "Soft wash in progress",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/house-washing/white-siding-clean-after-wash-pembroke.webp",
+        alt: "Gleaming white siding and soffit after an exterior house wash near Pembroke",
+        caption: "After · bright again",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/house-washing/siding-soffit-clean-after-ottawa-valley.webp",
+        alt: "Clean siding corner and soffits after a soft wash on an Ottawa Valley home",
+        caption: "Siding & soffits · finished",
+        width: 1201,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/house-washing/suds-soft-wash-siding-action.webp",
+        alt: "Crew member scrubbing white siding with an extension brush, soap suds running down the wall",
+        caption: "Suds down · scrub in progress",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/house-washing/rinsing-soffit-eaves-pressure-wand.webp",
+        alt: "Pressure wand rinsing soffit and eaves on a white-sided home in the Ottawa Valley",
+        caption: "Soffits & eaves · rinsed",
+        width: 1441,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/house-washing/half-cleaned-siding-soft-wash-progress.webp",
+        alt: "Half-cleaned wall showing the before and after difference during a soft wash near Petawawa",
+        caption: "Half done · see the difference",
+        width: 1081,
+        height: 1920,
+      },
+      {
+        src: "/images/gallery/house-washing/soft-wash-brush-scrubbing-siding.webp",
+        alt: "Technician scrubbing dirty siding with a soft-wash brush on an Ottawa Valley home",
+        caption: "Brush detail · walkways & decks too",
+        width: 1081,
+        height: 1920,
+      },
+    ],
   },
   // Add more categories here as photos come in.
 ];
@@ -378,17 +667,17 @@ export const populatedWorkCategories = (): WorkCategory[] =>
 /**
  * Many service slugs don't have a dedicated photo gallery yet. We alias them
  * to the closest-matching populated category so every service detail page can
- * still display real PVS work. The alias is a soft mapping for UI only — the
+ * still display real PVS work. The alias is a soft mapping for UI only, the
  * /our-work pages are still driven off the real `slug` field.
  */
 const SERVICE_GALLERY_ALIAS: Record<string, string> = {
-  "landscaping-services": "lawn-mowing",
+  "landscaping-services": "landscaping",
   "spring-cleanup": "lawn-mowing",
+  "fall-cleanup": "lawn-mowing",
   aeration: "lawn-mowing",
   dethatching: "lawn-mowing",
   overseeding: "lawn-mowing",
   "property-maintenance": "lawn-mowing",
-  "house-washing": "pressure-washing",
   "property-touch-ups": "pressure-washing",
   "property-cleanouts": "junk-removal",
   "seasonal-snow-contract": "snow-removal",

@@ -25,7 +25,7 @@ export function GoogleReviewsEmbed({
   scriptSrc: scriptSrcProp,
   containerClass: containerClassProp,
 }: {
-  /** Override the env-var widget URL — useful when you want to embed multiple
+  /** Override the env-var widget URL, useful when you want to embed multiple
    *  Trustindex widgets (e.g. one badge + one review feed) on the same page. */
   scriptSrc?: string;
   containerClass?: string;
@@ -73,7 +73,7 @@ export function GoogleReviewsEmbed({
   );
 }
 
-/** True when the env var is set — used to hide the static review cards. */
+/** True when the env var is set, used to hide the static review cards. */
 export function isGoogleReviewsEmbedEnabled(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC);
 }

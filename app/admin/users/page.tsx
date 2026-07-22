@@ -16,12 +16,20 @@ export const dynamic = "force-dynamic";
 
 const PRISMA_ROLE: Record<
   Role,
-  "ULTIMATE_ADMIN" | "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE" | "CUSTOMER"
+  | "ULTIMATE_ADMIN"
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "MANAGER"
+  | "EMPLOYEE"
+  | "REP"
+  | "CUSTOMER"
 > = {
   ultimate_admin: "ULTIMATE_ADMIN",
   super_admin: "SUPER_ADMIN",
   admin: "ADMIN",
+  manager: "MANAGER",
   employee: "EMPLOYEE",
+  rep: "REP",
   customer: "CUSTOMER",
 };
 
@@ -29,7 +37,9 @@ const FROM_PRISMA: Record<string, Role> = {
   ULTIMATE_ADMIN: "ultimate_admin",
   SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
+  MANAGER: "manager",
   EMPLOYEE: "employee",
+  REP: "rep",
   CUSTOMER: "customer",
 };
 
@@ -70,7 +80,7 @@ export default async function UsersPage() {
             {users.length} total ·{" "}
             {canEdit
               ? "you can change roles"
-              : "read-only — ask an ultimate admin to change roles"}
+              : "read-only, ask an ultimate admin to change roles"}
           </p>
         </div>
       </header>
@@ -104,7 +114,7 @@ export default async function UsersPage() {
                     <Td>
                       <div className="font-medium">
                         {[u.firstName, u.lastName].filter(Boolean).join(" ") ||
-                          "—"}
+                          ", "}
                       </div>
                     </Td>
                     <Td>
@@ -135,7 +145,7 @@ export default async function UsersPage() {
 
       <p className="text-xs text-muted-foreground">
         Ultimate admin can assign any role including ultimate_admin. Admins
-        cannot promote users — assignable roles are{" "}
+        cannot promote users, assignable roles are{" "}
         {ULTIMATE_ADMIN_ASSIGNABLE_ROLES.filter((r) => r !== "ultimate_admin")
           .map((r) => ROLE_LABELS[r])
           .join(", ")}{" "}
@@ -161,7 +171,7 @@ function Td({ children }: { children: React.ReactNode }) {
 
 async function updateUserRole(userId: string, next: Role) {
   "use server";
-  // ultimate_admin only — and we re-check on the server in case anyone
+  // ultimate_admin only, and we re-check on the server in case anyone
   // calls this outside the UI.
   await requireRole("ultimate_admin");
 

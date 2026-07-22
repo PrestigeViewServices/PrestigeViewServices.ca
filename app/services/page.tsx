@@ -6,9 +6,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
 
 export const metadata: Metadata = {
-  title: "All Services — Lawn, Window Cleaning, Snow Removal & More",
+  title: "All Services, Lawn, Window Cleaning, Snow Removal & More",
   description:
-    "Every Prestige View Services offering — lawn mowing, spring cleanups, aeration, window cleaning, gutter clearing, pressure washing, snow contracts, and more. Petawawa, Pembroke & the Ottawa Valley.",
+    "Every Prestige View Services offering, lawn mowing, spring cleanups, aeration, window cleaning, gutter clearing, pressure washing, snow contracts, and more. Petawawa, Pembroke & the Ottawa Valley.",
   alternates: { canonical: "/services" },
 };
 
@@ -17,7 +17,7 @@ type Group = {
   title: string;
   blurb: string;
   icon: LucideIcon;
-  // Pulls from the `division` field on Service — internal taxonomy only.
+  // Pulls from the `division` field on Service, internal taxonomy only.
   // The public-facing name is the section title above.
   source: ("lawnpros" | "clearview" | "snowland")[];
 };
@@ -42,7 +42,7 @@ const GROUPS: Group[] = [
     id: "snow-and-ice",
     title: "Snow & Ice",
     blurb:
-      "Residential snow removal, seasonal contracts, walkway clearing — Ottawa Valley winters handled.",
+      "Residential snow removal, seasonal contracts, walkway clearing, Ottawa Valley winters handled.",
     icon: Snowflake,
     source: ["snowland"],
   },

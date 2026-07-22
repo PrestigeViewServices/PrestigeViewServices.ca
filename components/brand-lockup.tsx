@@ -85,7 +85,7 @@ const accentGradient: Record<VariantConfig["accent"], string> = {
 /**
  * Master + division brand lockups. Renders the image from /public/images/
  * via next/image. If the file is missing, falls back to a text + icon lockup
- * styled in the division's accent color — page never breaks.
+ * styled in the division's accent color, page never breaks.
  */
 export function BrandLockup({
   variant = "master",
@@ -107,7 +107,7 @@ export function BrandLockup({
   return (
     <Link
       href={href}
-      aria-label={`${v.textTitle} — home`}
+      aria-label={`${v.textTitle}, home`}
       className={cn(
         "group inline-flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md",
         className

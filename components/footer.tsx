@@ -8,17 +8,20 @@ import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export function Footer() {
-  // Pick a few popular services per the lead-gen funnel
-  const featured = services.filter((s) =>
-    [
-      "lawn-mowing",
-      "window-cleaning",
-      "snow-removal",
-      "gutter-cleaning",
-      "pressure-washing",
-      "spring-cleanup",
-    ].includes(s.slug)
-  );
+  // The 8 core services, full internal-link grid for SEO + navigation.
+  const CORE = [
+    "window-cleaning",
+    "gutter-cleaning",
+    "pressure-washing",
+    "house-washing",
+    "lawn-mowing",
+    "hedge-trimming",
+    "landscaping-services",
+    "snow-removal",
+  ];
+  const featured = CORE.map((slug) =>
+    services.find((s) => s.slug === slug)
+  ).filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   return (
     <footer className="mt-12 border-t border-surface-border bg-background/60">
@@ -47,37 +50,34 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="md:col-span-2">
+          <div className="md:col-span-3">
             <h3 className="text-sm font-semibold mb-4">Services</h3>
             <ul className="space-y-2.5 text-sm">
+              {featured.map((s) => (
+                <li key={s.slug}>
+                  <Link
+                    href={`/services/${s.slug}`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {s.name}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link
-                  href="/services#lawn-care"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  href="/services"
+                  className="text-primary hover:text-foreground transition-colors"
                 >
-                  Lawn Care
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services#exterior-cleaning"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Exterior Cleaning
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services#snow-and-ice"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Snow &amp; Ice
+                  All services →
                 </Link>
               </li>
             </ul>
-            <h3 className="text-sm font-semibold mb-4 mt-7">Service Areas</h3>
+          </div>
+
+          <div className="md:col-span-2">
+            <h3 className="text-sm font-semibold mb-4">Service Areas</h3>
             <ul className="space-y-2.5 text-sm">
-              {serviceAreas.slice(0, 6).map((a) => (
+              {serviceAreas.map((a) => (
                 <li key={a.slug}>
                   <Link
                     href={`/service-areas/${a.slug}`}
@@ -95,22 +95,6 @@ export function Footer() {
                   All areas →
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          <div className="md:col-span-3">
-            <h3 className="text-sm font-semibold mb-4">Popular Services</h3>
-            <ul className="space-y-2.5 text-sm">
-              {featured.map((s) => (
-                <li key={s.slug}>
-                  <Link
-                    href={`/services/${s.slug}`}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {s.name}
-                  </Link>
-                </li>
-              ))}
             </ul>
           </div>
 
@@ -155,6 +139,9 @@ export function Footer() {
             <ReviewCta variant="link" />
             <Link href="/about" className="hover:text-foreground">
               About
+            </Link>
+            <Link href="/insurance" className="hover:text-foreground">
+              Insurance
             </Link>
             <Link href="/careers" className="hover:text-foreground">
               Careers

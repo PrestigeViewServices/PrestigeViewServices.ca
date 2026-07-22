@@ -24,7 +24,7 @@ export const divisions: Division[] = [
     description:
       "Recurring lawn mowing, seasonal cleanups, and turf health programs for Petawawa & Pembroke homeowners.",
     longDescription:
-      "From your weekly mow to spring revival and fall recovery, PVS LawnPros keeps your lawn the best-looking one on the block — on a schedule you don't have to think about.",
+      "From your weekly mow to spring revival and fall recovery, PVS LawnPros keeps your lawn the best-looking one on the block, on a schedule you don't have to think about.",
     accent: "lawn",
     icon: Leaf,
     topServices: ["lawn-mowing", "spring-cleanup", "aeration"],

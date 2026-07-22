@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
  * **JIT role assignment.** If the user's primary email is on
  * `ULTIMATE_ADMIN_EMAILS`, we promote them to `ultimate_admin` on first
  * arrival. That removes the dependency on the Clerk webhook for the
- * happy path — the webhook still does the same thing in the background
+ * happy path, the webhook still does the same thing in the background
  * once it's configured.
  *
  * Users cannot self-select a portal. Clerk's after-sign-in URL points

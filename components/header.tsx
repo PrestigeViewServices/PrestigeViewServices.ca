@@ -29,7 +29,7 @@ import { AuthControls } from "@/components/auth-controls";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
-// Top-tier conversion routes — pinned at the top of the mobile sheet AND
+// Top-tier conversion routes, pinned at the top of the mobile sheet AND
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [

@@ -15,7 +15,7 @@ import { ReviewCta } from "@/components/review-cta";
 
 export const dynamic = "force-dynamic";
 
-// TODO: edit profile — Phase 2. We'll surface a form here that writes to
+// TODO: edit profile, Phase 2. We'll surface a form here that writes to
 // User (firstName, lastName, phone, streetAddress, city, region, postalCode)
 // and mirrors changes to Clerk user metadata.
 
@@ -99,7 +99,7 @@ export default async function AccountHomePage() {
           <Row
             icon={<Phone className="h-4 w-4 text-primary" />}
             label="Phone"
-            value={profile?.phone || "—"}
+            value={profile?.phone || ", "}
           />
           <Row
             icon={<MapPin className="h-4 w-4 text-primary" />}
@@ -116,7 +116,7 @@ export default async function AccountHomePage() {
           >
             contact@prestigeviewservices.ca
           </a>{" "}
-          for now — in-place editing is coming soon.
+          for now, in-place editing is coming soon.
         </p>
       </section>
 
@@ -178,13 +178,13 @@ type ProfileLite = {
 } | null;
 
 function formatAddress(p: ProfileLite): string {
-  if (!p) return "—";
+  if (!p) return ", ";
   const parts = [
     p.streetAddress,
     [p.city, p.region].filter(Boolean).join(", "),
     p.postalCode,
   ].filter(Boolean);
-  return parts.length > 0 ? parts.join(" · ") : "—";
+  return parts.length > 0 ? parts.join(" · ") : ", ";
 }
 
 function Row({

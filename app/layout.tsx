@@ -11,6 +11,7 @@ import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
+import { serviceAreas } from "@/lib/content/service-areas";
 import { isClerkConfigured } from "@/lib/auth";
 import "./globals.css";
 
@@ -20,7 +21,7 @@ const inter = Inter({
   display: "swap",
 });
 
-// Display/heading face — geometric, premium, modern. Paired with Inter body.
+// Display/heading face, geometric, premium, modern. Paired with Inter body.
 const sora = Sora({
   subsets: ["latin"],
   variable: "--font-sora",
@@ -31,7 +32,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — ${siteConfig.tagline}`,
+    default: `${siteConfig.name}, ${siteConfig.tagline}`,
     template: `%s · ${siteConfig.shortName}`,
   },
   description: siteConfig.description,
@@ -51,15 +52,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_CA",
     url: siteConfig.url,
-    title: `${siteConfig.name} — ${siteConfig.tagline}`,
+    title: `${siteConfig.name}, ${siteConfig.tagline}`,
     description: siteConfig.description,
     siteName: siteConfig.name,
     images: [
       {
-        url: "/images/logo.png",
+        url: "/images/og-default.png",
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name} — ${siteConfig.tagline}`,
+        alt: `${siteConfig.name}, ${siteConfig.tagline}`,
       },
     ],
   },
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: ["/images/logo.png"],
+    images: ["/images/og-default.png"],
   },
   robots: {
     index: true,
@@ -100,10 +101,22 @@ export default function RootLayout({
     telephone: siteConfig.phone,
     email: siteConfig.email,
     areaServed: [
-      { "@type": "City", name: "Petawawa" },
-      { "@type": "City", name: "Pembroke" },
+      ...serviceAreas.map((a) => ({
+        "@type": "City",
+        name: a.name,
+        address: {
+          "@type": "PostalAddress",
+          addressRegion: a.region,
+          addressCountry: "CA",
+        },
+      })),
       { "@type": "AdministrativeArea", name: "Ottawa Valley" },
     ],
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 45.8956,
+      longitude: -77.2814,
+    },
     address: {
       "@type": "PostalAddress",
       streetAddress: siteConfig.address.streetAddress,
@@ -157,7 +170,7 @@ export default function RootLayout({
         <OfferModal />
         <StickyCta />
 
-        {/* Analytics — providers self-disable when their env vars are unset */}
+        {/* Analytics, providers self-disable when their env vars are unset */}
         <VercelAnalytics />
         <GoogleAnalytics />
         <MetaPixel />

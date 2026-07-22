@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site";
 
 /**
  * Real Google reviews via the Trustindex widget (configured by
- * NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC). No fabricated reviews — when the
+ * NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC). No fabricated reviews, when the
  * widget env var is missing, we render an honest empty state with the
  * "Leave us a Google review" CTA.
  *
@@ -17,7 +17,7 @@ import { siteConfig } from "@/lib/site";
  */
 export function ReviewsPreview() {
   // Inlined env check instead of importing a helper from the "use client"
-  // embed module — exports from a client file become client references and
+  // embed module, exports from a client file become client references and
   // aren't callable from server components.
   const widgetEnabled = Boolean(
     process.env.NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC
@@ -36,7 +36,7 @@ export function ReviewsPreview() {
           <GoogleReviewsEmbed />
         </div>
       ) : (
-        // No fake reviews — show an honest empty state until the widget
+        // No fake reviews, show an honest empty state until the widget
         // env var is configured.
         <div className="mt-12 mx-auto max-w-xl surface-card p-8 sm:p-10 text-center">
           <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-yellow-500/15 text-yellow-300">
@@ -46,8 +46,8 @@ export function ReviewsPreview() {
             Reviews going live shortly
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            We're hooking up our live Google reviews. In the meantime, see
-            them — or leave one — directly on Google.
+            We're hooking up our live Google reviews. In the meantime, you can
+            see them (or leave one) directly on Google.
           </p>
           <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
             <Button asChild variant="outline">

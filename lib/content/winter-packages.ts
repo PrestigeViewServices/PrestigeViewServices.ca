@@ -1,5 +1,5 @@
 /**
- * Winter package definitions — single source of truth.
+ * Winter package definitions, single source of truth.
  *
  * ⚠️ PRICING IS A PLACEHOLDER. Replace the `priceCents` numbers below with the
  * real "Starts at" amounts from the marketing flyer before launch. Everything
@@ -61,7 +61,7 @@ export type DrivewayTierDef = {
   excluded: string[];
   /**
    * Seasonal "starts at" pricing per driveway size, in cents.
-   * PLACEHOLDER VALUES — update before launch.
+   * PLACEHOLDER VALUES, update before launch.
    */
   priceCents: Record<DrivewaySize, number>;
 };
@@ -129,7 +129,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
   {
     slug: "PLATINUM",
     name: "Platinum",
-    blurb: "Top-tier proactive storm management — best for long driveways and busy households.",
+    blurb: "Top-tier proactive storm management, best for long driveways and busy households.",
     features: [
       "Automatic dispatch at 3cm",
       "Night & day passes (2 passes)",
@@ -159,10 +159,10 @@ export type ShovelingTierDef = {
   excluded: string[];
   /**
    * Internal pack total in cents (passes × starting per-pass rate). NOT shown
-   * to customers — the site shows "Custom quote" because the real per-pass
+   * to customers, the site shows "Custom quote" because the real per-pass
    * rate (~$10 and easing down with bigger packs) depends on walkway/porch/deck
    * size. Used only for the server-side estimate captured with a lead.
-   * PLACEHOLDER VALUES — confirm before launch.
+   * PLACEHOLDER VALUES, confirm before launch.
    */
   priceCents: number;
 };
@@ -172,7 +172,7 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
     slug: "PASS_10",
     name: "10-Pass Pack",
     passes: 10,
-    blurb: "A starter pack of 10 shovelling visits — walkway, porch & back deck.",
+    blurb: "A starter pack of 10 shovelling visits, walkway, porch & back deck.",
     features: [
       "10 shovelling visits",
       "Walkway + porch + back deck",
@@ -180,13 +180,13 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
       "Top up whenever you run low",
     ],
     excluded: ["Best for 1 pass per event"],
-    priceCents: 10000, // 10 × ~$10 starting (internal — not shown)
+    priceCents: 10000, // 10 × ~$10 starting (internal, not shown)
   },
   {
     slug: "PASS_15",
     name: "15-Pass Pack",
     passes: 15,
-    blurb: "Fifteen visits — a comfortable buffer for an average Valley winter.",
+    blurb: "Fifteen visits, a comfortable buffer for an average Valley winter.",
     features: [
       "15 shovelling visits",
       "Walkway + porch + back deck",
@@ -194,7 +194,7 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
       "Priority over single visits",
     ],
     excluded: [],
-    priceCents: 14250, // 15 × ~$9.50 starting (internal — not shown)
+    priceCents: 14250, // 15 × ~$9.50 starting (internal, not shown)
   },
   {
     slug: "PASS_25",
@@ -208,13 +208,13 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
       "Priority routing",
     ],
     excluded: [],
-    priceCents: 22500, // 25 × ~$9 starting (internal — not shown)
+    priceCents: 22500, // 25 × ~$9 starting (internal, not shown)
   },
   {
     slug: "PASS_50",
     name: "50-Pass Pack",
     passes: 50,
-    blurb: "Full-season storm management — two passes per event all winter.",
+    blurb: "Full-season storm management, two passes per event all winter.",
     features: [
       "50 shovelling visits",
       "2 passes per event all season",
@@ -222,7 +222,7 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
       "Priority routing",
     ],
     excluded: [],
-    priceCents: 42500, // 50 × ~$8.50 starting (internal — not shown)
+    priceCents: 42500, // 50 × ~$8.50 starting (internal, not shown)
   },
 ];
 

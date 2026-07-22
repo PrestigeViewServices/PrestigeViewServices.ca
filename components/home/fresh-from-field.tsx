@@ -4,7 +4,7 @@ import { ArrowRight, Droplets, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /**
- * "Fresh from the Field" — editorial photo showcase for the home page.
+ * "Fresh from the Field", editorial photo showcase for the home page.
  *
  * Hard-coded to the latest job until we wire a CMS-driven feature flag. To
  * swap the feature, replace the `feature` object below with new photos +
@@ -13,14 +13,14 @@ import { Button } from "@/components/ui/button";
 
 const feature = {
   eyebrow: "Fresh from the Field",
-  // Visible date — kept simple, no library. Update when you change the photos.
+  // Visible date, kept simple, no library. Update when you change the photos.
   dateLabel: "This week · Ottawa Valley",
   title: "Deck Soft-Wash + Siding Refresh",
   blurb:
-    "A 2-storey ClearView visit: pressure-washing the siding, soft-washing the deck and railings, and finishing with a streak-free window pass. Five hours, one happy homeowner.",
+    "A 2-storey exterior cleaning visit: pressure-washing the siding, soft-washing the deck and railings, and finishing with a streak-free window pass. Five hours, one happy homeowner.",
   hero: {
     src: "/images/gallery/pressure-washing/pressure-job-04.jpg",
-    alt: "PVS technician in branded gear pressure-washing the second-storey siding of a home with a red metal roof — visible water mist captures the action mid-spray.",
+    alt: "PVS technician in branded gear pressure-washing the second-storey siding of a home with a red metal roof, water mist visible mid-spray.",
   },
   thumbs: [
     {

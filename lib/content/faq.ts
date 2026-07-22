@@ -11,7 +11,7 @@ export type FaqItem = {
 export const homeFaqs: FaqItem[] = [
   {
     q: "What areas of the Ottawa Valley does Prestige View Services cover?",
-    a: "We're based in Petawawa and run regular crews across Pembroke, Deep River, Chalk River, Cobden, Renfrew, Arnprior, and Eganville. If your address is in the Valley, give us a call — we'll let you know the next available visit.",
+    a: "We're based in Petawawa and run regular crews across Pembroke, Deep River, Chalk River, Cobden, Renfrew, Arnprior, and Eganville. If your address is in the Valley, give us a call, we'll let you know the next available visit.",
   },
   {
     q: "Do you offer recurring lawn or snow plans, or just one-off jobs?",
@@ -23,7 +23,7 @@ export const homeFaqs: FaqItem[] = [
   },
   {
     q: "Are you insured?",
-    a: "Yes — every PVS crew is fully insured for both residential and small commercial work across the Ottawa Valley.",
+    a: "Yes, every PVS crew is fully insured for both residential and small commercial work across the Ottawa Valley.",
   },
   {
     q: "Can I bundle multiple services?",
@@ -36,10 +36,58 @@ export const homeFaqs: FaqItem[] = [
 ];
 
 export const serviceFaqs: Record<string, FaqItem[]> = {
+  "hedge-trimming": [
+    {
+      q: "When is the best time to trim hedges in the Ottawa Valley?",
+      a: "For cedars, late spring after the first flush of growth and again in mid-summer if you want razor-sharp lines all season. Flowering shrubs like lilacs get trimmed right after they bloom so you don't cut off next year's flowers. We schedule each visit to suit the plant.",
+    },
+    {
+      q: "How much can you cut off an overgrown hedge?",
+      a: "Cedars generally tolerate about a third of the green growth in one season. Cutting into bare wood usually stays bare, so badly overgrown hedges come back in stages over two or three visits. We'll tell you honestly what one visit can and can't fix.",
+    },
+    {
+      q: "Do you take away the clippings?",
+      a: "Always. Tarps go down before the first cut, and everything is raked, bagged, and hauled away. The area under the hedge is left cleaner than we found it.",
+    },
+    {
+      q: "Can you shape shrubs and small trees too?",
+      a: "Yes. Spireas, junipers, dogwoods, and small ornamental trees all get shaped on the same visit. Anything requiring a chainsaw at height we'll refer to an arborist, and we'll tell you that upfront.",
+    },
+    {
+      q: "How much does hedge trimming cost?",
+      a: "It depends on length, height, and how overgrown the hedge is. Text us a couple of photos and you'll have a written quote within one business day, no site visit needed for most jobs.",
+    },
+  ],
+  "landscaping-services": [
+    {
+      q: "What size of landscaping projects do you take on?",
+      a: "The sweet spot is one-crew projects: garden bed refreshes, mulching, edging, seasonal planting, sod patches, and small interlock or walkway repairs. Full yard redesigns and excavation work belong with a design-build contractor, and we'll say so if that's what your project needs.",
+    },
+    {
+      q: "Do I need a design or drawings first?",
+      a: "No. For the projects we take on, a photo of the space and a conversation about what you want is enough. You get a one-page written scope, not a design bill.",
+    },
+    {
+      q: "What does a typical bed refresh include?",
+      a: "Weeding and clearing out the old material, cutting a crisp spade edge, landscape fabric where it makes sense, fresh mulch, and new plants if you want them. Most front-yard refreshes are done in a single day.",
+    },
+    {
+      q: "Can you fix a heaved or sunken paver walkway?",
+      a: "Usually, yes. We lift the affected pavers, re-level the base, and re-set them with fresh joint sand. It's a fraction of the cost of replacing the walkway.",
+    },
+    {
+      q: "What plants survive Ottawa Valley winters?",
+      a: "We plant for zone 4 and for the sandy soils common around Petawawa: cedars, spireas, potentilla, daylilies, hostas, and hardy perennials that come back reliably. We'll steer you away from anything that won't make it to spring.",
+    },
+    {
+      q: "Do you offer maintenance after the project?",
+      a: "Yes, and it's the easy part: add your beds to a lawn care plan and the crew keeps the edges crisp and the weeds down all season.",
+    },
+  ],
   "window-cleaning": [
     {
       q: "How often should I have my windows cleaned in Petawawa or Pembroke?",
-      a: "Twice a year is the sweet spot — once in spring after pollen drops and once in fall after the leaves come down. Homes near gravel roads or with mature trees often benefit from quarterly cleaning.",
+      a: "Twice a year is the sweet spot, once in spring after pollen drops and once in fall after the leaves come down. Homes near gravel roads or with mature trees often benefit from quarterly cleaning.",
     },
     {
       q: "Do you clean both inside and outside?",
@@ -52,16 +100,16 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
   ],
   "lawn-mowing": [
     {
-      q: "Weekly or bi-weekly — which should I pick?",
+      q: "Weekly or bi-weekly, which should I pick?",
       a: "Weekly is better for healthy turf and crisp lines. Bi-weekly is fine for slower-growing lawns or drier July weeks. Most Petawawa & Pembroke customers run weekly May–June and switch to bi-weekly July–August.",
     },
     {
       q: "Do you do edging and cleanup?",
-      a: "Always — every visit includes string-trim, hard-edge, and a blow-clean of walkways and the drive. No extra charge.",
+      a: "Always, every visit includes string-trim, hard-edge, and a blow-clean of walkways and the drive. No extra charge.",
     },
     {
       q: "What happens if it rains on my scheduled day?",
-      a: "We reschedule to the next clear day on your route — usually within 24–48 hours. You'll get a heads-up text.",
+      a: "We reschedule to the next clear day on your route, usually within 24–48 hours. You'll get a heads-up text.",
     },
   ],
   "snow-removal": [
@@ -89,23 +137,41 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Do you do gutter guards or repairs?",
-      a: "Yes — minor re-fastening is included. Larger repairs or guard installs are quoted separately.",
+      a: "Yes, minor re-fastening is included. Larger repairs or guard installs are quoted separately.",
     },
   ],
   "pressure-washing": [
     {
-      q: "Pressure or soft wash — what's the difference?",
+      q: "Pressure or soft wash, what's the difference?",
       a: "Pressure for hard surfaces (driveway, walkway, patio). Soft wash for siding, soffits, and decks where high pressure would damage the finish. We pick the right one per surface.",
     },
     {
       q: "Is the cleaner safe for plants and pets?",
-      a: "Yes — we use eco-friendly, biodegradable solutions and rinse plantings thoroughly before and after.",
+      a: "Yes, we use eco-friendly, biodegradable solutions and rinse plantings thoroughly before and after.",
+    },
+  ],
+  "fall-cleanup": [
+    {
+      q: "When should I book a fall cleanup in the Ottawa Valley?",
+      a: "Late October into November, after most leaves are down but before the first staying snow. Routes fill quickly once the maples let go, so booking in September or early October guarantees your spot.",
+    },
+    {
+      q: "What's included in a PVS fall cleanup?",
+      a: "Full leaf and debris removal from the lawn and beds, a final cut at winter height, perennial and bed cut-back, and hauling everything away. Add a fall gutter cleaning on the same visit and the whole property is winter-ready in one stop.",
+    },
+    {
+      q: "Why does a fall cleanup matter for my lawn?",
+      a: "A leaf mat left over winter smothers grass and invites snow mould, and long grass under snow does the same. Cleared turf cut to the right height comes back greener and weeks earlier in spring.",
+    },
+    {
+      q: "Can you combine fall cleanup with my snow contract?",
+      a: "Yes, and it's the natural pairing: the same visit that winterizes the yard is when we stake your driveway for the winter routes. Most seasonal snow customers add the cleanup to the same account.",
     },
   ],
   "spring-cleanup": [
     {
       q: "When's the best time for a spring cleanup in the Ottawa Valley?",
-      a: "As soon as the ground has thawed and most of the snow is gone — usually mid-April to early May in Petawawa and Pembroke. Earlier is better since it sets up a healthier first mow.",
+      a: "As soon as the ground has thawed and most of the snow is gone, usually mid-April to early May in Petawawa and Pembroke. Earlier is better since it sets up a healthier first mow.",
     },
     {
       q: "What's included in a spring cleanup?",
@@ -113,13 +179,13 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Do I need a spring cleanup if I already have a lawn-mowing plan?",
-      a: "Usually yes for the first visit — the winter mess is more than a regular mow can handle. After that, your recurring lawn plan takes over.",
+      a: "Usually yes for the first visit, the winter mess is more than a regular mow can handle. After that, your recurring lawn plan takes over.",
     },
   ],
   "aeration": [
     {
       q: "When should I aerate my lawn?",
-      a: "Spring or fall, when the lawn is actively growing. Fall is often best in the Ottawa Valley — the lawn recovers fast and aeration sets up healthier turf for next year.",
+      a: "Spring or fall, when the lawn is actively growing. Fall is often best in the Ottawa Valley, the lawn recovers fast and aeration sets up healthier turf for next year.",
     },
     {
       q: "How often do I need to aerate?",
@@ -127,7 +193,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Should I overseed after aerating?",
-      a: "If your lawn has thin spots, yes — the aeration holes are perfect for seed-to-soil contact. We usually book both on the same visit.",
+      a: "If your lawn has thin spots, yes, the aeration holes are perfect for seed-to-soil contact. We usually book both on the same visit.",
     },
   ],
   "dethatching": [
@@ -147,7 +213,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "How long until I see new grass?",
-      a: "7–14 days for germination, full coverage in about 4–6 weeks. Watering matters — we leave you a simple plan.",
+      a: "7–14 days for germination, full coverage in about 4–6 weeks. Watering matters, we leave you a simple plan.",
     },
   ],
   "property-maintenance": [
@@ -157,17 +223,17 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Can I add window cleaning or pressure washing to it?",
-      a: "Yes — most Petawawa and Pembroke customers add a spring window-and-gutter package plus a mid-summer pressure wash. We coordinate so trips and pricing both work in your favour.",
+      a: "Yes, most Petawawa and Pembroke customers add a spring window-and-gutter package plus a mid-summer pressure wash. We coordinate so trips and pricing both work in your favour.",
     },
   ],
   "house-washing": [
     {
       q: "What's the difference between house washing and pressure washing?",
-      a: "House washing is a soft-wash technique that uses low pressure plus a cleaning solution — safe for siding, soffits, and stucco. Pressure washing uses high pressure for hard surfaces like driveways and patios.",
+      a: "House washing is a soft-wash technique that uses low pressure plus a cleaning solution, safe for siding, soffits, and stucco. Pressure washing uses high pressure for hard surfaces like driveways and patios.",
     },
     {
       q: "Will it damage my siding or plants?",
-      a: "No — soft wash is specifically designed for siding. We pre-rinse plantings, use plant-safe cleaners, and rinse again after.",
+      a: "No, soft wash is specifically designed for siding. We pre-rinse plantings, use plant-safe cleaners, and rinse again after.",
     },
     {
       q: "How often should I wash my home exterior?",
@@ -177,7 +243,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
   "property-touch-ups": [
     {
       q: "What counts as a property touch-up?",
-      a: "Small exterior fixes that aren't worth booking a tradesman for — re-seating a loose downspout, replacing a worn weatherstrip, touching up paint, re-fastening trim. Goes on the same visit as a window or gutter clean.",
+      a: "Small exterior fixes that aren't worth booking a tradesman for, re-seating a loose downspout, replacing a worn weatherstrip, touching up paint, re-fastening trim. Goes on the same visit as a window or gutter clean.",
     },
     {
       q: "How do I know if my touch-up qualifies?",
@@ -187,7 +253,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
   "junk-removal": [
     {
       q: "Can I get same-day junk removal in Petawawa or Pembroke?",
-      a: "Often yes — same-day depends on the route, but next-day is almost always possible. Send photos via the contact form for the fastest quote.",
+      a: "Often yes, same-day depends on the route, but next-day is almost always possible. Send photos via the contact form for the fastest quote.",
     },
     {
       q: "What can you take?",
@@ -195,7 +261,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Where does the junk go?",
-      a: "Donation-eligible items go to local charities. Recyclable materials go to the appropriate depot. The rest goes to the transfer station — we keep landfill volume as low as we can.",
+      a: "Donation-eligible items go to local charities. Recyclable materials go to the appropriate depot. The rest goes to the transfer station, we keep landfill volume as low as we can.",
     },
   ],
   "property-cleanouts": [
@@ -205,7 +271,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "Do you sort items before disposal?",
-      a: "Yes — donations and recycling are separated and routed before anything heads to the transfer station. Itemized receipt available on request.",
+      a: "Yes, donations and recycling are separated and routed before anything heads to the transfer station. Itemized receipt available on request.",
     },
   ],
   "seasonal-snow-contract": [
@@ -215,17 +281,17 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
     },
     {
       q: "When should I sign up?",
-      a: "Before the first snowfall — usually September or October in the Ottawa Valley. Routes fill up fast and signing late means we may not have a slot.",
+      a: "Before the first snowfall, usually September or October in the Ottawa Valley. Routes fill up fast and signing late means we may not have a slot.",
     },
     {
       q: "What if it's a mild winter?",
-      a: "The flat rate is the trade-off for guaranteed service in heavy years. Most Petawawa and Pembroke winters land in our favour for the customer — but the peace of mind is the real value.",
+      a: "The flat rate is the trade-off for guaranteed service in heavy years. Most Petawawa and Pembroke winters land in our favour for the customer, but the peace of mind is the real value.",
     },
   ],
   "walkway-clearing": [
     {
       q: "Do I need walkway clearing if I already have a snow contract?",
-      a: "It's an add-on. Plowing handles the drive; walkway clearing covers steps, front walks, and entries — usually shoveled and salted on the same visit.",
+      a: "It's an add-on. Plowing handles the drive; walkway clearing covers steps, front walks, and entries, usually shoveled and salted on the same visit.",
     },
     {
       q: "Do you salt or sand?",

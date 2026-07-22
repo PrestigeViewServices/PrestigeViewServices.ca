@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "PVS",
   tagline: "Raising the Standard Across the Valley",
   description:
-    "Petawawa, Pembroke & Ottawa Valley's premier year-round property care company — lawn care, window cleaning, and snow removal.",
+    "Petawawa, Pembroke & Ottawa Valley's year-round property care company: window cleaning, lawn care, landscaping, and snow removal.",
   url:
     process.env.NEXT_PUBLIC_SITE_URL || "https://prestigeviewservices.ca",
   phone: process.env.NEXT_PUBLIC_BUSINESS_PHONE || "+1-613-334-5858",

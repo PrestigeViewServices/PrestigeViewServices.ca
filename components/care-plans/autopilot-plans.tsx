@@ -13,10 +13,10 @@ import {
 } from "@/lib/content/care-plans";
 
 /**
- * "Put it on autopilot — Care Plans" section, dropped into a service page so
+ * "Put it on autopilot, Care Plans" section, dropped into a service page so
  * visitors see the recurring option tied to the exact service they came for.
  *
- * Server component — reads the placement config and renders the featured plan
+ * Server component, reads the placement config and renders the featured plan
  * cards plus the matching à-la-carte one-off "from" price.
  */
 export function AutopilotPlans({
@@ -40,9 +40,9 @@ export function AutopilotPlans({
       className="container-max scroll-mt-24 py-14 sm:py-20"
     >
       <SectionHeading
-        eyebrow="Put it on autopilot — Care Plans"
+        eyebrow="Put it on autopilot, Care Plans"
         title={`Never think about ${serviceName.toLowerCase()} again`}
-        description="Spread the work across the season on one monthly payment. We schedule it, call you, and show up — you just enjoy the result."
+        description="Spread the work across the season on one monthly payment. We schedule it, call you, and show up, you just enjoy the result."
         align="left"
       />
 

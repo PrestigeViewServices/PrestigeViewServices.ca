@@ -17,14 +17,14 @@ import {
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Care Plans & Packages — Exterior Cleaning Memberships",
+  title: "Care Plans & Packages, Exterior Cleaning Memberships",
   description:
-    "Put your home's exterior on autopilot. Recurring Care Plans from $49/mo spread house washing, windows, gutters & driveway across the year — or pay once with a one-off package. Petawawa, Pembroke & the Ottawa Valley.",
+    "Put your home's exterior on autopilot. Recurring Care Plans from $49/mo spread house washing, windows, gutters & driveway across the year, or pay once with a one-off package. Petawawa, Pembroke & the Ottawa Valley.",
   alternates: { canonical: "/care-plans" },
 };
 
 // Plans shown in the comparison + calendar sections (Build-Your-Own is
-// excluded — it has its own calculator).
+// excluded, it has its own calculator).
 const COMPARE_SLUGS: CarePlanSlug[] = [
   "house-gutter",
   "house-view",
@@ -129,7 +129,7 @@ export default function CarePlansPage() {
         <SectionHeading
           eyebrow="Memberships · Care Plans"
           title="Put your home's exterior on autopilot"
-          description={`Bundle house washing, windows, gutters and driveway into one monthly payment — spread across the season so it's always handled. Prefer a one-time refresh? Flip to Pay Once. Serving ${siteConfig.serviceArea}.`}
+          description={`Bundle house washing, windows, gutters and driveway into one monthly payment, spread across the season so it's always handled. Prefer a one-time refresh? Flip to Pay Once. Serving ${siteConfig.serviceArea}.`}
         />
       </section>
 
@@ -137,7 +137,7 @@ export default function CarePlansPage() {
       <section className="container-max py-10" id="pricing">
         <PricingToggle />
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          No payment is collected online today — every plan starts with a free
+          No payment is collected online today, every plan starts with a free
           quote. {/* 💳 BILLING PLACEHOLDER: Stripe/Square subscription checkout wires in here. */}
         </p>
       </section>
@@ -171,7 +171,7 @@ export default function CarePlansPage() {
         <SectionHeading
           eyebrow="Build-Your-Own"
           title="Mix your own plan, see the price instantly"
-          description="Pick your services and watch the monthly price update live — the more you bundle, the more you save."
+          description="Pick your services and watch the monthly price update live, the more you bundle, the more you save."
         />
         <div className="mx-auto mt-10 max-w-4xl">
           <BuildYourOwn />
@@ -183,7 +183,7 @@ export default function CarePlansPage() {
         <SectionHeading
           eyebrow="Your year, planned"
           title="How a plan spreads across the season"
-          description="We map every visit to the right month so your home stays sharp spring through fall — without you tracking a thing."
+          description="We map every visit to the right month so your home stays sharp spring through fall, without you tracking a thing."
         />
         <div className="mt-10 space-y-10">
           {calendarPlans.map((plan) => (
@@ -210,7 +210,7 @@ export default function CarePlansPage() {
         <SectionHeading
           eyebrow="Side by side"
           title="Compare the plans"
-          description="The quick version — what each recurring plan covers."
+          description="The quick version, what each recurring plan covers."
         />
         <div className="mt-10 overflow-x-auto">
           <table className="w-full min-w-[860px] border-collapse text-sm">
@@ -297,7 +297,7 @@ export default function CarePlansPage() {
       <CtaBand
         eyebrow="No pressure, no obligation"
         title="Ready to put it on autopilot?"
-        description="Tell us about your home and we'll recommend the right plan — free, within one business day."
+        description="Tell us about your home and we'll recommend the right plan, free, within one business day."
         primaryLabel="Get a Free Quote"
         primaryHref="/quote?plan=care-plan"
       />

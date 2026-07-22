@@ -34,7 +34,7 @@ export function generateMetadata({
   const role = getRole(params.slug);
   if (!role || !role.active) return {};
   return {
-    title: `${role.title} — ${divisionLabel[role.division]}`,
+    title: `${role.title}, ${divisionLabel[role.division]}`,
     description: role.shortPitch,
     alternates: { canonical: `/careers/${role.slug}` },
   };
@@ -44,7 +44,7 @@ export default function RoleDetailPage({ params }: { params: Params }) {
   const role = getRole(params.slug);
   if (!role || !role.active) notFound();
 
-  // JobPosting JSON-LD — pages Google Jobs can pick up.
+  // JobPosting JSON-LD, pages Google Jobs can pick up.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "JobPosting",

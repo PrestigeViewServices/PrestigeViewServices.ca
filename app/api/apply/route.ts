@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const { hp: _hp, ...payload } = parsed.data;
 
   // Write to DB when configured. Email is always sent so applications are
-  // never silently lost — even if Postgres is down.
+  // never silently lost, even if Postgres is down.
   const db = getDb();
   if (db) {
     try {
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     console.error("Application email send failed", err);
     if (!db) {
       return NextResponse.json(
-        { ok: false, error: "Could not deliver application — please email us." },
+        { ok: false, error: "Could not deliver application, please email us." },
         { status: 500 }
       );
     }

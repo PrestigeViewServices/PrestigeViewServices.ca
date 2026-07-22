@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
+import { PromoBanner } from "@/components/home/promo-banner";
+import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
 import { OffersBand } from "@/components/home/offers-band";
@@ -16,15 +18,15 @@ import { homeFaqs } from "@/lib/content/faq";
 
 export const metadata: Metadata = {
   title:
-    "Lawn Care, Window Cleaning & Snow Removal in Petawawa, Pembroke & the Ottawa Valley",
+    "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
   description:
-    "Prestige View Services — Petawawa & Pembroke's year-round property care company. Lawn mowing, window cleaning, gutter cleaning, pressure washing, junk removal, and snow removal across the Ottawa Valley. Free quote in one business day.",
+    "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Serving Petawawa, Pembroke, Deep River & the Ottawa Valley. Get a free quote.",
   alternates: { canonical: "/" },
   openGraph: {
     title:
-      "Lawn, Window & Snow Care in Petawawa & Pembroke · Prestige View Services",
+      "The Ottawa Valley's Property Care Team | Prestige View Services",
     description:
-      "Year-round property care for Petawawa, Pembroke and the Ottawa Valley — one local crew, recurring schedule, one easy bill.",
+      "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
     url: "/",
     type: "website",
   },
@@ -33,12 +35,16 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      <PromoBanner />
       <Hero />
       <TrustMarquee />
       <Reveal>
         <ServicesOverview />
       </Reveal>
       <Reveal delay={60}>
+        <VeteranCallout />
+      </Reveal>
+      <Reveal>
         <OffersBand />
       </Reveal>
       <Reveal>
@@ -64,7 +70,7 @@ export default function HomePage() {
           items={homeFaqs}
           eyebrow="Questions Petawawa & Pembroke Homeowners Ask"
           title="Frequently Asked Questions"
-          description="Quick answers about how PVS books, prices, and shows up — across the Ottawa Valley."
+          description="Quick answers about how PVS books, prices, and shows up across the Ottawa Valley."
         />
       </Reveal>
       <Reveal>

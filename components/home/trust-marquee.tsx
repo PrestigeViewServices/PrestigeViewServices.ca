@@ -16,11 +16,11 @@ const chips = [
   { icon: ShieldCheck, label: "Fully Insured" },
   { icon: MapPin, label: "Petawawa · Pembroke · Deep River" },
   { icon: Star, label: "5-Star Average" },
-  { icon: Leaf, label: "LawnPros" },
-  { icon: Sparkles, label: "ClearView" },
-  { icon: Snowflake, label: "SnowLand" },
+  { icon: HeartHandshake, label: "Veteran Operated" },
+  { icon: Sparkles, label: "Window Cleaning" },
+  { icon: Leaf, label: "Lawn Care & Landscaping" },
+  { icon: Snowflake, label: "Snow Removal" },
   { icon: Droplets, label: "Pressure Washing" },
-  { icon: HeartHandshake, label: "Satisfaction Guarantee" },
   { icon: MapPin, label: "Ottawa Valley" },
 ];
 

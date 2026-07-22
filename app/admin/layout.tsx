@@ -26,7 +26,7 @@ export default async function AdminLayout({
       <section className="container-max py-16">
         <NotConfigured
           service="Clerk"
-          reason="Admin authentication is provided by Clerk. Open SETUP.md for the click-by-click setup — about 10 minutes."
+          reason="Admin authentication is provided by Clerk. Open SETUP.md for the click-by-click setup, about 10 minutes."
           envVars={ADMIN_ENV_VARS}
           missing={ADMIN_ENV_VARS.filter((k) => !process.env[k])}
           docHref="https://clerk.com/docs/quickstarts/nextjs"

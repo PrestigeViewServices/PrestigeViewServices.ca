@@ -10,7 +10,7 @@ import {
 
 export const runtime = "nodejs";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB — Vercel serverless body cap is 4.5 MB
+const MAX_BYTES = 5 * 1024 * 1024; // 5 MB, Vercel serverless body cap is 4.5 MB
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
 
 const metadataSchema = z.object({
@@ -28,11 +28,11 @@ const metadataSchema = z.object({
  * POST /api/admin/photos
  *
  * Multipart form with:
- *   file       — image (jpeg/png/webp, ≤ 5 MB)
- *   alt        — required alt text
- *   section    — gallery section slug (e.g. "home")
- *   caption    — optional caption
- *   sortOrder  — optional integer, lower = earlier
+ *   file, image (jpeg/png/webp, ≤ 5 MB)
+ *   alt, required alt text
+ *   section, gallery section slug (e.g. "home")
+ *   caption, optional caption
+ *   sortOrder, optional integer, lower = earlier
  *
  * Role-gated to ultimate_admin + super_admin. Uploads to Cloudinary, then
  * persists a GalleryImage record.
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
-      { ok: false, error: `File too large — max ${Math.round(MAX_BYTES / 1024 / 1024)} MB` },
+      { ok: false, error: `File too large, max ${Math.round(MAX_BYTES / 1024 / 1024)} MB` },
       { status: 413 }
     );
   }

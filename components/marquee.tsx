@@ -16,7 +16,7 @@ type MarqueeProps = {
 /**
  * Edge-faded auto-scrolling marquee. Pure CSS animation on a duplicated track,
  * so no JS frame budget. Respects prefers-reduced-motion via the
- * `motion-reduce:animate-none` Tailwind variant — content stays visible,
+ * `motion-reduce:animate-none` Tailwind variant, content stays visible,
  * just frozen.
  */
 export function Marquee({

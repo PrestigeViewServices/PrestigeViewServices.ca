@@ -15,7 +15,7 @@ import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Prestige View Services",
+  title: "Privacy Policy, Prestige View Services",
   description:
     "How Prestige View Services collects, uses, and protects personal information from customers across Petawawa, Pembroke, and the Ottawa Valley.",
   alternates: { canonical: "/privacy" },
@@ -77,31 +77,31 @@ export default function PrivacyPage() {
               </p>
               <ul>
                 <li>
-                  <strong>Contact details</strong> — your name, phone number, email
+                  <strong>Contact details</strong>, your name, phone number, email
                   address, and the service address where work will be performed.
                 </li>
                 <li>
-                  <strong>Service details</strong> — the property type, lot size,
+                  <strong>Service details</strong>, the property type, lot size,
                   service history, photos you upload, access notes, and any
                   preferences you share with us.
                 </li>
                 <li>
-                  <strong>Payment information</strong> — when you pay an invoice, our
+                  <strong>Payment information</strong>, when you pay an invoice, our
                   payment processor handles your card or bank details. We do not
                   store full card numbers on our servers.
                 </li>
                 <li>
-                  <strong>Account information</strong> — if you create a customer
+                  <strong>Account information</strong>, if you create a customer
                   portal account, we store your login credentials, communication
                   preferences, and quote/invoice history.
                 </li>
                 <li>
-                  <strong>Job site information</strong> — before-and-after photos
+                  <strong>Job site information</strong>, before-and-after photos
                   taken by our crews to document completed work. We will not publish
                   identifiable photos of your property without your consent.
                 </li>
                 <li>
-                  <strong>Website usage</strong> — pages viewed, device type,
+                  <strong>Website usage</strong>, pages viewed, device type,
                   approximate location, and referral source, collected through
                   cookies and analytics tools described below.
                 </li>
@@ -138,24 +138,23 @@ export default function PrivacyPage() {
               </p>
               <ul>
                 <li>
-                  <strong>Payment processing</strong> — secure third-party
+                  <strong>Payment processing</strong>, secure third-party
                   processors that handle card and bank payments on our behalf.
                 </li>
                 <li>
-                  <strong>Scheduling, CRM, and field-service tools</strong> — to
+                  <strong>Scheduling, CRM, and field-service tools</strong>, to
                   manage quotes, jobs, routes, and invoices.
                 </li>
                 <li>
-                  <strong>Email and SMS providers</strong> — to deliver booking
+                  <strong>Email and SMS providers</strong>, to deliver booking
                   confirmations, service reminders, and account messages.
                 </li>
                 <li>
-                  <strong>Website hosting and analytics</strong> — to operate
+                  <strong>Website hosting and analytics</strong>, to operate
                   prestigeviewservices.ca and understand how visitors use it.
                 </li>
                 <li>
-                  <strong>Insurance, legal, and accounting professionals</strong> —
-                  when needed to manage claims, disputes, or tax obligations.
+                  <strong>Insurance, legal, and accounting professionals</strong>, when needed to manage claims, disputes, or tax obligations.
                 </li>
               </ul>
               <p>
@@ -171,7 +170,7 @@ export default function PrivacyPage() {
               </p>
               <ul>
                 <li>
-                  <strong>Essential cookies</strong> keep the site working — for
+                  <strong>Essential cookies</strong> keep the site working, for
                   example, remembering that you're signed in to the customer portal
                   or that you've dismissed a banner.
                 </li>
@@ -184,7 +183,7 @@ export default function PrivacyPage() {
               </ul>
               <p>
                 You can block or delete cookies through your browser settings. Some
-                parts of the site — such as the customer portal — may not work
+                parts of the site, such as the customer portal, may not work
                 properly without essential cookies.
               </p>
             </Policy>
@@ -251,20 +250,18 @@ export default function PrivacyPage() {
               </p>
               <ul>
                 <li>
-                  <strong>Quote requests that don't become customers</strong> —
-                  typically deleted within 24 months.
+                  <strong>Quote requests that don't become customers</strong>, typically deleted within 24 months.
                 </li>
                 <li>
-                  <strong>Active customer records</strong> — kept for the life of
+                  <strong>Active customer records</strong>, kept for the life of
                   the account and for as long as we continue to provide service.
                 </li>
                 <li>
-                  <strong>Invoices, tax records, and insurance records</strong> —
-                  kept for at least seven years to meet Canadian tax and
+                  <strong>Invoices, tax records, and insurance records</strong>, kept for at least seven years to meet Canadian tax and
                   recordkeeping requirements.
                 </li>
                 <li>
-                  <strong>Job site photos</strong> — kept indefinitely for our
+                  <strong>Job site photos</strong>, kept indefinitely for our
                   internal records, unless you ask us to delete photos of your
                   property.
                 </li>

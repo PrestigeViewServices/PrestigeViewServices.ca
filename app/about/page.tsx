@@ -5,7 +5,7 @@ import { CtaBand } from "@/components/cta-band";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About PVS — Locally Owned Ottawa Valley Property Care",
+  title: "About PVS, Locally Owned Ottawa Valley Property Care",
   description:
     "Prestige View Services is a locally owned property care company serving Petawawa, Pembroke, and the Ottawa Valley year-round.",
   alternates: { canonical: "/about" },
@@ -20,7 +20,7 @@ const values = [
   {
     icon: ShieldCheck,
     title: "Insured & Professional",
-    body: "Liability coverage on every job, uniformed crews, and transparent quotes — no surprises.",
+    body: "Liability coverage on every job, uniformed crews, and transparent quotes, no surprises.",
   },
   {
     icon: HeartHandshake,
@@ -30,7 +30,7 @@ const values = [
   {
     icon: Users,
     title: "One Account, Every Season",
-    body: "Lawn, exterior, and snow — coordinated under one team, one point of contact, one bill.",
+    body: "Lawn, exterior, and snow, coordinated under one team, one point of contact, one bill.",
   },
 ];
 
@@ -41,7 +41,7 @@ export default function AboutPage() {
         <SectionHeading
           eyebrow="About PVS"
           title="Property Care, Modernized for the Ottawa Valley"
-          description={`${siteConfig.name} was built around a simple idea: homeowners want their property looked after by people they trust, on a schedule they don't have to think about. That's what we do — year-round.`}
+          description={`${siteConfig.name} was built around a simple idea: homeowners want their property looked after by people they trust, on a schedule they don't have to think about. That's what we do, year-round.`}
         />
       </section>
 

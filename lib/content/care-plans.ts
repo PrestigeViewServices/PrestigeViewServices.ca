@@ -1,5 +1,5 @@
 /**
- * Care Plans, one-off Packages & à-la-carte pricing — SINGLE SOURCE OF TRUTH.
+ * Care Plans, one-off Packages & à-la-carte pricing, SINGLE SOURCE OF TRUTH.
  *
  * ✏️  TO EDIT PRICES: change the numbers in this file only. Every surface that
  *     shows a plan/package price (the /care-plans page, the per-service
@@ -7,8 +7,7 @@
  *
  * 💳  BILLING PLACEHOLDER: nothing here charges a card. Every CTA routes to the
  *     existing lead-capture flow at /quote (see `quoteHref`). When recurring
- *     billing is ready, wire Stripe/Square subscription creation at that CTA —
- *     search this repo for "BILLING PLACEHOLDER" to find the touch points.
+ *     billing is ready, wire Stripe/Square subscription creation at that CTA, *     search this repo for "BILLING PLACEHOLDER" to find the touch points.
  *
  * Prices are stored as whole CAD dollars (these are round marketing numbers,
  * not invoice math, so cents would be noise).
@@ -18,7 +17,7 @@ import type { LucideIcon } from "lucide-react";
 import { Home, Sparkles, Droplets, Waves, Frame } from "lucide-react";
 
 /* ----------------------------------------------------------------------------
- * À-la-carte services — the building blocks shared by plans, packages, and the
+ * À-la-carte services, the building blocks shared by plans, packages, and the
  * Build-Your-Own calculator.
  * ------------------------------------------------------------------------- */
 
@@ -32,7 +31,7 @@ export type ServiceDef = {
   oneOffFrom: number;
   /**
    * Build-Your-Own monthly building-block price. The cheapest of these is the
-   * "from $32/mo" headline on the Build-Your-Own card — keep them in sync.
+   * "from $32/mo" headline on the Build-Your-Own card, keep them in sync.
    */
   monthlyFrom: number;
 };
@@ -108,7 +107,7 @@ export type CarePlan = {
   includes: { icon: LucideIcon; label: string }[];
   bestFor: string;
   mostPopular?: boolean;
-  /** Service calendar — how the plan spreads across the season. */
+  /** Service calendar, how the plan spreads across the season. */
   calendar: CalendarStop[];
 };
 
@@ -120,7 +119,7 @@ export const CARE_PLANS: CarePlan[] = [
     tagline: "Keep your siding fresh and your gutters flowing.",
     includes: [
       { icon: Home, label: "House soft-wash (spring)" },
-      { icon: Droplets, label: "Gutter clean — spring & fall" },
+      { icon: Droplets, label: "Gutter clean, spring & fall" },
     ],
     bestFor: "Dirty siding + treed / leafy lots",
     calendar: [
@@ -135,7 +134,7 @@ export const CARE_PLANS: CarePlan[] = [
     tagline: "Curb appeal up front, a clear view all season.",
     includes: [
       { icon: Home, label: "House soft-wash (spring)" },
-      { icon: Sparkles, label: "Exterior windows — spring & fall" },
+      { icon: Sparkles, label: "Exterior windows, spring & fall" },
     ],
     bestFor: "Curb appeal + a clear view",
     calendar: [
@@ -149,7 +148,7 @@ export const CARE_PLANS: CarePlan[] = [
     monthly: 39,
     tagline: "Crystal-clear exterior glass, spring and fall.",
     includes: [
-      { icon: Sparkles, label: "Exterior windows — spring & fall (2×)" },
+      { icon: Sparkles, label: "Exterior windows, spring & fall (2×)" },
       { icon: Frame, label: "Sills & frames wiped each visit" },
     ],
     bestFor: "A clear view, windows only",
@@ -162,7 +161,7 @@ export const CARE_PLANS: CarePlan[] = [
     slug: "crystal-clear",
     name: "Crystal Clear Plan",
     monthly: 59,
-    tagline: "Spotless glass inside and out — plus screens & tracks.",
+    tagline: "Spotless glass inside and out, plus screens & tracks.",
     includes: [
       { icon: Sparkles, label: "Windows inside & out (2×)" },
       { icon: Frame, label: "Screens, tracks & sills detailed" },
@@ -181,7 +180,7 @@ export const CARE_PLANS: CarePlan[] = [
     name: "Total Exterior Plan",
     monthly: 119,
     mostPopular: true,
-    tagline: "The whole exterior, handled — nothing left on your list.",
+    tagline: "The whole exterior, handled, nothing left on your list.",
     includes: [
       { icon: Home, label: "House wash" },
       { icon: Sparkles, label: "Exterior windows (2×)" },
@@ -201,7 +200,7 @@ export const CARE_PLANS: CarePlan[] = [
     monthly: 32,
     isFrom: true,
     tagline:
-      "Pick any services — we space them across the season on one monthly payment.",
+      "Pick any services, we space them across the season on one monthly payment.",
     includes: [
       { icon: Sparkles, label: "Any mix of services" },
       { icon: Droplets, label: "Add a 2nd service → 10% off" },
@@ -220,9 +219,9 @@ export function getCarePlan(slug: CarePlanSlug): CarePlan | undefined {
   return CARE_PLANS.find((p) => p.slug === slug);
 }
 
-/** Perks every Care Plan includes — shown once, applies to all. */
+/** Perks every Care Plan includes, shown once, applies to all. */
 export const PLAN_PERKS: string[] = [
-  "We schedule & call you — you don't lift a finger",
+  "We schedule & call you, you don't lift a finger",
   "Priority booking ahead of one-off jobs",
   "10% off any extra service",
   "Locked-in pricing for your term",
@@ -262,7 +261,7 @@ export const ONE_OFF_PACKAGES: OneOffPackage[] = [
     name: "Full Shine",
     price: 849,
     mostPopular: true,
-    tagline: "The popular all-rounder — house, glass, and gutters in one visit.",
+    tagline: "The popular all-rounder, house, glass, and gutters in one visit.",
     includes: [
       { icon: Home, label: "House wash" },
       { icon: Sparkles, label: "Exterior windows" },
@@ -274,10 +273,10 @@ export const ONE_OFF_PACKAGES: OneOffPackage[] = [
     slug: "top-to-bottom",
     name: "Top-to-Bottom",
     price: 1099,
-    tagline: "Everything we do, top to bottom — inside-and-out glass included.",
+    tagline: "Everything we do, top to bottom, inside-and-out glass included.",
     includes: [
       { icon: Home, label: "House wash" },
-      { icon: Sparkles, label: "Windows — inside & out" },
+      { icon: Sparkles, label: "Windows, inside & out" },
       { icon: Droplets, label: "Gutter clean" },
       { icon: Waves, label: "Driveway wash" },
     ],
@@ -305,7 +304,7 @@ export const DISCOUNT_BADGES: DiscountBadge[] = [
     id: "military",
     emoji: "🎖️",
     title: "Military / Veteran / First Responder",
-    detail: "10% off — proud to serve those who serve (Petawawa & CFB).",
+    detail: "10% off, proud to serve those who serve (Petawawa & CFB).",
   },
   {
     id: "neighbour",
@@ -316,7 +315,7 @@ export const DISCOUNT_BADGES: DiscountBadge[] = [
 ];
 
 /* ----------------------------------------------------------------------------
- * Placement map — which plans / à-la-carte items surface on which service page.
+ * Placement map, which plans / à-la-carte items surface on which service page.
  * The service page reads this; if a slug isn't here, nothing extra renders
  * (so LawnPros & SnowLand pages are untouched).
  * ------------------------------------------------------------------------- */
@@ -365,7 +364,7 @@ export function formatDollars(dollars: number): string {
 /**
  * Build a lead-capture link for a plan/package CTA.
  *
- * 💳 BILLING PLACEHOLDER — routes to the existing /quote flow only. The `plan`
+ * 💳 BILLING PLACEHOLDER, routes to the existing /quote flow only. The `plan`
  * / `package` params are harmless today and let us pre-select the offer when a
  * Stripe/Square subscription checkout is added later.
  */

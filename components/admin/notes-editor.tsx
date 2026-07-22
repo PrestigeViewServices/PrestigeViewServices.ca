@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
  * Inline notes editor for an Application row. Read-only by default; click
  * "Edit" to enter edit mode. Save calls the passed-in server action.
  *
- * Notes are factual only — don't treat this as a free-form chat channel.
+ * Notes are factual only, don't treat this as a free-form chat channel.
  */
 export function NotesEditor({
   rowId,
@@ -74,7 +74,7 @@ export function NotesEditor({
         rows={3}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder="Factual notes only — reference checks, scheduling constraints, etc."
+        placeholder="Factual notes only, reference checks, scheduling constraints, etc."
       />
       <div className="flex items-center gap-2">
         <Button size="sm" onClick={save} disabled={isPending}>

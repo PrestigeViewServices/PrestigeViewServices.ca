@@ -16,7 +16,7 @@ import {
 
 /** Sections the public site reads from. Extend as you add gallery surfaces. */
 const SECTIONS = [
-  { value: "home", label: "Home — Recent Work strip" },
+  { value: "home", label: "Home, Recent Work strip" },
 ] as const;
 
 export function PhotoUploader() {
@@ -146,7 +146,7 @@ export function PhotoUploader() {
       {status === "success" && (
         <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 flex items-start gap-2 text-sm text-emerald-300">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>Uploaded — it's live on the public site.</span>
+          <span>Uploaded, it's live on the public site.</span>
         </div>
       )}
 

@@ -99,7 +99,7 @@ export function PlanCard({
         </div>
         {startsAt && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Final price scoped to your home &amp; siding — free quote.
+            Final price scoped to your home &amp; siding, free quote.
           </p>
         )}
       </div>

@@ -16,6 +16,7 @@ import {
   CalendarCheck,
   Footprints,
   Shovel,
+  TreeDeciduous,
 } from "lucide-react";
 import type { DivisionSlug } from "./divisions";
 
@@ -26,7 +27,7 @@ export type Service = {
   shortDescription: string;
   features: string[];
   icon: LucideIcon;
-  /** Cross-sell hints — slugs of services often purchased together */
+  /** Cross-sell hints, slugs of services often purchased together */
   pairsWith?: string[];
 };
 
@@ -49,25 +50,40 @@ export const services: Service[] = [
   },
   {
     slug: "landscaping-services",
-    name: "Landscaping Services",
+    name: "Landscaping Projects",
     division: "lawnpros",
     shortDescription:
-      "Mulch refresh, crisp bed edges, and seasonal planting — design-light landscaping handled by the crew that already maintains your property.",
+      "Garden bed refreshes, mulching, edging, planting, and small paver repairs. Big curb appeal without a big contractor project.",
     features: [
-      "Mulch top-up & fresh installations",
-      "Bed & border edging",
+      "Garden bed refresh & mulch top-up",
+      "Crisp bed & border edging",
       "Perennial, shrub & seasonal planting",
-      "Free on-site estimate & design notes",
+      "Sod patches & small paver repairs",
     ],
     icon: Shovel,
     pairsWith: ["lawn-mowing", "spring-cleanup", "property-maintenance"],
+  },
+  {
+    slug: "hedge-trimming",
+    name: "Hedge Trimming & Shrub Care",
+    division: "lawnpros",
+    shortDescription:
+      "Sharp, clean lines that make the whole property look maintained, with cuts timed to keep your hedges healthy.",
+    features: [
+      "Crisp, level hedge lines",
+      "Shrub shaping & health pruning",
+      "Seasonal timing for plant health",
+      "Full clipping cleanup & haul-away",
+    ],
+    icon: TreeDeciduous,
+    pairsWith: ["lawn-mowing", "landscaping-services", "window-cleaning"],
   },
   {
     slug: "spring-cleanup",
     name: "Spring Cleanups",
     division: "lawnpros",
     shortDescription:
-      "Get your yard ready for the season — debris removal, edging, and first cut.",
+      "Get your yard ready for the season: debris removal, edging, and first cut.",
     features: [
       "Winter debris & leaf removal",
       "Bed edging & cleanup",
@@ -76,6 +92,21 @@ export const services: Service[] = [
     ],
     icon: Sprout,
     pairsWith: ["lawn-mowing", "aeration", "gutter-cleaning"],
+  },
+  {
+    slug: "fall-cleanup",
+    name: "Fall Cleanups",
+    division: "lawnpros",
+    shortDescription:
+      "Leaves raked and hauled, beds cut back, and a final cut that sets your lawn up to win next spring.",
+    features: [
+      "Full leaf & debris removal",
+      "Final cut & lawn cut-down",
+      "Perennial & bed cut-back",
+      "Pairs with fall gutter cleaning",
+    ],
+    icon: Leaf,
+    pairsWith: ["gutter-cleaning", "lawn-mowing", "snow-removal"],
   },
   {
     slug: "aeration",
@@ -127,7 +158,7 @@ export const services: Service[] = [
     name: "Property Maintenance",
     division: "lawnpros",
     shortDescription:
-      "Ongoing seasonal upkeep — one crew, one bill, every visit.",
+      "Ongoing seasonal upkeep, one crew, one bill, every visit.",
     features: [
       "Custom recurring plan",
       "Trim, edge & cleanup",
@@ -174,7 +205,7 @@ export const services: Service[] = [
     name: "Pressure Washing",
     division: "clearview",
     shortDescription:
-      "Driveways, walkways, decks & patios — restored, not just rinsed.",
+      "Driveways, walkways, decks & patios restored, not just rinsed.",
     features: [
       "Driveway restoration",
       "Walkway cleaning",
@@ -204,7 +235,7 @@ export const services: Service[] = [
     name: "Property Touch-Ups & Maintenance",
     division: "clearview",
     shortDescription:
-      "Seasonal exterior upkeep — book standalone or add to any service.",
+      "Seasonal exterior upkeep, book standalone or add to any service.",
     features: [
       "Seasonal exterior upkeep",
       "Standalone or add-on",
@@ -234,7 +265,7 @@ export const services: Service[] = [
     name: "Property Cleanouts",
     division: "clearview",
     shortDescription:
-      "Move-out, estate, garage, and renovation cleanouts — done in one sweep.",
+      "Move-out, estate, garage, and renovation cleanouts, done in one sweep.",
     features: [
       "Move-out cleanouts",
       "Estate & garage clearing",

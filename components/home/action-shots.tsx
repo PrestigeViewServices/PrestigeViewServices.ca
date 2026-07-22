@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/section-heading";
 
 /**
- * Horizontal scroll-snap gallery of real PVS ClearView action shots —
- * crew on roofs, squeegee work, skylight before/afters — leading into a
+ * Horizontal scroll-snap gallery of real PVS action shots (crew on roofs,
+ * squeegee work, skylight before/afters), leading into a
  * "Get a Free Quote" CTA card as the final slide. Native CSS scroll-snap, no
  * client JS, full-bleed image cards that work as a swipeable strip on mobile
  * and as a horizontal scroll on desktop.
@@ -51,7 +51,7 @@ export function ActionShots() {
         <SectionHeading
           eyebrow="In the Field"
           title="Action Shots from the Crew"
-          description="Real PVS jobs across Petawawa, Pembroke, and the Ottawa Valley — swipe to see the work, then book your own."
+          description="Real PVS jobs across Petawawa, Pembroke, and the Ottawa Valley. Swipe to see the work, then book your own."
           align="left"
         />
       </div>
@@ -82,7 +82,7 @@ export function ActionShots() {
           </article>
         ))}
 
-        {/* Final CTA slide — the scroll lands the visitor on a quote ask. */}
+        {/* Final CTA slide, the scroll lands the visitor on a quote ask. */}
         <article className="snap-start shrink-0 w-[78%] sm:w-[52%] lg:w-[36%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent flex flex-col justify-between p-6 sm:p-8">
           <div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/20 text-primary">
             <Sparkles className="h-5 w-5" />

@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
   const { hp: _hp, ...payload } = parsed.data;
 
-  // Server-side recompute — never trust a client-supplied estimate.
+  // Server-side recompute, never trust a client-supplied estimate.
   const { low, high } = estimateCents(
     payload.drivewayTier,
     payload.drivewaySize,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     // Same pattern as /api/apply: log so submissions are never silently lost
     // when the DB isn't configured.
     // eslint-disable-next-line no-console
-    console.log("[PVS winter reservation — no DB]", {
+    console.log("[PVS winter reservation, no DB]", {
       receivedAt: new Date().toISOString(),
       estimate: { low, high },
       ...payload,
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     // eslint-disable-next-line no-console
     console.error("Winter reservation DB write failed", err);
     return NextResponse.json(
-      { ok: false, error: "Could not save your reservation — please call us." },
+      { ok: false, error: "Could not save your reservation, please call us." },
       { status: 500 }
     );
   }

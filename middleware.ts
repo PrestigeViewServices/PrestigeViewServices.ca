@@ -9,6 +9,7 @@ import {
   canManagePhotos,
   isUltimateAdmin,
   canManageAdminGeneral,
+  canCanvass,
   type Role,
 } from "@/lib/roles";
 
@@ -45,6 +46,7 @@ const isAdminGeneralRoute = createRouteMatcher([
   "/admin/loyalty(.*)",
 ]);
 const isPortalRoute = createRouteMatcher(["/portal(.*)"]);
+const isRepRoute = createRouteMatcher(["/rep(.*)"]);
 const isAccountRoute = createRouteMatcher(["/account(.*)"]);
 const isPostSignInRoute = createRouteMatcher(["/post-sign-in"]);
 
@@ -60,6 +62,7 @@ export default CLERK_CONFIGURED
   const gated =
     isAdminRoute(req) ||
     isPortalRoute(req) ||
+    isRepRoute(req) ||
     isAccountRoute(req) ||
     isPostSignInRoute(req);
   if (!gated) return;
@@ -93,6 +96,10 @@ export default CLERK_CONFIGURED
   }
   if (isPortalRoute(req)) {
     if (role !== "employee") return bounceToPostSignIn(req.url);
+    return;
+  }
+  if (isRepRoute(req)) {
+    if (!canCanvass(role)) return bounceToPostSignIn(req.url);
     return;
   }
   if (isAccountRoute(req)) {

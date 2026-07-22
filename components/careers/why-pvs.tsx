@@ -22,7 +22,7 @@ const reasons = [
   {
     icon: GraduationCap,
     title: "We train you",
-    body: "Ladders, equipment, customer interaction. You don't need experience — you need work ethic.",
+    body: "Ladders, equipment, customer interaction. You don't need experience, you need work ethic.",
   },
   {
     icon: Wrench,

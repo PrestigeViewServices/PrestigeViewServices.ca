@@ -14,7 +14,7 @@ export const metadata = {
 
 // TODO: wire to automated send (Twilio SMS / Resend email + Aurora hook)
 // once we've decided which channel fits the workflow best. For Phase 1,
-// templates are copy-only — AG sends them by hand from his phone or email
+// templates are copy-only, AG sends them by hand from his phone or email
 // client. That's deliberate: lets us iterate on copy without engineering.
 
 const SMS_TEMPLATE = (url: string) =>
@@ -50,7 +50,7 @@ export default async function ReviewsAdminPage() {
           Collect Google reviews
         </h1>
         <p className="mt-1.5 text-muted-foreground">
-          Everything points at one Google review URL —{" "}
+          Everything points at one Google review URL, {" "}
           <code className="text-foreground/90 break-all">{url}</code>. Update
           it in <code>lib/site.ts</code> if Google ever regenerates the link.
         </p>
@@ -86,7 +86,7 @@ export default async function ReviewsAdminPage() {
             </h2>
             <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
               1024 × 1024 PNG. Big enough for door hangers, business cards,
-              truck decals, and invoice corners — and it stays scannable
+              truck decals, and invoice corners, and it stays scannable
               even if part of it gets scuffed.
             </p>
             <ul className="mt-5 space-y-2 text-sm">
@@ -124,8 +124,7 @@ export default async function ReviewsAdminPage() {
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Copy a template, replace <code>{"{first name}"}</code>, paste it
-            into the customer's preferred channel. No auto-send in Phase 1 —
-            it's intentional, so we can tune copy without a deploy.
+            into the customer's preferred channel. No auto-send in Phase 1, it's intentional, so we can tune copy without a deploy.
           </p>
         </header>
 

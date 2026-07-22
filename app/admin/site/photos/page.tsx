@@ -85,8 +85,7 @@ export default async function PhotosPage() {
                 className="underline"
               >
                 cloudinary.com
-              </a>{" "}
-              — the free tier is plenty for Phase 1.
+              </a>{" "}, the free tier is plenty for Phase 1.
             </p>
           </div>
         </div>

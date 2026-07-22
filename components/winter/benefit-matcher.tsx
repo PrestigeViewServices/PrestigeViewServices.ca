@@ -15,7 +15,7 @@ import {
  * Customer-facing benefits → tier eligibility map. The labels are written for
  * end-users (concrete value they care about); the tiers[] array lists which
  * tier slugs include that benefit. Keep in sync with the `features` arrays in
- * lib/content/winter-packages.ts — this file is the marketing-facing mirror.
+ * lib/content/winter-packages.ts, this file is the marketing-facing mirror.
  */
 type DrivewayBenefit = {
   id: string;
@@ -27,7 +27,7 @@ type DrivewayBenefit = {
 const DRIVEWAY_BENEFITS: DrivewayBenefit[] = [
   {
     id: "auto-dispatch",
-    label: "Auto-dispatch — no calling us",
+    label: "Auto-dispatch, no calling us",
     hint: "We trigger on snowfall, you don't have to text",
     tiers: ["SILVER", "GOLD", "PLATINUM"],
   },
@@ -51,7 +51,7 @@ const DRIVEWAY_BENEFITS: DrivewayBenefit[] = [
   },
   {
     id: "priority",
-    label: "Priority routing — done before work",
+    label: "Priority routing, done before work",
     hint: "Routed first so you can leave on time",
     tiers: ["GOLD", "PLATINUM"],
   },
@@ -126,7 +126,7 @@ function pickDriveway(selected: string[]): DrivewayTier {
     });
     if (allCovered) return tier;
   }
-  // Selected benefits include something no tier offers — fall back to top.
+  // Selected benefits include something no tier offers, fall back to top.
   return "PLATINUM";
 }
 
@@ -209,7 +209,7 @@ export function BenefitMatcher() {
             What do you need this winter?
           </h2>
           <p className="mt-2 max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Pick the things that matter — we&apos;ll match the smallest package
+            Pick the things that matter, we&apos;ll match the smallest package
             that covers everything you tick. Change your mind anytime.
           </p>
         </div>

@@ -16,11 +16,11 @@ import {
 const REDUCE_MOTION = { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const };
 
 /**
- * Build-Your-Own live calculator — the centerpiece.
+ * Build-Your-Own live calculator, the centerpiece.
  *
  * Toggle services on/off; the monthly price recalculates instantly and applies
  * the stacking discount (2 = 10% off, 3+ = 15% off). No page reload, no submit
- * to see the number — the math lives in `buildYourOwnTotal` so the UI and the
+ * to see the number, the math lives in `buildYourOwnTotal` so the UI and the
  * data file never drift.
  */
 export function BuildYourOwn() {
@@ -72,7 +72,7 @@ export function BuildYourOwn() {
                   <Checkbox
                     checked={isOn}
                     onCheckedChange={() => toggle(s.key)}
-                    aria-label={`Add ${s.label} — from ${formatDollars(
+                    aria-label={`Add ${s.label}, from ${formatDollars(
                       s.monthlyFrom
                     )} per month`}
                   />
@@ -125,7 +125,7 @@ export function BuildYourOwn() {
               >
                 <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
                   <TrendingDown className="h-3.5 w-3.5" />
-                  {Math.round(discountRate * 100)}% bundle discount —{" "}
+                  {Math.round(discountRate * 100)}% bundle discount, {" "}
                   <span className="tabular-nums">
                     save {formatDollars(savings)}/mo
                   </span>
@@ -162,7 +162,7 @@ export function BuildYourOwn() {
               </a>
             </Button>
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              No payment today — we confirm details and lock your price.
+              No payment today, we confirm details and lock your price.
             </p>
           </div>
         </div>

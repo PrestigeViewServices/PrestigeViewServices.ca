@@ -13,7 +13,7 @@ export const runtime = "nodejs";
  * Subscribe this endpoint in the Clerk dashboard:
  *   user.created, user.updated, user.deleted
  *
- * It mirrors the user into our `User` table and — on creation — sets
+ * It mirrors the user into our `User` table and, on creation, sets
  * publicMetadata.role to "ultimate_admin" if the email is on the
  * ULTIMATE_ADMIN_EMAILS allowlist (env-only, never UI-assignable).
  * Default new-user role is "customer".
@@ -117,7 +117,9 @@ async function upsertUser(
     | "ULTIMATE_ADMIN"
     | "SUPER_ADMIN"
     | "ADMIN"
+    | "MANAGER"
     | "EMPLOYEE"
+    | "REP"
     | "CUSTOMER" = "CUSTOMER";
   const existing = await db.user.findUnique({ where: { id: data.id } });
   if (existing) {

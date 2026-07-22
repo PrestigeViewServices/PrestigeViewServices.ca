@@ -7,14 +7,14 @@ import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Get a Free Quote — Lawn, Window, Snow Services",
+  title: "Get a Free Quote, Lawn, Window, Snow Services",
   description:
-    "Tell us about your property and the service you need. We'll respond within one business day with a transparent quote — no obligation.",
+    "Tell us about your property and the service you need. We'll respond within one business day with a transparent quote, no obligation.",
   alternates: { canonical: "/quote" },
 };
 
 // Popular service combos surfaced as a hint below the form. Aurora controls
-// the form's service field, so this is text-only — mention add-ons in the
+// the form's service field, so this is text-only, mention add-ons in the
 // form's notes field and the team will price them together.
 const popularBundles = [
   "Lawn Mowing + Window Cleaning",
@@ -29,7 +29,7 @@ export default function QuotePage() {
       <SectionHeading
         eyebrow="Free · No Obligation"
         title="Request a Quote"
-        description="Fully insured. Local to the Ottawa Valley. We respond within one business day — no pressure, no surprise fees."
+        description="Fully insured. Local to the Ottawa Valley. We respond within one business day, no pressure, no surprise fees."
       />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-12">
@@ -59,11 +59,11 @@ export default function QuotePage() {
               ))}
             </ul>
             <p className="mt-3 text-xs text-muted-foreground">
-              Add any extras in the form's notes — we'll price them together.
+              Add any extras in the form's notes, we'll price them together.
             </p>
           </aside>
 
-          {/* "While you wait" nudge — Aurora's success state lives inside the
+          {/* "While you wait" nudge, Aurora's success state lives inside the
               iframe so we can't hook it directly. This is the next-best
               touch point for happy returning customers. */}
           <ReviewCta
@@ -77,7 +77,7 @@ export default function QuotePage() {
           <div className="surface-card p-6">
             <h2 className="text-lg font-semibold">Prefer to talk?</h2>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Skip the form — call or email us directly.
+              Skip the form, call or email us directly.
             </p>
             <ul className="mt-5 space-y-3 text-sm">
               <li className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function QuotePage() {
                   <li>
                     A team lead calls or emails to confirm scope and timing.
                   </li>
-                  <li>You get a clear, written quote — no surprise fees.</li>
+                  <li>You get a clear, written quote, no surprise fees.</li>
                 </ol>
               </div>
             </div>

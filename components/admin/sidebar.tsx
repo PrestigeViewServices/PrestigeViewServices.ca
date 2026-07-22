@@ -12,8 +12,11 @@ import {
   Image as ImageIcon,
   MessageSquareQuote,
   Snowflake,
+  KanbanSquare,
+  Contact,
+  Truck,
 } from "lucide-react";
-import type { Role } from "@/lib/roles";
+import { canDispatch, type Role } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -27,8 +30,27 @@ type NavItem = {
 const items: NavItem[] = [
   {
     href: "/admin",
-    label: "Overview",
+    label: "Command Center",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/admin/pipeline",
+    label: "Job Pipeline",
+    icon: KanbanSquare,
+    // Ops roles: ultimate_admin, admin, manager (super_admin is photos/hiring only).
+    show: (r) => canDispatch(r),
+  },
+  {
+    href: "/admin/accounts",
+    label: "Accounts",
+    icon: Contact,
+    show: (r) => canDispatch(r),
+  },
+  {
+    href: "/admin/dispatch",
+    label: "Crew Dispatch",
+    icon: Truck,
+    show: (r) => canDispatch(r),
   },
   {
     href: "/admin/applications",
@@ -45,7 +67,7 @@ const items: NavItem[] = [
     href: "/admin/site/photos",
     label: "Photos",
     icon: ImageIcon,
-    // super_admin + ultimate_admin only — admin doesn't manage photos.
+    // super_admin + ultimate_admin only, admin doesn't manage photos.
     show: (r) => r === "ultimate_admin" || r === "super_admin",
   },
   {
@@ -60,14 +82,14 @@ const items: NavItem[] = [
     href: "/admin/support",
     label: "Support",
     icon: LifeBuoy,
-    // admin + ultimate_admin only — super_admin is intentionally excluded.
+    // admin + ultimate_admin only, super_admin is intentionally excluded.
     show: (r) => r === "ultimate_admin" || r === "admin",
   },
   {
     href: "/admin/loyalty",
     label: "Loyalty",
     icon: Star,
-    // Billing-adjacent — same gate as support, super_admin excluded.
+    // Billing-adjacent, same gate as support, super_admin excluded.
     show: (r) => r === "ultimate_admin" || r === "admin",
   },
   {

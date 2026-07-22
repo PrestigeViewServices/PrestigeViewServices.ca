@@ -1,71 +1,97 @@
 import Link from "next/link";
-import { ArrowRight, Leaf, Sparkles, Snowflake, Check } from "lucide-react";
-import { services } from "@/lib/content/services";
+import {
+  ArrowRight,
+  Sparkles,
+  Droplets,
+  Waves,
+  Home,
+  Scissors,
+  TreeDeciduous,
+  Shovel,
+  Snowflake,
+} from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { cn } from "@/lib/utils";
 
 /**
- * "What We Do" — replaces the old per-division overview. Same visual
- * shape (3 cards) but framed as service categories under the single
- * Prestige View Services brand, not as standalone sub-brands.
+ * "What We Do", 8-tile grid, one tile per core service, each linking to
+ * its dedicated service page. One brand, no sub-brand names.
  */
-
-type Group = {
-  key: "lawn" | "exterior" | "snow";
-  title: string;
+type Tile = {
+  slug: string;
+  name: string;
   pitch: string;
-  icon: typeof Leaf;
-  // Internal: which service `division` slugs roll up here.
-  source: ("lawnpros" | "clearview" | "snowland")[];
-  // service slugs to feature on the home tile
-  topServices: string[];
+  icon: typeof Sparkles;
   iconBg: string;
   iconText: string;
-  linkText: string;
 };
 
-const GROUPS: Group[] = [
+const TILES: Tile[] = [
   {
-    key: "lawn",
-    title: "Lawn Care",
-    pitch:
-      "Recurring lawn mowing, seasonal cleanups, and turf health for Petawawa & Pembroke homeowners.",
-    icon: Leaf,
-    source: ["lawnpros"],
-    topServices: ["lawn-mowing", "spring-cleanup", "aeration"],
-    iconBg: "bg-emerald-500/15",
-    iconText: "text-emerald-400",
-    linkText: "text-emerald-400 hover:text-emerald-300",
-  },
-  {
-    key: "exterior",
-    title: "Exterior Cleaning",
-    pitch:
-      "Streak-free windows, clean gutters, and pressure washing across the Ottawa Valley.",
+    slug: "window-cleaning",
+    name: "Window Cleaning",
+    pitch: "Streak-free glass, inside and out, with frame and sill care.",
     icon: Sparkles,
-    source: ["clearview"],
-    topServices: ["window-cleaning", "gutter-cleaning", "pressure-washing"],
     iconBg: "bg-blue-500/15",
     iconText: "text-blue-400",
-    linkText: "text-blue-400 hover:text-blue-300",
   },
   {
-    key: "snow",
-    title: "Snow & Ice",
-    pitch:
-      "Residential snow removal and seasonal contracts so your driveway and walkways stay safe all winter.",
-    icon: Snowflake,
-    source: ["snowland"],
-    topServices: ["snow-removal", "seasonal-snow-contract", "walkway-clearing"],
+    slug: "gutter-cleaning",
+    name: "Gutter Cleaning",
+    pitch: "Debris cleared, downspouts flushed, problems flagged early.",
+    icon: Droplets,
     iconBg: "bg-sky-500/15",
     iconText: "text-sky-400",
-    linkText: "text-sky-400 hover:text-sky-300",
+  },
+  {
+    slug: "pressure-washing",
+    name: "Pressure Washing",
+    pitch: "Driveways, walkways, decks and patios, restored rather than just rinsed.",
+    icon: Waves,
+    iconBg: "bg-cyan-500/15",
+    iconText: "text-cyan-400",
+  },
+  {
+    slug: "house-washing",
+    name: "House Washing",
+    pitch: "Gentle soft-wash that lifts algae and grime off your siding.",
+    icon: Home,
+    iconBg: "bg-indigo-500/15",
+    iconText: "text-indigo-400",
+  },
+  {
+    slug: "lawn-mowing",
+    name: "Lawn Care & Mowing",
+    pitch: "Weekly cuts, crisp edges, spring cleanups, aeration and overseeding.",
+    icon: Scissors,
+    iconBg: "bg-emerald-500/15",
+    iconText: "text-emerald-400",
+  },
+  {
+    slug: "hedge-trimming",
+    name: "Hedge Trimming & Shrub Care",
+    pitch: "Sharp, clean lines that make the whole property look maintained.",
+    icon: TreeDeciduous,
+    iconBg: "bg-green-500/15",
+    iconText: "text-green-400",
+  },
+  {
+    slug: "landscaping-services",
+    name: "Landscaping Projects",
+    pitch: "Bed refreshes, mulch, edging, and planting. Big curb appeal, fast.",
+    icon: Shovel,
+    iconBg: "bg-lime-500/15",
+    iconText: "text-lime-400",
+  },
+  {
+    slug: "snow-removal",
+    name: "Snow Removal",
+    pitch: "Seasonal contracts that keep your driveway clear all winter.",
+    icon: Snowflake,
+    iconBg: "bg-sky-500/15",
+    iconText: "text-sky-300",
   },
 ];
-
-function findService(slug: string) {
-  return services.find((s) => s.slug === slug);
-}
 
 export function ServicesOverview() {
   return (
@@ -73,60 +99,47 @@ export function ServicesOverview() {
       <SectionHeading
         eyebrow="What We Do"
         title="One crew. Every season."
-        description="Year-round property care across the Ottawa Valley — bundled into one local team, one schedule, one easy bill."
+        description="Eight services, one local team. Year-round property care across the Ottawa Valley with one schedule and one easy bill."
       />
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {GROUPS.map((g) => {
-          const Icon = g.icon;
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {TILES.map((t) => {
+          const Icon = t.icon;
           return (
-            <article
-              key={g.key}
-              className="surface-card surface-card-hover p-7 flex flex-col"
+            <Link
+              key={t.slug}
+              href={`/services/${t.slug}`}
+              className="surface-card surface-card-hover group flex flex-col p-6"
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "grid h-12 w-12 place-items-center rounded-xl",
-                    g.iconBg,
-                    g.iconText
-                  )}
-                >
-                  <Icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-bold leading-tight">{g.title}</h3>
-              </div>
-              <p className="mt-5 text-sm text-muted-foreground leading-relaxed">
-                {g.pitch}
-              </p>
-              <ul className="mt-5 space-y-2 flex-1">
-                {g.topServices.map((slug) => {
-                  const s = findService(slug);
-                  if (!s) return null;
-                  return (
-                    <li key={slug} className="flex items-center gap-2 text-sm">
-                      <Check
-                        className={cn("h-4 w-4 shrink-0", g.iconText)}
-                        strokeWidth={3}
-                      />
-                      <span>{s.name}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <Link
-                href="/services"
+              <div
                 className={cn(
-                  "mt-6 inline-flex items-center gap-1.5 text-sm font-semibold transition-colors",
-                  g.linkText
+                  "grid h-11 w-11 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-110",
+                  t.iconBg,
+                  t.iconText
                 )}
               >
-                See all {g.title.toLowerCase()} services
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </article>
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-base font-bold leading-tight">
+                {t.name}
+              </h3>
+              <p className="mt-2 flex-1 text-sm text-muted-foreground leading-relaxed">
+                {t.pitch}
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                Learn more
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </span>
+            </Link>
           );
         })}
       </div>
+      <p className="mt-8 text-center text-sm text-muted-foreground">
+        Also available: junk removal, property cleanouts, and seasonal
+        maintenance plans.{" "}
+        <Link href="/services" className="font-semibold text-primary">
+          See all services →
+        </Link>
+      </p>
     </section>
   );
 }

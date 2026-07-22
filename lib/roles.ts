@@ -19,7 +19,9 @@ export const ROLES = [
   "ultimate_admin",
   "super_admin",
   "admin",
+  "manager",
   "employee",
+  "rep",
   "customer",
 ] as const;
 
@@ -29,7 +31,9 @@ export const ROLE_LABELS: Record<Role, string> = {
   ultimate_admin: "Ultimate Admin",
   super_admin: "Super Admin",
   admin: "Admin",
+  manager: "Manager",
   employee: "Employee",
+  rep: "Sales Rep",
   customer: "Customer",
 };
 
@@ -38,7 +42,9 @@ export const ULTIMATE_ADMIN_ASSIGNABLE_ROLES: Role[] = [
   "ultimate_admin",
   "super_admin",
   "admin",
+  "manager",
   "employee",
+  "rep",
   "customer",
 ];
 
@@ -49,8 +55,25 @@ export function canReachAdmin(role: Role | null | undefined): boolean {
   return (
     role === "ultimate_admin" ||
     role === "admin" ||
-    role === "super_admin"
+    role === "super_admin" ||
+    role === "manager"
   );
+}
+
+/** Roles allowed to run field ops: pipeline, dispatch, accounts, jobs. */
+export function canDispatch(role: Role | null | undefined): boolean {
+  return (
+    role === "ultimate_admin" || role === "admin" || role === "manager"
+  );
+}
+
+/**
+ * Roles allowed to EDIT finance (invoices, AR actions). Managers run ops but
+ * cannot touch money — only the owner tier can. super_admin is ops-narrow and
+ * also excluded.
+ */
+export function canEditFinance(role: Role | null | undefined): boolean {
+  return role === "ultimate_admin" || role === "admin";
 }
 
 /** Roles allowed to view + change application hiring status. */
@@ -88,6 +111,24 @@ export function isAdminLike(role: Role | null | undefined): boolean {
   return canReachAdmin(role);
 }
 
+/**
+ * Roles allowed into the /rep canvassing app. Reps live there; the ops tier
+ * can also open it (useful for testing routes and covering shifts).
+ */
+export function canCanvass(role: Role | null | undefined): boolean {
+  return (
+    role === "rep" ||
+    role === "manager" ||
+    role === "admin" ||
+    role === "ultimate_admin"
+  );
+}
+
+/** Roles allowed to see the admin Canvassing dashboard (live rep map, stats). */
+export function canViewCanvassing(role: Role | null | undefined): boolean {
+  return canDispatch(role);
+}
+
 // ---- Misc ------------------------------------------------------------------
 
 export function parseRole(value: unknown): Role | null {
@@ -118,6 +159,9 @@ export function homePathForRole(role: Role): string {
       return "/account";
     case "employee":
       return "/portal";
+    case "rep":
+      return "/rep";
+    case "manager":
     case "admin":
     case "super_admin":
     case "ultimate_admin":

@@ -38,7 +38,7 @@ export type Role = {
   responsibilities: string[];
   requirements: string[];
   niceToHave: string[];
-  /** ISO date — drives JobPosting JSON-LD datePosted */
+  /** ISO date, drives JobPosting JSON-LD datePosted */
   datePosted: string;
   /** Toggle off to hide the role everywhere (returns 404 on detail page). */
   active: boolean;
@@ -57,7 +57,7 @@ export const roles: Role[] = [
     shortPitch:
       "Mow, edge, and finish properties across the Valley. Seasonal start with a path to year-round work across our snow team.",
     longPitch:
-      "Spend your days outdoors on a tight crew, making properties look their best. We start most lawn crew members in the spring and roll the right people into our snow team for the winter — so the work doesn't stop in October.",
+      "Spend your days outdoors on a tight crew, making properties look their best. We start most lawn crew members in the spring and roll the right people into our snow team for the winter, so the work doesn't stop in October.",
     responsibilities: [
       "Operate mowers, trimmers, and blowers safely and efficiently",
       "Edge, trim, and blow-clean every visit to a finished standard",
@@ -94,7 +94,7 @@ export const roles: Role[] = [
       "Onboard, coach, and motivate new crew members",
       "Final QC walk-through on every property before leaving",
       "Communicate proactively with the office and customers",
-      "Own equipment uptime — light maintenance and end-of-day inspections",
+      "Own equipment uptime, light maintenance and end-of-day inspections",
     ],
     requirements: [
       "2+ seasons in lawn care, landscaping, or trades",
@@ -118,9 +118,9 @@ export const roles: Role[] = [
     payRange: "$20–$26/hr",
     location: LOCATION_DEFAULT,
     shortPitch:
-      "Window cleaning, gutter clearing, and pressure washing across residential properties — streak-free results, every job.",
+      "Window cleaning, gutter clearing, and pressure washing across residential properties, streak-free results, every job.",
     longPitch:
-      "Join the ClearView crew handling windows, gutters, pressure washing, and exterior touch-ups. We train you on every system — you bring the work ethic and an eye for finish quality.",
+      "Join the exterior cleaning crew handling windows, gutters, pressure washing, and exterior touch-ups. We train you on every system, you bring the work ethic and an eye for finish quality.",
     responsibilities: [
       "Interior + exterior window cleaning to a streak-free standard",
       "Gutter cleaning and downspout flushing",
@@ -132,7 +132,7 @@ export const roles: Role[] = [
       "Comfortable working from ladders up to 24'",
       "Valid Ontario driver's license",
       "Reliable transportation",
-      "Detail-oriented — \"streak-free\" matters",
+      "Detail-oriented, \"streak-free\" matters",
     ],
     niceToHave: [
       "Prior window cleaning or pressure washing experience",
@@ -152,7 +152,7 @@ export const roles: Role[] = [
     shortPitch:
       "Plow residential routes through the night during qualifying storms. Premium seasonal pay, flexible day-job-compatible schedule.",
     longPitch:
-      "SnowLand Operators run our residential plow routes from November through April. Pay scales with experience and route load. Most of our operators come from our summer crews — but we hire externally too for the right person.",
+      "Snow removal operators run our residential plow routes from November through April. Pay scales with experience and route load. Most of our operators come from our summer crews, but we hire externally too for the right person.",
     responsibilities: [
       "Plow assigned residential routes during qualifying storms",
       "Apply salt / grit on walkways and aprons",
@@ -160,7 +160,7 @@ export const roles: Role[] = [
       "Light end-of-shift truck maintenance and fueling",
     ],
     requirements: [
-      "Valid Ontario driver's license — DZ an asset",
+      "Valid Ontario driver's license, DZ an asset",
       "Snow plowing experience (residential or commercial)",
       "Available on-call during qualifying storms (overnight common)",
       "Cold-weather fit and stamina",
@@ -181,7 +181,7 @@ export const roles: Role[] = [
     payRange: "Based on role + experience",
     location: LOCATION_DEFAULT,
     shortPitch:
-      "Don't see a perfect fit? Tell us what you're great at — we keep a short list of strong candidates and reach out as roles open.",
+      "Don't see a perfect fit? Tell us what you're great at, we keep a short list of strong candidates and reach out as roles open.",
     longPitch:
       "We always want to hear from reliable people who take pride in their work. Submit a general application and we'll keep you on file. When something opens that matches your skills, you're first call.",
     responsibilities: [
@@ -225,7 +225,7 @@ export function generalApplication(): Role {
 }
 
 // User-facing category labels. We dropped the sub-brand naming
-// (LawnPros / ClearView / SnowLand) — PVS is one brand, these are
+// (LawnPros / ClearView / SnowLand), PVS is one brand, these are
 // service categories the role rolls up to.
 export const divisionLabel: Record<CareerDivision, string> = {
   lawnpros: "Lawn Care",

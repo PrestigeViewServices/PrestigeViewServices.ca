@@ -13,7 +13,7 @@ import {
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Winter Packages — Snow Removal Pricing | Prestige View Services",
+  title: "Winter Packages, Snow Removal Pricing | Prestige View Services",
   description:
     "Choose a seasonal snow removal package for your Petawawa, Pembroke, or Ottawa Valley driveway. Get an instant estimate and reserve your spot in one form.",
   alternates: { canonical: "/winter-packages" },
@@ -34,7 +34,7 @@ export default function WinterPackagesPage() {
         <SectionHeading
           eyebrow="Year-Round Property Care, Modernized"
           title="Winter Packages for Ottawa Valley Driveways"
-          description={`Pick a tier that matches how proactive you want us to be — Bronze for budget, Platinum for white-glove storm management. Add walkway shoveling if you need it. Reserve your spot below and we'll send a custom quote for your driveway.`}
+          description={`Pick a tier that matches how proactive you want us to be, Bronze for budget, Platinum for white-glove storm management. Add walkway shoveling if you need it. Reserve your spot below and we'll send a custom quote for your driveway.`}
         />
       </section>
 
@@ -69,7 +69,7 @@ export default function WinterPackagesPage() {
                 </p>
                 <p className="mt-1 text-2xl font-bold">Custom quote</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Priced to your driveway — free, no obligation
+                  Priced to your driveway, free, no obligation
                 </p>
               </div>
 
@@ -103,7 +103,7 @@ export default function WinterPackagesPage() {
           </h2>
         </div>
         <p className="mb-6 max-w-2xl text-sm text-muted-foreground leading-relaxed">
-          Buy a pack of shovelling visits — each visit covers your walkway, porch
+          Buy a pack of shovelling visits, each visit covers your walkway, porch
           &amp; back deck. Storms often need two passes, so bigger packs are built
           for 2-passes-per-event coverage all winter. Per-visit pricing is scoped
           to your property, so we&apos;ll send a custom quote.
@@ -134,7 +134,7 @@ export default function WinterPackagesPage() {
                   </span>
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Custom quote — priced per visit by walkway size
+                  Custom quote, priced per visit by walkway size
                 </p>
               </div>
               <ul className="mt-5 space-y-2 text-sm">
@@ -163,14 +163,14 @@ export default function WinterPackagesPage() {
         <SectionHeading
           eyebrow="Reserve"
           title="Reserve Your Spot"
-          description={`Pick your package and reserve your spot in one form. We'll send your custom seasonal quote after a quick property check — usually within one business day. No payment is collected today.`}
+          description={`Pick your package and reserve your spot in one form. We'll send your custom seasonal quote after a quick property check, usually within one business day. No payment is collected today.`}
         />
         <div className="mt-10 mx-auto max-w-3xl">
           <EstimatorForm />
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Serving {siteConfig.serviceArea}. Your seasonal price depends on
-          driveway dimensions, slope, and accessibility — we&apos;ll confirm it
+          driveway dimensions, slope, and accessibility, we&apos;ll confirm it
           after a quick property check.
         </p>
       </section>

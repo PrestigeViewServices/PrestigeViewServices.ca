@@ -26,7 +26,7 @@ export default async function ApplicationsPage({
   searchParams: SearchParams;
 }) {
   if (!isClerkConfigured()) return null;
-  // Layout renders a NotConfigured notice when Clerk is off — bail here so we
+  // Layout renders a NotConfigured notice when Clerk is off, bail here so we
   // don't try to read a session that doesn't exist yet.
   await requireRole(["ultimate_admin", "super_admin", "admin"]);
 

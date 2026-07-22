@@ -4,7 +4,7 @@ import { requireRole, isClerkConfigured } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 // =============================================================================
-// PHASE 2 — Loyalty / Subscriptions
+// PHASE 2, Loyalty / Subscriptions
 // =============================================================================
 // TODO: integrate Stripe for subscription/loyalty billing (pending confirmation
 // of paid-membership vs points-based program).
@@ -52,13 +52,13 @@ export default async function LoyaltyPage() {
           icon={<Star className="h-5 w-5" />}
           title="Membership tiers"
           body="Plan summary, monthly recurring revenue, churn rate."
-          note="Stripe — Phase 2"
+          note="Stripe, Phase 2"
         />
         <PlaceholderCard
           icon={<Sparkles className="h-5 w-5" />}
           title="Loyalty points"
           body="Points ledger, top earners, redemption history."
-          note="Custom ledger or LoyaltyLion — Phase 2"
+          note="Custom ledger or LoyaltyLion, Phase 2"
         />
       </div>
 

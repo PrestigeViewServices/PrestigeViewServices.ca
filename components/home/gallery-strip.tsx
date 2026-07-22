@@ -38,7 +38,7 @@ async function loadGallery(): Promise<GalleryItem[]> {
           }));
         }
       } catch {
-        // Swallow — fall through to static gallery if DB query fails.
+        // Swallow, fall through to static gallery if DB query fails.
       }
     }
   }
@@ -62,7 +62,7 @@ export async function GalleryStrip() {
       <SectionHeading
         eyebrow="Recent Work"
         title="A Few Recent Properties"
-        description="Real homes across Petawawa, Pembroke, and the Ottawa Valley — cleaned, mowed, and cleared by the PVS team."
+        description="Real homes across Petawawa, Pembroke, and the Ottawa Valley. Cleaned, mowed, and cleared by the PVS team."
       />
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((photo) => (

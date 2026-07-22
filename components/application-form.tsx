@@ -292,7 +292,7 @@ export function ApplicationForm({
         error={errors.whyJoin?.message}
       >
         <Textarea
-          placeholder="A sentence or two is plenty — we're after fit, not essays."
+          placeholder="A sentence or two is plenty, we're after fit, not essays."
           rows={4}
           {...register("whyJoin")}
         />

@@ -7,7 +7,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
  * Header sign-in / user button. Renders the Clerk widget when signed in,
  * a "Sign in" link to /sign-in when signed out.
  *
- * Skipped when no NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY — without ClerkProvider
+ * Skipped when no NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, without ClerkProvider
  * mounted, the SignedIn/SignedOut components would crash at runtime.
  */
 export function AuthControls({ compact = false }: { compact?: boolean }) {

@@ -14,8 +14,7 @@ type Props = {
 
 /**
  * 3D tilt card that tracks the pointer position. Disabled on touch devices
- * (via `@media (hover: hover)`) and when prefers-reduced-motion is set —
- * users without precise pointers don't get the effect, no fallback noise.
+ * (via `@media (hover: hover)`) and when prefers-reduced-motion is set, * users without precise pointers don't get the effect, no fallback noise.
  *
  * Uses spring-smoothed rotateX/rotateY transforms (GPU only) and a moving
  * radial glow that follows the pointer for depth.

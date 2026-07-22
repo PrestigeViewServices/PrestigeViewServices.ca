@@ -9,7 +9,7 @@ import type { FaqItem } from "@/lib/content/faq";
 
 /**
  * Renders an FAQ block + the matching FAQPage JSON-LD inline. Drop into any
- * page that has 3+ FAQs — Google can show the questions as rich snippets in
+ * page that has 3+ FAQs, Google can show the questions as rich snippets in
  * the SERP, which is one of the highest-impact local-SEO wins available.
  */
 export function FaqSection({

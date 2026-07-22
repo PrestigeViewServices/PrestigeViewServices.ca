@@ -4,7 +4,7 @@ import Script from "next/script";
  * Loads GA4 only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set, so dev/preview
  * environments don't pollute production property data.
  *
- * GA4 captures pageviews, referrer, and utm_* automatically — no extra
+ * GA4 captures pageviews, referrer, and utm_* automatically, no extra
  * code needed for source/medium/campaign attribution.
  */
 export function GoogleAnalytics() {

@@ -10,9 +10,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
 
 export const metadata: Metadata = {
-  title: "Our Work — Recent Jobs Across the Ottawa Valley",
+  title: "Our Work, Recent Jobs Across the Ottawa Valley",
   description:
-    "See real before/after photos from Prestige View Services jobs across Petawawa, Pembroke, and the Ottawa Valley — window cleaning, lawn care, snow removal, and more.",
+    "See real before/after photos from Prestige View Services jobs across Petawawa, Pembroke, and the Ottawa Valley, window cleaning, lawn care, snow removal, and more.",
   alternates: { canonical: "/our-work" },
 };
 

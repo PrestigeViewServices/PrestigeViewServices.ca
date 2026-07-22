@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 /**
  * Three sizes share one source-of-truth href (siteConfig.googleReviewUrl).
  *
- *   "callout" — the dark gradient card dropped on /quote post-form,
+ *   "callout", the dark gradient card dropped on /quote post-form,
  *               /account, and anywhere we want to nudge a happy customer.
- *   "button"  — a prominent CTA used on the /reviews page hero.
- *   "link"    — a small footer link.
+ *   "button", a prominent CTA used on the /reviews page hero.
+ *   "link", a small footer link.
  *
  * Every variant opens Google in a new tab with rel="noopener noreferrer".
  */

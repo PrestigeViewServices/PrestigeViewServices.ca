@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 /**
- * Scroll-reveal showcase — a 3D card that rotates flat and scales up as the
+ * Scroll-reveal showcase, a 3D card that rotates flat and scales up as the
  * visitor scrolls, revealing a real PVS job photo. Uses the
  * <ContainerScroll /> primitive in components/ui.
  *
@@ -24,8 +24,8 @@ export function ScrollRevealShowcase() {
             <span className="text-gradient">put our name on</span>
           </h2>
           <p className="mt-4 mx-auto max-w-xl text-base sm:text-lg text-muted-foreground text-balance">
-            Real homes across Petawawa, Pembroke &amp; the Ottawa Valley —
-            cleaned, cleared, and cared for by the PVS crew.
+            Real homes across Petawawa, Pembroke &amp; the Ottawa Valley.
+            Cleaned, cleared, and cared for by the PVS crew.
           </p>
         </>
       }

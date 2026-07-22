@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ShieldCheck,
   RotateCcw,
@@ -11,16 +12,22 @@ import { SectionHeading } from "@/components/section-heading";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { TiltCard } from "@/components/ui/tilt-card";
 
-const items = [
+const items: {
+  icon: typeof ShieldCheck;
+  title: string;
+  body: string;
+  href?: string;
+}[] = [
   {
     icon: ShieldCheck,
     title: "Fully Insured",
-    body: "Liability coverage on every job, every visit.",
+    body: "$2M liability coverage on every job, every visit. See our insurance page for the details.",
+    href: "/insurance",
   },
   {
     icon: MapPin,
     title: "Locally Owned",
-    body: "Two trucks, two crews — born in the Ottawa Valley, faces you'll recognize.",
+    body: "Two trucks, two crews, born in the Ottawa Valley. Faces you'll recognize.",
   },
   {
     icon: RotateCcw,
@@ -41,7 +48,7 @@ export function TrustStrip() {
   const stats = [
     { value: 100, suffix: "%", label: "Insured & guaranteed" },
     { value: 4, label: "Seasons covered" },
-    { value: 7, label: "Ottawa Valley service areas" },
+    { value: 9, label: "Ottawa Valley service areas" },
     { value: 2, label: "Local PVS crews" },
   ];
 
@@ -74,16 +81,8 @@ export function TrustStrip() {
       </div>
 
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map(({ icon: Icon, title, body }, i) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.4, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ y: -4 }}
-            className="group"
-          >
+        {items.map(({ icon: Icon, title, body, href }, i) => {
+          const card = (
             <TiltCard className="rounded-2xl">
               <div className="surface-card p-6 h-full">
                 <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary transition-transform duration-300 group-hover:scale-110">
@@ -95,8 +94,21 @@ export function TrustStrip() {
                 </p>
               </div>
             </TiltCard>
-          </motion.div>
-        ))}
+          );
+          return (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.4, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4 }}
+              className="group"
+            >
+              {href ? <Link href={href}>{card}</Link> : card}
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );

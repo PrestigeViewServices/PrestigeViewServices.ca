@@ -1,8 +1,8 @@
 /**
- * Recent Work gallery — feeds the home page <GalleryStrip />.
+ * Recent Work gallery, feeds the home page <GalleryStrip />.
  *
  * Add an entry per photo. `src` is relative to /public.
- * Filenames must be lowercase, hyphen-separated, no spaces — see
+ * Filenames must be lowercase, hyphen-separated, no spaces, see
  * /public/images/README.md for recommended dimensions and starter names.
  *
  * If this array is empty, the gallery section is hidden on the home page.
@@ -17,7 +17,7 @@ export type GalleryPhoto = {
   height: number;
 };
 
-// Home page "Recent Work" strip — one or two picks per service so the
+// Home page "Recent Work" strip, one or two picks per service so the
 // strip showcases the full range of PVS work at a glance. For the full
 // per-service galleries, see lib/content/work-categories.ts.
 export const gallery: GalleryPhoto[] = [
@@ -40,7 +40,7 @@ export const gallery: GalleryPhoto[] = [
   {
     id: "snow-tractor",
     src: "/images/gallery/snow-removal/snow-job-05.jpg",
-    alt: "PVS SnowLand tractor with snowblower clearing a residential driveway",
+    alt: "PVS tractor with snowblower clearing a residential driveway in the Ottawa Valley",
     caption: "Snow removal · Ottawa Valley",
     width: 1200,
     height: 1600,
@@ -48,7 +48,7 @@ export const gallery: GalleryPhoto[] = [
   {
     id: "pressure-deck-after",
     src: "/images/gallery/pressure-washing/pressure-job-07.jpg",
-    alt: "Freshly soft-washed wood deck with hot tub and chiminea in golden afternoon light — Ottawa Valley",
+    alt: "Freshly soft-washed wood deck with hot tub and chiminea in golden afternoon light, Ottawa Valley",
     caption: "Pressure wash · deck reveal",
     width: 1600,
     height: 1200,

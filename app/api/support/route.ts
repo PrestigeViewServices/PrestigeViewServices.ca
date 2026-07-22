@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Support DB write failed", err);
-      // Fall through to email — better partial success than total failure.
+      // Fall through to email, better partial success than total failure.
     }
   }
 
@@ -64,9 +64,9 @@ export async function POST(request: Request) {
     // eslint-disable-next-line no-console
     console.error("Support email send failed", err);
     if (!db) {
-      // DB also unavailable — bail.
+      // DB also unavailable, bail.
       return NextResponse.json(
-        { ok: false, error: "Could not record your request — please call us." },
+        { ok: false, error: "Could not record your request, please call us." },
         { status: 500 }
       );
     }

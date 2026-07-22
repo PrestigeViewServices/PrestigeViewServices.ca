@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Reviews — What Petawawa & Pembroke Are Saying",
+  title: "Reviews, What Petawawa & Pembroke Are Saying",
   description:
     "Real Google reviews from Prestige View Services customers across Petawawa, Pembroke, and the Ottawa Valley.",
   alternates: { canonical: "/reviews" },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
  * Real Google reviews via Trustindex embed. Configure the widget by setting
  * NEXT_PUBLIC_GOOGLE_REVIEWS_SCRIPT_SRC (and optionally _CONTAINER_CLASS)
  * in env. When the widget URL is missing, the page renders an empty state
- * with the "Leave us a Google review" CTA — we never invent reviews.
+ * with the "Leave us a Google review" CTA, we never invent reviews.
  */
 export default function ReviewsPage() {
   const widgetEnabled = Boolean(
@@ -55,7 +55,7 @@ export default function ReviewsPage() {
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Our Google reviews feed is being wired up. Until then, you can
-              read them all — or leave one — straight on Google.
+              read them all, or leave one, straight on Google.
             </p>
             <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
               <Button asChild variant="outline">
@@ -76,7 +76,7 @@ export default function ReviewsPage() {
         <SectionHeading
           eyebrow="On Instagram"
           title="Latest From the Crew"
-          description="Recent jobs, before-and-afters, and behind-the-scenes from our Petawawa & Pembroke crews — straight from our Instagram."
+          description="Recent jobs, before-and-afters, and behind-the-scenes from our Petawawa & Pembroke crews, straight from our Instagram."
           align="left"
         />
         <div className="mt-10">

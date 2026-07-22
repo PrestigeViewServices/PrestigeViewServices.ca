@@ -8,9 +8,9 @@ import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title:
-    "Service Areas — Petawawa, Pembroke & the Ottawa Valley",
+    "Service Areas, Petawawa, Pembroke & the Ottawa Valley",
   description:
-    "Prestige View Services covers Petawawa, Pembroke, Deep River, Renfrew, Arnprior, Cobden, Eganville, and Chalk River — lawn care, window cleaning, gutter cleaning, and snow removal year-round.",
+    "Prestige View Services covers Petawawa, Pembroke, Deep River, Renfrew, Arnprior, Cobden, Eganville, and Chalk River, lawn care, window cleaning, gutter cleaning, and snow removal year-round.",
   alternates: { canonical: "/service-areas" },
 };
 

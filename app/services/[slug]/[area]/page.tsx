@@ -2,14 +2,22 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MapPin, Medal } from "lucide-react";
 import { services, getService } from "@/lib/content/services";
-import { getDivision } from "@/lib/content/divisions";
+import type { DivisionSlug } from "@/lib/content/divisions";
 import { serviceAreas, getServiceArea } from "@/lib/content/service-areas";
 import { getGalleryForService } from "@/lib/content/work-categories";
+import { getLocalCopy } from "@/lib/content/local-copy";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
+import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+
+const CATEGORY_LABEL: Record<DivisionSlug, string> = {
+  lawnpros: "Lawn & Landscaping",
+  clearview: "Exterior Cleaning",
+  snowland: "Snow & Ice",
+};
 import {
   ServiceAmbience,
   ambienceForService,
@@ -19,7 +27,7 @@ import { siteConfig } from "@/lib/site";
 type Params = { slug: string; area: string };
 
 /**
- * Service+Area combination pages — e.g. /services/window-cleaning/petawawa.
+ * Service+Area combination pages, e.g. /services/window-cleaning/petawawa.
  * Captures "<service> + <city>" search intent directly. 16 services × 8
  * areas = 128 pre-rendered pages, each with its own H1, intro, schema, and
  * cross-linking to the parent service and area.
@@ -42,8 +50,14 @@ export function generateMetadata({
   const service = getService(params.slug);
   const area = getServiceArea(params.area);
   if (!service || !area) return {};
-  const title = `${service.name} in ${area.name}, ${area.region} · PVS`;
-  const description = `${service.shortDescription} Local ${service.name.toLowerCase()} crew serving ${area.name} and the surrounding Ottawa Valley — free quote within one business day.`;
+  const local = getLocalCopy(service.slug, area.slug);
+  const title = `${service.name} in ${area.name}, ${area.region}`;
+  // Unique per-combo description: lead with the page's own local copy when
+  // it exists so no two combo pages share a meta description.
+  const localHook = local?.intro[0]?.split(". ").slice(0, 1).join(". ");
+  const description = localHook
+    ? `${localHook}. Free quote within one business day.`.slice(0, 155)
+    : `${service.shortDescription} Local ${service.name.toLowerCase()} crew serving ${area.name} and the surrounding Ottawa Valley, free quote within one business day.`;
   return {
     title,
     description,
@@ -67,7 +81,9 @@ export default function ServiceAreaCombinationPage({
   const area = getServiceArea(params.area);
   if (!service || !area) notFound();
 
-  const division = getDivision(service.division);
+  const categoryLabel = CATEGORY_LABEL[service.division];
+  const local = getLocalCopy(service.slug, area.slug);
+  const isPetawawa = area.slug === "petawawa";
   const gallery = getGalleryForService(service.slug);
 
   // Other top services in this area (cross-sell + internal linking signal).
@@ -114,6 +130,19 @@ export default function ServiceAreaCombinationPage({
         url: `${siteConfig.url}/quote?service=${service.slug}&area=${area.slug}`,
       },
     },
+    ...(local?.faqs && local.faqs.length > 0
+      ? [
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: local.faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]
+      : []),
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -143,7 +172,7 @@ export default function ServiceAreaCombinationPage({
 
   const Icon = service.icon;
 
-  // Same theming as the parent service page — snow / lawn / water / autumn.
+  // Same theming as the parent service page, snow / lawn / water / autumn.
   const ambience = ambienceForService(service.slug);
 
   return (
@@ -171,13 +200,13 @@ export default function ServiceAreaCombinationPage({
           <div>
             <p className="eyebrow text-primary mb-2 inline-flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
-              {area.name}, {area.region} · {division.shortName}
+              {area.name}, {area.region} · {categoryLabel}
             </p>
             <h1 className="heading-section text-balance">
               {service.name} in {area.name}
             </h1>
             <p className="mt-4 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
-              {service.shortDescription} {area.name} crews routed weekly —{" "}
+              {service.shortDescription} {area.name} crews routed weekly, {" "}
               {area.distanceFromHqKm === 0
                 ? "we're based right here"
                 : `${area.distanceFromHqKm} km from our Petawawa hub`}
@@ -201,6 +230,38 @@ export default function ServiceAreaCombinationPage({
           </div>
         </div>
       </section>
+
+      {isPetawawa && (
+        <section className="container-max pt-10">
+          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-6">
+            <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed">
+              <span className="font-semibold">
+                Military &amp; veteran discount in Petawawa.
+              </span>{" "}
+              PVS is veteran operated. Serving members, veterans, military
+              families, and first responders save 10% on{" "}
+              {service.name.toLowerCase()}. Not combinable with other offers
+              above 10%. Mention your service when you request a quote.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {local && (
+        <section className="container-max pt-10 sm:pt-14">
+          <div className="max-w-3xl space-y-5">
+            {local.intro.map((p) => (
+              <p
+                key={p.slice(0, 40)}
+                className="text-base sm:text-lg text-muted-foreground leading-relaxed"
+              >
+                {p}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="container-max py-14 sm:py-20">
         <SectionHeading
@@ -283,6 +344,15 @@ export default function ServiceAreaCombinationPage({
             </Button>
           </div>
         </section>
+      )}
+
+      {local?.faqs && local.faqs.length > 0 && (
+        <FaqSection
+          items={local.faqs}
+          eyebrow={`${area.name} FAQs`}
+          title={`${service.name} in ${area.name}, Common Questions`}
+          description={`What ${area.name} homeowners ask us about ${service.name.toLowerCase()}.`}
+        />
       )}
 
       {otherServicesInArea.length > 0 && (

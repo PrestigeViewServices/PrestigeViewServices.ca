@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Contact PVS — Petawawa & Pembroke Property Care",
+  title: "Contact PVS, Petawawa & Pembroke Property Care",
   description:
     "Call, email, or request a callback. Prestige View Services is local to the Ottawa Valley and responds within one business day.",
   alternates: { canonical: "/contact" },
@@ -19,7 +19,7 @@ export default function ContactPage() {
         <SectionHeading
           eyebrow="We're Local"
           title="Get in Touch"
-          description="Reach us by phone, email, or send your details below — we'll be in touch within one business day."
+          description="Reach us by phone, email, or send your details below, we'll be in touch within one business day."
         />
       </section>
 

@@ -18,7 +18,7 @@ export function CareersHero() {
           className="eyebrow text-primary mb-5 justify-center"
         >
           <MapPin className="h-3.5 w-3.5" />
-          Hiring locally — {siteConfig.serviceArea}
+          Hiring locally, {siteConfig.serviceArea}
         </motion.p>
 
         <motion.h1
@@ -39,7 +39,7 @@ export function CareersHero() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-6 mx-auto max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed text-balance"
         >
-          PVS runs three divisions — lawn, exterior, and snow — so the
+          PVS runs three divisions, lawn, exterior, and snow, so the
           right people work year-round instead of getting laid off in
           October.
         </motion.p>

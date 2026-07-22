@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * slowly drifting particles + a soft color tint. Reduced-motion users get a
  * still gradient with no particles.
  *
- * The component is a server component — the animation is pure CSS keyframes
+ * The component is a server component, the animation is pure CSS keyframes
  * declared in app/globals.css. No client JS needed.
  *
  * Particles use a deterministic pseudo-random distribution so SSR + hydrate
@@ -45,7 +45,7 @@ const PARTICLE_COLOR: Record<Theme, string> = {
   autumn: "text-amber-300",
 };
 
-// Falling vs rising — only lawn rises (like grass clippings drifting up).
+// Falling vs rising, only lawn rises (like grass clippings drifting up).
 const ANIM_CLASS: Record<Theme, string> = {
   snow: "animate-ambience-fall",
   lawn: "animate-ambience-rise",

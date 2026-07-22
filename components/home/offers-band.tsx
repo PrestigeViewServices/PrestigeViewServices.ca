@@ -10,7 +10,7 @@ export function OffersBand() {
     return 0;
   });
 
-  // Show up to 3 on home — keeps focus tight.
+  // Show up to 3 on home, keeps focus tight.
   const featured = sorted.slice(0, 3);
 
   if (featured.length === 0) return null;

@@ -18,7 +18,7 @@ export default function SupportPage() {
       <SectionHeading
         eyebrow="Existing Customers"
         title="Customer Support"
-        description="If you're already a PVS customer and need help with a service, use this form. New quote? Try the Get a Quote page instead — it gets a faster response."
+        description="If you're already a PVS customer and need help with a service, use this form. New quote? Try the Get a Quote page instead, it gets a faster response."
       />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-12">
@@ -57,10 +57,10 @@ export default function SupportPage() {
           <div className="surface-card p-6">
             <h3 className="font-semibold">What you can use this for</h3>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc list-inside marker:text-primary">
-              <li><strong className="text-foreground/90">Issue</strong> — something wasn't right with a visit</li>
-              <li><strong className="text-foreground/90">Dispatch</strong> — need a crew sooner than scheduled</li>
-              <li><strong className="text-foreground/90">Quote</strong> — adjusting an existing recurring service</li>
-              <li><strong className="text-foreground/90">General</strong> — anything else</li>
+              <li><strong className="text-foreground/90">Issue</strong>, something wasn't right with a visit</li>
+              <li><strong className="text-foreground/90">Dispatch</strong>, need a crew sooner than scheduled</li>
+              <li><strong className="text-foreground/90">Quote</strong>, adjusting an existing recurring service</li>
+              <li><strong className="text-foreground/90">General</strong>, anything else</li>
             </ul>
           </div>
         </aside>

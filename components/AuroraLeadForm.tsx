@@ -6,7 +6,7 @@ const AURORA_ORIGIN = "https://aurorasuite.ca";
 const AURORA_SRC = `${AURORA_ORIGIN}/lead-form/114?signature=c4498657b1ef01bfdc9b5533b8570c45125c92fd8273b7d0ec1cc3555cbbb835`;
 
 /**
- * Aurora Suite lead form — the single source of truth for lead capture
+ * Aurora Suite lead form, the single source of truth for lead capture
  * across the entire site. The iframe self-reports its rendered height via
  * window.postMessage; we resize on each message so the iframe is never
  * internally scrollable.
@@ -45,7 +45,7 @@ export function AuroraLeadForm({ id = "quote-form" }: { id?: string }) {
       <iframe
         ref={iframeRef}
         src={AURORA_SRC}
-        title="Request a Quote — Prestige View Services"
+        title="Request a Quote, Prestige View Services"
         loading="lazy"
         referrerPolicy="strict-origin-when-cross-origin"
         allow="clipboard-write; autoplay; encrypted-media"
