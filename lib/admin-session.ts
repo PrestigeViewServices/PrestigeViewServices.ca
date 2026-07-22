@@ -18,8 +18,14 @@ export const ADMIN_COOKIE = "pvs_admin";
 /** 30 days — long enough that the owner isn't re-typing the password weekly. */
 const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 
+/** Env values arrive from dashboards and CLIs that love to append stray
+ * newlines — always read them trimmed so auth never fails on whitespace. */
+function envTrimmed(name: string): string {
+  return (process.env[name] ?? "").trim();
+}
+
 export function isAdminAuthConfigured(): boolean {
-  return Boolean(process.env.ADMIN_PASSWORD);
+  return Boolean(envTrimmed("ADMIN_PASSWORD"));
 }
 
 /**
@@ -28,15 +34,13 @@ export function isAdminAuthConfigured(): boolean {
  * the same address.
  */
 export function checkAdminEmail(candidate: string): boolean {
-  const expected = process.env.ADMIN_EMAIL;
+  const expected = envTrimmed("ADMIN_EMAIL");
   if (!expected) return true; // email not enforced until configured
-  return candidate.trim().toLowerCase() === expected.trim().toLowerCase();
+  return candidate.trim().toLowerCase() === expected.toLowerCase();
 }
 
 function sessionSecret(): string {
-  return (
-    process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD || ""
-  );
+  return envTrimmed("ADMIN_SESSION_SECRET") || envTrimmed("ADMIN_PASSWORD");
 }
 
 async function hmacHex(secret: string, message: string): Promise<string> {
@@ -66,7 +70,7 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 /** Checks a submitted password against ADMIN_PASSWORD. */
 export async function checkAdminPassword(candidate: string): Promise<boolean> {
-  const expected = process.env.ADMIN_PASSWORD;
+  const expected = envTrimmed("ADMIN_PASSWORD");
   if (!expected) return false;
   // Hash both sides first so comparison length never depends on the secret.
   const [a, b] = await Promise.all([
