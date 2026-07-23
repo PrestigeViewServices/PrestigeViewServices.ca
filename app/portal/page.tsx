@@ -1,5 +1,4 @@
 import { revalidatePath } from "next/cache";
-import { currentUser } from "@clerk/nextjs/server";
 import {
   MapPin,
   Clock,
@@ -9,7 +8,7 @@ import {
   Truck,
 } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
-import { getSession, requireRole, isClerkConfigured } from "@/lib/auth";
+import { getSession, requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { isCloudinaryConfigured, uploadPhotoBuffer } from "@/lib/cloudinary";
 import {
@@ -24,13 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 export const dynamic = "force-dynamic";
 
 export default async function PortalHomePage() {
-  if (!isClerkConfigured()) return null;
   const session = await getSession();
-  const user = await currentUser();
-  const name =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    user?.primaryEmailAddress?.emailAddress ||
-    "Crew member";
+  const name = "Crew member";
 
   if (!isDbReady()) {
     return (

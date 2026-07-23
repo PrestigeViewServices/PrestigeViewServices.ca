@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
-import { AuthControls } from "@/components/auth-controls";
+import { UserRound } from "lucide-react";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -114,7 +114,12 @@ export function Header() {
           <Button asChild size="md">
             <Link href="/quote">Get Quote</Link>
           </Button>
-          <AuthControls />
+          <Button asChild variant="ghost" size="md" aria-label="My Account">
+            <Link href="/account">
+              <UserRound className="h-4 w-4" />
+              My Account
+            </Link>
+          </Button>
         </div>
 
         {/* Mobile actions */}
@@ -191,7 +196,12 @@ export function Header() {
                   </Button>
                 </div>
                 <div className="px-3 py-2">
-                  <AuthControls compact />
+                  <Button asChild variant="outline" size="sm" className="w-full">
+                    <Link href="/account">
+                      <UserRound className="h-4 w-4" />
+                      My Account · Prestige Club
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </SheetContent>

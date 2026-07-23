@@ -17,7 +17,6 @@ const csp = [
     "https://www.googletagmanager.com", // Google Analytics
     "https://connect.facebook.net", // Meta pixel
     "https://cdn.trustindex.io", // Google reviews widget
-    "https://*.clerk.accounts.dev", // Clerk (portal/rep auth)
   ].join(" "),
   "style-src 'self' 'unsafe-inline' https://cdn.trustindex.io",
   "img-src 'self' data: blob: https:",
@@ -29,14 +28,12 @@ const csp = [
     "https://www.googletagmanager.com https://stats.g.doubleclick.net",
     "https://www.facebook.com",
     "https://*.trustindex.io",
-    "https://*.clerk.accounts.dev https://clerk-telemetry.com",
   ].join(" "),
   [
     "frame-src",
     "https://aurorasuite.ca", // quote/contact lead form iframe
     "https://www.facebook.com",
     "https://*.trustindex.io",
-    "https://*.clerk.accounts.dev",
   ].join(" "),
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",

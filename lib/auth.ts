@@ -1,65 +1,27 @@
-import { auth } from "@clerk/nextjs/server";
 import type { Role } from "./roles";
-import { parseRole } from "./roles";
 import { hasAdminSession, isAdminAuthConfigured } from "./admin-session";
 
 /**
- * Server-side Clerk helpers. Pages call these to get the current user's
- * role for rendering or guarding mutations. The middleware does the
- * route-level redirect; these helpers protect server actions and API routes
- * where role-specific logic lives.
- */
-
-/** Names of env vars Clerk reads for production keys. Order matters for display. */
-export const CLERK_ENV_VARS = [
-  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-  "CLERK_SECRET_KEY",
-] as const;
-
-/** Returns the subset of CLERK_ENV_VARS that aren't set. */
-export function missingClerkEnvVars(): string[] {
-  return CLERK_ENV_VARS.filter((k) => !process.env[k]);
-}
-
-/**
- * True when production Clerk env vars are set. Keyless mode (which works
- * for `next dev` only) is intentionally NOT counted here because Vercel
- * builds can't write to .clerk/ during prerender.
+ * Server-side auth helpers — fully IN-HOUSE, no external auth service.
  *
- * Pages and the root layout use this to skip ClerkProvider when keys are
- * absent so the marketing site still builds + deploys cleanly. /admin and
- * /portal show a "Clerk not configured" notice in that mode.
+ * Two session systems exist, both ours:
+ *  - Admin/staff: owner password + signed cookie (lib/admin-session.ts).
+ *    Resolves to `ultimate_admin`, which passes every role gate.
+ *  - Customers: Prestige Club member cookie (lib/customer-auth.ts), used
+ *    exclusively by /account — customer pages call getMember(), never this.
  */
-export function isClerkConfigured(): boolean {
-  return missingClerkEnvVars().length === 0;
-}
 
 export type Session = {
   userId: string;
   role: Role;
 };
 
-/**
- * Returns the current session.
- *
- * The INTERNAL admin session (password login, signed cookie — see
- * lib/admin-session.ts) is checked first: the owner's cookie grants
- * `ultimate_admin`, which passes every admin role gate, so the whole
- * dashboard works with zero external auth services. Clerk remains the
- * fallback for the customer/employee portals.
- */
+/** The current STAFF session (owner's internal login), or null. */
 export async function getSession(): Promise<Session | null> {
   if (isAdminAuthConfigured() && (await hasAdminSession())) {
     return { userId: "internal-admin", role: "ultimate_admin" };
   }
-  if (!isClerkConfigured()) return null;
-  const { userId, sessionClaims } = await auth();
-  if (!userId) return null;
-
-  const claimRole = (sessionClaims as { publicMetadata?: { role?: unknown } })
-    ?.publicMetadata?.role;
-  const role = parseRole(claimRole) ?? "customer";
-  return { userId, role };
+  return null;
 }
 
 /** Throws if the user isn't authenticated or doesn't hold one of the allowed roles. */

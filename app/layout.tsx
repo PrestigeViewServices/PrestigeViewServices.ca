@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { TrackPageview } from "@/components/track-pageview";
+// NOTE: auth is fully in-house (lib/admin-session.ts + lib/customer-auth.ts);
+// no auth provider wraps the tree.
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { OfferModal } from "@/components/offer-modal";
@@ -13,7 +14,6 @@ import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
-import { isClerkConfigured } from "@/lib/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -181,8 +181,5 @@ export default function RootLayout({
     </html>
   );
 
-  // Only wrap in ClerkProvider when env vars are set. Without them,
-  // ClerkProvider throws at static-prerender time, which would break Vercel
-  // builds for the marketing site. Keyless mode is a `next dev`-only convenience.
-  return isClerkConfigured() ? <ClerkProvider>{tree}</ClerkProvider> : tree;
+  return tree;
 }
