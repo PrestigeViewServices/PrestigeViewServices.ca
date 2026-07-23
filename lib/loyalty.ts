@@ -241,7 +241,83 @@ export async function awardServicePoints(
       data: { pointsAwarded: true },
     }),
   ]);
+  // Cross-sell engine: a paid visit may have just unlocked the one-time
+  // second-category bonus.
+  await maybeAwardCrossCategory(db, record.memberId);
   return true;
+}
+
+/**
+ * Points held by not-yet-approved redemption requests. REQUESTED holds the
+ * points without a ledger entry; the -points REDEEM entry posts at APPROVAL
+ * (declines release the hold automatically).
+ */
+export async function pendingRedemptionPoints(
+  db: PrismaClient,
+  memberId: string
+): Promise<number> {
+  const agg = await db.redemption.aggregate({
+    where: { memberId, status: "REQUESTED" },
+    _sum: { points: true },
+  });
+  return agg._sum.points ?? 0;
+}
+
+/** Balance a member can actually redeem right now. */
+export async function availablePoints(
+  db: PrismaClient,
+  memberId: string
+): Promise<number> {
+  const [balance, pending] = await Promise.all([
+    pointsBalance(db, memberId),
+    pendingRedemptionPoints(db, memberId),
+  ]);
+  return balance - pending;
+}
+
+/**
+ * Cross-category automation (the cross-sell engine): the first time a
+ * member has PAID visits in two different public categories, award the
+ * one-time 200-point bonus. Idempotent — a prior EARN_CROSS_CATEGORY
+ * entry short-circuits.
+ */
+export async function maybeAwardCrossCategory(
+  db: PrismaClient,
+  memberId: string
+): Promise<boolean> {
+  const already = await db.pointsTransaction.findFirst({
+    where: { memberId, type: "EARN_CROSS_CATEGORY" },
+    select: { id: true },
+  });
+  if (already) return false;
+  const categories = await db.serviceRecord.groupBy({
+    by: ["category"],
+    where: { memberId, paid: true },
+  });
+  if (categories.length < 2) return false;
+  await db.pointsTransaction.create({
+    data: {
+      memberId,
+      type: "EARN_CROSS_CATEGORY",
+      amount: POINTS.CROSS_CATEGORY,
+      note: "First booking in a second category, welcome to the club bonus",
+    },
+  });
+  return true;
+}
+
+/** Shareable referral code, e.g. "JORDAN-4X2K". */
+export function generateReferralCode(firstName: string): string {
+  const base = firstName
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 8) || "PVS";
+  const suffix = Array.from({ length: 4 }, () =>
+    "ABCDEFGHJKMNPQRSTUVWXYZ23456789".charAt(
+      Math.floor(Math.random() * 31)
+    )
+  ).join("");
+  return `${base}-${suffix}`;
 }
 
 /** Last paid activity + expiry projection for the expiry warning UI. */

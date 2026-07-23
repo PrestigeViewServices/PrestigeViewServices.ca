@@ -10,6 +10,7 @@ import {
   UserRound,
   Building2,
   LogOut,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const items = [
   { href: "/account/rewards", label: "Points & Rewards", icon: Gift },
   { href: "/account/history", label: "Service History", icon: History },
   { href: "/account/requests", label: "Requests", icon: MessagesSquare },
+  { href: "/account/referrals", label: "Refer a Friend", icon: Users },
   { href: "/account/profile", label: "Profile", icon: UserRound },
   { href: "/account/about", label: "About PVS", icon: Building2 },
 ];

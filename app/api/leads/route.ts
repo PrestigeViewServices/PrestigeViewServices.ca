@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import {
   leadSchema,
   divisionForService,
@@ -6,8 +7,47 @@ import {
 } from "@/lib/lead-schema";
 import { sendLeadNotification } from "@/lib/send-lead-email";
 import { getDb } from "@/lib/db";
+import type { PrismaClient } from "@prisma/client";
 
 export const runtime = "nodejs";
+
+/**
+ * Prestige Club referral attribution (best-effort, never blocks intake).
+ * The /r/[code] landing set a pvs_ref cookie; if this lead's email is new
+ * to the referrer, record a Referral at BOOKED. Admin advances it to
+ * COMPLETED → points awarded after the friend's first paid service.
+ */
+async function recordReferral(
+  db: PrismaClient,
+  leadEmail: string
+): Promise<string | null> {
+  try {
+    const store = await cookies();
+    const code = store.get("pvs_ref")?.value?.trim().toUpperCase();
+    if (!code) return null;
+    const referrer = await db.member.findUnique({
+      where: { referralCode: code },
+      select: { id: true, email: true },
+    });
+    // No self-referrals, and one referral record per referred email.
+    if (!referrer || referrer.email === leadEmail.toLowerCase()) return null;
+    const existing = await db.referral.findFirst({
+      where: { referredEmail: leadEmail.toLowerCase() },
+    });
+    if (existing) return null;
+    await db.referral.create({
+      data: {
+        code: `${code}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+        referrerId: referrer.id,
+        referredEmail: leadEmail.toLowerCase(),
+        status: "BOOKED",
+      },
+    });
+    return code;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Public lead intake. Creates a Lead at the top of the pipeline (status NEW,
@@ -78,6 +118,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const refCode = await recordReferral(db, payload.email);
+    const noteParts = [
+      payload.promoCode ? `Promo: ${payload.promoCode}` : null,
+      refCode ? `Referred by club code ${refCode} — friend gets $25 off first service` : null,
+    ].filter(Boolean);
     const created = await db.lead.create({
       data: {
         name: payload.name,
@@ -87,7 +132,7 @@ export async function POST(request: Request) {
         propertyAddress: payload.propertyAddress || null,
         message: payload.message || null,
         serviceSlugs: [payload.service],
-        notes: payload.promoCode ? `Promo: ${payload.promoCode}` : null,
+        notes: noteParts.length ? noteParts.join(" · ") : null,
         status: "NEW",
         source: "PUBLIC_FORM",
       },

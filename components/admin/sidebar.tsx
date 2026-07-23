@@ -17,6 +17,7 @@ import {
   BarChart3,
   Award,
   MessageCircle,
+  BadgeCheck,
 } from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ const groups: NavGroup[] = [
     title: "Prestige Club",
     items: [
       { href: "/admin/club", label: "Members", icon: Award },
+      { href: "/admin/club/approvals", label: "Approvals", icon: BadgeCheck },
       { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
     ],
   },

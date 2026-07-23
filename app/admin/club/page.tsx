@@ -92,7 +92,13 @@ export default async function ClubAdminPage(props: {
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">Members</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/club/approvals"
+            className="rounded-full bg-gradient-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition-transform hover:scale-[1.02]"
+          >
+            Approvals
+          </Link>
           <Link
             href="/admin/club/tickets"
             className="rounded-full border border-surface-border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"

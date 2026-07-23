@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -12,13 +13,14 @@ import {
   Users,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
-import { getMember } from "@/lib/customer-auth";
+import { getMember, requireMemberId } from "@/lib/customer-auth";
 import {
   CENTS_PER_POINT,
   EXPIRY_MONTHS,
   POINTS,
   REDEEM_OPTIONS,
   TIERS,
+  availablePoints,
   creditCentsForPoints,
   expiryInfo,
   formatCents,
@@ -27,10 +29,34 @@ import {
   rollingSpendCents,
   tierForSpend,
 } from "@/lib/loyalty";
+import { clubNotifyEmail, sendClubEmail } from "@/lib/send-club-email";
 import { TierBadge } from "@/components/account/tier-progress";
+import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+const REDEMPTION_STATUS_META: Record<
+  string,
+  { label: string; cls: string }
+> = {
+  REQUESTED: {
+    label: "Requested",
+    cls: "bg-blue-500/15 text-blue-300 border-blue-500/25",
+  },
+  APPROVED: {
+    label: "Approved",
+    cls: "bg-amber-500/15 text-amber-200 border-amber-500/25",
+  },
+  APPLIED: {
+    label: "Applied to invoice",
+    cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
+  },
+  DECLINED: {
+    label: "Declined",
+    cls: "bg-rose-500/15 text-rose-300 border-rose-500/25",
+  },
+};
 
 const TYPE_LABEL: Record<string, string> = {
   EARN_SERVICE: "Service visit",
@@ -50,16 +76,27 @@ export default async function RewardsPage() {
   const db = getDb();
   if (!db) return null;
 
-  const [balance, spendCents, ledger, expiry] = await Promise.all([
-    pointsBalance(db, member.id),
-    rollingSpendCents(db, member.id),
-    db.pointsTransaction.findMany({
-      where: { memberId: member.id },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }),
-    expiryInfo(db, member.id),
-  ]);
+  const [balance, available, spendCents, ledger, expiry, redemptions, reviewClaim] =
+    await Promise.all([
+      pointsBalance(db, member.id),
+      availablePoints(db, member.id),
+      rollingSpendCents(db, member.id),
+      db.pointsTransaction.findMany({
+        where: { memberId: member.id },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      }),
+      expiryInfo(db, member.id),
+      db.redemption.findMany({
+        where: { memberId: member.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
+      db.reviewClaim.findFirst({
+        where: { memberId: member.id, status: { not: "REJECTED" } },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
 
   const tier = tierForSpend(spendCents);
   const creditValue = creditCentsForPoints(balance);
@@ -158,37 +195,129 @@ export default async function RewardsPage() {
             <Gift className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold">Redeem for service credit</h2>
           </div>
+          {available < balance && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatPoints(balance - available)} pts are held by a pending
+              request, {formatPoints(available)} available to redeem.
+            </p>
+          )}
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {REDEEM_OPTIONS.map((pts) => {
-              const affordable = balance >= pts;
+              const affordable = available >= pts;
               return (
-                <div
-                  key={pts}
-                  className={`rounded-xl border p-3 text-center ${
-                    affordable
-                      ? "border-primary/40 bg-primary/10"
-                      : "border-surface-border bg-surface/40 opacity-60"
-                  }`}
-                >
-                  <p className="text-lg font-bold">
-                    {formatCents(pts * CENTS_PER_POINT)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatPoints(pts)} pts
-                  </p>
-                </div>
+                <form key={pts} action={requestRedemption}>
+                  <input type="hidden" name="points" value={pts} />
+                  <button
+                    type="submit"
+                    disabled={!affordable}
+                    className={`w-full rounded-xl border p-3 text-center transition-colors ${
+                      affordable
+                        ? "border-primary/40 bg-primary/10 hover:border-primary/70 hover:bg-primary/20"
+                        : "cursor-not-allowed border-surface-border bg-surface/40 opacity-60"
+                    }`}
+                  >
+                    <p className="text-lg font-bold">
+                      {formatCents(pts * CENTS_PER_POINT)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatPoints(pts)} pts
+                    </p>
+                    {affordable && (
+                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        Request
+                      </p>
+                    )}
+                  </button>
+                </form>
               );
             })}
           </div>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            Online redemption requests are coming to the portal shortly. Until
-            then, call {siteConfig.phoneDisplay} or send a request from the
-            Requests tab and we&apos;ll apply your credit to your next
-            invoice. Credits apply to future services, never cash, and combine
-            with other promos up to 20% off an invoice, your military discount
-            always stacks on top.
+            Tap an amount to request it, we approve within one business day
+            and apply the credit to your next invoice. Credits apply to future
+            services, never cash, and combine with other promos up to 20% off
+            an invoice, your military discount always stacks on top. Questions?{" "}
+            {siteConfig.phoneDisplay}.
           </p>
+
+          {redemptions.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {redemptions.map((r) => {
+                const meta =
+                  REDEMPTION_STATUS_META[r.status] ??
+                  REDEMPTION_STATUS_META.REQUESTED;
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-surface-border bg-surface/50 px-4 py-2.5 text-sm"
+                  >
+                    <span>
+                      {formatCents(r.creditCents)} credit ·{" "}
+                      <span className="text-muted-foreground">
+                        {formatPoints(r.points)} pts ·{" "}
+                        {r.createdAt.toLocaleDateString("en-CA")}
+                      </span>
+                      {r.status === "APPLIED" && r.appliedInvoiceRef && (
+                        <span className="text-muted-foreground">
+                          {" "}
+                          · invoice {r.appliedInvoiceRef}
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${meta.cls}`}
+                    >
+                      {meta.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+      </section>
+
+      {/* ---- Review bonus claim ---- */}
+      <section className="surface-card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex items-start gap-3">
+          <MessageSquareHeart className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <div className="text-sm leading-relaxed">
+            <p className="font-semibold">
+              Left us a Google review? That&apos;s +{POINTS.REVIEW} points.
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              <a
+                href={siteConfig.googleReviewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-primary hover:underline"
+              >
+                Write your review
+              </a>
+              , then tell us below. We verify it (usually same day) and the
+              points post automatically. One-time bonus.
+            </p>
+          </div>
+        </div>
+        {reviewClaim ? (
+          <span
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium ${
+              reviewClaim.status === "AWARDED"
+                ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-300"
+                : "border-blue-500/25 bg-blue-500/15 text-blue-300"
+            }`}
+          >
+            {reviewClaim.status === "AWARDED"
+              ? "Bonus awarded"
+              : "Being verified"}
+          </span>
+        ) : (
+          <form action={claimReview}>
+            <Button type="submit" size="sm" variant="outline" className="shrink-0">
+              I left a review
+            </Button>
+          </form>
+        )}
       </section>
 
       {warnExpiry && expiry.expiresAt && (
@@ -350,4 +479,78 @@ export default async function RewardsPage() {
       </section>
     </div>
   );
+}
+
+// --- server actions ---------------------------------------------------------
+
+async function requestRedemption(formData: FormData) {
+  "use server";
+  const memberId = await requireMemberId();
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+
+  const points = Math.trunc(Number(formData.get("points")));
+  if (!REDEEM_OPTIONS.includes(points as (typeof REDEEM_OPTIONS)[number])) {
+    throw new Error("Invalid redemption amount");
+  }
+
+  // Validate against balance minus points already held by pending requests.
+  const available = await availablePoints(db, memberId);
+  if (available < points) throw new Error("Not enough available points");
+
+  const member = await db.member.findUnique({ where: { id: memberId } });
+  const redemption = await db.redemption.create({
+    data: {
+      memberId,
+      points,
+      creditCents: creditCentsForPoints(points),
+      status: "REQUESTED",
+    },
+  });
+
+  await sendClubEmail({
+    to: clubNotifyEmail(),
+    subject: `Redemption request: ${formatCents(redemption.creditCents)} — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    replyTo: member?.email,
+    text: [
+      `${member?.firstName ?? "A member"} requested a ${formatCents(redemption.creditCents)} service credit (${points} pts).`,
+      ``,
+      `Approve or decline: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/admin/club/approvals`,
+    ].join("\n"),
+  });
+
+  revalidatePath("/account/rewards");
+}
+
+async function claimReview() {
+  "use server";
+  const memberId = await requireMemberId();
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+
+  // One-time bonus: any prior pending/awarded claim (or awarded points)
+  // blocks a new claim.
+  const [existing, awarded] = await Promise.all([
+    db.reviewClaim.findFirst({
+      where: { memberId, status: { not: "REJECTED" } },
+    }),
+    db.pointsTransaction.findFirst({
+      where: { memberId, type: "EARN_REVIEW" },
+    }),
+  ]);
+  if (existing || awarded) return;
+
+  const member = await db.member.findUnique({ where: { id: memberId } });
+  await db.reviewClaim.create({ data: { memberId } });
+  await sendClubEmail({
+    to: clubNotifyEmail(),
+    subject: `Review bonus claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    replyTo: member?.email,
+    text: [
+      `${member?.firstName ?? "A member"} says they left a Google review.`,
+      `Verify it, then approve the 250-pt bonus:`,
+      `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/admin/club/approvals`,
+    ].join("\n"),
+  });
+  revalidatePath("/account/rewards");
 }

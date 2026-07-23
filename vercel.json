@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/jobber-sync",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/birthday-bonus",
+      "schedule": "0 12 1 * *"
     }
   ]
 }

@@ -921,6 +921,9 @@ model Member {
   firstName    String
   lastName     String?
   phone        String?
+  /// Shareable referral code (e.g. "JORDAN-4X2K"), generated on first visit
+  /// to the referrals page. /r/[code] resolves it.
+  referralCode String?  @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -931,6 +934,27 @@ model Member {
   tickets         ClubTicket[]
   giveawayEntries GiveawayEntry[]
   serviceRecords  ServiceRecord[]
+  reviewClaims    ReviewClaim[]
+}
+
+enum ReviewClaimStatus {
+  PENDING
+  AWARDED
+  REJECTED
+}
+
+/// "I left a Google review" self-reports, verified manually by admin before
+/// the one-time 250-point bonus posts to the ledger.
+model ReviewClaim {
+  id        String            @id @default(cuid())
+  memberId  String
+  member    Member            @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  status    ReviewClaimStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([status])
+  @@index([memberId])
 }
 
 model CustomerProfile {

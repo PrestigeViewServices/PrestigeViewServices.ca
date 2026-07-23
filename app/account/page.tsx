@@ -220,10 +220,10 @@ export default async function AccountDashboardPage() {
           sub={`${formatPoints(balance)} points ready`}
         />
         <QuickAction
-          href="/account/rewards#earn"
+          href="/account/referrals"
           icon={<Star className="h-5 w-5" />}
-          title="Earn more"
-          sub="Reviews, referrals, bonuses"
+          title="Refer a friend"
+          sub={`Give $25, get ${POINTS.REFERRAL} pts`}
         />
       </div>
 
