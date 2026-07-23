@@ -16,6 +16,7 @@ export type ImportRow = {
   phone?: string;
   streetAddress?: string;
   city?: string;
+  postalCode?: string;
 };
 
 export type CsvImportSummary = {
@@ -63,6 +64,7 @@ export async function provisionMembers(
               streetAddress:
                 (row.streetAddress ?? "").trim().slice(0, 140) || null,
               city: (row.city ?? "").trim().slice(0, 60) || null,
+              postalCode: (row.postalCode ?? "").trim().slice(0, 12) || null,
             },
           },
         },
@@ -129,10 +131,19 @@ export function parseCustomerCsv(text: string): ImportRow[] {
         first: col(["firstname", "first", "name", "fullname", "customername", "client"]),
         last: col(["lastname", "last", "surname"]),
         phone: col(["phone", "phonenumber", "tel", "mobile"]),
-        address: col(["address", "streetaddress", "street"]),
+        address: col(["address", "streetaddress", "street", "address1", "addressline1"]),
         city: col(["city", "town"]),
+        postal: col(["postalcode", "postal", "zip", "zipcode"]),
       }
-    : { first: 0, email: 1, phone: 2, last: -1, address: -1, city: -1 };
+    : {
+        first: 0,
+        email: 1,
+        phone: 2,
+        last: -1,
+        address: -1,
+        city: -1,
+        postal: -1,
+      };
 
   const dataLines = hasHeader ? lines.slice(1) : lines;
   return dataLines.map((line) => {
@@ -160,6 +171,7 @@ export function parseCustomerCsv(text: string): ImportRow[] {
       phone: get(idx.phone),
       streetAddress: get(idx.address),
       city: get(idx.city),
+      postalCode: get(idx.postal),
     };
   });
 }
