@@ -300,7 +300,7 @@ export async function importJobberClients(
           pageInfo { hasNextPage endCursor }
         }
       }`,
-      { first: 100, after: cursor }
+      { first: 50, after: cursor }
     );
 
     for (const client of data.clients.nodes) {
@@ -419,39 +419,55 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
     return summary;
   }
 
-  const data = await jobberQuery<{
-    invoices: { nodes: JobberInvoiceNode[] };
-  }>(
-    token,
-    `query RecentInvoices($first: Int!) {
-      invoices(first: $first, sort: { key: CREATED_AT, direction: DESCENDING }) {
-        nodes {
-          id
-          subject
-          invoiceStatus
-          total
-          issuedDate
-          client { id emails { address } }
-          jobs {
-            nodes {
-              id
-              title
-              completedAt
-              property { address { street city } }
-            }
-          }
-        }
-      }
-    }`,
-    { first: 100 }
-  );
-
   const touchedMembers = new Set<string>();
   // Admin-tunable program numbers, loaded once per sync.
   const settings = await getClubSettings(db);
   const tiers = clubTiers(settings);
 
-  for (const inv of data.invoices.nodes) {
+  // Paginate newest-first in modest pages (Jobber's throttle is cost-based
+  // and counts nested nodes). ~200 invoices per run; older history lands on
+  // subsequent daily runs.
+  let cursor: string | null = null;
+  const invoices: JobberInvoiceNode[] = [];
+  for (let page = 0; page < 8; page++) {
+    const data: {
+      invoices: {
+        nodes: JobberInvoiceNode[];
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      };
+    } = await jobberQuery(
+      token,
+      `query RecentInvoices($first: Int!, $after: String) {
+        invoices(first: $first, after: $after, sort: { key: CREATED_AT, direction: DESCENDING }) {
+          nodes {
+            id
+            subject
+            invoiceStatus
+            total
+            issuedDate
+            client { id emails { address } }
+            jobs(first: 5) {
+              nodes {
+                id
+                title
+                completedAt
+                property { address { street city } }
+              }
+            }
+          }
+          pageInfo { hasNextPage endCursor }
+        }
+      }`,
+      { first: 25, after: cursor }
+    );
+    invoices.push(...data.invoices.nodes);
+    if (!data.invoices.pageInfo.hasNextPage) break;
+    cursor = data.invoices.pageInfo.endCursor;
+    // Breathe between pages so the cost-based throttle can restore.
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+
+  for (const inv of invoices) {
     summary.invoicesSeen++;
     const clientId = inv.client?.id ?? null;
     const emails = (inv.client?.emails ?? []).map((e) =>
@@ -484,7 +500,8 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
     }
     if (!member) summary.unmatchedClients++;
 
-    const paid = inv.invoiceStatus === "PAID";
+    // Jobber returns lowercase statuses ("paid", "past_due", "draft").
+    const paid = (inv.invoiceStatus ?? "").toLowerCase() === "paid";
     // Total arrives as a decimal number of dollars; store integer cents.
     const amountCents = Math.round((inv.total ?? 0) * 100);
 
@@ -507,6 +524,9 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
             .join(", ")
         : null;
 
+      // A PAID invoice means the work happened, even when the Jobber job
+      // has no completedAt stamp — never show "Scheduled" on paid work.
+      const status = paid || job.completedAt ? "COMPLETED" : "SCHEDULED";
       const record = await db.serviceRecord.upsert({
         where: { jobberJobId: job.id },
         create: {
@@ -517,14 +537,14 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
           title,
           serviceDate,
           address,
-          status: job.completedAt ? "COMPLETED" : "SCHEDULED",
+          status,
           amountCents: Math.round(amountCents / jobs.length),
           paid,
           paidAt: paid ? new Date() : null,
         },
         update: {
           memberId: member ?? undefined,
-          status: job.completedAt ? "COMPLETED" : undefined,
+          status,
           paid,
           paidAt: paid ? new Date() : undefined,
         },
