@@ -123,6 +123,12 @@ export default async function ClubAdminPage(props: {
             Category mapping
           </Link>
           <Link
+            href="/admin/club/import"
+            className="rounded-full border border-surface-border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
+          >
+            Import CSV
+          </Link>
+          <Link
             href="/admin/club/settings"
             className="rounded-full border border-surface-border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
           >
