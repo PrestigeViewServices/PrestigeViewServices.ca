@@ -109,3 +109,29 @@ export async function hasAdminSession(): Promise<boolean> {
 }
 
 export const ADMIN_SESSION_MAX_AGE_SECONDS = SESSION_MS / 1000;
+
+/**
+ * Owner convenience: when the OWNER (email === ADMIN_EMAIL) signs into the
+ * customer portal, also grant the admin session so one login opens both
+ * /account and /admin. No-ops for everyone else.
+ */
+export async function maybeGrantOwnerSession(email: string): Promise<boolean> {
+  const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  if (
+    !adminEmail ||
+    !isAdminAuthConfigured() ||
+    email.trim().toLowerCase() !== adminEmail
+  ) {
+    return false;
+  }
+  const token = await createAdminToken();
+  const store = await cookies();
+  store.set(ADMIN_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: ADMIN_SESSION_MAX_AGE_SECONDS,
+  });
+  return true;
+}

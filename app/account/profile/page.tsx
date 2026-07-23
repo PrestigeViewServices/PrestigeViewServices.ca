@@ -300,6 +300,24 @@ async function saveProfile(formData: FormData) {
     }),
   ]);
 
+  // Profile-completion bonus: one-time, when the details crews actually
+  // need (phone + address + birthday month) are all on file.
+  if (phone && streetAddress && city && birthdayMonth) {
+    try {
+      const { getClubSettings } = await import("@/lib/club-settings");
+      const { awardOnce } = await import("@/lib/loyalty");
+      const settings = await getClubSettings(db);
+      await awardOnce(db, {
+        memberId,
+        type: "EARN_PROFILE",
+        amount: settings.pointsProfileComplete,
+        note: "Profile completed, crews thank you",
+      });
+    } catch {
+      // Best-effort.
+    }
+  }
+
   revalidatePath("/account/profile");
   revalidatePath("/account");
 }

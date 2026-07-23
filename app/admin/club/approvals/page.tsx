@@ -154,12 +154,12 @@ export default async function ApprovalsPage() {
         <div className="flex items-center gap-2">
           <MessageSquareHeart className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">
-            Review bonus claims ({reviewClaims.length})
+            Bonus claims ({reviewClaims.length})
           </h2>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Check Google for the member&apos;s review, then approve the
-          one-time +{settings.pointsReview}.{" "}
+          Google reviews (+{settings.pointsReview}, one-time) and social
+          shoutouts (+{settings.pointsSocialShoutout}, repeatable / 90 days).{" "}
           <a
             href="https://business.google.com/reviews"
             target="_blank"
@@ -180,24 +180,51 @@ export default async function ApprovalsPage() {
               key={c.id}
               className="surface-card flex flex-wrap items-center justify-between gap-3 p-5"
             >
-              <p className="text-sm">
-                <Link
-                  href={`/admin/club/members/${c.memberId}`}
-                  className="font-semibold text-primary hover:underline"
-                >
-                  {c.member.firstName} {c.member.lastName ?? ""}
-                </Link>{" "}
-                <span className="text-muted-foreground">
-                  · {c.member.email} · claimed{" "}
-                  {c.createdAt.toLocaleDateString("en-CA")}
-                </span>
-              </p>
+              <div className="min-w-0 text-sm">
+                <p>
+                  <span
+                    className={`mr-2 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                      c.kind === "social"
+                        ? "border-violet-500/25 bg-violet-500/15 text-violet-300"
+                        : "border-sky-500/25 bg-sky-500/15 text-sky-300"
+                    }`}
+                  >
+                    {c.kind === "social" ? "Social shoutout" : "Google review"}
+                  </span>
+                  <Link
+                    href={`/admin/club/members/${c.memberId}`}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    {c.member.firstName} {c.member.lastName ?? ""}
+                  </Link>{" "}
+                  <span className="text-muted-foreground">
+                    · {c.member.email} · claimed{" "}
+                    {c.createdAt.toLocaleDateString("en-CA")}
+                  </span>
+                </p>
+                {c.note && (
+                  <p className="mt-1 break-all text-xs text-muted-foreground">
+                    Post:{" "}
+                    <a
+                      href={c.note}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      {c.note}
+                    </a>
+                  </p>
+                )}
+              </div>
               <div className="flex gap-2">
                 <form action={approveReview}>
                   <input type="hidden" name="id" value={c.id} />
                   <Button type="submit" size="sm">
                     <BadgeCheck className="h-4 w-4" />
-                    Verified, award {settings.pointsReview}
+                    Verified, award{" "}
+                    {c.kind === "social"
+                      ? settings.pointsSocialShoutout
+                      : settings.pointsReview}
                   </Button>
                 </form>
                 <form action={rejectReview}>
@@ -386,35 +413,47 @@ async function approveReview(formData: FormData) {
   if (!claim || claim.status !== "PENDING") return;
 
   const settings = await getClubSettings(db);
-  // One-time bonus guard even if two claims somehow exist.
-  const prior = await db.pointsTransaction.findFirst({
-    where: { memberId: claim.memberId, type: "EARN_REVIEW" },
-  });
+  const isSocial = claim.kind === "social";
+  const amount = isSocial
+    ? settings.pointsSocialShoutout
+    : settings.pointsReview;
+  const type = isSocial ? ("EARN_SOCIAL" as const) : ("EARN_REVIEW" as const);
+  // Review bonus is strictly one-time; social repeats (cooldown enforced
+  // at claim time).
+  const prior = isSocial
+    ? null
+    : await db.pointsTransaction.findFirst({
+        where: { memberId: claim.memberId, type: "EARN_REVIEW" },
+      });
   await db.$transaction([
-    ...(prior
+    ...(prior || amount <= 0
       ? []
       : [
           db.pointsTransaction.create({
             data: {
               memberId: claim.memberId,
-              type: "EARN_REVIEW",
-              amount: settings.pointsReview,
+              type,
+              amount,
               sourceRef: claim.id,
-              note: "Verified Google review, thank you!",
+              note: isSocial
+                ? "Verified social shoutout, you're the best kind of marketing"
+                : "Verified Google review, thank you!",
             },
           }),
         ]),
     db.reviewClaim.update({ where: { id }, data: { status: "AWARDED" } }),
   ]);
 
-  if (!prior && claim.member.profile?.notifyServiceReminders !== false) {
+  if (!prior && amount > 0 && claim.member.profile?.notifyServiceReminders !== false) {
     await sendClubEmail({
       to: claim.member.email,
-      subject: `+${settings.pointsReview} points for your review — thank you!`,
+      subject: `+${amount} points — thank you!`,
       text: [
         `Hi ${claim.member.firstName},`,
         ``,
-        `Your Google review is verified and ${settings.pointsReview} points just landed in your Prestige Club account. Reviews keep a local crew rolling — thank you!`,
+        isSocial
+          ? `Your shoutout is verified and ${amount} points just landed in your Prestige Club account. You're the best kind of marketing — thank you!`
+          : `Your Google review is verified and ${amount} points just landed in your Prestige Club account. Reviews keep a local crew rolling — thank you!`,
         ``,
         `Your points: ${PORTAL_URL()}/account/rewards`,
         ``,

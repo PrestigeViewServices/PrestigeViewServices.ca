@@ -854,6 +854,10 @@ enum PointsType {
   EARN_CROSS_CATEGORY
   EARN_SNOW_EARLYBIRD
   EARN_BIRTHDAY
+  EARN_WELCOME
+  EARN_BOOKING
+  EARN_SOCIAL
+  EARN_PROFILE
   REDEEM
   EXPIRE
   ADMIN_ADJUST
@@ -947,18 +951,22 @@ enum ReviewClaimStatus {
   REJECTED
 }
 
-/// "I left a Google review" self-reports, verified manually by admin before
-/// the one-time 250-point bonus posts to the ledger.
+/// Member self-reported bonus claims, verified manually by admin before
+/// points post. `kind` = "review" (one-time Google review) or "social"
+/// (social media shoutout, repeatable after a cooldown).
 model ReviewClaim {
   id        String            @id @default(cuid())
   memberId  String
   member    Member            @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  kind      String            @default("review")
+  /// Optional supporting detail from the member (e.g. link to the post).
+  note      String?
   status    ReviewClaimStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
   @@index([status])
-  @@index([memberId])
+  @@index([memberId, kind])
 }
 
 model CustomerProfile {

@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/lib/site";
 
-export const dynamic = "force-static";
+// Rendered inside the cookie-gated /account layout, so the route is
+// dynamic — force-static here conflicted with the layout and broke the
+// page in production.
+export const dynamic = "force-dynamic";
 
 /**
  * About PVS inside the portal — a trust page, not a brochure. Public

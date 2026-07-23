@@ -63,6 +63,10 @@ const TYPE_LABEL: Record<string, string> = {
   EARN_CROSS_CATEGORY: "New category bonus",
   EARN_SNOW_EARLYBIRD: "Snow early-bird bonus",
   EARN_BIRTHDAY: "Birthday bonus",
+  EARN_WELCOME: "Welcome bonus",
+  EARN_BOOKING: "Portal booking bonus",
+  EARN_SOCIAL: "Social shoutout bonus",
+  EARN_PROFILE: "Profile completion bonus",
   REDEEM: "Redeemed for credit",
   EXPIRE: "Points expired",
   ADMIN_ADJUST: "Adjustment",
@@ -92,10 +96,31 @@ export default async function RewardsPage() {
         take: 20,
       }),
       db.reviewClaim.findFirst({
-        where: { memberId: member.id, status: { not: "REJECTED" } },
+        where: {
+          memberId: member.id,
+          kind: "review",
+          status: { not: "REJECTED" },
+        },
         orderBy: { createdAt: "desc" },
       }),
     ]);
+
+  // Social shoutout: pending claim, or an awarded one inside the 90-day
+  // cooldown, blocks a new claim.
+  const socialClaim = await db.reviewClaim.findFirst({
+    where: {
+      memberId: member.id,
+      kind: "social",
+      OR: [
+        { status: "PENDING" },
+        {
+          status: "AWARDED",
+          updatedAt: { gte: new Date(Date.now() - 90 * 24 * 3600 * 1000) },
+        },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   const tiers = clubTiers(settings);
   const tier = tierForSpend(spendCents, tiers);
@@ -149,6 +174,34 @@ export default async function RewardsPage() {
       points: settings.pointsBirthday,
       title: "Birthday bonus",
       body: "Set your birthday month in your profile and the points arrive on their own.",
+      highlight: false,
+    },
+    {
+      icon: Gift,
+      points: settings.pointsWelcome,
+      title: "Join the club",
+      body: "One-time welcome bonus the moment your account is created or claimed. Already yours!",
+      highlight: false,
+    },
+    {
+      icon: Check,
+      points: settings.pointsBookingRequest,
+      title: "Book through the portal",
+      body: "Send a Book-a-Service request from the Requests tab. Once per month.",
+      highlight: false,
+    },
+    {
+      icon: Sparkles,
+      points: settings.pointsSocialShoutout,
+      title: "Give us a shoutout",
+      body: "Post about PVS on Facebook or Instagram and tag us. Verified by our team, repeatable every 90 days.",
+      highlight: false,
+    },
+    {
+      icon: Users,
+      points: settings.pointsProfileComplete,
+      title: "Complete your profile",
+      body: "Phone, address, and birthday month on file, one-time bonus, posts automatically.",
       highlight: false,
     },
   ].filter((c) => c.points > 0);
@@ -320,6 +373,53 @@ export default async function RewardsPage() {
             </Button>
           </form>
         )}
+      </section>
+
+      {/* ---- Social shoutout claim ---- */}
+      <section className="surface-card p-5 sm:p-6">
+        <div className="flex items-start gap-3">
+          <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+          <div className="w-full text-sm leading-relaxed">
+            <p className="font-semibold">
+              Posted about PVS? That&apos;s +{settings.pointsSocialShoutout}{" "}
+              points.
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Share a photo or shoutout on Facebook or Instagram and tag
+              @prestigeviewservices. We verify it, points post same day.
+              Repeatable every 90 days.
+            </p>
+            {socialClaim ? (
+              <span
+                className={`mt-3 inline-block rounded-full border px-3 py-1 text-xs font-medium ${
+                  socialClaim.status === "AWARDED"
+                    ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-300"
+                    : "border-blue-500/25 bg-blue-500/15 text-blue-300"
+                }`}
+              >
+                {socialClaim.status === "AWARDED"
+                  ? "Awarded, next shoutout unlocks in 90 days"
+                  : "Being verified"}
+              </span>
+            ) : (
+              <form
+                action={claimSocial}
+                className="mt-3 flex flex-col gap-2 sm:flex-row"
+              >
+                <input
+                  name="link"
+                  type="url"
+                  placeholder="Link to your post (optional but helps!)"
+                  maxLength={300}
+                  className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-sm"
+                />
+                <Button type="submit" size="sm" variant="outline" className="shrink-0">
+                  I posted a shoutout
+                </Button>
+              </form>
+            )}
+          </div>
+        </div>
       </section>
 
       {warnExpiry && expiry.expiresAt && (
@@ -536,7 +636,7 @@ async function claimReview() {
   // blocks a new claim.
   const [existing, awarded] = await Promise.all([
     db.reviewClaim.findFirst({
-      where: { memberId, status: { not: "REJECTED" } },
+      where: { memberId, kind: "review", status: { not: "REJECTED" } },
     }),
     db.pointsTransaction.findFirst({
       where: { memberId, type: "EARN_REVIEW" },
@@ -545,14 +645,56 @@ async function claimReview() {
   if (existing || awarded) return;
 
   const member = await db.member.findUnique({ where: { id: memberId } });
-  await db.reviewClaim.create({ data: { memberId } });
+  await db.reviewClaim.create({ data: { memberId, kind: "review" } });
   await sendClubEmail({
     to: clubNotifyEmail(),
     subject: `Review bonus claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
     replyTo: member?.email,
     text: [
       `${member?.firstName ?? "A member"} says they left a Google review.`,
-      `Verify it, then approve the 250-pt bonus:`,
+      `Verify it, then approve the bonus:`,
+      `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/admin/club/approvals`,
+    ].join("\n"),
+  });
+  revalidatePath("/account/rewards");
+}
+
+async function claimSocial(formData: FormData) {
+  "use server";
+  const memberId = await requireMemberId();
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+
+  const link = String(formData.get("link") ?? "").trim().slice(0, 300);
+
+  // Repeatable after 90 days; a pending claim always blocks a new one.
+  const blocking = await db.reviewClaim.findFirst({
+    where: {
+      memberId,
+      kind: "social",
+      OR: [
+        { status: "PENDING" },
+        {
+          status: "AWARDED",
+          updatedAt: { gte: new Date(Date.now() - 90 * 24 * 3600 * 1000) },
+        },
+      ],
+    },
+  });
+  if (blocking) return;
+
+  const member = await db.member.findUnique({ where: { id: memberId } });
+  await db.reviewClaim.create({
+    data: { memberId, kind: "social", note: link || null },
+  });
+  await sendClubEmail({
+    to: clubNotifyEmail(),
+    subject: `Social shoutout claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    replyTo: member?.email,
+    text: [
+      `${member?.firstName ?? "A member"} says they posted a social shoutout about PVS.`,
+      link ? `Post: ${link}` : "No link provided — check the tagged posts.",
+      `Verify it, then approve the bonus:`,
       `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/admin/club/approvals`,
     ].join("\n"),
   });

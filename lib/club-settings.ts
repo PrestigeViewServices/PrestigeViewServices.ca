@@ -22,7 +22,11 @@ export type SettingKey =
   | "tierInsiderCents"
   | "tierEliteCents"
   | "tierPrestigeCents"
-  | "snowEarlybirdDeadline";
+  | "snowEarlybirdDeadline"
+  | "pointsWelcome"
+  | "pointsBookingRequest"
+  | "pointsSocialShoutout"
+  | "pointsProfileComplete";
 
 export type SettingDef = {
   key: SettingKey;
@@ -106,6 +110,50 @@ export const SETTING_DEFS: SettingDef[] = [
     group: "Earning",
     unit: "points",
     defaultValue: POINTS.BIRTHDAY,
+    min: 0,
+    max: 10_000,
+  },
+  {
+    key: "pointsWelcome",
+    label: "Welcome bonus",
+    description:
+      "One-time, posts automatically when an account is created or claimed.",
+    group: "Earning",
+    unit: "points",
+    defaultValue: 100,
+    min: 0,
+    max: 10_000,
+  },
+  {
+    key: "pointsBookingRequest",
+    label: "Booking request bonus",
+    description:
+      "When a member sends a Book-a-Service request from the portal. At most once per 30 days per member.",
+    group: "Earning",
+    unit: "points",
+    defaultValue: 25,
+    min: 0,
+    max: 10_000,
+  },
+  {
+    key: "pointsSocialShoutout",
+    label: "Social media shoutout",
+    description:
+      "Member posts about PVS and tags us; you verify in Approvals. Repeatable after 90 days.",
+    group: "Earning",
+    unit: "points",
+    defaultValue: 150,
+    min: 0,
+    max: 10_000,
+  },
+  {
+    key: "pointsProfileComplete",
+    label: "Profile completion bonus",
+    description:
+      "One-time, posts automatically when phone, address, and birthday month are all filled in.",
+    group: "Earning",
+    unit: "points",
+    defaultValue: 50,
     min: 0,
     max: 10_000,
   },

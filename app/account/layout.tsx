@@ -70,7 +70,13 @@ export default async function AccountLayout({
             <p className="hidden px-3 pb-2 text-[11px] uppercase tracking-wider text-muted-foreground lg:block">
               {CLUB_TAGLINE}
             </p>
-            <AccountNav firstName={member.firstName} />
+            <AccountNav
+              firstName={member.firstName}
+              isOwner={
+                member.email.toLowerCase() ===
+                (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase()
+              }
+            />
           </div>
         </aside>
         <div className="min-w-0">{children}</div>

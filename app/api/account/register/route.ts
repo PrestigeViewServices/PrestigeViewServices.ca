@@ -100,6 +100,21 @@ export async function POST(req: Request) {
   // Pre-existing Jobber history is claimed on the next scheduled sync
   // (email match) or via the admin "link account" tool.
 
+  // Welcome bonus (one-time, admin-tunable, 0 disables).
+  try {
+    const { getClubSettings } = await import("@/lib/club-settings");
+    const { awardOnce } = await import("@/lib/loyalty");
+    const settings = await getClubSettings(db);
+    await awardOnce(db, {
+      memberId: member.id,
+      type: "EARN_WELCOME",
+      amount: settings.pointsWelcome,
+      note: "Welcome to The Prestige Club!",
+    });
+  } catch {
+    // Bonus is best-effort — never block account creation.
+  }
+
   const token = await createMemberToken(member.id);
   const store = await cookies();
   store.set(MEMBER_COOKIE, token, {
@@ -109,5 +124,7 @@ export async function POST(req: Request) {
     path: "/",
     maxAge: MEMBER_SESSION_MAX_AGE_SECONDS,
   });
+  const { maybeGrantOwnerSession } = await import("@/lib/admin-session");
+  await maybeGrantOwnerSession(member.email);
   return NextResponse.json({ ok: true });
 }

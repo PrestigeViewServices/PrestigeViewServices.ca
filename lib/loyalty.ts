@@ -332,6 +332,50 @@ export async function maybeAwardCrossCategory(
   return true;
 }
 
+/**
+ * Award a bonus at most once — ever, or once per cooldown window.
+ * Returns false when a prior entry blocks it or the amount is 0.
+ */
+export async function awardOnce(
+  db: PrismaClient,
+  opts: {
+    memberId: string;
+    type: import("@prisma/client").PointsType;
+    amount: number;
+    note: string;
+    sourceRef?: string;
+    /** When set, re-awardable after this many days instead of one-time. */
+    cooldownDays?: number;
+  }
+): Promise<boolean> {
+  if (opts.amount <= 0) return false;
+  const prior = await db.pointsTransaction.findFirst({
+    where: {
+      memberId: opts.memberId,
+      type: opts.type,
+      ...(opts.cooldownDays
+        ? {
+            createdAt: {
+              gte: new Date(Date.now() - opts.cooldownDays * 24 * 3600 * 1000),
+            },
+          }
+        : {}),
+    },
+    select: { id: true },
+  });
+  if (prior) return false;
+  await db.pointsTransaction.create({
+    data: {
+      memberId: opts.memberId,
+      type: opts.type,
+      amount: opts.amount,
+      note: opts.note,
+      sourceRef: opts.sourceRef,
+    },
+  });
+  return true;
+}
+
 /** Shareable referral code, e.g. "JORDAN-4X2K". */
 export function generateReferralCode(firstName: string): string {
   const base = firstName

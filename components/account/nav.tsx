@@ -30,7 +30,13 @@ const items = [
  * Portal nav: horizontal scroll strip on mobile (most visitors arrive from
  * a Facebook/Instagram link on a phone), sidebar list on desktop.
  */
-export function AccountNav({ firstName }: { firstName: string }) {
+export function AccountNav({
+  firstName,
+  isOwner = false,
+}: {
+  firstName: string;
+  isOwner?: boolean;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -67,6 +73,15 @@ export function AccountNav({ firstName }: { firstName: string }) {
             </Link>
           );
         })}
+        {isOwner && (
+          <a
+            href="/admin"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-gradient-primary px-3 py-2 text-sm font-semibold text-white shadow-glow lg:mt-2 lg:shrink"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="whitespace-nowrap">Admin Dashboard</span>
+          </a>
+        )}
         <button
           type="button"
           onClick={signOut}

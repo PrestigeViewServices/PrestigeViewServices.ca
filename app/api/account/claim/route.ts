@@ -52,6 +52,21 @@ export async function POST(req: Request) {
     data: { passwordHash: await hashPassword(password), inviteToken: null },
   });
 
+  // Welcome bonus (one-time, admin-tunable, 0 disables).
+  try {
+    const { getClubSettings } = await import("@/lib/club-settings");
+    const { awardOnce } = await import("@/lib/loyalty");
+    const settings = await getClubSettings(db);
+    await awardOnce(db, {
+      memberId: member.id,
+      type: "EARN_WELCOME",
+      amount: settings.pointsWelcome,
+      note: "Welcome to The Prestige Club!",
+    });
+  } catch {
+    // Best-effort.
+  }
+
   const session = await createMemberToken(member.id);
   const store = await cookies();
   store.set(MEMBER_COOKIE, session, {

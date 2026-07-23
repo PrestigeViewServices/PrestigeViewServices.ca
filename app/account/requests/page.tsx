@@ -235,6 +235,26 @@ async function createTicket(formData: FormData) {
     },
   });
 
+  // Booking-request bonus: rewards using the portal to book, capped at one
+  // award per 30 days so it can't be farmed with junk tickets.
+  if (validType === "BOOK_SERVICE") {
+    try {
+      const { getClubSettings } = await import("@/lib/club-settings");
+      const { awardOnce } = await import("@/lib/loyalty");
+      const settings = await getClubSettings(db);
+      await awardOnce(db, {
+        memberId,
+        type: "EARN_BOOKING",
+        amount: settings.pointsBookingRequest,
+        note: "Booked through the portal, thanks for keeping it easy",
+        sourceRef: ticket.id,
+        cooldownDays: 30,
+      });
+    } catch {
+      // Best-effort.
+    }
+  }
+
   // Best-effort internal notification — never blocks the customer.
   await sendClubEmail({
     to: clubNotifyEmail(),
