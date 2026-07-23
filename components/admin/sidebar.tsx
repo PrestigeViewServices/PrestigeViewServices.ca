@@ -19,6 +19,8 @@ import {
   MessageCircle,
   BadgeCheck,
   SlidersHorizontal,
+  PartyPopper,
+  TrendingUp,
 } from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
@@ -49,6 +51,8 @@ const groups: NavGroup[] = [
       { href: "/admin/club", label: "Members", icon: Award },
       { href: "/admin/club/approvals", label: "Approvals", icon: BadgeCheck },
       { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
+      { href: "/admin/club/giveaways", label: "Giveaways", icon: PartyPopper },
+      { href: "/admin/club/metrics", label: "Metrics", icon: TrendingUp },
       { href: "/admin/club/settings", label: "Program Settings", icon: SlidersHorizontal },
     ],
   },

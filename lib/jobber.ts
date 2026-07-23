@@ -109,6 +109,39 @@ export function scrubTitle(raw: string): string {
   return scrubbed || "Service visit";
 }
 
+// ---- Invoice credit (Phase 3 scaffold) -------------------------------------
+
+/**
+ * Apply a redemption credit to a Jobber invoice.
+ *
+ * SCAFFOLD: Jobber's GraphQL API has no one-shot "apply credit" mutation —
+ * the practical route is adding a negative line item or a discount to the
+ * invoice, which needs product/service mapping decisions made against a
+ * real Jobber account. Until then this is a guarded no-op: it only ever
+ * attempts anything when BOTH the access token and JOBBER_ALLOW_WRITES=true
+ * are set, so read-only syncing stays strictly read-only.
+ */
+export async function applyCreditToInvoice(opts: {
+  invoiceRef: string;
+  creditCents: number;
+}): Promise<{ applied: boolean; reason: string }> {
+  if (!isJobberConfigured()) {
+    return { applied: false, reason: "Jobber not connected" };
+  }
+  if ((process.env.JOBBER_ALLOW_WRITES ?? "").trim() !== "true") {
+    return {
+      applied: false,
+      reason: "Jobber writes disabled (set JOBBER_ALLOW_WRITES=true to enable)",
+    };
+  }
+  // TODO(Phase 3+): implement the discount/line-item mutation once the
+  // Jobber app is provisioned and the credit product is mapped.
+  return {
+    applied: false,
+    reason: `Automation pending — apply ${(opts.creditCents / 100).toFixed(2)} CAD to invoice ${opts.invoiceRef} manually in Jobber`,
+  };
+}
+
 // ---- Sync ------------------------------------------------------------------
 
 export type SyncSummary = {

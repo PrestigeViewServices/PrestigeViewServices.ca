@@ -346,6 +346,50 @@ export function generateReferralCode(firstName: string): string {
   return `${base}-${suffix}`;
 }
 
+/**
+ * Snow early-bird automation: members whose winter reservation was
+ * CONFIRMED and created on/before the (admin-settable) deadline get the
+ * one-time bonus. Matched by email; idempotent via a prior
+ * EARN_SNOW_EARLYBIRD entry.
+ */
+export async function awardSnowEarlybird(
+  db: PrismaClient,
+  opts: { bonusPoints: number; deadline: Date }
+): Promise<number> {
+  if (opts.bonusPoints <= 0) return 0;
+  const reservations = await db.winterReservation.findMany({
+    where: {
+      status: { in: ["CONFIRMED", "COMPLETED"] },
+      createdAt: { lte: opts.deadline },
+    },
+    select: { id: true, email: true },
+  });
+  let awarded = 0;
+  for (const r of reservations) {
+    const member = await db.member.findUnique({
+      where: { email: r.email.toLowerCase() },
+      select: { id: true },
+    });
+    if (!member) continue;
+    const prior = await db.pointsTransaction.findFirst({
+      where: { memberId: member.id, type: "EARN_SNOW_EARLYBIRD" },
+      select: { id: true },
+    });
+    if (prior) continue;
+    await db.pointsTransaction.create({
+      data: {
+        memberId: member.id,
+        type: "EARN_SNOW_EARLYBIRD",
+        amount: opts.bonusPoints,
+        sourceRef: r.id,
+        note: "Snow pass early bird, locked in before the deadline",
+      },
+    });
+    awarded++;
+  }
+  return awarded;
+}
+
 /** Last paid activity + expiry projection for the expiry warning UI. */
 export async function expiryInfo(
   db: PrismaClient,

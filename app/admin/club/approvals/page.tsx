@@ -364,6 +364,12 @@ async function markApplied(formData: FormData) {
     where: { id },
     data: { status: "APPLIED", appliedInvoiceRef: invoiceRef },
   });
+  // Best-effort Jobber automation (guarded no-op until writes are enabled).
+  const { applyCreditToInvoice } = await import("@/lib/jobber");
+  await applyCreditToInvoice({
+    invoiceRef,
+    creditCents: redemption.creditCents,
+  });
   revalidatePath("/admin/club/approvals");
 }
 

@@ -1094,9 +1094,15 @@ model GiveawayEntry {
   member     Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
   /// "tier" | "referral" | "no_purchase" (mail-in / free web form entries).
   source     String
+  /// Contact details for NO-PURCHASE entrants (Canadian contest compliance:
+  /// the free entry route must work without an account or purchase).
+  entrantName  String?
+  entrantEmail String?
+  entrantTown  String?
   createdAt  DateTime @default(now())
 
   @@index([giveawayId])
+  @@index([giveawayId, entrantEmail])
 }
 
 /// Cached Jobber job/invoice data mapped to PUBLIC category labels. The

@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth";
 import {
   SETTING_DEFS,
   getClubSettings,
+  yyyymmddToInput,
   type SettingKey,
 } from "@/lib/club-settings";
 import { formatCents, formatPoints } from "@/lib/loyalty";
@@ -81,8 +82,12 @@ export default async function ClubSettingsPage() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {SETTING_DEFS.filter((d) => d.group === group).map((d) => {
                 const stored = settings[d.key];
-                const displayValue =
-                  d.unit === "dollars" ? stored / 100 : stored;
+                const isDate = d.unit === "date";
+                const displayValue = isDate
+                  ? yyyymmddToInput(stored)
+                  : d.unit === "dollars"
+                    ? stored / 100
+                    : stored;
                 return (
                   <div key={d.key}>
                     <label
@@ -103,11 +108,23 @@ export default async function ClubSettingsPage() {
                       <input
                         id={`set-${d.key}`}
                         name={d.key}
-                        type="number"
+                        type={isDate ? "date" : "number"}
                         required
-                        step={1}
-                        min={d.unit === "dollars" ? d.min / 100 : d.min}
-                        max={d.unit === "dollars" ? d.max / 100 : d.max}
+                        step={isDate ? undefined : 1}
+                        min={
+                          isDate
+                            ? undefined
+                            : d.unit === "dollars"
+                              ? d.min / 100
+                              : d.min
+                        }
+                        max={
+                          isDate
+                            ? undefined
+                            : d.unit === "dollars"
+                              ? d.max / 100
+                              : d.max
+                        }
                         defaultValue={displayValue}
                         className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       />
@@ -125,7 +142,9 @@ export default async function ClubSettingsPage() {
                         Default:{" "}
                         {d.unit === "dollars"
                           ? formatCents(d.defaultValue)
-                          : d.defaultValue}
+                          : d.unit === "date"
+                            ? yyyymmddToInput(d.defaultValue)
+                            : d.defaultValue}
                       </span>
                     </p>
                   </div>
@@ -172,9 +191,17 @@ async function saveSettings(formData: FormData) {
   if (!db) throw new Error("DB not configured");
 
   for (const def of SETTING_DEFS) {
-    const raw = Number(formData.get(def.key));
-    if (!Number.isFinite(raw)) continue;
-    const stored = def.unit === "dollars" ? Math.round(raw * 100) : Math.trunc(raw);
+    let stored: number;
+    if (def.unit === "date") {
+      // "yyyy-mm-dd" → YYYYMMDD int.
+      const s = String(formData.get(def.key) ?? "").replace(/-/g, "");
+      stored = Number(s);
+    } else {
+      const raw = Number(formData.get(def.key));
+      if (!Number.isFinite(raw)) continue;
+      stored = def.unit === "dollars" ? Math.round(raw * 100) : Math.trunc(raw);
+    }
+    if (!Number.isFinite(stored) || stored <= 0) continue;
     const clamped = Math.min(def.max, Math.max(def.min, stored));
     await db.clubSetting.upsert({
       where: { key: def.key satisfies SettingKey },

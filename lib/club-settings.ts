@@ -21,15 +21,16 @@ export type SettingKey =
   | "centsPerPoint"
   | "tierInsiderCents"
   | "tierEliteCents"
-  | "tierPrestigeCents";
+  | "tierPrestigeCents"
+  | "snowEarlybirdDeadline";
 
 export type SettingDef = {
   key: SettingKey;
   label: string;
   description: string;
   group: "Earning" | "Redemption" | "Tiers";
-  /** How the stored integer is displayed/edited. */
-  unit: "points" | "cents-per-point" | "dollars";
+  /** How the stored integer is displayed/edited. "date" stores YYYYMMDD. */
+  unit: "points" | "cents-per-point" | "dollars" | "date";
   defaultValue: number;
   min: number;
   max: number;
@@ -86,6 +87,17 @@ export const SETTING_DEFS: SettingDef[] = [
     defaultValue: POINTS.SNOW_EARLYBIRD,
     min: 0,
     max: 10_000,
+  },
+  {
+    key: "snowEarlybirdDeadline",
+    label: "Snow early-bird deadline",
+    description:
+      "Confirmed snow reservations made on or before this date earn the early-bird bonus automatically.",
+    group: "Earning",
+    unit: "date",
+    defaultValue: 2026_08_14,
+    min: 2020_01_01,
+    max: 2099_12_31,
   },
   {
     key: "pointsBirthday",
@@ -157,6 +169,20 @@ export async function getClubSettings(
     }
   }
   return out;
+}
+
+/** YYYYMMDD int → Date (end of that day, local). */
+export function dateFromYyyymmdd(value: number): Date {
+  const y = Math.floor(value / 10_000);
+  const m = Math.floor((value % 10_000) / 100);
+  const d = value % 100;
+  return new Date(y, m - 1, d, 23, 59, 59);
+}
+
+/** YYYYMMDD int → "yyyy-mm-dd" for date inputs. */
+export function yyyymmddToInput(value: number): string {
+  const s = String(value).padStart(8, "0");
+  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
 }
 
 /** Tier ladder with thresholds taken from settings. */

@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/db";
 import { syncJobber } from "@/lib/jobber";
+import { awardSnowEarlybird } from "@/lib/loyalty";
+import { dateFromYyyymmdd, getClubSettings } from "@/lib/club-settings";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -24,7 +26,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const summary = await syncJobber(db);
-    return NextResponse.json(summary);
+    // Snow early-bird runs daily alongside the sync, and works even before
+    // Jobber is connected (reservations come from the winter form).
+    const settings = await getClubSettings(db);
+    const earlybirdAwarded = await awardSnowEarlybird(db, {
+      bonusPoints: settings.pointsSnowEarlybird,
+      deadline: dateFromYyyymmdd(settings.snowEarlybirdDeadline),
+    });
+    return NextResponse.json({ ...summary, earlybirdAwarded });
   } catch (err) {
     return NextResponse.json(
       { ok: false, reason: String(err) },
