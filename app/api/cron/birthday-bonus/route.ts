@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/db";
-import { POINTS } from "@/lib/loyalty";
+import { getClubSettings } from "@/lib/club-settings";
 import { sendClubEmail } from "@/lib/send-club-email";
 import { siteConfig } from "@/lib/site";
 
@@ -21,6 +21,11 @@ export async function GET(req: NextRequest) {
   const db = getDb();
   if (!db) return NextResponse.json({ ok: false, reason: "DB not configured" });
 
+  const settings = await getClubSettings(db);
+  const birthdayPoints = settings.pointsBirthday;
+  if (birthdayPoints <= 0) {
+    return NextResponse.json({ ok: true, skipped: "birthday bonus set to 0" });
+  }
   const month = new Date().getMonth() + 1; // 1-12
   const elevenMonthsAgo = new Date();
   elevenMonthsAgo.setMonth(elevenMonthsAgo.getMonth() - 11);
@@ -45,7 +50,7 @@ export async function GET(req: NextRequest) {
       data: {
         memberId: p.memberId,
         type: "EARN_BIRTHDAY",
-        amount: POINTS.BIRTHDAY,
+        amount: birthdayPoints,
         note: "Happy birthday from the PVS crew!",
       },
     });
@@ -54,11 +59,11 @@ export async function GET(req: NextRequest) {
     if (p.notifyPromos) {
       await sendClubEmail({
         to: p.member.email,
-        subject: `Happy birthday month, ${p.member.firstName}! +${POINTS.BIRTHDAY} points`,
+        subject: `Happy birthday month, ${p.member.firstName}! +${birthdayPoints} points`,
         text: [
           `Hi ${p.member.firstName},`,
           ``,
-          `It's your birthday month, so ${POINTS.BIRTHDAY} Prestige Club points just landed in your account, from all of us at PVS.`,
+          `It's your birthday month, so ${birthdayPoints} Prestige Club points just landed in your account, from all of us at PVS.`,
           ``,
           `Your points: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/account/rewards`,
           ``,

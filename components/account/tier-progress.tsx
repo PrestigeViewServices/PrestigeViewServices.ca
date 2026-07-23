@@ -4,6 +4,7 @@ import {
   formatCents,
   nextTierFor,
   tierForSpend,
+  type TierDef,
 } from "@/lib/loyalty";
 
 const TIER_BADGE_STYLE: Record<string, string> = {
@@ -13,8 +14,14 @@ const TIER_BADGE_STYLE: Record<string, string> = {
   PRESTIGE: "bg-gradient-primary text-white border-transparent shadow-glow",
 };
 
-export function TierBadge({ spendCents }: { spendCents: number }) {
-  const tier = tierForSpend(spendCents);
+export function TierBadge({
+  spendCents,
+  tiers = TIERS,
+}: {
+  spendCents: number;
+  tiers?: TierDef[];
+}) {
+  const tier = tierForSpend(spendCents, tiers);
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${TIER_BADGE_STYLE[tier.key]}`}
@@ -29,9 +36,15 @@ export function TierBadge({ spendCents }: { spendCents: number }) {
  * Tier progress bar: where the member sits on the rolling 12-month spend
  * ladder and how far to the next tier ("$430 more this year to reach Elite").
  */
-export function TierProgress({ spendCents }: { spendCents: number }) {
-  const tier = tierForSpend(spendCents);
-  const next = nextTierFor(spendCents);
+export function TierProgress({
+  spendCents,
+  tiers = TIERS,
+}: {
+  spendCents: number;
+  tiers?: TierDef[];
+}) {
+  const tier = tierForSpend(spendCents, tiers);
+  const next = nextTierFor(spendCents, tiers);
 
   // Percent across the CURRENT tier band (floor → next floor).
   const floor = tier.minCents;
@@ -66,7 +79,7 @@ export function TierProgress({ spendCents }: { spendCents: number }) {
         />
       </div>
       <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
-        {TIERS.map((t) => (
+        {tiers.map((t) => (
           <span
             key={t.key}
             className={t.key === tier.key ? "font-bold text-foreground" : ""}

@@ -15,20 +15,18 @@ import {
 import { getDb } from "@/lib/db";
 import { getMember, requireMemberId } from "@/lib/customer-auth";
 import {
-  CENTS_PER_POINT,
   EXPIRY_MONTHS,
-  POINTS,
-  REDEEM_OPTIONS,
-  TIERS,
   availablePoints,
   creditCentsForPoints,
   expiryInfo,
   formatCents,
   formatPoints,
   pointsBalance,
+  redeemOptionsFor,
   rollingSpendCents,
   tierForSpend,
 } from "@/lib/loyalty";
+import { clubTiers, getClubSettings } from "@/lib/club-settings";
 import { clubNotifyEmail, sendClubEmail } from "@/lib/send-club-email";
 import { TierBadge } from "@/components/account/tier-progress";
 import { Button } from "@/components/ui/button";
@@ -76,8 +74,9 @@ export default async function RewardsPage() {
   const db = getDb();
   if (!db) return null;
 
-  const [balance, available, spendCents, ledger, expiry, redemptions, reviewClaim] =
+  const [settings, balance, available, spendCents, ledger, expiry, redemptions, reviewClaim] =
     await Promise.all([
+      getClubSettings(db),
       pointsBalance(db, member.id),
       availablePoints(db, member.id),
       rollingSpendCents(db, member.id),
@@ -98,8 +97,10 @@ export default async function RewardsPage() {
       }),
     ]);
 
-  const tier = tierForSpend(spendCents);
-  const creditValue = creditCentsForPoints(balance);
+  const tiers = clubTiers(settings);
+  const tier = tierForSpend(spendCents, tiers);
+  const creditValue = creditCentsForPoints(balance, settings.centsPerPoint);
+  const redeemOptions = redeemOptionsFor(settings.centsPerPoint);
 
   // Expiry warning: within 6 months of the 24-month inactivity cutoff.
   const warnExpiry =
@@ -110,47 +111,47 @@ export default async function RewardsPage() {
   const earnCards = [
     {
       icon: Check,
-      points: POINTS.PER_VISIT,
+      points: settings.pointsPerVisit,
       title: "Every completed visit",
       body: "Points post automatically when your invoice is paid, every single service.",
       highlight: false,
     },
     {
       icon: Star,
-      points: POINTS.CROSS_CATEGORY,
+      points: settings.pointsCrossCategory,
       title: "Try a second category",
       body: "Your first booking in a new category, windows, lawn, or snow, earns a one-time bonus. The fastest boost in the club.",
       highlight: true,
     },
     {
       icon: Users,
-      points: POINTS.REFERRAL,
+      points: settings.pointsReferral,
       title: "Refer a friend",
-      body: "They complete their first paid service and get $25 off it, you get the points. (Referral links coming to the portal soon, mention a friend by name for now.)",
+      body: "Share your link from the Refer a Friend tab, they get $25 off their first service, you get the points once it's completed and paid.",
       highlight: false,
     },
     {
       icon: MessageSquareHeart,
-      points: POINTS.REVIEW,
+      points: settings.pointsReview,
       title: "Leave a Google review",
       body: "One-time bonus once our team verifies it. Reviews keep a local crew rolling.",
       highlight: false,
     },
     {
       icon: Snowflake,
-      points: POINTS.SNOW_EARLYBIRD,
+      points: settings.pointsSnowEarlybird,
       title: "Snow pass early bird",
       body: "Sign your seasonal snow contract before the early-bird deadline.",
       highlight: false,
     },
     {
       icon: Cake,
-      points: POINTS.BIRTHDAY,
+      points: settings.pointsBirthday,
       title: "Birthday bonus",
       body: "Set your birthday month in your profile and the points arrive on their own.",
       highlight: false,
     },
-  ];
+  ].filter((c) => c.points > 0);
 
   return (
     <div className="space-y-8">
@@ -202,7 +203,7 @@ export default async function RewardsPage() {
             </p>
           )}
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {REDEEM_OPTIONS.map((pts) => {
+            {redeemOptions.map((pts) => {
               const affordable = available >= pts;
               return (
                 <form key={pts} action={requestRedemption}>
@@ -217,7 +218,7 @@ export default async function RewardsPage() {
                     }`}
                   >
                     <p className="text-lg font-bold">
-                      {formatCents(pts * CENTS_PER_POINT)}
+                      {formatCents(pts * settings.centsPerPoint)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatPoints(pts)} pts
@@ -283,7 +284,8 @@ export default async function RewardsPage() {
           <MessageSquareHeart className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div className="text-sm leading-relaxed">
             <p className="font-semibold">
-              Left us a Google review? That&apos;s +{POINTS.REVIEW} points.
+              Left us a Google review? That&apos;s +{settings.pointsReview}{" "}
+              points.
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">
               <a
@@ -393,7 +395,7 @@ export default async function RewardsPage() {
             See all tiers
           </summary>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            {TIERS.map((t) => (
+            {tiers.map((t) => (
               <div
                 key={t.key}
                 className={`surface-card p-5 ${
@@ -490,7 +492,9 @@ async function requestRedemption(formData: FormData) {
   if (!db) throw new Error("DB not configured");
 
   const points = Math.trunc(Number(formData.get("points")));
-  if (!REDEEM_OPTIONS.includes(points as (typeof REDEEM_OPTIONS)[number])) {
+  // Validate against the CURRENT redemption options (admin-tunable rate).
+  const settings = await getClubSettings(db);
+  if (!redeemOptionsFor(settings.centsPerPoint).includes(points)) {
     throw new Error("Invalid redemption amount");
   }
 
@@ -503,7 +507,7 @@ async function requestRedemption(formData: FormData) {
     data: {
       memberId,
       points,
-      creditCents: creditCentsForPoints(points),
+      creditCents: creditCentsForPoints(points, settings.centsPerPoint),
       status: "REQUESTED",
     },
   });

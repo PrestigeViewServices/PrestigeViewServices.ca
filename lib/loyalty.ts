@@ -48,8 +48,21 @@ export const CENTS_PER_POINT = 5;
 export const REDEEM_STEP_POINTS = 500;
 export const REDEEM_OPTIONS = [500, 1000, 1500, 2000] as const;
 
-export function creditCentsForPoints(points: number): number {
-  return points * CENTS_PER_POINT;
+export function creditCentsForPoints(
+  points: number,
+  centsPerPoint: number = CENTS_PER_POINT
+): number {
+  return points * centsPerPoint;
+}
+
+/** Redemption options in points for the fixed $25/$50/$75/$100 steps,
+ * derived from the (admin-tunable) cents-per-point rate. */
+export function redeemOptionsFor(
+  centsPerPoint: number = CENTS_PER_POINT
+): number[] {
+  return [2_500, 5_000, 7_500, 10_000].map((cents) =>
+    Math.round(cents / Math.max(1, centsPerPoint))
+  );
 }
 
 /** Points expire after 24 months with no paid service. */
@@ -132,9 +145,12 @@ export function tierDef(key: LoyaltyTier): TierDef {
   return TIERS.find((t) => t.key === key) ?? TIERS[0];
 }
 
-export function tierForSpend(cents: number): TierDef {
-  let current = TIERS[0];
-  for (const t of TIERS) {
+export function tierForSpend(
+  cents: number,
+  tiers: TierDef[] = TIERS
+): TierDef {
+  let current = tiers[0];
+  for (const t of tiers) {
     if (cents >= t.minCents) current = t;
   }
   return current;
@@ -142,9 +158,10 @@ export function tierForSpend(cents: number): TierDef {
 
 /** Next tier above the given spend, or null at the top. */
 export function nextTierFor(
-  cents: number
+  cents: number,
+  tiers: TierDef[] = TIERS
 ): { tier: TierDef; remainingCents: number } | null {
-  const next = TIERS.find((t) => t.minCents > cents);
+  const next = tiers.find((t) => t.minCents > cents);
   if (!next) return null;
   return { tier: next, remainingCents: next.minCents - cents };
 }
@@ -193,10 +210,11 @@ export async function rollingSpendCents(
  * paid-invoice sync or admin data change. */
 export async function recalcTier(
   db: PrismaClient,
-  memberId: string
+  memberId: string,
+  tiers: TierDef[] = TIERS
 ): Promise<void> {
   const spend = await rollingSpendCents(db, memberId);
-  const tier = tierForSpend(spend);
+  const tier = tierForSpend(spend, tiers);
   await db.customerProfile.updateMany({
     where: { memberId },
     data: { tier: tier.key, tierSpend12moCents: spend },
@@ -216,7 +234,8 @@ export async function awardServicePoints(
     paid: boolean;
     pointsAwarded: boolean;
     title: string;
-  }
+  },
+  opts: { pointsPerVisit?: number; crossCategoryPoints?: number } = {}
 ): Promise<boolean> {
   if (
     !record.memberId ||
@@ -226,16 +245,21 @@ export async function awardServicePoints(
   ) {
     return false;
   }
+  const perVisit = opts.pointsPerVisit ?? POINTS.PER_VISIT;
   await db.$transaction([
-    db.pointsTransaction.create({
-      data: {
-        memberId: record.memberId,
-        type: "EARN_SERVICE",
-        amount: POINTS.PER_VISIT,
-        sourceRef: record.id,
-        note: `Completed visit: ${record.title}`,
-      },
-    }),
+    ...(perVisit > 0
+      ? [
+          db.pointsTransaction.create({
+            data: {
+              memberId: record.memberId,
+              type: "EARN_SERVICE",
+              amount: perVisit,
+              sourceRef: record.id,
+              note: `Completed visit: ${record.title}`,
+            },
+          }),
+        ]
+      : []),
     db.serviceRecord.update({
       where: { id: record.id },
       data: { pointsAwarded: true },
@@ -243,7 +267,7 @@ export async function awardServicePoints(
   ]);
   // Cross-sell engine: a paid visit may have just unlocked the one-time
   // second-category bonus.
-  await maybeAwardCrossCategory(db, record.memberId);
+  await maybeAwardCrossCategory(db, record.memberId, opts.crossCategoryPoints);
   return true;
 }
 
@@ -283,7 +307,8 @@ export async function availablePoints(
  */
 export async function maybeAwardCrossCategory(
   db: PrismaClient,
-  memberId: string
+  memberId: string,
+  bonusPoints: number = POINTS.CROSS_CATEGORY
 ): Promise<boolean> {
   const already = await db.pointsTransaction.findFirst({
     where: { memberId, type: "EARN_CROSS_CATEGORY" },
@@ -295,11 +320,12 @@ export async function maybeAwardCrossCategory(
     where: { memberId, paid: true },
   });
   if (categories.length < 2) return false;
+  if (bonusPoints <= 0) return false;
   await db.pointsTransaction.create({
     data: {
       memberId,
       type: "EARN_CROSS_CATEGORY",
-      amount: POINTS.CROSS_CATEGORY,
+      amount: bonusPoints,
       note: "First booking in a second category, welcome to the club bonus",
     },
   });

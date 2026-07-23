@@ -1,7 +1,8 @@
 import { Gift, Users } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getMember } from "@/lib/customer-auth";
-import { POINTS, generateReferralCode } from "@/lib/loyalty";
+import { generateReferralCode } from "@/lib/loyalty";
+import { getClubSettings } from "@/lib/club-settings";
 import { ShareButtons } from "@/components/account/share-buttons";
 import { siteConfig } from "@/lib/site";
 
@@ -59,6 +60,7 @@ export default async function ReferralsPage() {
   }
   if (!code) return null;
 
+  const settings = await getClubSettings(db);
   const referrals = await db.referral.findMany({
     where: { referrerId: member.id },
     orderBy: { createdAt: "desc" },
@@ -76,7 +78,7 @@ export default async function ReferralsPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           They get $25 off their first service. You get{" "}
-          {POINTS.REFERRAL} points when it&apos;s completed and paid.
+          {settings.pointsReferral} points when it&apos;s completed and paid.
         </p>
       </header>
 
@@ -104,7 +106,7 @@ export default async function ReferralsPage() {
           <li>
             <span className="font-semibold text-foreground">3.</span> Once
             their first service is completed and paid,{" "}
-            {POINTS.REFERRAL} points land in your ledger.
+            {settings.pointsReferral} points land in your ledger.
           </li>
         </ol>
       </section>

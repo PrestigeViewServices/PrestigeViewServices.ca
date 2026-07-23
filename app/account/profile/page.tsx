@@ -158,7 +158,7 @@ export default async function ProfilePage() {
               ))}
             </select>
             <p className="mt-1 text-xs text-muted-foreground">
-              Members with a birthday month on file get a 100-point bonus each
+              Members with a birthday month on file get a points bonus each
               year.
             </p>
           </div>

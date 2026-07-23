@@ -13,11 +13,12 @@ import { getMember } from "@/lib/customer-auth";
 import {
   CATEGORY_LABELS,
   CLUB_NAME,
-  POINTS,
+  formatCents,
   formatPoints,
   pointsBalance,
   rollingSpendCents,
 } from "@/lib/loyalty";
+import { clubTiers, getClubSettings } from "@/lib/club-settings";
 import { TierBadge, TierProgress } from "@/components/account/tier-progress";
 import { siteConfig } from "@/lib/site";
 
@@ -33,8 +34,9 @@ export default async function AccountDashboardPage() {
   const db = getDb();
   if (!db) return null;
 
-  const [balance, spendCents, nextService, openTickets, categoriesUsed] =
+  const [settings, balance, spendCents, nextService, openTickets, categoriesUsed] =
     await Promise.all([
+      getClubSettings(db),
       pointsBalance(db, member.id),
       rollingSpendCents(db, member.id),
       db.serviceRecord.findFirst({
@@ -57,6 +59,8 @@ export default async function AccountDashboardPage() {
   const isVeteran = member.profile?.veteranStatus !== "NONE";
   const singleCategory = categoriesUsed.length === 1;
   const usedCategory = singleCategory ? categoriesUsed[0].category : null;
+  const tiers = clubTiers(settings);
+  const crossPts = settings.pointsCrossCategory;
 
   return (
     <div className="space-y-6">
@@ -70,7 +74,7 @@ export default async function AccountDashboardPage() {
             Welcome back, {member.firstName}
           </h1>
         </div>
-        <TierBadge spendCents={spendCents} />
+        <TierBadge spendCents={spendCents} tiers={tiers} />
       </header>
 
       {/* ---- Points + tier card ---- */}
@@ -84,7 +88,8 @@ export default async function AccountDashboardPage() {
               {formatPoints(balance)}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              100 points = $5 in service credit
+              100 points = {formatCents(100 * settings.centsPerPoint)} in
+              service credit
             </p>
           </div>
           <Link
@@ -96,7 +101,7 @@ export default async function AccountDashboardPage() {
           </Link>
         </div>
         <div className="mt-6">
-          <TierProgress spendCents={spendCents} />
+          <TierProgress spendCents={spendCents} tiers={tiers} />
         </div>
       </section>
 
@@ -179,19 +184,19 @@ export default async function AccountDashboardPage() {
           Bonus points
         </p>
         <h2 className="mt-2 text-xl font-bold text-white text-balance">
-          Try a second service, pocket {POINTS.CROSS_CATEGORY} bonus points
+          Try a second service, pocket {crossPts} bonus points
         </h2>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-sky-100/85">
           {usedCategory ? (
             <>
               You&apos;ve booked {CATEGORY_LABELS[usedCategory]} with us, your
               first booking in any other category earns a one-time{" "}
-              {POINTS.CROSS_CATEGORY}-point bonus on top of your visit points.
+              {crossPts}-point bonus on top of your visit points.
             </>
           ) : (
             <>
               Book in a second service category, windows, lawn, or snow, and
-              your first visit there earns a one-time {POINTS.CROSS_CATEGORY}
+              your first visit there earns a one-time {crossPts}
               -point bonus. One property, one crew, one account.
             </>
           )}
@@ -223,7 +228,7 @@ export default async function AccountDashboardPage() {
           href="/account/referrals"
           icon={<Star className="h-5 w-5" />}
           title="Refer a friend"
-          sub={`Give $25, get ${POINTS.REFERRAL} pts`}
+          sub={`Give $25, get ${settings.pointsReferral} pts`}
         />
       </div>
 

@@ -10,7 +10,8 @@ import {
 import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { sendClubEmail } from "@/lib/send-club-email";
-import { POINTS, formatCents, formatPoints } from "@/lib/loyalty";
+import { formatCents, formatPoints } from "@/lib/loyalty";
+import { getClubSettings } from "@/lib/club-settings";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
@@ -31,6 +32,7 @@ export default async function ApprovalsPage() {
   const db = getDb();
   if (!db) return null;
 
+  const settings = await getClubSettings(db);
   const [redemptions, reviewClaims, referrals] = await Promise.all([
     db.redemption.findMany({
       where: { status: { in: ["REQUESTED", "APPROVED"] } },
@@ -157,7 +159,7 @@ export default async function ApprovalsPage() {
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           Check Google for the member&apos;s review, then approve the
-          one-time +{POINTS.REVIEW}.{" "}
+          one-time +{settings.pointsReview}.{" "}
           <a
             href="https://business.google.com/reviews"
             target="_blank"
@@ -195,7 +197,7 @@ export default async function ApprovalsPage() {
                   <input type="hidden" name="id" value={c.id} />
                   <Button type="submit" size="sm">
                     <BadgeCheck className="h-4 w-4" />
-                    Verified, award {POINTS.REVIEW}
+                    Verified, award {settings.pointsReview}
                   </Button>
                 </form>
                 <form action={rejectReview}>
@@ -222,7 +224,7 @@ export default async function ApprovalsPage() {
           BOOKED = the friend submitted a quote through a referral link
           (their $25-off applies to their first invoice). Mark completed once
           their first service is done and paid, then award the{" "}
-          {POINTS.REFERRAL} points.
+          {settings.pointsReferral} points.
         </p>
         <div className="mt-3 space-y-3">
           {referrals.length === 0 && (
@@ -260,7 +262,7 @@ export default async function ApprovalsPage() {
                 <form action={awardReferral}>
                   <input type="hidden" name="id" value={r.id} />
                   <Button type="submit" size="sm">
-                    Award {POINTS.REFERRAL} pts
+                    Award {settings.pointsReferral} pts
                   </Button>
                 </form>
               )}
@@ -377,6 +379,7 @@ async function approveReview(formData: FormData) {
   });
   if (!claim || claim.status !== "PENDING") return;
 
+  const settings = await getClubSettings(db);
   // One-time bonus guard even if two claims somehow exist.
   const prior = await db.pointsTransaction.findFirst({
     where: { memberId: claim.memberId, type: "EARN_REVIEW" },
@@ -389,7 +392,7 @@ async function approveReview(formData: FormData) {
             data: {
               memberId: claim.memberId,
               type: "EARN_REVIEW",
-              amount: POINTS.REVIEW,
+              amount: settings.pointsReview,
               sourceRef: claim.id,
               note: "Verified Google review, thank you!",
             },
@@ -401,11 +404,11 @@ async function approveReview(formData: FormData) {
   if (!prior && claim.member.profile?.notifyServiceReminders !== false) {
     await sendClubEmail({
       to: claim.member.email,
-      subject: `+${POINTS.REVIEW} points for your review — thank you!`,
+      subject: `+${settings.pointsReview} points for your review — thank you!`,
       text: [
         `Hi ${claim.member.firstName},`,
         ``,
-        `Your Google review is verified and ${POINTS.REVIEW} points just landed in your Prestige Club account. Reviews keep a local crew rolling — thank you!`,
+        `Your Google review is verified and ${settings.pointsReview} points just landed in your Prestige Club account. Reviews keep a local crew rolling — thank you!`,
         ``,
         `Your points: ${PORTAL_URL()}/account/rewards`,
         ``,
@@ -452,12 +455,13 @@ async function awardReferral(formData: FormData) {
   });
   if (!referral || referral.status !== "COMPLETED") return;
 
+  const settings = await getClubSettings(db);
   await db.$transaction([
     db.pointsTransaction.create({
       data: {
         memberId: referral.referrerId,
         type: "EARN_REFERRAL",
-        amount: POINTS.REFERRAL,
+        amount: settings.pointsReferral,
         sourceRef: referral.id,
         note: "Referral completed their first service, thank you!",
       },
@@ -468,11 +472,11 @@ async function awardReferral(formData: FormData) {
   if (referral.referrer.profile?.notifyServiceReminders !== false) {
     await sendClubEmail({
       to: referral.referrer.email,
-      subject: `+${POINTS.REFERRAL} points — your referral came through!`,
+      subject: `+${settings.pointsReferral} points — your referral came through!`,
       text: [
         `Hi ${referral.referrer.firstName},`,
         ``,
-        `Your friend finished their first PVS service, so ${POINTS.REFERRAL} points just hit your Prestige Club account. Know anyone else who could use a hand? Your link's always live.`,
+        `Your friend finished their first PVS service, so ${settings.pointsReferral} points just hit your Prestige Club account. Know anyone else who could use a hand? Your link's always live.`,
         ``,
         `Your referrals: ${PORTAL_URL()}/account/referrals`,
         ``,

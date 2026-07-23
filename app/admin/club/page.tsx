@@ -12,11 +12,11 @@ import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import {
-  CENTS_PER_POINT,
   formatCents,
   formatPoints,
   tierDef,
 } from "@/lib/loyalty";
+import { getClubSettings } from "@/lib/club-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +48,7 @@ export default async function ClubAdminPage(props: {
 
   const q = (searchParams.q ?? "").trim();
 
+  const settings = await getClubSettings(db);
   const [members, memberCount, outstanding, openTickets, unlinkedRecords] =
     await Promise.all([
       db.member.findMany({
@@ -71,7 +72,7 @@ export default async function ClubAdminPage(props: {
     ]);
 
   const outstandingPoints = Math.max(0, outstanding._sum.amount ?? 0);
-  const liabilityCents = outstandingPoints * CENTS_PER_POINT;
+  const liabilityCents = outstandingPoints * settings.centsPerPoint;
 
   // Per-member balances for the roster (single grouped query, no N+1).
   const balances = await db.pointsTransaction.groupBy({
@@ -110,6 +111,12 @@ export default async function ClubAdminPage(props: {
             className="rounded-full border border-surface-border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
           >
             Category mapping
+          </Link>
+          <Link
+            href="/admin/club/settings"
+            className="rounded-full border border-surface-border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
+          >
+            Program settings
           </Link>
         </div>
       </header>

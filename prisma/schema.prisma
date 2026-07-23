@@ -1129,6 +1129,16 @@ model ServiceRecord {
   @@index([paid])
 }
 
+/// Admin-editable program numbers (point values, redemption rate, tier
+/// thresholds). Keys are defined in lib/club-settings.ts; missing keys fall
+/// back to code defaults. Changes affect FUTURE awards only — the ledger is
+/// never rewritten.
+model ClubSetting {
+  key       String   @id
+  value     Int
+  updatedAt DateTime @updatedAt
+}
+
 /// Admin-editable mapping from Jobber line-item / job-name terms to public
 /// categories, so internal names never leak into the portal.
 model CategoryMapping {

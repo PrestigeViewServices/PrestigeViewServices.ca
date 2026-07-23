@@ -1,5 +1,6 @@
 import type { PrismaClient, PublicCategory } from "@prisma/client";
 import { awardServicePoints, recalcTier } from "./loyalty";
+import { clubTiers, getClubSettings } from "./club-settings";
 
 /**
  * Jobber GraphQL sync (read-only, Phase 1).
@@ -163,6 +164,9 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
   );
 
   const touchedMembers = new Set<string>();
+  // Admin-tunable program numbers, loaded once per sync.
+  const settings = await getClubSettings(db);
+  const tiers = clubTiers(settings);
 
   for (const inv of data.invoices.nodes) {
     summary.invoicesSeen++;
@@ -244,13 +248,20 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
       });
       summary.recordsUpserted++;
 
-      if (await awardServicePoints(db, record)) summary.pointsAwarded++;
+      if (
+        await awardServicePoints(db, record, {
+          pointsPerVisit: settings.pointsPerVisit,
+          crossCategoryPoints: settings.pointsCrossCategory,
+        })
+      ) {
+        summary.pointsAwarded++;
+      }
       if (member) touchedMembers.add(member);
     }
   }
 
   for (const memberId of touchedMembers) {
-    await recalcTier(db, memberId);
+    await recalcTier(db, memberId, tiers);
   }
 
   summary.ok = true;

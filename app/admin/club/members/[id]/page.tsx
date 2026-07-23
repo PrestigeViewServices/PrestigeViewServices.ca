@@ -130,15 +130,15 @@ export default async function ClubMemberPage(props: {
                 <label className="mb-1 block text-xs font-medium">Type</label>
                 <select name="type" defaultValue="ADMIN_ADJUST" className={inputCls}>
                   <option value="ADMIN_ADJUST">Adjustment</option>
-                  <option value="EARN_REVIEW">Review bonus (+250)</option>
-                  <option value="EARN_REFERRAL">Referral bonus (+500)</option>
+                  <option value="EARN_REVIEW">Review bonus</option>
+                  <option value="EARN_REFERRAL">Referral bonus</option>
                   <option value="EARN_CROSS_CATEGORY">
-                    Cross-category bonus (+200)
+                    Cross-category bonus
                   </option>
                   <option value="EARN_SNOW_EARLYBIRD">
-                    Snow early-bird (+300)
+                    Snow early-bird
                   </option>
-                  <option value="EARN_BIRTHDAY">Birthday bonus (+100)</option>
+                  <option value="EARN_BIRTHDAY">Birthday bonus</option>
                 </select>
               </div>
             </div>
