@@ -16,7 +16,8 @@
     "optimize:images": "node scripts/optimize-images.mjs",
     "notebook:docx": "node scripts/notebook-to-docx.mjs",
     "notebook:import": "powershell -ExecutionPolicy Bypass -File scripts/import-to-onenote.ps1",
-    "postinstall": "prisma generate || true"
+    "postinstall": "prisma generate || true",
+    "db:seed:club": "dotenv -e .env.local -- tsx prisma/seed-club.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

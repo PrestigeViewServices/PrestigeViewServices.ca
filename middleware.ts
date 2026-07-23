@@ -14,9 +14,12 @@ import { parseRole, canCanvass, type Role } from "@/lib/roles";
  *                  every admin page/action still calls requireRole(), which
  *                  resolves the internal cookie to `ultimate_admin`
  *                  (lib/auth.ts). Middleware deliberately leaves /admin alone.
+ *   /account(.*) → INTERNAL member auth (Prestige Club portal). The account
+ *                  layout verifies the signed member cookie server-side and
+ *                  renders sign-in/sign-up when absent (lib/customer-auth.ts).
+ *                  Middleware deliberately leaves /account alone.
  *   /portal      → employee only (Clerk)
  *   /rep         → canvassing roles (Clerk)
- *   /account     → customer only (Clerk)
  *   /post-sign-in→ any signed-in Clerk user (role-router)
  *
  * Clerk runs in **keyless mode** when env vars are absent: it auto-generates
@@ -25,7 +28,6 @@ import { parseRole, canCanvass, type Role } from "@/lib/roles";
 
 const isPortalRoute = createRouteMatcher(["/portal(.*)"]);
 const isRepRoute = createRouteMatcher(["/rep(.*)"]);
-const isAccountRoute = createRouteMatcher(["/account(.*)"]);
 const isPostSignInRoute = createRouteMatcher(["/post-sign-in"]);
 
 function bounceToPostSignIn(reqUrl: string) {
@@ -38,10 +40,7 @@ const passthrough = (_req: NextRequest) => NextResponse.next();
 export default CLERK_CONFIGURED
   ? clerkMiddleware(async (auth, req) => {
   const gated =
-    isPortalRoute(req) ||
-    isRepRoute(req) ||
-    isAccountRoute(req) ||
-    isPostSignInRoute(req);
+    isPortalRoute(req) || isRepRoute(req) || isPostSignInRoute(req);
   if (!gated) return;
 
   const { userId, sessionClaims, redirectToSignIn } = await auth();
@@ -61,10 +60,6 @@ export default CLERK_CONFIGURED
   }
   if (isRepRoute(req)) {
     if (!canCanvass(role)) return bounceToPostSignIn(req.url);
-    return;
-  }
-  if (isAccountRoute(req)) {
-    if (role !== "customer") return bounceToPostSignIn(req.url);
     return;
   }
 })

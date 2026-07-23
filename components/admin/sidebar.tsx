@@ -15,6 +15,8 @@ import {
   Truck,
   Inbox,
   BarChart3,
+  Award,
+  MessageCircle,
 } from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,13 @@ const groups: NavGroup[] = [
     items: [
       { href: "/admin", label: "Command Center", icon: LayoutDashboard },
       { href: "/admin/traffic", label: "Website Traffic", icon: BarChart3 },
+    ],
+  },
+  {
+    title: "Prestige Club",
+    items: [
+      { href: "/admin/club", label: "Members", icon: Award },
+      { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
     ],
   },
   {

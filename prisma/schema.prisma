@@ -825,3 +825,292 @@ model PageView {
   @@index([path])
   @@index([visitorId, createdAt])
 }
+
+// =============================================================================
+// THE PRESTIGE CLUB — customer loyalty program + portal
+// =============================================================================
+// Portal accounts are fully in-house (email + password, scrypt hashes, signed
+// session cookies) — no external auth service. Members are matched to Jobber
+// clients by email, with an admin "link account" fallback.
+//
+// POINTS ARE REAL MONEY (100 pts = $5 CAD service credit). The ledger
+// (PointsTransaction) is APPEND-ONLY: every balance is derived by summing the
+// ledger; no mutable balance column exists anywhere. Money is integer cents.
+//
+// Public category labels only — internal division names must never surface
+// in portal UI, URLs, or emails.
+
+enum LoyaltyTier {
+  MEMBER
+  INSIDER
+  ELITE
+  PRESTIGE
+}
+
+enum PointsType {
+  EARN_SERVICE
+  EARN_REVIEW
+  EARN_REFERRAL
+  EARN_CROSS_CATEGORY
+  EARN_SNOW_EARLYBIRD
+  EARN_BIRTHDAY
+  REDEEM
+  EXPIRE
+  ADMIN_ADJUST
+}
+
+enum RedemptionStatus {
+  REQUESTED
+  APPROVED
+  APPLIED
+  DECLINED
+}
+
+enum ReferralStatus {
+  INVITED
+  BOOKED
+  COMPLETED
+  AWARDED
+}
+
+enum ClubTicketType {
+  QUOTE
+  BOOK_SERVICE
+  ISSUE
+  BILLING
+  CALLBACK
+}
+
+enum ClubTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum PublicCategory {
+  WINDOW_EXTERIOR
+  LAWN_CARE
+  SNOW_REMOVAL
+}
+
+enum VeteranStatus {
+  NONE
+  SELF_DECLARED
+  VERIFIED
+}
+
+enum ServiceRecordStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+enum GiveawayStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  DRAWN
+}
+
+/// A portal account. Auth identity + credentials; loyalty data hangs off
+/// CustomerProfile. Passwords are scrypt hashes (lib/customer-auth.ts).
+model Member {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String?
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile         CustomerProfile?
+  points          PointsTransaction[]
+  redemptions     Redemption[]
+  referralsMade   Referral[]          @relation("Referrer")
+  tickets         ClubTicket[]
+  giveawayEntries GiveawayEntry[]
+  serviceRecords  ServiceRecord[]
+}
+
+model CustomerProfile {
+  id       String @id @default(cuid())
+  memberId String @unique
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  /// Jobber client id once linked (email match or admin fallback).
+  jobberClientId String? @unique
+  streetAddress  String?
+  city           String?
+  region         String? @default("ON")
+  postalCode     String?
+  /// 1-12; used for the birthday bonus (Phase 2 automation).
+  birthdayMonth  Int?
+  veteranStatus  VeteranStatus @default(NONE)
+  /// Cached tier — recalculated on every paid-invoice sync from the rolling
+  /// 12-month paid spend. Display convenience only; spend is the truth.
+  tier           LoyaltyTier   @default(MEMBER)
+  /// Rolling 12-month paid spend in CAD cents (recomputed, not authoritative).
+  tierSpend12moCents Int @default(0)
+  /// Email notification preferences.
+  notifyServiceReminders Boolean @default(true)
+  notifyPromos           Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// APPEND-ONLY points ledger. Never update or delete rows; corrections are
+/// new ADMIN_ADJUST entries. Balance = SUM(amount) per member.
+model PointsTransaction {
+  id       String     @id @default(cuid())
+  memberId String
+  member   Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  type     PointsType
+  /// Whole points, positive (earn) or negative (redeem/expire/adjust-down).
+  amount   Int
+  /// What produced this entry (service record id, referral id, admin ref).
+  sourceRef String?
+  /// Human-readable reason shown in the customer ledger.
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([memberId, createdAt])
+  @@index([type])
+}
+
+model Redemption {
+  id       String           @id @default(cuid())
+  memberId String
+  member   Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  /// Points spent (positive number, e.g. 500 = $25 credit).
+  points   Int
+  /// Credit value in CAD cents (points * 5).
+  creditCents Int
+  status   RedemptionStatus @default(REQUESTED)
+  /// Jobber invoice the credit was applied to (admin fills on APPLIED).
+  appliedInvoiceRef String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([memberId])
+}
+
+model Referral {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  referrerId    String
+  referrer      Member         @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredEmail String?
+  status        ReferralStatus @default(INVITED)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([referrerId])
+  @@index([status])
+}
+
+/// Customer request / callback ticket. Distinct from the public SupportRequest
+/// form: these belong to a signed-in member and carry a message thread.
+model ClubTicket {
+  id       String           @id @default(cuid())
+  memberId String
+  member   Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  type     ClubTicketType
+  subject  String
+  /// "phone" | "email" | "text"
+  preferredContact String?
+  /// Free-text preferred time window, e.g. "Weekdays after 4pm".
+  timeWindow       String?
+  status   ClubTicketStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages ClubTicketMessage[]
+
+  @@index([status])
+  @@index([memberId, createdAt])
+}
+
+model ClubTicketMessage {
+  id       String     @id @default(cuid())
+  ticketId String
+  ticket   ClubTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  /// "member" or "admin".
+  authorType String
+  /// Internal admin notes are never shown to the customer.
+  internal   Boolean @default(false)
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+model Giveaway {
+  id          String         @id @default(cuid())
+  title       String
+  prize       String
+  status      GiveawayStatus @default(DRAFT)
+  opensAt     DateTime?
+  closesAt    DateTime?
+  drawnAt     DateTime?
+  winnerEntryId String?
+  /// Skill-testing question result recorded for the winner (CA compliance).
+  skillTestResult String?
+  createdAt   DateTime @default(now())
+
+  entries GiveawayEntry[]
+}
+
+model GiveawayEntry {
+  id         String   @id @default(cuid())
+  giveawayId String
+  giveaway   Giveaway @relation(fields: [giveawayId], references: [id], onDelete: Cascade)
+  memberId   String?
+  member     Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  /// "tier" | "referral" | "no_purchase" (mail-in / free web form entries).
+  source     String
+  createdAt  DateTime @default(now())
+
+  @@index([giveawayId])
+}
+
+/// Cached Jobber job/invoice data mapped to PUBLIC category labels. The
+/// original Jobber names may contain internal division terms — only the
+/// mapped category and a scrubbed title are ever rendered.
+model ServiceRecord {
+  id       String  @id @default(cuid())
+  memberId String?
+  member   Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  jobberJobId     String? @unique
+  jobberInvoiceId String?
+  category        PublicCategory
+  /// Customer-safe title, e.g. "Exterior window cleaning".
+  title           String
+  serviceDate     DateTime
+  address         String?
+  status          ServiceRecordStatus @default(SCHEDULED)
+  amountCents     Int                 @default(0)
+  paid            Boolean             @default(false)
+  paidAt          DateTime?
+  photoUrls       String[]            @default([])
+  /// Guards against double-awarding EARN_SERVICE points for this record.
+  pointsAwarded   Boolean             @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId, serviceDate])
+  @@index([status])
+  @@index([paid])
+}
+
+/// Admin-editable mapping from Jobber line-item / job-name terms to public
+/// categories, so internal names never leak into the portal.
+model CategoryMapping {
+  id        String         @id @default(cuid())
+  /// Case-insensitive substring matched against Jobber job/line names.
+  matchTerm String         @unique
+  category  PublicCategory
+  createdAt DateTime       @default(now())
+}

@@ -38,6 +38,7 @@ const featuredLinks = [
 ] as const;
 
 const exploreLinks = [
+  { href: "/account", label: "My Account · Prestige Club" },
   { href: "/services", label: "All Services" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
