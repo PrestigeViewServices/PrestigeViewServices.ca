@@ -1135,6 +1135,17 @@ model ServiceRecord {
   @@index([paid])
 }
 
+/// OAuth tokens for external integrations (currently just "jobber").
+/// Jobber access tokens live ~60 minutes; the refresh token rotates on use,
+/// so the CURRENT pair must be persisted here — never in env vars.
+model IntegrationToken {
+  provider     String    @id
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime?
+  updatedAt    DateTime  @updatedAt
+}
+
 /// Admin-editable program numbers (point values, redemption rate, tier
 /// thresholds). Keys are defined in lib/club-settings.ts; missing keys fall
 /// back to code defaults. Changes affect FUTURE awards only — the ledger is

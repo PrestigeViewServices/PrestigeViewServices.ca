@@ -18,10 +18,138 @@ import { clubTiers, getClubSettings } from "./club-settings";
  */
 
 const JOBBER_API = "https://api.getjobber.com/api/graphql";
+const JOBBER_TOKEN_URL = "https://api.getjobber.com/api/oauth/token";
+export const JOBBER_AUTHORIZE_URL = "https://api.getjobber.com/api/oauth/authorize";
 const JOBBER_API_VERSION = "2025-01-20";
 
+/** App credentials from the Jobber Developer Center. */
+export function jobberClientCreds(): { id: string; secret: string } | null {
+  const id = (process.env.JOBBER_CLIENT_ID ?? "").trim();
+  const secret = (process.env.JOBBER_CLIENT_SECRET ?? "").trim();
+  return id && secret ? { id, secret } : null;
+}
+
+/** Legacy manual token OR app credentials present. */
 export function isJobberConfigured(): boolean {
-  return Boolean((process.env.JOBBER_ACCESS_TOKEN ?? "").trim());
+  return Boolean(
+    (process.env.JOBBER_ACCESS_TOKEN ?? "").trim() || jobberClientCreds()
+  );
+}
+
+/** OAuth redirect URI — must match the app config in Jobber exactly. */
+export function jobberRedirectUri(): string {
+  const base = (
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"
+  ).replace(/\/$/, "");
+  return `${base}/api/jobber/callback`;
+}
+
+type TokenResponse = {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+};
+
+/** Exchange an authorization code (OAuth callback) for tokens and persist. */
+export async function exchangeJobberCode(
+  db: PrismaClient,
+  code: string
+): Promise<{ ok: boolean; reason?: string }> {
+  const creds = jobberClientCreds();
+  if (!creds) return { ok: false, reason: "JOBBER_CLIENT_ID/SECRET not set" };
+  const res = await fetch(JOBBER_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: creds.id,
+      client_secret: creds.secret,
+      code,
+      redirect_uri: jobberRedirectUri(),
+    }),
+  });
+  if (!res.ok) {
+    return { ok: false, reason: `Token exchange ${res.status}: ${await res.text()}` };
+  }
+  const json = (await res.json()) as TokenResponse;
+  await saveTokens(db, json);
+  return { ok: true };
+}
+
+async function saveTokens(db: PrismaClient, t: TokenResponse): Promise<void> {
+  const expiresAt = t.expires_in
+    ? new Date(Date.now() + (t.expires_in - 120) * 1000)
+    : null;
+  await db.integrationToken.upsert({
+    where: { provider: "jobber" },
+    create: {
+      provider: "jobber",
+      accessToken: t.access_token,
+      refreshToken: t.refresh_token ?? "",
+      expiresAt,
+    },
+    update: {
+      accessToken: t.access_token,
+      // Jobber rotates refresh tokens — keep the newest, fall back to old.
+      ...(t.refresh_token ? { refreshToken: t.refresh_token } : {}),
+      expiresAt,
+    },
+  });
+}
+
+/**
+ * Current access token: env override → stored token (auto-refreshed via the
+ * rotating refresh token when near expiry). Null = not connected.
+ */
+export async function getJobberAccessToken(
+  db: PrismaClient
+): Promise<string | null> {
+  const manual = (process.env.JOBBER_ACCESS_TOKEN ?? "").trim();
+  if (manual) return manual;
+
+  const stored = await db.integrationToken.findUnique({
+    where: { provider: "jobber" },
+  });
+  if (!stored) return null;
+
+  const fresh =
+    stored.expiresAt == null || stored.expiresAt.getTime() > Date.now();
+  if (fresh) return stored.accessToken;
+
+  const creds = jobberClientCreds();
+  if (!creds || !stored.refreshToken) return null;
+  const res = await fetch(JOBBER_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: creds.id,
+      client_secret: creds.secret,
+      refresh_token: stored.refreshToken,
+    }),
+  });
+  if (!res.ok) return null;
+  const json = (await res.json()) as TokenResponse;
+  await saveTokens(db, json);
+  return json.access_token;
+}
+
+/** Connection status for the admin card. */
+export async function jobberConnectionStatus(db: PrismaClient): Promise<{
+  credsPresent: boolean;
+  connected: boolean;
+  lastTokenUpdate: Date | null;
+}> {
+  const stored = await db.integrationToken.findUnique({
+    where: { provider: "jobber" },
+  });
+  return {
+    credsPresent: Boolean(jobberClientCreds()),
+    connected: Boolean(
+      stored || (process.env.JOBBER_ACCESS_TOKEN ?? "").trim()
+    ),
+    lastTokenUpdate: stored?.updatedAt ?? null,
+  };
 }
 
 type JobberInvoiceNode = {
@@ -45,10 +173,10 @@ type JobberInvoiceNode = {
 };
 
 async function jobberQuery<T>(
+  token: string,
   query: string,
   variables: Record<string, unknown> = {}
 ): Promise<T> {
-  const token = (process.env.JOBBER_ACCESS_TOKEN ?? "").trim();
   const res = await fetch(JOBBER_API, {
     method: "POST",
     headers: {
@@ -165,14 +293,16 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
     pointsAwarded: 0,
     unmatchedClients: 0,
   };
-  if (!isJobberConfigured()) {
-    summary.reason = "JOBBER_ACCESS_TOKEN not set — sync skipped";
+  const token = await getJobberAccessToken(db);
+  if (!token) {
+    summary.reason = "Jobber not connected — sync skipped";
     return summary;
   }
 
   const data = await jobberQuery<{
     invoices: { nodes: JobberInvoiceNode[] };
   }>(
+    token,
     `query RecentInvoices($first: Int!) {
       invoices(first: $first, sort: { key: CREATED_AT, direction: DESCENDING }) {
         nodes {

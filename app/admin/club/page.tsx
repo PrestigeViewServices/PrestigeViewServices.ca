@@ -1,13 +1,18 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import {
   ArrowRight,
   Banknote,
   LifeBuoy,
   Link2,
+  Plug,
+  RefreshCw,
   Search,
   Sparkles,
   Users,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { jobberConnectionStatus, syncJobber } from "@/lib/jobber";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
@@ -22,7 +27,7 @@ export const dynamic = "force-dynamic";
 
 const ADMIN_ROLES = ["ultimate_admin", "super_admin", "admin", "manager"] as const;
 
-type SearchParams = { q?: string };
+type SearchParams = { q?: string; jobber?: string; sync?: string };
 
 /**
  * Prestige Club admin home: member roster + the numbers that matter.
@@ -49,6 +54,7 @@ export default async function ClubAdminPage(props: {
   const q = (searchParams.q ?? "").trim();
 
   const settings = await getClubSettings(db);
+  const jobber = await jobberConnectionStatus(db);
   const [members, memberCount, outstanding, openTickets, unlinkedRecords] =
     await Promise.all([
       db.member.findMany({
@@ -120,6 +126,71 @@ export default async function ClubAdminPage(props: {
           </Link>
         </div>
       </header>
+
+      {/* ---- Jobber connection ---- */}
+      <section
+        className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-5 ${
+          jobber.connected
+            ? "border-emerald-500/25 bg-emerald-500/5"
+            : "border-amber-500/30 bg-amber-500/5"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <Plug
+            className={`mt-0.5 h-5 w-5 shrink-0 ${jobber.connected ? "text-emerald-300" : "text-amber-300"}`}
+          />
+          <div className="text-sm">
+            <p className="font-semibold">
+              Jobber:{" "}
+              {jobber.connected
+                ? "connected"
+                : jobber.credsPresent
+                  ? "app configured, not authorized yet"
+                  : "not configured"}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {jobber.connected
+                ? `Tokens auto-refresh. Last update ${jobber.lastTokenUpdate?.toLocaleString("en-CA") ?? "n/a"}. Daily sync pulls clients, jobs & invoices (read-only).`
+                : jobber.credsPresent
+                  ? "One click to authorize against the PVS Jobber account."
+                  : "Add JOBBER_CLIENT_ID + JOBBER_CLIENT_SECRET from the Jobber Developer Center, then connect."}
+            </p>
+            {searchParams.jobber === "connected" && (
+              <p className="mt-1 text-xs font-semibold text-emerald-300">
+                Authorized successfully — you&apos;re live.
+              </p>
+            )}
+            {searchParams.jobber === "error" && (
+              <p className="mt-1 text-xs font-semibold text-rose-300">
+                Authorization failed, check the server logs and try again.
+              </p>
+            )}
+            {searchParams.sync && (
+              <p className="mt-1 text-xs font-semibold text-sky-300">
+                Sync result: {decodeURIComponent(searchParams.sync)}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {jobber.credsPresent && (
+            <Button asChild size="sm" variant={jobber.connected ? "outline" : "primary"}>
+              {/* Full page navigation (OAuth redirect chain) — not a Link. */}
+              <a href="/api/jobber/connect">
+                {jobber.connected ? "Reconnect" : "Connect Jobber"}
+              </a>
+            </Button>
+          )}
+          {jobber.connected && (
+            <form action={runSyncNow}>
+              <Button type="submit" size="sm" variant="outline">
+                <RefreshCw className="h-4 w-4" />
+                Sync now
+              </Button>
+            </form>
+          )}
+        </div>
+      </section>
 
       {/* ---- Stats ---- */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -201,6 +272,27 @@ export default async function ClubAdminPage(props: {
       </div>
     </div>
   );
+}
+
+// --- server actions ---------------------------------------------------------
+
+async function runSyncNow() {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+  const { redirect } = await import("next/navigation");
+  let msg: string;
+  try {
+    const s = await syncJobber(db);
+    msg = s.ok
+      ? `${s.invoicesSeen} invoices seen, ${s.recordsUpserted} records, ${s.pointsAwarded} points awarded, ${s.unmatchedClients} unmatched`
+      : (s.reason ?? "sync skipped");
+  } catch (err) {
+    msg = `sync failed: ${String(err).slice(0, 120)}`;
+  }
+  revalidatePath("/admin/club");
+  redirect(`/admin/club?sync=${encodeURIComponent(msg)}`);
 }
 
 function Stat({
