@@ -12,7 +12,11 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { jobberConnectionStatus, syncJobber } from "@/lib/jobber";
+import {
+  importJobberClients,
+  jobberConnectionStatus,
+  syncJobber,
+} from "@/lib/jobber";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
@@ -189,6 +193,14 @@ export default async function ClubAdminPage(props: {
               </Button>
             </form>
           )}
+          {jobber.connected && (
+            <form action={runImportNow}>
+              <Button type="submit" size="sm" variant="outline">
+                <Users className="h-4 w-4" />
+                Import clients
+              </Button>
+            </form>
+          )}
         </div>
       </section>
 
@@ -275,6 +287,25 @@ export default async function ClubAdminPage(props: {
 }
 
 // --- server actions ---------------------------------------------------------
+
+async function runImportNow() {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+  const { redirect } = await import("next/navigation");
+  let msg: string;
+  try {
+    const s = await importJobberClients(db);
+    msg = s.ok
+      ? `import: ${s.clientsSeen} clients seen, ${s.membersCreated} accounts created, ${s.alreadyExisted} already existed, ${s.noEmail} without email`
+      : (s.reason ?? "import skipped");
+  } catch (err) {
+    msg = `import failed: ${String(err).slice(0, 120)}`;
+  }
+  revalidatePath("/admin/club");
+  redirect(`/admin/club?sync=${encodeURIComponent(msg)}`);
+}
 
 async function runSyncNow() {
   "use server";

@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   }
 
   const existing = await db.member.findUnique({ where: { email } });
-  if (existing) {
+  if (existing && existing.passwordHash !== "") {
     return NextResponse.json(
       { error: "An account with this email already exists. Try signing in instead." },
       { status: 409 }
@@ -68,16 +68,29 @@ export async function POST(req: Request) {
   }
 
   const passwordHash = await hashPassword(password);
-  const member = await db.member.create({
-    data: {
-      email,
-      passwordHash,
-      firstName,
-      lastName: lastName || null,
-      phone: phone || null,
-      profile: { create: {} },
-    },
-  });
+  // An UNCLAIMED pre-provisioned account (Jobber import) gets claimed by
+  // signing up with the email on file — history and points come attached.
+  const member = existing
+    ? await db.member.update({
+        where: { id: existing.id },
+        data: {
+          passwordHash,
+          firstName,
+          lastName: lastName || existing.lastName,
+          phone: phone || existing.phone,
+          inviteToken: null,
+        },
+      })
+    : await db.member.create({
+        data: {
+          email,
+          passwordHash,
+          firstName,
+          lastName: lastName || null,
+          phone: phone || null,
+          profile: { create: {} },
+        },
+      });
 
   // Pre-existing Jobber history is claimed on the next scheduled sync
   // (email match) or via the admin "link account" tool.

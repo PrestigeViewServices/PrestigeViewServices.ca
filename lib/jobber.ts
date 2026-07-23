@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import type { PrismaClient, PublicCategory } from "@prisma/client";
 import { awardServicePoints, recalcTier } from "./loyalty";
 import { clubTiers, getClubSettings } from "./club-settings";
@@ -235,6 +236,125 @@ export function scrubTitle(raw: string): string {
     .replace(/^[\s\-–·:]+|[\s\-–·:]+$/g, "")
     .trim();
   return scrubbed || "Service visit";
+}
+
+// ---- Bulk client import ----------------------------------------------------
+
+export type ImportSummary = {
+  ok: boolean;
+  reason?: string;
+  clientsSeen: number;
+  membersCreated: number;
+  alreadyExisted: number;
+  noEmail: number;
+};
+
+/**
+ * Pre-provision a Prestige Club account for every Jobber client.
+ *
+ * Created accounts are UNCLAIMED (empty password hash — sign-in impossible)
+ * with an invite token. A customer claims theirs either through
+ * /account/claim/[token] or automatically by signing up with the email on
+ * file. Existing members are never touched. Runs are idempotent.
+ */
+export async function importJobberClients(
+  db: PrismaClient
+): Promise<ImportSummary> {
+  const summary: ImportSummary = {
+    ok: false,
+    clientsSeen: 0,
+    membersCreated: 0,
+    alreadyExisted: 0,
+    noEmail: 0,
+  };
+  const token = await getJobberAccessToken(db);
+  if (!token) {
+    summary.reason = "Jobber not connected";
+    return summary;
+  }
+
+  let cursor: string | null = null;
+  for (let page = 0; page < 20; page++) {
+    const data: {
+      clients: {
+        nodes: {
+          id: string;
+          firstName: string | null;
+          lastName: string | null;
+          emails: { address: string; primary: boolean }[];
+          phones: { number: string; primary: boolean }[];
+        }[];
+        pageInfo: { hasNextPage: boolean; endCursor: string | null };
+      };
+    } = await jobberQuery(
+      token,
+      `query ImportClients($first: Int!, $after: String) {
+        clients(first: $first, after: $after) {
+          nodes {
+            id
+            firstName
+            lastName
+            emails { address primary }
+            phones { number primary }
+          }
+          pageInfo { hasNextPage endCursor }
+        }
+      }`,
+      { first: 100, after: cursor }
+    );
+
+    for (const client of data.clients.nodes) {
+      summary.clientsSeen++;
+      const email = (
+        client.emails.find((e) => e.primary)?.address ??
+        client.emails[0]?.address ??
+        ""
+      )
+        .trim()
+        .toLowerCase();
+      if (!email) {
+        summary.noEmail++;
+        continue;
+      }
+      const existing = await db.member.findUnique({ where: { email } });
+      if (existing) {
+        summary.alreadyExisted++;
+        // Backfill the Jobber link if this member isn't linked yet.
+        await db.customerProfile.updateMany({
+          where: { memberId: existing.id, jobberClientId: null },
+          data: { jobberClientId: client.id },
+        });
+        continue;
+      }
+      const phone =
+        client.phones.find((p) => p.primary)?.number ??
+        client.phones[0]?.number ??
+        null;
+      const inviteToken = randomBytes(16).toString("hex");
+      try {
+        await db.member.create({
+          data: {
+            email,
+            passwordHash: "", // unclaimed — cannot sign in until claimed
+            firstName: client.firstName?.trim() || "Neighbour",
+            lastName: client.lastName?.trim() || null,
+            phone,
+            inviteToken,
+            profile: { create: { jobberClientId: client.id } },
+          },
+        });
+        summary.membersCreated++;
+      } catch {
+        summary.alreadyExisted++; // race/duplicate — count as existing
+      }
+    }
+
+    if (!data.clients.pageInfo.hasNextPage) break;
+    cursor = data.clients.pageInfo.endCursor;
+  }
+
+  summary.ok = true;
+  return summary;
 }
 
 // ---- Invoice credit (Phase 3 scaffold) -------------------------------------

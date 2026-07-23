@@ -80,6 +80,20 @@ export default async function ClubMemberPage(props: {
         </div>
       </header>
 
+      {member.passwordHash === "" && member.inviteToken && (
+        <div className="rounded-2xl border border-blue-500/25 bg-blue-500/10 p-4 text-sm">
+          <p className="font-semibold">Unclaimed account (Jobber import)</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            This customer hasn&apos;t set a password yet. Share their personal
+            claim link, or they can simply sign up at /account with this
+            email:
+          </p>
+          <p className="mt-2 break-all rounded-lg bg-surface/70 px-3 py-2 font-mono text-xs">
+            {`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/claim/${member.inviteToken}`}
+          </p>
+        </div>
+      )}
+
       {member.profile?.veteranStatus === "SELF_DECLARED" && (
         <form
           action={verifyVeteran}

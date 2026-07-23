@@ -924,6 +924,10 @@ model Member {
   /// Shareable referral code (e.g. "JORDAN-4X2K"), generated on first visit
   /// to the referrals page. /r/[code] resolves it.
   referralCode String?  @unique
+  /// Set on pre-provisioned (Jobber-imported) accounts. An empty
+  /// passwordHash marks the account unclaimed: the customer claims it via
+  /// /account/claim/[token] or simply by signing up with the same email.
+  inviteToken  String?  @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
