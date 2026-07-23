@@ -8,6 +8,7 @@ import {
   isCustomerAuthConfigured,
   verifyPassword,
 } from "@/lib/customer-auth";
+import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -27,12 +28,19 @@ export async function POST(req: Request) {
     );
   }
 
+  const ip = clientIp(req);
+  const limited = await rateLimit("member-login-ip", ip, 10, 900);
+  if (!limited.ok) return tooMany();
+
   const body = (await req.json().catch(() => null)) as {
     email?: string;
     password?: string;
   } | null;
-  const email = (body?.email ?? "").trim().toLowerCase();
-  const password = body?.password ?? "";
+  const email = (body?.email ?? "").trim().toLowerCase().slice(0, 200);
+  const password = (body?.password ?? "").slice(0, 200);
+
+  const perEmail = await rateLimit("member-login-email", email, 20, 3600);
+  if (!perEmail.ok) return tooMany();
 
   const member = email
     ? await db.member.findUnique({ where: { email } })

@@ -8,6 +8,7 @@ import {
   hashPassword,
   isCustomerAuthConfigured,
 } from "@/lib/customer-auth";
+import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -19,12 +20,16 @@ export async function POST(req: Request) {
   const db = getDb();
   if (!db) return NextResponse.json({ error: "Unavailable" }, { status: 500 });
 
+  const ip = clientIp(req);
+  const limited = await rateLimit("claim-ip", ip, 10, 3600);
+  if (!limited.ok) return tooMany();
+
   const body = (await req.json().catch(() => null)) as {
     token?: string;
     password?: string;
   } | null;
-  const token = (body?.token ?? "").trim();
-  const password = body?.password ?? "";
+  const token = (body?.token ?? "").trim().slice(0, 100);
+  const password = (body?.password ?? "").slice(0, 200);
 
   if (!token) return NextResponse.json({ error: "Invalid link" }, { status: 400 });
   if (password.length < 8) {

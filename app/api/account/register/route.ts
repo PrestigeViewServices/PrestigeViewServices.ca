@@ -8,6 +8,7 @@ import {
   hashPassword,
   isCustomerAuthConfigured,
 } from "@/lib/customer-auth";
+import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,10 @@ export async function POST(req: Request) {
     );
   }
 
+  const ip = clientIp(req);
+  const limited = await rateLimit("register-ip", ip, 6, 3600);
+  if (!limited.ok) return tooMany();
+
   const body = (await req.json().catch(() => null)) as {
     firstName?: string;
     lastName?: string;
@@ -44,7 +49,7 @@ export async function POST(req: Request) {
   const lastName = (body?.lastName ?? "").trim();
   const email = (body?.email ?? "").trim().toLowerCase();
   const phone = (body?.phone ?? "").trim();
-  const password = body?.password ?? "";
+  const password = (body?.password ?? "").slice(0, 200);
 
   if (!firstName) {
     return NextResponse.json({ error: "Please enter your first name." }, { status: 400 });

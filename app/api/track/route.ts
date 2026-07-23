@@ -1,3 +1,4 @@
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/db";
 
@@ -50,6 +51,8 @@ function referrerHost(raw: unknown, ownHost: string | null): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await rateLimit("track", clientIp(req), 150, 600);
+  if (!limited.ok) return new NextResponse(null, { status: 204 });
   const db = getDb();
   if (!db) return new NextResponse(null, { status: 204 });
 

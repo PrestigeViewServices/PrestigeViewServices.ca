@@ -1,3 +1,4 @@
+import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import {
@@ -57,6 +58,8 @@ async function recordReferral(
  * that logs instead of dropping the submission → create.
  */
 export async function POST(request: Request) {
+  const limited = await rateLimit("public-form", clientIp(request), 12, 3600);
+  if (!limited.ok) return tooMany();
   let json: unknown;
   try {
     json = await request.json();

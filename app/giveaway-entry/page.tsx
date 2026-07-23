@@ -149,6 +149,18 @@ async function submitFreeEntry(formData: FormData) {
   const db = getDb();
   if (!db) throw new Error("Unavailable");
 
+  // Ballot-stuffing protection: entries are per-email deduped, but junk
+  // rows still dilute nothing — cap the firehose anyway.
+  const { headers } = await import("next/headers");
+  const h = await headers();
+  const ip =
+    h.get("x-real-ip") ||
+    (h.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
+    "unknown";
+  const { rateLimit } = await import("@/lib/rate-limit");
+  const limited = await rateLimit("giveaway-entry", ip, 5, 3600);
+  if (!limited.ok) redirect("/giveaway-entry?entered=1"); // soft-drop
+
   if (formData.get("hp")) redirect("/giveaway-entry?entered=1"); // bot: pretend
 
   const giveawayId = String(formData.get("giveawayId") ?? "");

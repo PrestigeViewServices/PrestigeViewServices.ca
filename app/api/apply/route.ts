@@ -1,3 +1,4 @@
+import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { applicationSchema } from "@/lib/application-schema";
 import { sendApplicationEmail } from "@/lib/send-application-email";
@@ -6,6 +7,8 @@ import { getDb } from "@/lib/db";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const limited = await rateLimit("public-form", clientIp(request), 12, 3600);
+  if (!limited.ok) return tooMany();
   let json: unknown;
   try {
     json = await request.json();

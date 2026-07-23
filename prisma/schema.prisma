@@ -1139,6 +1139,14 @@ model ServiceRecord {
   @@index([paid])
 }
 
+/// Fixed-window rate limiting (serverless-safe: shared via Postgres).
+/// id = "scope:key:window". Old buckets are pruned opportunistically.
+model RateLimitBucket {
+  id        String   @id
+  count     Int      @default(1)
+  updatedAt DateTime @updatedAt
+}
+
 /// OAuth tokens for external integrations (currently just "jobber").
 /// Jobber access tokens live ~60 minutes; the refresh token rotates on use,
 /// so the CURRENT pair must be persisted here — never in env vars.
