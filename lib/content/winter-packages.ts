@@ -129,7 +129,8 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
   {
     slug: "PLATINUM",
     name: "Platinum",
-    blurb: "Top-tier proactive storm management, best for long driveways and busy households.",
+    blurb:
+      "Our most popular pass: proactive storm management for busy households. Capped each season so the service never slips, first come, first served.",
     features: [
       "Automatic dispatch at 3cm",
       "Night & day passes (2 passes)",

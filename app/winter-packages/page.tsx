@@ -44,8 +44,9 @@ const TIER_ACCENTS: Record<DrivewayTier, string> = {
   PLATINUM: "from-sky-300/20 to-blue-600/10 border-sky-300/40",
 };
 
-/** Gold is the pass most households land on, flag it like a pricing page would. */
-const MOST_POPULAR_TIER: DrivewayTier = "GOLD";
+/** Platinum is the pass most households choose — and it's capped each
+ * season to protect response times, which the card calls out. */
+const MOST_POPULAR_TIER: DrivewayTier = "PLATINUM";
 
 const HERO_PROOF = [
   { icon: Radar, label: "Auto-dispatch on snowfall", sub: "Triggered at 3–5 cm, you never call" },
