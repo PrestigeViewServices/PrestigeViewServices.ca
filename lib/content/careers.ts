@@ -24,6 +24,23 @@ export const CAREER_TYPES = [
   "Flexible",
 ] as const;
 
+/**
+ * Kinds of work an applicant can flag interest in on the application form.
+ * Broader than the open-role list on purpose: it feeds routing/notes, not
+ * the JobPosting pages.
+ */
+export const POSITION_INTERESTS = [
+  "Lawn care",
+  "Landscaping & interlock",
+  "Window cleaning",
+  "Gutter cleaning",
+  "Pressure washing",
+  "Snow removal",
+  "Crew lead",
+] as const;
+
+export type PositionInterest = (typeof POSITION_INTERESTS)[number];
+
 export type CareerType = (typeof CAREER_TYPES)[number];
 
 export type Role = {

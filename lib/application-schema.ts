@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CAREER_TYPES, roles } from "@/lib/content/careers";
+import { CAREER_TYPES, POSITION_INTERESTS, roles } from "@/lib/content/careers";
 
 const roleSlugs = roles.map((r) => r.slug) as [string, ...string[]];
 
@@ -30,6 +30,9 @@ export const applicationSchema = z.object({
   availability: z.enum(CAREER_TYPES, {
     errorMap: () => ({ message: "Pick your availability" }),
   }),
+  positionsInterested: z
+    .array(z.enum(POSITION_INTERESTS))
+    .min(1, "Pick at least one kind of work"),
   validLicense: z.enum(YES_NO, {
     errorMap: () => ({ message: "Please answer this question" }),
   }),

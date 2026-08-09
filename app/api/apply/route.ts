@@ -56,6 +56,9 @@ export async function POST(request: Request) {
           yearsExperience: payload.yearsExperience,
           whyJoin: payload.whyJoin || null,
           resumeUrl: payload.resumeUrl || null,
+          // No dedicated column yet: record interests as a factual note so
+          // they show up in the admin hiring view without a DB migration.
+          notes: `Interested in: ${payload.positionsInterested.join(", ")}`,
         },
       });
     } catch (err) {

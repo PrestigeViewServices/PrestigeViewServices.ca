@@ -14,6 +14,8 @@ import {
   activeRoles,
   CAREER_TYPES,
   GENERAL_APPLICATION_SLUG,
+  POSITION_INTERESTS,
+  type PositionInterest,
 } from "@/lib/content/careers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +60,7 @@ export function ApplicationForm({
       email: "",
       role: defaultRoleSlug as ApplicationFormValues["role"],
       availability: "Flexible",
+      positionsInterested: [],
       validLicense: undefined as unknown as ApplicationFormValues["validLicense"],
       reliableCommute:
         undefined as unknown as ApplicationFormValues["reliableCommute"],
@@ -231,6 +234,48 @@ export function ApplicationForm({
           />
         </Field>
       </div>
+
+      <Field
+        label="What kind of work interests you? (pick all that apply)"
+        error={errors.positionsInterested?.message}
+        required
+      >
+        <Controller
+          control={control}
+          name="positionsInterested"
+          render={({ field }) => (
+            <div className="flex flex-wrap gap-2">
+              {POSITION_INTERESTS.map((p) => {
+                const selected = (field.value as PositionInterest[]).includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() =>
+                      field.onChange(
+                        selected
+                          ? (field.value as PositionInterest[]).filter(
+                              (v) => v !== p
+                            )
+                          : [...(field.value as PositionInterest[]), p]
+                      )
+                    }
+                    aria-pressed={selected}
+                    className={cn(
+                      "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                      selected
+                        ? "border-primary/60 bg-primary/10 text-foreground"
+                        : "border-surface-border bg-input/40 text-muted-foreground hover:border-white/15 hover:text-foreground"
+                    )}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        />
+      </Field>
 
       <fieldset className="rounded-xl border border-surface-border bg-input/30 p-5 space-y-4">
         <legend className="px-2 text-xs uppercase tracking-wider text-muted-foreground">

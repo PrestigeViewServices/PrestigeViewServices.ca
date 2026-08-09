@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CareersHero } from "@/components/careers/hero";
+import { CrewPhotos } from "@/components/careers/crew-photos";
 import { WhyPVS } from "@/components/careers/why-pvs";
 import { GrowthPath } from "@/components/careers/growth-path";
 import { OpenRoles } from "@/components/careers/open-roles";
@@ -25,6 +26,7 @@ export default function CareersPage() {
   return (
     <>
       <CareersHero />
+      <CrewPhotos />
       <WhyPVS />
       <GrowthPath />
       <OpenRoles />
