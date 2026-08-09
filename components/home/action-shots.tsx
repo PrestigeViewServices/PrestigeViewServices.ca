@@ -52,7 +52,7 @@ const SHOTS = [
 
 export function ActionShots() {
   return (
-    <section className="py-20 sm:py-24 relative">
+    <section className="py-14 sm:py-16 relative">
       <div className="container-max">
         <SectionHeading
           eyebrow="In the Field"
@@ -63,7 +63,7 @@ export function ActionShots() {
       </div>
 
       <div
-        className="mt-10 flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-px-4 sm:scroll-px-8 pb-4
+        className="mt-8 flex gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-px-4 sm:scroll-px-8 pb-4
                    [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full"
       >
         {/* Leading spacer so the first card aligns with the container edge */}
@@ -72,7 +72,7 @@ export function ActionShots() {
         {SHOTS.map((s, i) => (
           <article
             key={s.src}
-            className="group snap-start shrink-0 w-[78%] sm:w-[52%] lg:w-[36%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
+            className="group snap-start shrink-0 w-[62%] sm:w-[38%] lg:w-[24%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
           >
             <Image
               src={s.src}
@@ -92,25 +92,25 @@ export function ActionShots() {
         ))}
 
         {/* Final CTA slide, the scroll lands the visitor on a quote ask. */}
-        <article className="snap-start shrink-0 w-[78%] sm:w-[52%] lg:w-[36%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent flex flex-col justify-between p-6 sm:p-8">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/20 text-primary">
-            <Sparkles className="h-5 w-5" />
+        <article className="snap-start shrink-0 w-[62%] sm:w-[38%] lg:w-[24%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent flex flex-col justify-between p-5 sm:p-6">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/20 text-primary">
+            <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight leading-tight">
               Want the same finish on your property?
             </h3>
-            <p className="mt-3 text-sm text-foreground/80 leading-relaxed">
+            <p className="mt-2 text-xs sm:text-sm text-foreground/80 leading-relaxed">
               Free, no-obligation quote within one business day. Local crew, fully insured.
             </p>
-            <div className="mt-6 flex flex-col gap-2">
-              <Button asChild size="lg">
+            <div className="mt-4 flex flex-col gap-2">
+              <Button asChild>
                 <Link href="/quote">
                   Get a Free Quote
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg">
+              <Button asChild variant="outline">
                 <Link href="/our-work">
                   See the full gallery
                 </Link>

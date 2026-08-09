@@ -14,34 +14,33 @@ import { Button } from "@/components/ui/button";
 const feature = {
   eyebrow: "Fresh from the Field",
   // Visible date, kept simple, no library. Update when you change the photos.
-  dateLabel: "This week · Ottawa Valley",
-  title: "Deck Soft-Wash + Siding Refresh",
+  dateLabel: "This month · Petawawa",
+  title: "Interlock Walkway Rebuild",
   blurb:
-    "A 2-storey exterior cleaning visit: pressure-washing the siding, soft-washing the deck and railings, and finishing with a streak-free window pass. Five hours, one happy homeowner.",
+    "Out with the heaved slabs, in with a compacted gravel base and brand-new interlock pavers finished with a charcoal border. One crew from tear-out to the final sweep, and a front entrance that looks like a different house.",
   hero: {
-    src: "/images/gallery/pressure-washing/pressure-job-04.jpg",
-    alt: "PVS technician in branded gear pressure-washing the second-storey siding of a home with a red metal roof, water mist visible mid-spray.",
+    src: "/images/gallery/landscaping/interlock-walkway-after-wide.webp",
+    alt: "Finished interlock front walkway and stone steps at a Petawawa bungalow after a PVS rebuild.",
   },
   thumbs: [
     {
-      src: "/images/gallery/pressure-washing/pressure-job-03.jpg",
-      alt: "PVS crew member soft-washing tan vertical siding on a residential property.",
-      label: "Siding wash",
+      src: "/images/gallery/landscaping/interlock-walkway-before-old-pavers.webp",
+      alt: "Aging patio-slab walkway with timber edging before the interlock rebuild.",
+      label: "Before",
     },
     {
-      src: "/images/gallery/pressure-washing/pressure-job-05.jpg",
-      alt: "Crew member pressure-washing the underside of a porch with white railings, warm wood deck visible.",
-      label: "Porch + railings",
+      src: "/images/gallery/landscaping/interlock-walkway-plate-compactor-base.webp",
+      alt: "Crew member compacting the gravel base with string lines set.",
+      label: "Base prep",
     },
     {
-      src: "/images/gallery/pressure-washing/pressure-job-07.jpg",
-      alt: "After: a freshly cleaned wood deck with hot tub and chiminea in golden afternoon light.",
+      src: "/images/gallery/landscaping/interlock-walkway-after-charcoal-border.webp",
+      alt: "Completed interlock walkway with charcoal paver border.",
       label: "After ✦",
     },
   ],
   services: [
-    { name: "Pressure Washing", href: "/services/pressure-washing" },
-    { name: "Window Cleaning", href: "/services/window-cleaning" },
+    { name: "Landscaping Projects", href: "/services/landscaping-services" },
   ],
 };
 

@@ -15,24 +15,24 @@ import { formatPhone } from "@/lib/utils";
  */
 const HERO_PHOTOS = [
   {
+    src: "/images/gallery/landscaping/interlock-walkway-after-charcoal-border.webp",
+    alt: "New interlock front walkway with charcoal paver border built by PVS in Petawawa",
+  },
+  {
     src: "/images/gallery/landscaping/stone-estate-manicured-lawn-gardens.webp",
     alt: "Manicured lawn and landscaped garden beds at a stone estate home in the Ottawa Valley",
   },
   {
-    src: "/images/gallery/pressure-washing/pressure-job-04.jpg",
-    alt: "Prestige View Services crew pressure washing the second-storey siding of an Ottawa Valley home",
+    src: "/images/gallery/window-cleaning/ladder-upper-window-flower-boxes.webp",
+    alt: "PVS technician on a ladder cleaning an upper window above bright flower boxes",
   },
   {
-    src: "/images/gallery/window-cleaning/ladder-second-storey-window-cleaning.webp",
-    alt: "PVS crew member on an extension ladder cleaning second-storey windows of a timber home",
+    src: "/images/gallery/lawn-mowing/stand-on-mower-backyard-stripes.webp",
+    alt: "Stand-on mower laying fresh stripes across a backyard lawn in Petawawa",
   },
   {
-    src: "/images/gallery/hedge-trimming/cedar-hedge-squared-sunrise-petawawa.webp",
-    alt: "Freshly squared cedar hedge at sunrise in Petawawa",
-  },
-  {
-    src: "/images/gallery/snow-removal/drone-tractor-snowblowing-driveway.webp",
-    alt: "Aerial view of a PVS tractor snow-blowing a residential driveway in winter",
+    src: "/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp",
+    alt: "PVS tractor snow-blowing a residential driveway at sunrise after an overnight storm",
   },
 ];
 
