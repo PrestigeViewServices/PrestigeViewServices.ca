@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { Phone, Mail, Clock } from "lucide-react";
+import Link from "next/link";
+import { Phone, Mail, Clock, ArrowRight, ShieldCheck } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { SupportForm } from "@/components/support-form";
 import { siteConfig } from "@/lib/site";
@@ -28,18 +28,6 @@ export default function SupportPage() {
         </div>
 
         <aside className="lg:col-span-5 space-y-5">
-          <figure className="relative aspect-[3/2] overflow-hidden rounded-2xl border border-surface-border bg-surface/50">
-            <Image
-              src="/images/careers/crew-truck-lineup.webp"
-              alt="The PVS crew in front of a company truck at the Petawawa shop"
-              fill
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              className="object-cover"
-            />
-            <figcaption className="absolute bottom-3 left-4 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-              The crew that answers · PVS Petawawa
-            </figcaption>
-          </figure>
           <div className="surface-card p-6">
             <h2 className="text-lg font-semibold">Reach a human directly</h2>
             <ul className="mt-4 space-y-3 text-sm">
@@ -76,6 +64,25 @@ export default function SupportPage() {
               <li><strong className="text-foreground/90">General</strong>, anything else</li>
             </ul>
           </div>
+
+          {/* Staff shortcut into the admin ticket queue (sign-in required). */}
+          <Link
+            href="/admin/support"
+            className="group flex items-center justify-between gap-3 rounded-2xl border border-surface-border bg-surface/40 p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+          >
+            <span className="flex items-center gap-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">
+                <ShieldCheck className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">PVS staff</span>
+                <span className="block text-xs text-muted-foreground">
+                  View and manage all support tickets
+                </span>
+              </span>
+            </span>
+            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </aside>
       </div>
     </section>
