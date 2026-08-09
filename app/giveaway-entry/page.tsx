@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Free Giveaway Entry | Prestige View Services",
   description:
-    "Enter the current Prestige Club giveaway for free — no purchase necessary. Open to Ontario residents 18+.",
+    "Enter the current Prestige Club giveaway for free, no purchase necessary. Open to Ontario residents 18+.",
   alternates: { canonical: "/giveaway-entry" },
 };
 
@@ -71,8 +71,8 @@ export default async function GiveawayEntryPage(props: {
         ) : (
           <>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Current draw: <span className="font-semibold text-foreground">{current.title}</span>{" "}
-              — prize: {current.prize}
+              Current draw: <span className="font-semibold text-foreground">{current.title}</span>
+              . Prize: {current.prize}
               {current.closesAt &&
                 `. Entries close ${current.closesAt.toLocaleDateString("en-CA", { month: "long", day: "numeric" })}`}
               . One free entry per person per draw, same odds per entry as any

@@ -68,7 +68,7 @@ export default async function ReferralsPage() {
   });
 
   const url = `${siteConfig.url}/r/${code}`;
-  const shareMessage = `PVS handles our windows/lawn/snow and they're great — use my link and you get $25 off your first service:`;
+  const shareMessage = `PVS handles our windows/lawn/snow and they're great. Use my link and you get $25 off your first service:`;
 
   return (
     <div className="space-y-8">

@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
           text: [
             `Hi ${m.firstName},`,
             ``,
-            `Your ${formatPoints(balance)} Prestige Club points are set to expire around ${expiresAt.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })} — points lapse after ${EXPIRY_MONTHS} months without a paid service.`,
+            `Your ${formatPoints(balance)} Prestige Club points are set to expire around ${expiresAt.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}. Points lapse after ${EXPIRY_MONTHS} months without a paid service.`,
             `Any completed visit resets the clock completely. Leave the hard work to us:`,
             ``,
             `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/account/requests?new=1`,

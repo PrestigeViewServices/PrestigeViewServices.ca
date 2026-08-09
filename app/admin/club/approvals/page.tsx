@@ -368,7 +368,7 @@ async function declineRedemption(formData: FormData) {
       text: [
         `Hi ${redemption.member.firstName},`,
         ``,
-        `We couldn't approve your ${formatCents(redemption.creditCents)} credit request this time — give us a call at ${siteConfig.phoneDisplay} and we'll sort it out. Your points are untouched.`,
+        `We couldn't approve your ${formatCents(redemption.creditCents)} credit request this time. Give us a call at ${siteConfig.phoneDisplay} and we'll sort it out. Your points are untouched.`,
         ``,
         `Prestige View Services`,
       ].join("\n"),
@@ -447,13 +447,13 @@ async function approveReview(formData: FormData) {
   if (!prior && amount > 0 && claim.member.profile?.notifyServiceReminders !== false) {
     await sendClubEmail({
       to: claim.member.email,
-      subject: `+${amount} points — thank you!`,
+      subject: `+${amount} points, thank you!`,
       text: [
         `Hi ${claim.member.firstName},`,
         ``,
         isSocial
-          ? `Your shoutout is verified and ${amount} points just landed in your Prestige Club account. You're the best kind of marketing — thank you!`
-          : `Your Google review is verified and ${amount} points just landed in your Prestige Club account. Reviews keep a local crew rolling — thank you!`,
+          ? `Your shoutout is verified and ${amount} points just landed in your Prestige Club account. You're the best kind of marketing. Thank you!`
+          : `Your Google review is verified and ${amount} points just landed in your Prestige Club account. Reviews keep a local crew rolling. Thank you!`,
         ``,
         `Your points: ${PORTAL_URL()}/account/rewards`,
         ``,
@@ -517,7 +517,7 @@ async function awardReferral(formData: FormData) {
   if (referral.referrer.profile?.notifyServiceReminders !== false) {
     await sendClubEmail({
       to: referral.referrer.email,
-      subject: `+${settings.pointsReferral} points — your referral came through!`,
+      subject: `+${settings.pointsReferral} points, your referral came through!`,
       text: [
         `Hi ${referral.referrer.firstName},`,
         ``,

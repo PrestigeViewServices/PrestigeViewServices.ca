@@ -249,7 +249,7 @@ export const serviceAreas: ServiceArea[] = [
     region: "ON",
     tagline: "Chalk River Lawn & Exterior Care",
     intro:
-      "Whether you're on Plant Road or off the highway, PVS covers Chalk River with the same routing as our Deep River runs, reliable, year-round.",
+      "On Plant Road or off the highway, PVS covers Chalk River with the same routing as our Deep River runs, reliable, year-round.",
     whyHere: [
       "Bundled Chalk River + Deep River routes, better pricing on recurring plans",
       "Acreage lawn care built for long rural lots",

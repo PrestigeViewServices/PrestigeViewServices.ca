@@ -4,7 +4,6 @@ import { SectionHeading } from "@/components/section-heading";
 import { CtaBand } from "@/components/cta-band";
 import { Reveal } from "@/components/ui/reveal";
 import { PricingToggle } from "@/components/care-plans/pricing-toggle";
-import { BuildYourOwn } from "@/components/care-plans/build-your-own";
 import { ServiceCalendar } from "@/components/care-plans/service-calendar";
 import { DiscountBadges } from "@/components/care-plans/discount-badges";
 import {
@@ -158,21 +157,6 @@ export default function CarePlansPage() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* ── Build-Your-Own calculator (centerpiece) ── */}
-      <section
-        className="container-max scroll-mt-24 py-12"
-        id="build-your-own"
-      >
-        <SectionHeading
-          eyebrow="Build-Your-Own"
-          title="Mix your own plan, exactly what you need"
-          description="Pick your services and we'll bundle them into one monthly payment, the more you bundle, the bigger the discount on your quote."
-        />
-        <div className="mx-auto mt-10 max-w-4xl">
-          <BuildYourOwn />
         </div>
       </section>
 

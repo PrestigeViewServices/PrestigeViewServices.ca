@@ -11,21 +11,20 @@ import {
 
 type Mode = "plan" | "once";
 
-// Care Plans → card props. The Build-Your-Own card points at the calculator
-// section instead of straight to /quote. Prices are never shown publicly,
-// every card reads "Custom quote".
-const PLAN_CARDS: PlanCardProps[] = CARE_PLANS.map((p) => ({
+// Care Plans → card props. Prices are never shown publicly, every card reads
+// "Custom quote". Build-Your-Own is hidden until we promote it (planned for
+// next season) — its data + calculator component stay in the repo.
+const PLAN_CARDS: PlanCardProps[] = CARE_PLANS.filter(
+  (p) => p.slug !== "build-your-own"
+).map((p) => ({
   name: p.name,
   billingLabel: "Billed monthly",
   tagline: p.tagline,
   includes: p.includes,
   bestFor: p.bestFor,
   mostPopular: p.mostPopular,
-  ctaHref:
-    p.slug === "build-your-own"
-      ? "#build-your-own"
-      : quoteHref({ plan: p.slug }),
-  ctaLabel: p.slug === "build-your-own" ? "Build yours" : "Get a Free Quote",
+  ctaHref: quoteHref({ plan: p.slug }),
+  ctaLabel: "Get a Free Quote",
 }));
 
 // One-off Packages → card props.

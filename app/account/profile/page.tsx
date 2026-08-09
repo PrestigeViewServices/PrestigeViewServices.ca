@@ -182,7 +182,7 @@ export default async function ProfilePage() {
                   serving.
                   {p?.veteranStatus === "VERIFIED" && (
                     <span className="mt-1 block font-semibold text-emerald-300">
-                      Verified — your discount is locked in.
+                      Verified. Your discount is locked in.
                     </span>
                   )}
                 </span>

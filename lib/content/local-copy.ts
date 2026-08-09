@@ -473,7 +473,7 @@ export const localCopy: Record<string, LocalCopy> = {
   "landscaping-services/petawawa": {
     intro: [
       "Petawawa moves on posting season, and so does its landscaping: bed refreshes before a house lists, curb appeal packages for new owners, and low-maintenance plantings for families who would rather spend summer at the beach than weeding. The military and veteran discount applies to project work too.",
-      "We plant for this town's sandy soil and open sun: tough perennials, mulch that actually holds moisture, and edging that keeps its line. Small interlock repairs and sod patches round out most jobs.",
+      "We plant for this town's sandy soil and open sun: tough perennials, mulch that actually holds moisture, and edging that keeps its line. Interlock walkways, paver repairs, and sod patches round out most jobs.",
     ],
     faqs: [
       {

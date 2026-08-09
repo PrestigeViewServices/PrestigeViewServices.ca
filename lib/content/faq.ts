@@ -61,7 +61,7 @@ export const serviceFaqs: Record<string, FaqItem[]> = {
   "landscaping-services": [
     {
       q: "What size of landscaping projects do you take on?",
-      a: "The sweet spot is one-crew projects: garden bed refreshes, mulching, edging, seasonal planting, sod patches, and small interlock or walkway repairs. Full yard redesigns and excavation work belong with a design-build contractor, and we'll say so if that's what your project needs.",
+      a: "The sweet spot is one-crew projects: garden bed refreshes, mulching, edging, seasonal planting, sod patches, and interlock work from walkway and patio rebuilds to single-stone repairs. We handle the tear-out, base compaction, and paver install ourselves. Full yard redesigns still belong with a design-build contractor, and we'll say so if that's what your project needs.",
     },
     {
       q: "Do I need a design or drawings first?",

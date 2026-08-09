@@ -13,6 +13,8 @@ type BeforeAfterSliderProps = {
   initialPosition?: number;
   beforeLabel?: string;
   afterLabel?: string;
+  /** Tailwind aspect-ratio class for the frame. Defaults to landscape 3:2. */
+  aspectClass?: string;
   className?: string;
 };
 
@@ -32,6 +34,7 @@ export function BeforeAfterSlider({
   initialPosition = 50,
   beforeLabel = "Before",
   afterLabel = "After",
+  aspectClass = "aspect-[3/2]",
   className,
 }: BeforeAfterSliderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +92,7 @@ export function BeforeAfterSlider({
     <div
       ref={containerRef}
       onPointerDown={onPointerDown}
-      className={`relative aspect-[3/2] w-full overflow-hidden rounded-2xl border border-surface-border bg-surface/60 select-none touch-pan-y ${
+      className={`relative ${aspectClass} w-full overflow-hidden rounded-2xl border border-surface-border bg-surface/60 select-none touch-pan-y ${
         className ?? ""
       }`}
     >

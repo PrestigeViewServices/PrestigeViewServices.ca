@@ -297,13 +297,13 @@ export const serviceCopy: Record<string, ServiceCopy> = {
   "landscaping-services": {
     intro: [
       "Big curb appeal does not need a big contractor. Most yards are one solid weekend of skilled work away from looking completely different: beds re-edged and mulched, tired plants swapped for ones that thrive here, a heaved paver path re-set flat. That is exactly the size of job we love.",
-      "We are already on your street mowing lawns and cleaning windows, which makes us the easy call for the projects that are too big for a Saturday but too small for a design-build firm. Garden bed refreshes, mulch top-ups, crisp bed edging, seasonal planting, sod patches, and small interlock repairs, quoted fast and done tidy.",
+      "We are already on your street mowing lawns and cleaning windows, which makes us the easy call for the projects that are too big for a Saturday but too small for a design-build firm. Garden bed refreshes, mulch top-ups, crisp bed edging, seasonal planting, sod patches, and full interlock work, from walkway and patio rebuilds down to single-stone repairs, quoted fast and done tidy.",
       "Every project gets a real crew, a real cleanup, and a finished look you can see from the road. No months-long waitlist, no drawings you did not ask for, no surprise extras on the invoice.",
     ],
     benefits: [
       {
         title: "Right-sized projects",
-        body: "Bed refreshes, mulching, edging, planting, sod patches, and small paver and walkway repairs.",
+        body: "Bed refreshes, mulching, edging, planting, sod patches, and interlock walkways and patios, built from the base up.",
       },
       {
         title: "Fast, honest quotes",

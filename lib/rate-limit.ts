@@ -50,7 +50,7 @@ export function clientIp(req: Request): string {
 }
 
 /** Standard 429 response. */
-export function tooMany(message = "Too many attempts — please wait a few minutes and try again.") {
+export function tooMany(message = "Too many attempts. Please wait a few minutes and try again.") {
   return new Response(JSON.stringify({ error: message }), {
     status: 429,
     headers: { "Content-Type": "application/json", "Retry-After": "600" },

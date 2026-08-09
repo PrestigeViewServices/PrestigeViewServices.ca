@@ -124,7 +124,7 @@ export async function POST(request: Request) {
     const refCode = await recordReferral(db, payload.email);
     const noteParts = [
       payload.promoCode ? `Promo: ${payload.promoCode}` : null,
-      refCode ? `Referred by club code ${refCode} — friend gets $25 off first service` : null,
+      refCode ? `Referred by club code ${refCode}. Friend gets $25 off first service` : null,
     ].filter(Boolean);
     const created = await db.lead.create({
       data: {
