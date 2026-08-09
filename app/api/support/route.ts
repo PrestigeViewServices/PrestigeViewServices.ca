@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { supportSchema } from "@/lib/support-schema";
 import { getDb } from "@/lib/db";
 import { sendSupportEmail } from "@/lib/send-support-email";
+import { notifyOwner } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -60,6 +61,26 @@ export async function POST(request: Request) {
       // Fall through to email, better partial success than total failure.
     }
   }
+
+  // Owner email + text, best-effort.
+  await notifyOwner({
+    kind: "support",
+    subject: `Support ticket (${payload.type}): ${payload.name}`,
+    text: [
+      `Name: ${payload.name}`,
+      `Phone: ${payload.phone}`,
+      `Email: ${payload.email}`,
+      `Type: ${payload.type}`,
+      payload.propertyAddress ? `Address: ${payload.propertyAddress}` : null,
+      `Details:\n${payload.details}`,
+      ``,
+      `Manage: /admin/support`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    sms: `PVS support ticket (${payload.type}): ${payload.name} · ${payload.phone}`,
+    replyTo: payload.email,
+  });
 
   try {
     await sendSupportEmail(parsed.data);

@@ -2,6 +2,8 @@ import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { applicationSchema } from "@/lib/application-schema";
 import { sendApplicationEmail } from "@/lib/send-application-email";
+import { notifyOwner } from "@/lib/notify";
+import { getRole } from "@/lib/content/careers";
 import { getDb } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -67,6 +69,31 @@ export async function POST(request: Request) {
       // Fall through to email so the application isn't lost.
     }
   }
+
+  // Owner email + text, best-effort.
+  const roleTitle = getRole(payload.role)?.title ?? payload.role;
+  await notifyOwner({
+    kind: "application",
+    subject: `Job application: ${roleTitle}, ${payload.name}`,
+    text: [
+      `Name: ${payload.name}`,
+      `Phone: ${payload.phone}`,
+      `Email: ${payload.email}`,
+      `Role: ${roleTitle}`,
+      `Availability: ${payload.availability}`,
+      `Interested in: ${payload.positionsInterested.join(", ")}`,
+      `License: ${payload.validLicense} · Commute: ${payload.reliableCommute}`,
+      `Experience: ${payload.yearsExperience}`,
+      payload.whyJoin ? `Why PVS:\n${payload.whyJoin}` : null,
+      payload.resumeUrl ? `Resume: ${payload.resumeUrl}` : null,
+      ``,
+      `Manage: /admin/applications`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    sms: `PVS job application: ${payload.name} · ${roleTitle} · ${payload.phone}`,
+    replyTo: payload.email,
+  });
 
   try {
     await sendApplicationEmail(parsed.data);

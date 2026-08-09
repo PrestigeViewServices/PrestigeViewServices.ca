@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { winterReservationSchema } from "@/lib/winter-reservation-schema";
 import { estimateCents } from "@/lib/content/winter-packages";
 import { getDb } from "@/lib/db";
+import { notifyOwner } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,28 @@ export async function POST(request: Request) {
     payload.drivewaySize,
     payload.shovelingTier
   );
+
+  // Owner email + text, best-effort, never blocks intake.
+  await notifyOwner({
+    kind: "winter",
+    subject: `Winter reservation: ${payload.name}, ${payload.city}`,
+    text: [
+      `Name: ${payload.name}`,
+      `Phone: ${payload.phone}`,
+      `Email: ${payload.email}`,
+      `Address: ${payload.streetAddress}, ${payload.city}`,
+      `Driveway: ${payload.drivewayTier} · ${payload.drivewaySize}`,
+      `Shoveling: ${payload.shovelingTier}`,
+      `Estimate: $${(low / 100).toFixed(0)}–$${(high / 100).toFixed(0)}`,
+      payload.customerNotes ? `Notes:\n${payload.customerNotes}` : null,
+      ``,
+      `Manage: /admin/winter-reservations`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    sms: `PVS winter reservation: ${payload.name} · ${payload.city} · ${payload.phone}`,
+    replyTo: payload.email,
+  });
 
   const db = getDb();
   if (!db) {

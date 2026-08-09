@@ -8,9 +8,6 @@ import { StatusSelect } from "@/components/admin/status-select";
 
 export const dynamic = "force-dynamic";
 
-// NOTE: This view may duplicate AuroraSuite's customer-issue tracking.
-// Confirm with the team before relying on it as the source of truth.
-
 const SUPPORT_STATUSES = [
   { value: "NEW", label: "New" },
   { value: "IN_PROGRESS", label: "In Progress" },
@@ -57,11 +54,6 @@ export default async function SupportAdminPage() {
           {items.length} result{items.length === 1 ? "" : "s"}
         </p>
       </header>
-
-      <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-sm text-yellow-200/90">
-        Heads-up: this list may overlap with AuroraSuite. Confirm routing with
-        the team before treating it as the single source of truth.
-      </div>
 
       <div className="space-y-4">
         {items.length === 0 && (

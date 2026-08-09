@@ -7,6 +7,7 @@ import {
   LEAD_SERVICES,
 } from "@/lib/lead-schema";
 import { sendLeadNotification } from "@/lib/send-lead-email";
+import { notifyOwner } from "@/lib/notify";
 import { getDb } from "@/lib/db";
 import type { PrismaClient } from "@prisma/client";
 
@@ -91,22 +92,40 @@ export async function POST(request: Request) {
     LEAD_SERVICES.find((s) => s.value === payload.service)?.label ??
     payload.service;
 
-  // Email notification is best-effort and must never block or fail intake.
+  // Notifications are best-effort and must never block or fail intake.
   const notify = () =>
-    sendLeadNotification({
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone,
-      serviceLabel,
-      promoCode: payload.promoCode || null,
-      propertyAddress: payload.propertyAddress || null,
-      message: payload.message || null,
-    }).then((r) => {
-      if (!r.sent) {
-        // eslint-disable-next-line no-console
-        console.warn("[PVS lead] email notification skipped:", r.reason);
-      }
-    });
+    Promise.all([
+      sendLeadNotification({
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        serviceLabel,
+        promoCode: payload.promoCode || null,
+        propertyAddress: payload.propertyAddress || null,
+        message: payload.message || null,
+      }).then((r) => {
+        if (!r.sent) {
+          // eslint-disable-next-line no-console
+          console.warn("[PVS lead] email notification skipped:", r.reason);
+        }
+      }),
+      notifyOwner({
+        kind: "lead",
+        subject: `New lead: ${serviceLabel}, ${payload.name}`,
+        text: [
+          `Name: ${payload.name}`,
+          `Phone: ${payload.phone}`,
+          `Email: ${payload.email}`,
+          `Service: ${serviceLabel}`,
+          payload.propertyAddress ? `Address: ${payload.propertyAddress}` : null,
+          payload.message ? `Message:\n${payload.message}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        sms: `PVS lead: ${payload.name} · ${serviceLabel} · ${payload.phone}`,
+        replyTo: payload.email,
+      }),
+    ]);
 
   const db = getDb();
   if (!db) {
