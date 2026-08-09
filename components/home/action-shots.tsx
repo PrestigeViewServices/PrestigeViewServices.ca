@@ -13,34 +13,40 @@ import { SectionHeading } from "@/components/section-heading";
  */
 const SHOTS = [
   {
-    src: "/images/gallery/window-cleaning/storefront-squeegee-action.jpg",
-    alt: "PVS technician squeegeeing a commercial storefront window from inside",
-    caption: "Squeegee · storefront",
+    src: "/images/gallery/landscaping/interlock-walkway-laying-pavers.webp",
+    alt: "PVS crew member setting interlock pavers by hand with a rubber mallet",
+    caption: "Interlock · setting pavers",
+    service: "Landscaping",
   },
   {
-    src: "/images/gallery/window-cleaning/skylight-debris-before.jpg",
-    alt: "Skylight choked with leaves and debris before a PVS cleaning",
-    caption: "Skylight · before",
+    src: "/images/gallery/landscaping/interlock-walkway-plate-compactor-base.webp",
+    alt: "Crew member running a plate compactor over a walkway base with string lines set",
+    caption: "Interlock · base compaction",
+    service: "Landscaping",
+  },
+  {
+    src: "/images/gallery/window-cleaning/ladder-upper-window-flower-boxes.webp",
+    alt: "PVS technician on a ladder cleaning an upper window above bright flower boxes",
+    caption: "Upper storey · by hand",
+    service: "Windows",
+  },
+  {
+    src: "/images/gallery/lawn-mowing/stand-on-mower-backyard-stripes.webp",
+    alt: "Stand-on mower laying fresh stripes across a backyard lawn",
+    caption: "Fresh stripes · weekly cut",
+    service: "Lawn care",
+  },
+  {
+    src: "/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp",
+    alt: "PVS tractor snow-blowing a residential driveway at sunrise",
+    caption: "Storm response · sunrise",
+    service: "Snow",
   },
   {
     src: "/images/gallery/window-cleaning/skylight-roof-crew.jpg",
     alt: "PVS technician on the roof above a skylight in mid-clean",
     caption: "Crew on roof",
-  },
-  {
-    src: "/images/gallery/window-cleaning/skylight-clean-after.jpg",
-    alt: "Same skylight crystal clear after a PVS window cleaning service",
-    caption: "Skylight · after",
-  },
-  {
-    src: "/images/gallery/window-cleaning/modern-dark-frame-01.jpg",
-    alt: "Modern dark-framed home windows reflecting sky after PVS cleaning",
-    caption: "Modern dark frame",
-  },
-  {
-    src: "/images/gallery/window-cleaning/residential-bay-window.jpg",
-    alt: "Brick residential home with large bay window cleaned by PVS",
-    caption: "Residential bay window",
+    service: "Windows",
   },
 ];
 
@@ -66,7 +72,7 @@ export function ActionShots() {
         {SHOTS.map((s, i) => (
           <article
             key={s.src}
-            className="snap-start shrink-0 w-[78%] sm:w-[52%] lg:w-[36%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
+            className="group snap-start shrink-0 w-[78%] sm:w-[52%] lg:w-[36%] aspect-[3/4] relative overflow-hidden rounded-2xl border border-surface-border bg-surface/50"
           >
             <Image
               src={s.src}
@@ -74,9 +80,12 @@ export function ActionShots() {
               fill
               sizes="(min-width:1024px) 36vw, (min-width:640px) 52vw, 78vw"
               priority={i === 0}
-              className="object-cover"
+              className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
             />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4">
+            <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+              {s.service}
+            </span>
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent p-4 pt-10">
               <p className="text-sm font-semibold text-white">{s.caption}</p>
             </div>
           </article>
@@ -102,7 +111,7 @@ export function ActionShots() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/our-work/window-cleaning">
+                <Link href="/our-work">
                   See the full gallery
                 </Link>
               </Button>
