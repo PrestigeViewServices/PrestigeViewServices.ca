@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, CalendarDays, Clock } from "lucide-react";
 import { guides, getGuide, otherGuides } from "@/lib/content/guides";
 import { getService } from "@/lib/content/services";
 import { FaqSection } from "@/components/faq-section";
+import { SamTip } from "@/components/sam";
 import { Button } from "@/components/ui/button";
 import { CtaBand } from "@/components/cta-band";
 import { siteConfig } from "@/lib/site";
@@ -158,6 +159,10 @@ export default async function GuidePage(props: { params: Promise<Params> }) {
                 {p}
               </p>
             ))}
+
+            <SamTip pose={guide.samTip.pose} className="mt-8">
+              {guide.samTip.text}
+            </SamTip>
 
             {guide.sections.map((s, i) => (
               <div key={i} className="mt-10">

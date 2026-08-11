@@ -24,6 +24,8 @@ export type Guide = {
   readMinutes: number;
   hero: { src: string; alt: string };
   intro: string[];
+  /** Sam's one-liner tip, rendered as a speech-bubble callout mid-article. */
+  samTip: { pose: "hero" | "mower" | "window" | "gutter" | "pressure"; text: string };
   sections: GuideSection[];
   faqs: { q: string; a: string }[];
   /** Service slugs to surface as "book it" cards at the bottom. */
@@ -48,6 +50,10 @@ export const guides: Guide[] = [
       "Every fall we get the same call: water pouring over the front step in the first cold rain, from a gutter that looked fine all summer. Gutters fail quietly, then all at once. The fix is a schedule, not a reaction.",
       "Here is how we time gutter cleaning across Petawawa, Pembroke, and the wider Valley, and how to tell which schedule your own house needs.",
     ],
+    samTip: {
+      pose: "gutter",
+      text: "If you can see a plant growing out of your gutter, that is not a garden, that is a work order. Grass needs about an inch of composted debris to sprout, which means the trough below it has been full for a year.",
+    },
     sections: [
       {
         heading: "The short answer: twice a year for most homes",
@@ -107,6 +113,10 @@ export const guides: Guide[] = [
       "Most lawn advice online is written for clay or loam. Petawawa sits on sand, and sandy soil drains fast, starves fast, and burns fast. Follow generic advice here and you get the classic July brown-out.",
       "This is the calendar our mowing crews actually run, adapted for homeowners who want to do some or all of it themselves.",
     ],
+    samTip: {
+      pose: "mower",
+      text: "The number one lawn mistake in Petawawa is a July scalping. When in doubt, mow taller. Nobody has ever killed a lawn by cutting it at three and a half inches.",
+    },
     sections: [
       {
         heading: "April and May: wake it up gently",
@@ -172,6 +182,10 @@ export const guides: Guide[] = [
       "The rental-store pressure washer has ruined more siding in the Valley than any hailstorm. The machine is not the problem, the method is: different surfaces need completely different pressure, and the wrong choice does permanent damage.",
       "Here is the split we use on every job, and how to tell which side of it your project lands on.",
     ],
+    samTip: {
+      pose: "pressure",
+      text: "My rule of thumb: if you would walk on it in boots, it can take pressure. If rain runs off it into your house, it gets the gentle treatment. Your siding will thank you, quietly, for decades.",
+    },
     sections: [
       {
         heading: "Pressure washing: for the hard stuff",
@@ -224,6 +238,10 @@ export const guides: Guide[] = [
       "Valley winters do not ease in. The first real storm usually lands before half the town has found the snow shovel, and everything about winter driveway care gets harder once the ground freezes.",
       "This is the checklist we walk through with our own seasonal customers every fall, and most of it applies whether you clear your own snow or not.",
     ],
+    samTip: {
+      pose: "gutter",
+      text: "Stake your driveway even if you shovel it yourself. Come February, every driveway in the Valley is a guess, and the lawn edges remember every wrong guess until June.",
+    },
     sections: [
       {
         heading: "Fix the surface while you still can",
@@ -282,6 +300,10 @@ export const guides: Guide[] = [
     intro: [
       "Everyone has cleaned a window, stepped back, and watched the sun reveal a smeared mess. Streaks are not bad luck. They are one of three specific problems, and each has a specific fix.",
     ],
+    samTip: {
+      pose: "window",
+      text: "Clean glass on a cloudy day. Direct sun flash-dries the water before the squeegee arrives, and that is where half of all streaks come from. The other half is the paper towel.",
+    },
     sections: [
       {
         heading: "Problem one: dirty water, dirty tools",
@@ -340,6 +362,10 @@ export const guides: Guide[] = [
       "Posting season compresses a house sale into weeks. The houses that show well in the first listing photos are the ones that move, and almost everything buyers see in those photos is outside.",
       "This is the order of operations we run for pre-listing properties across Petawawa, built for a timeline where the movers are already booked.",
     ],
+    samTip: {
+      pose: "hero",
+      text: "Wash before you fix, and fix before you plant. Half the flaws on a pre-listing punch list disappear with soap, and mulch photographs better than anything you can grow in three weeks.",
+    },
     sections: [
       {
         heading: "Week one: wash everything",

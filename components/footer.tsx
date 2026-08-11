@@ -143,6 +143,12 @@ export function Footer() {
             <Link href="/guides" className="hover:text-foreground">
               Tips &amp; Guides
             </Link>
+            <Link href="/seasonal-planner" className="hover:text-foreground">
+              Seasonal Planner
+            </Link>
+            <Link href="/faq" className="hover:text-foreground">
+              FAQ
+            </Link>
             <Link href="/insurance" className="hover:text-foreground">
               Insurance
             </Link>
