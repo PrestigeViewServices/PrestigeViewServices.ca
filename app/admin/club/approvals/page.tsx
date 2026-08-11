@@ -80,8 +80,7 @@ export default async function ApprovalsPage() {
         <p className="mt-1 text-xs text-muted-foreground">
           Approving deducts the points immediately. Apply the credit to the
           member&apos;s next Jobber invoice, remember: combined promo
-          discounts cap at 20% per invoice (the veteran discount is exempt
-          and always stacks).
+          discounts cap at 20% per invoice.
         </p>
         <div className="mt-3 space-y-3">
           {redemptions.length === 0 && (

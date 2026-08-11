@@ -5,7 +5,8 @@
  * back to the compact template.
  *
  * Rules: no internal division names, no em dashes, no paragraph reuse
- * between entries. Petawawa entries lead with the military angle.
+ * between entries. Petawawa entries lead with the hometown / Garrison
+ * community angle.
  */
 
 export type LocalCopy = {
@@ -19,14 +20,10 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- WINDOW CLEANING ----------------
   "window-cleaning/petawawa": {
     intro: [
-      "Petawawa is our home town, and window cleaning here comes with the discount we are proudest of: serving members, veterans, and military families save on every visit. From PMQs near the base to the big riverfront panes out at Black Bay, the crew that shows up is the same one your neighbours already know.",
+      "Petawawa is our home town, and window cleaning here comes with hometown treatment. From PMQs near the base to the big riverfront panes out at Black Bay, the crew that shows up is the same one your neighbours already know.",
       "Base-area homes deal with a specific kind of grime: dust off the training areas and hard water spotting from sprinklers. We clean glass, frames, sills, and screens by hand, so the film actually comes off instead of moving around.",
     ],
     faqs: [
-      {
-        q: "Do military families get a discount on window cleaning in Petawawa?",
-        a: "Yes. Serving members, veterans, military families, and first responders save 10% on window cleaning and every other PVS service. Mention your connection to the Garrison when you book.",
-      },
       {
         q: "Can you clean my windows while I'm away on tasking?",
         a: "Absolutely. Exterior cleans don't need anyone home, we send photos when the job is done, and billing is handled by e-transfer or card on file.",
@@ -97,17 +94,13 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- GUTTER CLEANING ----------------
   "gutter-cleaning/petawawa": {
     intro: [
-      "Gutter cleaning in Petawawa comes with our military and veteran discount, and with a crew that knows the town's rooflines street by street. The tall pines around Black Bay and Petawawa Point drop needles all season long, which pack into gutters tighter than leaves ever do.",
+      "Gutter cleaning in Petawawa comes with a crew that knows the town's rooflines street by street. The tall pines around Black Bay and Petawawa Point drop needles all season long, which pack into gutters tighter than leaves ever do.",
       "For families juggling postings and deployments, we make this the easiest chore to hand off: no one needs to be home, debris leaves with us, and you get photos of the clean troughs and any spots worth watching.",
     ],
     faqs: [
       {
         q: "How often do Petawawa homes near the pines need gutter cleaning?",
         a: "Homes under pine cover around Black Bay and the Point usually need spring and fall visits, and heavy-cover properties benefit from a third. Needles compact and hold water worse than leaves, so they can't wait for spring.",
-      },
-      {
-        q: "Does the military discount apply to gutter cleaning?",
-        a: "Yes. The discount applies to every PVS service, gutter cleaning included. Mention your service when you request the quote.",
       },
     ],
   },
@@ -174,7 +167,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- PRESSURE WASHING ----------------
   "pressure-washing/petawawa": {
     intro: [
-      "Petawawa driveways earn their grime: sand and grit from base traffic, winter salt, and hot summers that bake it all in. A pressure wash brings concrete and interlock back to their real colour in an afternoon, and the military and veteran discount applies here like everywhere else at PVS.",
+      "Petawawa driveways earn their grime: sand and grit from base traffic, winter salt, and hot summers that bake it all in. A pressure wash brings concrete and interlock back to their real colour in an afternoon.",
       "We wash a lot of PMQ and rental move-outs in this town. If you are posting out and the driveway, walkway, and patio need to look like inspection day, one visit handles it.",
     ],
     faqs: [
@@ -248,7 +241,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- HOUSE WASHING ----------------
   "house-washing/petawawa": {
     intro: [
-      "A soft wash is the fastest way to make a Petawawa home look years newer, and with our military and veteran discount it costs less here than most people expect. Algae shows up hard on the shaded sides of the newer builds around town, and the base area's sandy dust films onto siding by mid-summer.",
+      "A soft wash is the fastest way to make a Petawawa home look years newer, and it costs less than most people expect. Algae shows up hard on the shaded sides of the newer builds around town, and the base area's sandy dust films onto siding by mid-summer.",
       "Low pressure and a plant-safe cleaning solution take siding, soffits, and fascia back to bright without driving water behind the cladding. Most homes are done in a morning.",
     ],
     faqs: [
@@ -321,7 +314,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- LAWN MOWING ----------------
   "lawn-mowing/petawawa": {
     intro: [
-      "Petawawa lawns grow on sand, and sandy soil is unforgiving: cut too short in July and the lawn browns in a week. Our crews run higher summer cut heights and sharp blades, which is most of the secret to the good-looking lawns on our routes. The military and veteran discount applies, and half our mowing customers here use it.",
+      "Petawawa lawns grow on sand, and sandy soil is unforgiving: cut too short in July and the lawn browns in a week. Our crews run higher summer cut heights and sharp blades, which is most of the secret to the good-looking lawns on our routes.",
       "For families mid-deployment or between postings, weekly mowing is the chore that most needs to disappear. It shows up on route day, the edges get trimmed, the walks get blown clean, and the photo lands in your inbox.",
     ],
     faqs: [
@@ -399,7 +392,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- HEDGE TRIMMING ----------------
   "hedge-trimming/petawawa": {
     intro: [
-      "Petawawa properties love their cedar privacy hedges, and nothing sharpens a property line like a freshly squared one. Our crews cut level tops and clean faces on everything from PMQ-height borders to the tall walls around Black Bay yards, with the military and veteran discount applied to the invoice.",
+      "Petawawa properties love their cedar privacy hedges, and nothing sharpens a property line like a freshly squared one. Our crews cut level tops and clean faces on everything from PMQ-height borders to the tall walls around Black Bay yards.",
       "Timing matters more than people think: cedars here want late spring or mid-summer cuts so the growth heals before winter. We book the visit for the plant's calendar, not just ours.",
     ],
     faqs: [
@@ -472,7 +465,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- LANDSCAPING PROJECTS ----------------
   "landscaping-services/petawawa": {
     intro: [
-      "Petawawa moves on posting season, and so does its landscaping: bed refreshes before a house lists, curb appeal packages for new owners, and low-maintenance plantings for families who would rather spend summer at the beach than weeding. The military and veteran discount applies to project work too.",
+      "Petawawa moves on posting season, and so does its landscaping: bed refreshes before a house lists, curb appeal packages for new owners, and low-maintenance plantings for families who would rather spend summer at the beach than weeding.",
       "We plant for this town's sandy soil and open sun: tough perennials, mulch that actually holds moisture, and edging that keeps its line. Interlock walkways, paver repairs, and sod patches round out most jobs.",
     ],
     faqs: [
@@ -553,10 +546,6 @@ export const localCopy: Record<string, LocalCopy> = {
       {
         q: "Will my driveway be cleared in time for early parade timings?",
         a: "Petawawa routes are timed for base schedules. Contract driveways get priority passes through the storm and a final clean-up pass after, so early departures are covered.",
-      },
-      {
-        q: "Do military members get a break on snow contracts?",
-        a: "Yes, serving members, veterans, and military families get 10% off. It can't be combined with offers above 10%, so during the early-bird window we simply apply EARLYBIRD15 at 15% instead, whichever saves you more is the one you get.",
       },
     ],
   },

@@ -211,10 +211,6 @@ export function AccountAuth() {
           </Button>
         </form>
       </div>
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Military, veteran, or first responder? Your 10% discount is waiting,
-        set it in your profile after you join.
-      </p>
     </div>
   );
 }

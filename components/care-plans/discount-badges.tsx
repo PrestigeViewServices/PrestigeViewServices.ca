@@ -2,7 +2,7 @@ import { DISCOUNT_BADGES } from "@/lib/content/care-plans";
 import { cn } from "@/lib/utils";
 
 /**
- * Military / First-Responder + Neighbour Deal discount badges.
+ * Neighbour Deal discount badges.
  * Pure presentational, reused on the Care Plans page and service sections.
  */
 export function DiscountBadges({ className }: { className?: string }) {

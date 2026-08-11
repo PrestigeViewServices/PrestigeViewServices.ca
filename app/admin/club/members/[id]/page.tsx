@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { ArrowLeft, Link2, Medal, PlusCircle } from "lucide-react";
+import { ArrowLeft, Link2, PlusCircle } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import {
@@ -92,23 +92,6 @@ export default async function ClubMemberPage(props: {
             {`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/claim/${member.inviteToken}`}
           </p>
         </div>
-      )}
-
-      {member.profile?.veteranStatus === "SELF_DECLARED" && (
-        <form
-          action={verifyVeteran}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-4"
-        >
-          <input type="hidden" name="memberId" value={member.id} />
-          <p className="flex items-center gap-2 text-sm">
-            <Medal className="h-4 w-4 text-sky-400" />
-            Self-declared military / veteran / first responder, verify on
-            first service.
-          </p>
-          <Button type="submit" size="sm" variant="outline">
-            Mark verified
-          </Button>
-        </form>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -217,8 +200,7 @@ export default async function ClubMemberPage(props: {
                     "en-CA",
                     { month: "long" }
                   )
-                : "not set"}{" "}
-              · Veteran: {member.profile?.veteranStatus.toLowerCase().replace("_", " ")}
+                : "not set"}
             </p>
           </div>
         </section>
@@ -350,17 +332,3 @@ async function linkJobber(formData: FormData) {
   revalidatePath(`/admin/club/members/${memberId}`);
 }
 
-async function verifyVeteran(formData: FormData) {
-  "use server";
-  await requireRole([...ADMIN_ROLES]);
-  const db = getDb();
-  if (!db) throw new Error("DB not configured");
-
-  const memberId = String(formData.get("memberId") ?? "");
-  if (!memberId) return;
-  await db.customerProfile.updateMany({
-    where: { memberId, veteranStatus: "SELF_DECLARED" },
-    data: { veteranStatus: "VERIFIED" },
-  });
-  revalidatePath(`/admin/club/members/${memberId}`);
-}

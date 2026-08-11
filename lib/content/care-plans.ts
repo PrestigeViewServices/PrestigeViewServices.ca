@@ -301,12 +301,6 @@ export type DiscountBadge = {
 
 export const DISCOUNT_BADGES: DiscountBadge[] = [
   {
-    id: "military",
-    emoji: "🎖️",
-    title: "Military / Veteran / First Responder",
-    detail: "10% off, proud to serve those who serve (Petawawa & CFB).",
-  },
-  {
     id: "neighbour",
     emoji: "👋",
     title: "Neighbour Deal",

@@ -95,10 +95,6 @@ const WINTER_FAQS = [
     q: "How much does a seasonal pass cost?",
     a: "Every driveway is different, so we price each pass to your property instead of publishing one-size numbers. Reserve below and we'll send your custom seasonal quote free within one business day, and signing before August 14 with code EARLYBIRD15 takes 15% off.",
   },
-  {
-    q: "Do military members get a discount on snow passes?",
-    a: "Yes. Serving members, veterans, military families, and first responders get 10% off. It can't stack with offers above 10%, so during the early-bird window we simply apply EARLYBIRD15 at 15% instead, you always get whichever saves you more.",
-  },
 ];
 
 export default function WinterPackagesPage() {

@@ -95,15 +95,11 @@ export const serviceAreas: ServiceArea[] = [
     geo: { lat: 45.8956, lng: -77.2814 },
     snowStatus: "active",
     localNotes: [
-      "Petawawa is our home base, and it shows in the routing: most streets in town see a PVS truck weekly. We are veteran operated and built around the Garrison Petawawa community, which is why serving members, veterans, and military families get 10% off every service we offer.",
+      "Petawawa is our home base, and it shows in the routing: most streets in town see a PVS truck weekly. We are veteran operated and built around the Garrison Petawawa community, so we know the rhythm of this town better than anyone.",
       "We know the housing here because we work on all of it: PMQs and newer builds around the base, family homes in Civic Centre and along Doran Road, and the bigger riverfront lots out toward Black Bay and Petawawa Point. Sandy soil means lawns dry out fast in July, so we adjust cut heights through the season instead of scalping turf on a fixed setting.",
       "Posting season is real in this town. If you are moving in, moving out, or heading on deployment, we handle move-out cleanups, set up recurring care while you are away, and send photo updates after every visit so you can see the property from wherever you are posted.",
     ],
     faqs: [
-      {
-        q: "Do you offer a military discount in Petawawa?",
-        a: "Yes, it is one of the things we are known for. Serving members, veterans, military families, and first responders get 10% off every service. It can't be combined with other offers above 10%, we always apply whichever discount saves you more. Just mention your service when you request your quote.",
-      },
       {
         q: "Can you look after my property while I'm deployed or on course?",
         a: "That is one of the most common requests we get in Petawawa. We set up recurring lawn, window, and snow care, send photo updates after each visit, and bill one predictable amount so the home front runs itself while you're away.",
