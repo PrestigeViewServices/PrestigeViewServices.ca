@@ -42,6 +42,7 @@ const exploreLinks = [
   { href: "/services", label: "All Services" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
+  { href: "/guides", label: "Tips & Guides" },
   { href: "/reviews", label: "Reviews" },
   { href: "/careers", label: "Careers" },
   { href: "/support", label: "Customer Support" },

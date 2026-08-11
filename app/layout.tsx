@@ -101,6 +101,9 @@ export default function RootLayout({
     url: siteConfig.url,
     telephone: siteConfig.phone,
     email: siteConfig.email,
+    image: `${siteConfig.url}/images/og-default.png`,
+    logo: `${siteConfig.url}/images/logo.png`,
+    priceRange: "$$",
     areaServed: [
       ...serviceAreas.map((a) => ({
         "@type": "City",

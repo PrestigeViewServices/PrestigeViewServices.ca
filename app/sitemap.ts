@@ -4,6 +4,7 @@ import { services } from "@/lib/content/services";
 import { serviceAreas, serviceOfferedInArea } from "@/lib/content/service-areas";
 import { workCategories } from "@/lib/content/work-categories";
 import { activeRoles } from "@/lib/content/careers";
+import { guides } from "@/lib/content/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
@@ -22,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/support`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/careers`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${base}/winter-packages`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
@@ -62,6 +64,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const guideRoutes: MetadataRoute.Sitemap = guides.map((g) => ({
+    url: `${base}/guides/${g.slug}`,
+    lastModified: new Date(g.dateModified),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
   const roleRoutes: MetadataRoute.Sitemap = activeRoles().map((r) => ({
     url: `${base}/careers/${r.slug}`,
     lastModified: new Date(r.datePosted),
@@ -75,6 +84,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...areaRoutes,
     ...comboRoutes,
     ...workRoutes,
+    ...guideRoutes,
     ...roleRoutes,
   ];
 }
