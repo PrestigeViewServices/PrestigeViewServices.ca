@@ -390,7 +390,7 @@ export const serviceCopy: Record<string, ServiceCopy> = {
     intro: [
       "Valley winters do not negotiate. When 30 centimetres lands overnight, you either dig for an hour before work or you watch a PVS tractor clear the driveway from your kitchen window with a coffee in hand. We know which morning we would pick.",
       "Our seasonal contracts cover your driveway, apron and walkways for the whole winter at one flat rate: unlimited visits during qualifying snowfalls, priority routing for contract customers, and salt available for ice days. Tractor-mounted snowblowers mean clean, tight passes that do not bury your lawn or mailbox.",
-      "Contracts are capped per route so the machine is never too far away mid-storm. Routes fill up before the first flake flies, and early birds get the best rate of the year: sign before September 15 and take 15 percent off with code EARLYBIRD26/27.",
+      "Contracts are capped per route so the machine is never too far away mid-storm. Routes fill up before the first flake flies, so the earlier you reserve, the better your placement on the run.",
     ],
     benefits: [
       {
@@ -413,7 +413,7 @@ export const serviceCopy: Record<string, ServiceCopy> = {
     process: [
       {
         title: "Lock in your spot",
-        body: "Request a quote with your address and driveway type. Before September 15, code EARLYBIRD26/27 takes 15 percent off.",
+        body: "Request a quote with your address and driveway type, and we'll price the season for your property.",
       },
       {
         title: "Stakes go in before freeze-up",

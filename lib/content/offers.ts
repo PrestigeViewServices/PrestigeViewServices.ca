@@ -30,8 +30,11 @@ export const offers: Offer[] = [
     division: "clearview",
   },
   {
+    // Deactivated 2026-08-16: the 15% early-bird discount is no longer
+    // advertised. Kept (inactive) so the offer can be revived for a future
+    // season alongside EARLYBIRD_ENABLED in lib/lead-schema.ts.
     id: "snow-early",
-    active: true,
+    active: false,
     eyebrow: "Winter Early Bird: 15% Off",
     headline: "15% Off Seasonal Snow Contracts Signed Before September 15",
     body: "Beat the fall rush: lock in your driveway and walkways for the whole winter at 15% off the seasonal rate. Offer ends September 15. Mention code EARLYBIRD26/27.",

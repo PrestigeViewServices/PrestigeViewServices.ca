@@ -6,15 +6,19 @@ import {
   EARLYBIRD_CODE,
   EARLYBIRD_DEADLINE,
   EARLYBIRD_DEADLINE_LABEL,
+  EARLYBIRD_ENABLED,
 } from "@/lib/lead-schema";
 
 /**
- * Early-bird urgency bar with a live countdown.
+ * Urgency bar for the winter packages page.
  *
- * Two states, and it moves between them on its own:
- *  - Before the deadline: the discount plus a ticking d/h/m readout.
- *  - After it: swaps to scarcity messaging. It never renders negative time,
- *    and it never needs a human to remember to take the offer down.
+ * Three states, and it moves between them on its own:
+ *  - Promo off (EARLYBIRD_ENABLED false, the current setting): scarcity
+ *    messaging only, no discount is mentioned anywhere.
+ *  - Promo on, before the deadline: the discount plus a ticking d/h/m readout.
+ *  - Promo on, past the deadline: falls back to the same scarcity messaging.
+ *    It never renders negative time, and it never needs a human to remember
+ *    to take the offer down.
  *
  * The countdown is client-only after mount. Server render and first paint
  * show the deadline date instead of a timer so SSR and hydration always
@@ -50,7 +54,9 @@ function useRemaining(): { value: Remaining; expired: boolean | null } {
 }
 
 export function OfferCountdown() {
-  const { value, expired } = useRemaining();
+  const { value, expired: pastDeadline } = useRemaining();
+  // With the promo switched off, the bar is scarcity-only from the start.
+  const expired = EARLYBIRD_ENABLED ? pastDeadline : true;
 
   return (
     <section className="container-max py-6">

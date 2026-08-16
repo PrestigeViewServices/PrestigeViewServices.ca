@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 import {
   EARLYBIRD_DEADLINE,
   EARLYBIRD_DEADLINE_LABEL,
+  EARLYBIRD_ENABLED,
 } from "@/lib/lead-schema";
 
 /**
  * Above-the-fold early-bird promo band. Sits at the very top of the home
  * page, above the hero. Countdown renders client-side only (after mount)
  * so SSR/hydration always agree; until then the static deadline shows.
+ *
+ * Renders nothing at all while EARLYBIRD_ENABLED is false.
  */
 const DEADLINE = new Date(EARLYBIRD_DEADLINE);
 
@@ -28,6 +31,7 @@ function useCountdown(target: Date) {
 
 export function PromoBanner() {
   const remaining = useCountdown(DEADLINE);
+  if (!EARLYBIRD_ENABLED) return null;
   if (remaining !== null && remaining <= 0) return null;
 
   const days = remaining !== null ? Math.floor(remaining / 86_400_000) : null;

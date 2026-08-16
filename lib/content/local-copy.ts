@@ -546,7 +546,7 @@ export const localCopy: Record<string, LocalCopy> = {
   // ---------------- SNOW REMOVAL ----------------
   "snow-removal/petawawa": {
     intro: [
-      "Petawawa mornings do not wait for shovelling, and neither do parade timings. Our snow routes are built around this town, cleared through the storm so driveways are open when the base traffic starts moving. Sign before September 15 with code EARLYBIRD26/27 and take 15 percent off your seasonal contract, the best rate of the year.",
+      "Petawawa mornings do not wait for shovelling, and neither do parade timings. Our snow routes are built around this town, cleared through the storm so driveways are open when the base traffic starts moving. Routes are capped and they fill before the first storm, so reserve your spot early.",
       "We stake driveways in the fall, run tractor-mounted blowers that throw snow clear instead of banking it, and cap each route so the machine is never far away mid-storm.",
     ],
     faqs: [
@@ -556,7 +556,7 @@ export const localCopy: Record<string, LocalCopy> = {
       },
       {
         q: "Do military members get a break on snow contracts?",
-        a: "Yes, serving members, veterans, and military families get 10% off. It can't be combined with offers above 10%, so during the early-bird window we simply apply EARLYBIRD26/27 at 15% instead, whichever saves you more is the one you get.",
+        a: "Yes, serving members, veterans, and military families get 10% off, and it applies to every service we offer. Just mention your service when you request a quote.",
       },
     ],
   },

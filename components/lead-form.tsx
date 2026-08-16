@@ -17,7 +17,8 @@ import {
   LEAD_SERVICE_VALUES,
   SNOW_SERVICE_VALUES,
   EARLYBIRD_CODE,
-  EARLYBIRD_DEADLINE,
+  EARLYBIRD_DEADLINE_LABEL,
+  earlyBirdActive as isEarlyBirdActive,
   type LeadFormValues,
 } from "@/lib/lead-schema";
 import { siteConfig } from "@/lib/site";
@@ -38,7 +39,7 @@ import {
  * Native PVS lead form. Posts to /api/leads, which drops the lead straight
  * into the admin pipeline (status NEW) and emails the office. No third-party
  * embed. Pre-selects the service from ?service= links across the site, and
- * offers the EARLYBIRD15 snow promo while it runs.
+ * offers the snow early-bird promo while EARLYBIRD_ENABLED is on.
  */
 export function LeadForm({ id = "quote-form" }: { id?: string }) {
   return (
@@ -68,7 +69,9 @@ function normalizeService(raw: string | null): LeadFormValues["service"] | undef
 function LeadFormInner({ id }: { id: string }) {
   const params = useSearchParams();
   const presetService = normalizeService(params.get("service"));
-  const earlyBirdActive = Date.now() < new Date(EARLYBIRD_DEADLINE).getTime();
+  // Reads the shared helper so the EARLYBIRD_ENABLED master switch in
+  // lib/lead-schema.ts turns this checkbox off along with everything else.
+  const earlyBirdActive = isEarlyBirdActive();
 
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
@@ -273,7 +276,8 @@ function LeadFormInner({ id }: { id: string }) {
               Apply the Winter Early Bird ({EARLYBIRD_CODE})
             </span>
             <span className="block text-muted-foreground">
-              15% off seasonal snow contracts signed before August 14.
+              15% off seasonal snow contracts signed before{" "}
+              {EARLYBIRD_DEADLINE_LABEL}.
             </span>
           </span>
         </label>

@@ -24,7 +24,6 @@ import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
 } from "@/lib/content/winter-packages";
-import { EARLYBIRD_CODE, EARLYBIRD_DEADLINE_LABEL } from "@/lib/lead-schema";
 import { siteConfig } from "@/lib/site";
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
@@ -149,11 +148,11 @@ const WINTER_FAQS = [
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Every driveway is different, so we price each pass to your property instead of publishing one-size numbers. Send a quote request and we reply within 24 hours, free and with no obligation. Signing before ${EARLYBIRD_DEADLINE_LABEL} with code ${EARLYBIRD_CODE} takes 15% off.`,
+    a: "Every driveway is different, so we price each pass to your property instead of publishing one-size numbers. Send a quote request and we reply within 24 hours, free and with no obligation. Nothing is collected when you request the quote.",
   },
   {
     q: "Do military members get a discount on snow passes?",
-    a: `Yes. Serving members, veterans, military families, and first responders get 10% off. It cannot stack with offers above 10%, so during the early-bird window we simply apply ${EARLYBIRD_CODE} at 15% instead. You always get whichever saves you more.`,
+    a: "Yes. Serving members, veterans, military families, and first responders get 10% off, and it applies to every service we offer. Tick the box on the quote form, or just mention your service when you call.",
   },
 ];
 

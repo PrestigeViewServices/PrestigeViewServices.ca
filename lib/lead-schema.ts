@@ -48,21 +48,28 @@ export function divisionForService(service: string): LeadDivision {
   );
 }
 
-/**
- * Snow services show the early-bird promo checkbox while it runs.
- *
- * These three are the ONLY place the early-bird promo is defined. The home
- * banner, the offers band, the winter packages page, and the SEO copy all
- * read from here, so moving the date is a one-line change. Past the deadline
- * every surface swaps itself to "routes are filling" messaging automatically.
- */
 export const SNOW_SERVICE_VALUES = ["snow-removal"];
+
+/**
+ * MASTER SWITCH for the seasonal snow early-bird discount.
+ *
+ * Turned OFF 2026-08-16 at the owner's request: the 15% off is no longer
+ * advertised anywhere on the site. Every surface (home banner, offers band,
+ * offer modal, winter packages countdown, quote form promo checkbox, and the
+ * snow SEO copy) reads `earlyBirdActive()`, so flipping this back to true is
+ * all it takes to bring the promo back for a future season.
+ *
+ * Set a fresh code and deadline below before re-enabling.
+ */
+export const EARLYBIRD_ENABLED = false;
+
 export const EARLYBIRD_CODE = "EARLYBIRD26/27";
 export const EARLYBIRD_DEADLINE = "2026-09-16T00:00:00-04:00"; // through Sept 15
 export const EARLYBIRD_DEADLINE_LABEL = "September 15";
 
-/** True while the early-bird window is still open. */
+/** True only while the promo is switched on AND inside its window. */
 export function earlyBirdActive(now: number = Date.now()): boolean {
+  if (!EARLYBIRD_ENABLED) return false;
   return now < new Date(EARLYBIRD_DEADLINE).getTime();
 }
 
