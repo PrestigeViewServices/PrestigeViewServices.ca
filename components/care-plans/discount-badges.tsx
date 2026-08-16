@@ -2,14 +2,16 @@ import { DISCOUNT_BADGES } from "@/lib/content/care-plans";
 import { cn } from "@/lib/utils";
 
 /**
- * Military / First-Responder + Neighbour Deal discount badges.
+ * Standing discount badges (currently just Military / First-Responder).
  * Pure presentational, reused on the Care Plans page and service sections.
  */
 export function DiscountBadges({ className }: { className?: string }) {
   return (
     <ul
       className={cn(
-        "grid gap-3 sm:grid-cols-2",
+        "grid gap-3",
+        // Two columns only when there are enough badges to fill them.
+        DISCOUNT_BADGES.length > 1 && "sm:grid-cols-2",
         className
       )}
     >

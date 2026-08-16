@@ -299,18 +299,15 @@ export type DiscountBadge = {
   detail: string;
 };
 
+// The "Neighbour Deal" (15% off when a neighbour books the same week) was
+// removed 2026-08-16 at the owner's request — the military discount is the
+// only standing discount advertised on the site.
 export const DISCOUNT_BADGES: DiscountBadge[] = [
   {
     id: "military",
     emoji: "🎖️",
     title: "Military / Veteran / First Responder",
     detail: "10% off, proud to serve those who serve (Petawawa & CFB).",
-  },
-  {
-    id: "neighbour",
-    emoji: "👋",
-    title: "Neighbour Deal",
-    detail: "15% off when a neighbour books the same week.",
   },
 ];
 
