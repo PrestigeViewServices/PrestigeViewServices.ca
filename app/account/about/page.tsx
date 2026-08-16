@@ -1,7 +1,9 @@
+import Link from "next/link";
 import {
   Clock,
   Mail,
   MapPin,
+  Medal,
   Phone,
   ShieldCheck,
   Sparkles,
@@ -85,6 +87,28 @@ export default function AboutPvsPage() {
           do it right, send a photo when it&apos;s done. That&apos;s the PVS
           difference.
         </p>
+      </section>
+
+      {/* ---- Veteran discount ---- */}
+      <section className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-5 sm:p-6">
+        <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+        <div className="text-sm leading-relaxed">
+          <p className="font-semibold">
+            Military, veterans &amp; first responders: 10% off, always.
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            We&apos;re proud to be part of the Garrison Petawawa community.
+            The discount applies to every service, every time, and it stacks
+            with your Prestige Club credits. Declare it in{" "}
+            <Link
+              href="/account/profile"
+              className="font-medium text-primary hover:underline"
+            >
+              your profile
+            </Link>{" "}
+            and we&apos;ll verify on your first service.
+          </p>
+        </div>
       </section>
 
       {/* ---- Services ---- */}

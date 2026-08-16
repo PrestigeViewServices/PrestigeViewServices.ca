@@ -191,6 +191,24 @@ async function submitFreeEntry(formData: FormData) {
         entrantTown: town,
       },
     });
+
+    // Owner alert, best-effort. Must run before redirect(), which throws.
+    const { notifyOwner } = await import("@/lib/notify");
+    await notifyOwner({
+      kind: "giveaway",
+      subject: `New giveaway entry: ${name} (${town})`,
+      text: [
+        `Draw: ${giveaway.title}`,
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Town: ${town}`,
+        `Source: mail-in / no-purchase entry`,
+        ``,
+        `Manage: /admin/club/giveaways`,
+      ].join("\n"),
+      sms: `PVS giveaway entry: ${name} · ${town}`,
+      replyTo: email,
+    });
   }
   redirect("/giveaway-entry?entered=1");
 }

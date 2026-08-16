@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  BellOff,
   Briefcase,
   Eye,
   Inbox,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
+import { notificationsConfigured } from "@/lib/notify";
 import { NotConfigured } from "@/components/admin/not-configured";
 import {
   LEAD_STATUS_META,
@@ -165,6 +167,8 @@ export default async function AdminHomePage() {
         </p>
       </header>
 
+      <NotifyStatusBanner />
+
       {/* ---- Stat tiles ---- */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
@@ -309,6 +313,52 @@ export default async function AdminHomePage() {
           </ul>
         </section>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Notification health. Owner alerts (email + SMS) fan out from
+ * lib/notify.ts, which self-disables when its provider keys are missing —
+ * historically that failed silently, so every intake alert was dropped with
+ * no visible sign. This banner makes the dead channel obvious.
+ */
+function NotifyStatusBanner() {
+  const { email, sms, recipients } = notificationsConfigured();
+  if (email && sms) return null;
+
+  return (
+    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+      <p className="flex items-center gap-2 text-sm font-semibold text-amber-200">
+        <BellOff className="h-4 w-4 shrink-0" aria-hidden />
+        {email
+          ? "Text alerts are off"
+          : "Email alerts are off, nothing is being sent"}
+      </p>
+      <ul className="mt-3 space-y-1.5 text-sm text-amber-100/85">
+        {!email && (
+          <li>
+            <strong>Email:</strong> set <code>RESEND_API_KEY</code> to start
+            receiving quote requests, winter reservations, applications,
+            support tickets, new members, and giveaway entries at{" "}
+            {recipients.join(", ")}. Until then they are saved here only.
+          </li>
+        )}
+        {!sms && (
+          <li>
+            <strong>Text:</strong> set <code>TWILIO_ACCOUNT_SID</code>,{" "}
+            <code>TWILIO_AUTH_TOKEN</code>, and{" "}
+            <code>TWILIO_FROM_NUMBER</code>, or set{" "}
+            <code>OWNER_SMS_GATEWAY</code> to use your carrier&apos;s
+            email-to-text address.
+          </li>
+        )}
+      </ul>
+      <p className="mt-3 text-xs text-amber-100/60">
+        Add these in Vercel under Project Settings, Environment Variables,
+        then redeploy. Nothing submitted through the website is ever lost, it
+        is always written to the dashboard first.
+      </p>
     </div>
   );
 }

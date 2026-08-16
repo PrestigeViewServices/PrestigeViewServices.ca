@@ -1,8 +1,10 @@
 import { z } from "zod";
 import {
+  ADD_ON_KEYS,
   DRIVEWAY_TIERS,
   DRIVEWAY_SIZES,
   SHOVELING_TIERS,
+  WINTER_TOWNS,
 } from "@/lib/content/winter-packages";
 
 export const winterReservationSchema = z.object({
@@ -20,6 +22,11 @@ export const winterReservationSchema = z.object({
     .string()
     .min(3, "Please enter your street address")
     .max(200, "Address is too long"),
+  /**
+   * Which route the property sits on. "OTHER" means outside our two snow
+   * towns, in which case `city` carries the town the customer typed.
+   */
+  town: z.enum(WINTER_TOWNS).default("PETAWAWA"),
   city: z.string().min(2, "Please enter your city").max(80, "City is too long"),
   region: z.string().max(40).optional(),
   postalCode: z
@@ -34,6 +41,12 @@ export const winterReservationSchema = z.object({
     errorMap: () => ({ message: "Choose your driveway size" }),
   }),
   shovelingTier: z.enum(SHOVELING_TIERS).default("NONE"),
+  /** Multi-select extras. Deduped so a replayed payload can't inflate the list. */
+  addOns: z
+    .array(z.enum(ADD_ON_KEYS))
+    .max(ADD_ON_KEYS.length)
+    .default([])
+    .transform((keys) => Array.from(new Set(keys))),
   customerNotes: z
     .string()
     .max(1500, "Keep it under 1500 characters")

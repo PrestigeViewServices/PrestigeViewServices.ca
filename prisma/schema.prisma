@@ -206,6 +206,7 @@ enum DrivewaySize {
   ONE_CAR
   TWO_CAR
   THREE_PLUS_CAR
+  LONG_RURAL
 }
 
 enum ShovelingTier {
@@ -283,6 +284,13 @@ model WinterReservation {
   drivewayTier  DrivewayTier
   drivewaySize  DrivewaySize
   shovelingTier ShovelingTier @default(NONE)
+
+  /// Multi-select add-ons chosen on /winter-packages.
+  saltingAddOn    Boolean @default(false)
+  /// End-of-driveway city ridge priority (already included on Gold/Platinum).
+  ridgePriority   Boolean @default(false)
+  /// Self-declared military/veteran, applies the standing 10% discount.
+  veteranDiscount Boolean @default(false)
 
   /// Estimate captured at submission time, in CAD cents.
   estimateLowCents  Int

@@ -16,17 +16,59 @@ import { siteConfig } from "@/lib/site";
  *    Silently reports "not configured" otherwise, never blocks intake.
  *
  * Env (all optional, sensible owner defaults baked in):
- *  - OWNER_NOTIFY_EMAIL  (default guerlenskyagnant@outlook.com)
+ *  - OWNER_NOTIFY_EMAIL  (default guerlenskyagnant@outlook.com; accepts a
+ *                         comma-separated list to copy several inboxes)
  *  - OWNER_NOTIFY_PHONE  (default +16137626009, E.164 for Twilio)
  *  - OWNER_SMS_GATEWAY   (carrier gateway address, enables SMS without Twilio)
+ *
+ * ⚠️ Email is OFF until RESEND_API_KEY is set. Without it every call here is
+ * a no-op that only logs — see notificationsConfigured() below, which the
+ * admin Command Center surfaces so this can never fail silently again.
  */
 
-const OWNER_EMAIL =
-  process.env.OWNER_NOTIFY_EMAIL || "guerlenskyagnant@outlook.com";
+/** Owner inboxes. Comma-separated env value lets several addresses subscribe. */
+function ownerEmails(): string[] {
+  const raw =
+    process.env.OWNER_NOTIFY_EMAIL || "guerlenskyagnant@outlook.com";
+  return raw
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+}
+
 const OWNER_PHONE = process.env.OWNER_NOTIFY_PHONE || "+16137626009";
 
+/**
+ * Which notification channels are actually live. The admin dashboard renders
+ * this so a missing API key is visible instead of silently swallowing every
+ * intake alert.
+ */
+export function notificationsConfigured(): {
+  email: boolean;
+  sms: boolean;
+  recipients: string[];
+} {
+  return {
+    email: Boolean(process.env.RESEND_API_KEY),
+    sms: Boolean(
+      (process.env.TWILIO_ACCOUNT_SID &&
+        process.env.TWILIO_AUTH_TOKEN &&
+        process.env.TWILIO_FROM_NUMBER) ||
+        (process.env.OWNER_SMS_GATEWAY && process.env.RESEND_API_KEY)
+    ),
+    recipients: ownerEmails(),
+  };
+}
+
 export type OwnerNotification = {
-  kind: "lead" | "application" | "support" | "winter" | "other";
+  kind:
+    | "lead"
+    | "application"
+    | "support"
+    | "winter"
+    | "member"
+    | "giveaway"
+    | "other";
   subject: string;
   /** Full body for the email. */
   text: string;
@@ -52,7 +94,7 @@ async function sendOwnerEmail(n: OwnerNotification): Promise<ChannelResult> {
       },
       body: JSON.stringify({
         from,
-        to: [OWNER_EMAIL],
+        to: ownerEmails(),
         reply_to: n.replyTo ?? siteConfig.email,
         subject: n.subject,
         text: n.text,

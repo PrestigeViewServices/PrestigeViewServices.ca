@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, MapPin, Snowflake } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MapPin, Medal, Snowflake } from "lucide-react";
 import { services, getService } from "@/lib/content/services";
 import type { DivisionSlug } from "@/lib/content/divisions";
 import {
@@ -94,6 +94,7 @@ export default async function ServiceAreaCombinationPage(
   const snowExpanding = isSnowService(service.slug) && area.snowStatus === "expanding";
   const categoryLabel = CATEGORY_LABEL[service.division];
   const local = getLocalCopy(service.slug, area.slug);
+  const isPetawawa = area.slug === "petawawa";
   const gallery = getGalleryForService(service.slug);
 
   // Other top services in this area (cross-sell + internal linking signal).
@@ -240,6 +241,23 @@ export default async function ServiceAreaCombinationPage(
           </div>
         </div>
       </section>
+
+      {isPetawawa && (
+        <section className="container-max pt-10">
+          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-6">
+            <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed">
+              <span className="font-semibold">
+                Military &amp; veteran discount in Petawawa.
+              </span>{" "}
+              PVS is veteran operated. Serving members, veterans, military
+              families, and first responders save 10% on{" "}
+              {service.name.toLowerCase()}. Not combinable with other offers
+              above 10%. Mention your service when you request a quote.
+            </p>
+          </div>
+        </section>
+      )}
 
       {snowExpanding && (
         <section className="container-max pt-10">

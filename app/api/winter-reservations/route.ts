@@ -1,7 +1,14 @@
 import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { winterReservationSchema } from "@/lib/winter-reservation-schema";
-import { estimateCents } from "@/lib/content/winter-packages";
+import {
+  DRIVEWAY_SIZE_LABELS,
+  SHOVELING_LABELS,
+  WINTER_TOWN_LABELS,
+  estimateCents,
+  getDrivewayTier,
+  selectionSummary,
+} from "@/lib/content/winter-packages";
 import { getDb } from "@/lib/db";
 import { notifyOwner } from "@/lib/notify";
 
@@ -46,25 +53,45 @@ export async function POST(request: Request) {
     payload.shovelingTier
   );
 
-  // Owner email + text, best-effort, never blocks intake.
+  const summary = selectionSummary({
+    drivewayTier: payload.drivewayTier,
+    drivewaySize: payload.drivewaySize,
+    shovelingTier: payload.shovelingTier,
+    addOns: payload.addOns,
+  });
+  const townLabel = WINTER_TOWN_LABELS[payload.town];
+
+  // Owner email + text, best-effort, never blocks intake. The subject line is
+  // scannable from a phone lock screen: package, name, town.
   await notifyOwner({
     kind: "winter",
-    subject: `Winter reservation: ${payload.name}, ${payload.city}`,
+    subject: `❄️ WINTER QUOTE REQUEST — ${getDrivewayTier(payload.drivewayTier).name} — ${payload.name} — ${townLabel}`,
     text: [
+      `Selection: ${summary}`,
+      ``,
       `Name: ${payload.name}`,
       `Phone: ${payload.phone}`,
       `Email: ${payload.email}`,
-      `Address: ${payload.streetAddress}, ${payload.city}`,
-      `Driveway: ${payload.drivewayTier} · ${payload.drivewaySize}`,
-      `Shoveling: ${payload.shovelingTier}`,
-      `Estimate: $${(low / 100).toFixed(0)}–$${(high / 100).toFixed(0)}`,
-      payload.customerNotes ? `Notes:\n${payload.customerNotes}` : null,
+      `Address: ${payload.streetAddress}, ${payload.city}${
+        payload.postalCode ? ` ${payload.postalCode}` : ""
+      }`,
+      `Town/route: ${townLabel}`,
+      ``,
+      `Package: ${getDrivewayTier(payload.drivewayTier).name}`,
+      `Driveway size: ${DRIVEWAY_SIZE_LABELS[payload.drivewaySize]}`,
+      `Walkway pack: ${SHOVELING_LABELS[payload.shovelingTier]}`,
+      `Salting: ${payload.addOns.includes("SALTING") ? "yes" : "no"}`,
+      `City-ridge priority: ${payload.addOns.includes("RIDGE_PRIORITY") ? "yes" : "no"}`,
+      `Military/veteran 10%: ${payload.addOns.includes("VETERAN") ? "YES" : "no"}`,
+      ``,
+      `Internal estimate: $${(low / 100).toFixed(0)}–$${(high / 100).toFixed(0)} (before discounts)`,
+      payload.customerNotes ? `\nNotes:\n${payload.customerNotes}` : null,
       ``,
       `Manage: /admin/winter-reservations`,
     ]
       .filter(Boolean)
       .join("\n"),
-    sms: `PVS winter reservation: ${payload.name} · ${payload.city} · ${payload.phone}`,
+    sms: `PVS winter quote: ${summary} · ${payload.name} · ${townLabel} · ${payload.phone}`,
     replyTo: payload.email,
   });
 
@@ -94,6 +121,9 @@ export async function POST(request: Request) {
         drivewayTier: payload.drivewayTier,
         drivewaySize: payload.drivewaySize,
         shovelingTier: payload.shovelingTier,
+        saltingAddOn: payload.addOns.includes("SALTING"),
+        ridgePriority: payload.addOns.includes("RIDGE_PRIORITY"),
+        veteranDiscount: payload.addOns.includes("VETERAN"),
         estimateLowCents: low,
         estimateHighCents: high,
         customerNotes: payload.customerNotes || null,

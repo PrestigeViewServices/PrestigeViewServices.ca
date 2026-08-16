@@ -11,6 +11,11 @@ const SENTINEL_ID = "sticky-cta-sentinel";
  * Anchors on a sentinel element with id="sticky-cta-sentinel" placed at the
  * end of the hero. If no sentinel exists on the page (e.g. routes without a
  * hero), the CTA shows immediately.
+ *
+ * A page that renders its own bottom bar (e.g. the winter package selector)
+ * sets `data-page-sticky-bar` on <body>, which hides this one via the
+ * `.site-sticky-cta` rule in globals.css. Otherwise the two stack on top of
+ * each other at the same z-index.
  */
 export function StickyCta() {
   const [visible, setVisible] = useState(false);
@@ -36,7 +41,7 @@ export function StickyCta() {
   return (
     <div
       aria-hidden={!visible}
-      className={`fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-out motion-reduce:transition-none ${
+      className={`site-sticky-cta fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ease-out motion-reduce:transition-none ${
         visible ? "translate-y-0" : "translate-y-full"
       }`}
     >

@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { Snowflake, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  EARLYBIRD_DEADLINE,
+  EARLYBIRD_DEADLINE_LABEL,
+} from "@/lib/lead-schema";
 
 /**
  * Above-the-fold early-bird promo band. Sits at the very top of the home
  * page, above the hero. Countdown renders client-side only (after mount)
  * so SSR/hydration always agree; until then the static deadline shows.
  */
-const DEADLINE = new Date("2026-08-15T00:00:00-04:00"); // through Aug 14 EDT
+const DEADLINE = new Date(EARLYBIRD_DEADLINE);
 
 function useCountdown(target: Date) {
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -43,10 +47,10 @@ export function PromoBanner() {
         <p className="text-xs font-medium uppercase tracking-wider text-sky-200/90">
           {days !== null && hours !== null ? (
             <>
-              Ends in {days}d {hours}h. Deadline: August 14
+              Ends in {days}d {hours}h. Deadline: {EARLYBIRD_DEADLINE_LABEL}
             </>
           ) : (
-            <>Deadline: August 14</>
+            <>Deadline: {EARLYBIRD_DEADLINE_LABEL}</>
           )}
         </p>
         <Link

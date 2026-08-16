@@ -147,6 +147,12 @@
 .animate-ambience-fall-tumble { animation: ambience-fall-tumble linear infinite; }
 .animate-ambience-rise        { animation: ambience-rise        linear infinite; }
 
+/* A page with its own bottom bar (winter package selector) suppresses the
+   global StickyCta, otherwise both sit at bottom-0 / z-40 and overlap. */
+body[data-page-sticky-bar] .site-sticky-cta {
+  display: none;
+}
+
 /* Spinner shown while a Spline 3D scene loads — used by <SplineScene />. */
 .loader {
   width: 32px;

@@ -3,6 +3,7 @@ import {
   ArrowRight,
   CalendarClock,
   Gift,
+  Medal,
   MessagesSquare,
   Sparkles,
   Star,
@@ -55,6 +56,7 @@ export default async function AccountDashboardPage() {
       }),
     ]);
 
+  const isVeteran = member.profile?.veteranStatus !== "NONE";
   const singleCategory = categoriesUsed.length === 1;
   const usedCategory = singleCategory ? categoriesUsed[0].category : null;
   const tiers = clubTiers(settings);
@@ -101,6 +103,36 @@ export default async function AccountDashboardPage() {
         <div className="mt-6">
           <TierProgress spendCents={spendCents} tiers={tiers} />
         </div>
+      </section>
+
+      {/* ---- Veteran discount band ---- */}
+      <section className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-5">
+        <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+        <p className="text-sm leading-relaxed">
+          {isVeteran ? (
+            <>
+              <span className="font-semibold">
+                Your military &amp; veteran discount is on file.
+              </span>{" "}
+              10% off every service, always, it stacks with your points
+              credits. That&apos;s the PVS difference.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">
+                Military, veteran, or first responder?
+              </span>{" "}
+              You get 10% off every service, always.{" "}
+              <Link
+                href="/account/profile"
+                className="font-medium text-primary hover:underline"
+              >
+                Set it in your profile
+              </Link>{" "}
+              and we&apos;ll verify it on your first service.
+            </>
+          )}
+        </p>
       </section>
 
       {/* ---- Next service ---- */}

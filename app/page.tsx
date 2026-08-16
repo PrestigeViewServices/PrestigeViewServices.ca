@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
 import { PromoBanner } from "@/components/home/promo-banner";
+import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
 import { OffersBand } from "@/components/home/offers-band";
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     title:
       "The Ottawa Valley's Property Care Team | Prestige View Services",
     description:
-      "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Free quotes in one business day.",
+      "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
     url: "/",
     type: "website",
   },
@@ -39,6 +40,9 @@ export default function HomePage() {
       <TrustMarquee />
       <Reveal>
         <ServicesOverview />
+      </Reveal>
+      <Reveal delay={60}>
+        <VeteranCallout />
       </Reveal>
       <Reveal>
         <OffersBand />

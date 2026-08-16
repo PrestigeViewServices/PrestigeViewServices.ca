@@ -67,6 +67,25 @@ export async function POST(req: Request) {
     // Best-effort.
   }
 
+  // Owner alert, best-effort, never blocks the claim.
+  const { notifyOwner } = await import("@/lib/notify");
+  await notifyOwner({
+    kind: "member",
+    subject: `Prestige Club account claimed: ${member.firstName} ${member.lastName ?? ""}`.trim(),
+    text: [
+      `Name: ${member.firstName} ${member.lastName ?? ""}`.trim(),
+      `Email: ${member.email}`,
+      member.phone ? `Phone: ${member.phone}` : null,
+      `An invited member set their password and activated their account.`,
+      ``,
+      `Manage: /admin/club`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    sms: `PVS account claimed: ${member.firstName} · ${member.email}`,
+    replyTo: member.email,
+  });
+
   const session = await createMemberToken(member.id);
   const store = await cookies();
   store.set(MEMBER_COOKIE, session, {

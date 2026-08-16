@@ -290,7 +290,7 @@ export default async function RewardsPage() {
             Tap an amount to request it, we approve within one business day
             and apply the credit to your next invoice. Credits apply to future
             services, never cash, and combine with other promos up to 20% off
-            an invoice. Questions?{" "}
+            an invoice, your military discount always stacks on top. Questions?{" "}
             {siteConfig.phoneDisplay}.
           </p>
 

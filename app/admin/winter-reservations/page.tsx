@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { Mail, Phone, MapPin, Snowflake, Shovel } from "lucide-react";
+import { Mail, Phone, MapPin, Medal, Snowflake, Shovel } from "lucide-react";
 import type { ReservationStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
@@ -195,9 +195,31 @@ export default async function WinterReservationsPage(
                   value={SHOVELING_LABELS[r.shovelingTier]}
                 />
                 <Row
+                  label="Add-ons"
+                  value={
+                    [
+                      r.saltingAddOn ? "Salting and de-icing" : null,
+                      r.ridgePriority ? "City-ridge priority" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "None"
+                  }
+                />
+                <Row
                   label="Received"
                   value={r.createdAt.toLocaleString("en-CA")}
                 />
+                {r.veteranDiscount && (
+                  <Row
+                    label="Discount"
+                    value={
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-semibold text-sky-200">
+                        <Medal className="h-3.5 w-3.5" />
+                        Military / veteran 10%
+                      </span>
+                    }
+                  />
+                )}
               </dl>
 
               {r.customerNotes && (

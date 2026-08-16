@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, MapPin, Check, Snowflake } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Check, Medal, Snowflake } from "lucide-react";
 import {
   serviceAreas,
   getServiceArea,
@@ -79,6 +79,8 @@ export default async function ServiceAreaPage(
   const coreServices = coreSlugs
     .map((slug) => getService(slug))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+  const isPetawawa = area.slug === "petawawa";
 
   // Representative photo: the gallery of this town's top service.
   const heroPhoto = getGalleryForService(area.topServices[0])?.photos[0];
@@ -200,6 +202,23 @@ export default async function ServiceAreaPage(
           )}
         </div>
       </section>
+
+      {isPetawawa && (
+        <section className="container-max pt-10">
+          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-6">
+            <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed">
+              <span className="font-semibold">
+                Garrison Petawawa: your discount lives here.
+              </span>{" "}
+              PVS is veteran operated. Serving members, veterans, military
+              families, and first responders save 10% on every service, from
+              windows to snow (not combinable with other offers above 10%).
+              Mention your service when you request a quote.
+            </p>
+          </div>
+        </section>
+      )}
 
       {area.snowStatus === "expanding" && (
         <section className="container-max pt-10">

@@ -48,10 +48,23 @@ export function divisionForService(service: string): LeadDivision {
   );
 }
 
-/** Snow services show the early-bird promo checkbox while it runs. */
+/**
+ * Snow services show the early-bird promo checkbox while it runs.
+ *
+ * These three are the ONLY place the early-bird promo is defined. The home
+ * banner, the offers band, the winter packages page, and the SEO copy all
+ * read from here, so moving the date is a one-line change. Past the deadline
+ * every surface swaps itself to "routes are filling" messaging automatically.
+ */
 export const SNOW_SERVICE_VALUES = ["snow-removal"];
-export const EARLYBIRD_CODE = "EARLYBIRD15";
-export const EARLYBIRD_DEADLINE = "2026-08-15T00:00:00-04:00"; // through Aug 14
+export const EARLYBIRD_CODE = "EARLYBIRD26/27";
+export const EARLYBIRD_DEADLINE = "2026-09-16T00:00:00-04:00"; // through Sept 15
+export const EARLYBIRD_DEADLINE_LABEL = "September 15";
+
+/** True while the early-bird window is still open. */
+export function earlyBirdActive(now: number = Date.now()): boolean {
+  return now < new Date(EARLYBIRD_DEADLINE).getTime();
+}
 
 export const leadSchema = z.object({
   name: z

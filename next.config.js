@@ -10,14 +10,23 @@
  *   protection here is the strict external-host allowlist.
  * - frame-ancestors 'none' = nobody can iframe this site (clickjacking).
  */
+const isDev = process.env.NODE_ENV !== "production";
+
 const csp = [
   "default-src 'self'",
   [
     "script-src 'self' 'unsafe-inline'",
+    // Next.js dev builds wrap every module in eval() for HMR and source maps.
+    // Without this, nothing hydrates on localhost and the whole site is
+    // click-dead while developing. Never emitted in production builds.
+    isDev ? "'unsafe-eval'" : null,
     "https://www.googletagmanager.com", // Google Analytics
     "https://connect.facebook.net", // Meta pixel
     "https://cdn.trustindex.io", // Google reviews widget
-  ].join(" "),
+    "https://va.vercel-scripts.com", // @vercel/analytics
+  ]
+    .filter(Boolean)
+    .join(" "),
   "style-src 'self' 'unsafe-inline' https://cdn.trustindex.io",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://cdn.trustindex.io",
@@ -28,6 +37,7 @@ const csp = [
     "https://www.googletagmanager.com https://stats.g.doubleclick.net",
     "https://www.facebook.com",
     "https://*.trustindex.io",
+    "https://va.vercel-scripts.com https://vitals.vercel-insights.com",
   ].join(" "),
   [
     "frame-src",

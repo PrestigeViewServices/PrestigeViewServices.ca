@@ -115,6 +115,27 @@ export async function POST(req: Request) {
     // Bonus is best-effort — never block account creation.
   }
 
+  // Owner alert, best-effort, never blocks sign-up.
+  const { notifyOwner } = await import("@/lib/notify");
+  await notifyOwner({
+    kind: "member",
+    subject: `New Prestige Club member: ${firstName} ${lastName}`.trim(),
+    text: [
+      `Name: ${firstName} ${lastName}`.trim(),
+      `Email: ${email}`,
+      phone ? `Phone: ${phone}` : null,
+      existing
+        ? `Claimed a pre-provisioned account (Jobber history attaches on next sync).`
+        : `Brand new sign-up.`,
+      ``,
+      `Manage: /admin/club`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    sms: `PVS new club member: ${firstName} ${lastName} · ${email}`.trim(),
+    replyTo: email,
+  });
+
   const token = await createMemberToken(member.id);
   const store = await cookies();
   store.set(MEMBER_COOKIE, token, {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { ArrowRight, Phone, ShieldCheck, MapPin, Star } from "lucide-react";
+import { ArrowRight, Phone, ShieldCheck, MapPin, Star, Medal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -137,6 +137,11 @@ export function Hero() {
             <span className="inline-flex items-center gap-1.5">
               <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
               Top-rated on Google
+            </span>
+            <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-sky-100/40" />
+            <span className="inline-flex items-center gap-1.5">
+              <Medal className="h-4 w-4 text-sky-300" />
+              Military &amp; veteran discount
             </span>
             <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-sky-100/40" />
             <span className="inline-flex items-center gap-1.5">

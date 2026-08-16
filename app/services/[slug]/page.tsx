@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, MapPin, Snowflake } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MapPin, Medal, Snowflake } from "lucide-react";
 import { services, getService } from "@/lib/content/services";
 import type { DivisionSlug } from "@/lib/content/divisions";
 import { getServiceCopy } from "@/lib/content/service-copy";
@@ -408,6 +408,23 @@ export default async function ServiceDetailPage(
           </ol>
         </section>
       )}
+
+      <section className="container-max pb-14 sm:pb-20">
+        <div className="flex flex-col gap-4 rounded-2xl border border-sky-400/25 bg-sky-500/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+          <div className="flex items-start gap-3">
+            <Medal className="mt-0.5 h-5 w-5 shrink-0 text-sky-400" aria-hidden />
+            <p className="text-sm sm:text-base leading-relaxed">
+              <span className="font-semibold">Military &amp; veteran discount.</span>{" "}
+              Serving members, veterans, and military families save 10% on{" "}
+              {service.name.toLowerCase()}. Not combinable with other offers
+              above 10%. Just mention your service when you request a quote.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href={`/quote?service=${service.slug}`}>Claim it</Link>
+          </Button>
+        </div>
+      </section>
 
       {showVideoReel && (
         <section className="container-max pb-14 sm:pb-20 relative">

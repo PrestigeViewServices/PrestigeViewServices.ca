@@ -22,6 +22,7 @@ export const DRIVEWAY_SIZES = [
   "ONE_CAR",
   "TWO_CAR",
   "THREE_PLUS_CAR",
+  "LONG_RURAL",
 ] as const;
 
 export type DrivewaySize = (typeof DRIVEWAY_SIZES)[number];
@@ -40,9 +41,18 @@ export const SHOVELING_TIERS = [
 export type ShovelingTier = (typeof SHOVELING_TIERS)[number];
 
 export const DRIVEWAY_SIZE_LABELS: Record<DrivewaySize, string> = {
-  ONE_CAR: "1-car driveway",
-  TWO_CAR: "2-car driveway",
-  THREE_PLUS_CAR: "3+ car driveway",
+  ONE_CAR: "Single",
+  TWO_CAR: "Double",
+  THREE_PLUS_CAR: "Triple or larger",
+  LONG_RURAL: "Long rural",
+};
+
+/** One-line hint shown under each size option in the quote form. */
+export const DRIVEWAY_SIZE_HINTS: Record<DrivewaySize, string> = {
+  ONE_CAR: "One vehicle wide",
+  TWO_CAR: "Two vehicles side by side",
+  THREE_PLUS_CAR: "Three or more wide, or a large parking pad",
+  LONG_RURAL: "Long lane-way, roughly 100 ft or more",
 };
 
 export const SHOVELING_LABELS: Record<ShovelingTier, string> = {
@@ -53,15 +63,38 @@ export const SHOVELING_LABELS: Record<ShovelingTier, string> = {
   PASS_50: "50-pass pack",
 };
 
+/**
+ * The seven attributes compared side by side in the tier table. Keeping them
+ * on the tier def (rather than in the table component) means the cards, the
+ * table, and the shareable image card can never drift apart.
+ */
+export type TierComparison = {
+  triggerDepth: string;
+  responseTime: string;
+  passesPerStorm: string;
+  ridgeRemoval: boolean | string;
+  liveTracking: boolean;
+  priorityRouting: boolean;
+  spotCap: string;
+};
+
 export type DrivewayTierDef = {
   slug: DrivewayTier;
   name: string;
   blurb: string;
+  /** Bullets shown on the selectable card. Kept short and scannable. */
   features: string[];
   excluded: string[];
+  /** Badge printed above the card, e.g. Platinum's capped-spots callout. */
+  badge?: string;
+  /** Tier accent, used for the card border glow, dot, and the share image. */
+  accent: string;
+  compare: TierComparison;
   /**
    * Seasonal "starts at" pricing per driveway size, in cents.
-   * PLACEHOLDER VALUES, update before launch.
+   * PLACEHOLDER VALUES, update before launch. Never rendered publicly, the
+   * site shows "Custom quote" everywhere. Used only for the internal estimate
+   * captured alongside each reservation.
    */
   priceCents: Record<DrivewaySize, number>;
 };
@@ -72,80 +105,110 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
     name: "Bronze",
     blurb: "Entry-level seasonal plowing for budget-minded homeowners.",
     features: [
-      "1 pass after the event",
-      "Basic driveway markers",
-      "Completed within 24 hours",
+      "1 clearing pass after each storm",
+      "Driveway markers included",
+      "Done within 24 hours",
     ],
-    excluded: ["No courtesy passes", "Flexible routing", "No night-time pass"],
+    excluded: ["No night pass", "Flexible routing, not priority"],
+    accent: "#CD7F32",
+    compare: {
+      triggerDepth: "After the storm ends",
+      responseTime: "Within 24 hours",
+      passesPerStorm: "1 pass",
+      ridgeRemoval: "Add-on",
+      liveTracking: false,
+      priorityRouting: false,
+      spotCap: "Open",
+    },
     priceCents: {
       ONE_CAR: 45000,
       TWO_CAR: 55000,
       THREE_PLUS_CAR: 65000,
+      LONG_RURAL: 85000,
     },
   },
   {
     slug: "SILVER",
     name: "Silver",
-    blurb: "Auto-dispatch + faster turnaround for everyday driveways.",
+    blurb: "Auto-dispatch and faster turnaround for everyday driveways.",
     features: [
-      "Automatic dispatch at 5cm",
-      "1 driveway pass per event",
-      "Premium driveway markers",
-      "Completed within 12 hours",
-      "Live tracking + alerts",
+      "Auto-dispatch at 5 cm, no calling needed",
+      "Live tracking and storm alerts",
+      "Done within 12 hours",
     ],
-    excluded: [
-      "City plow ridge removal",
-      "No night-time pass",
-      "No courtesy passes",
-    ],
+    excluded: ["No night pass", "City ridge removal is an add-on"],
+    accent: "#C0C0C0",
+    compare: {
+      triggerDepth: "5 cm",
+      responseTime: "Within 12 hours",
+      passesPerStorm: "1 pass",
+      ridgeRemoval: "Add-on",
+      liveTracking: true,
+      priorityRouting: false,
+      spotCap: "Open",
+    },
     priceCents: {
       ONE_CAR: 65000,
       TWO_CAR: 80000,
       THREE_PLUS_CAR: 95000,
+      LONG_RURAL: 120000,
     },
   },
   {
     slug: "GOLD",
     name: "Gold",
-    blurb: "Two-pass coverage so you're clear for the morning and the evening.",
+    blurb: "Two-pass coverage so you are clear morning and evening.",
     features: [
-      "Automatic dispatch at 5cm",
-      "Night & day passes (2 passes)",
-      "Premium driveway markers",
-      "Completed within 10 hours",
-      "Live tracking + alerts",
-      "City plow ridge removal",
-      "Courtesy passes",
-      "Priority routing",
+      "Night and day passes, cleared both ways",
+      "City plow ridge removal included",
+      "Priority routing, done within 10 hours",
     ],
     excluded: [],
+    accent: "#FFD700",
+    compare: {
+      triggerDepth: "5 cm",
+      responseTime: "Within 10 hours",
+      passesPerStorm: "2 passes, night and day",
+      ridgeRemoval: true,
+      liveTracking: true,
+      priorityRouting: true,
+      spotCap: "Open",
+    },
     priceCents: {
       ONE_CAR: 90000,
       TWO_CAR: 110000,
       THREE_PLUS_CAR: 130000,
+      LONG_RURAL: 165000,
     },
   },
   {
     slug: "PLATINUM",
     name: "Platinum",
     blurb:
-      "Our most popular pass: proactive storm management for busy households. Capped each season so the service never slips, first come, first served.",
+      "Proactive storm management for busy households. Capped each season so the service never slips, first come first served.",
     features: [
-      "Automatic dispatch at 3cm",
-      "Night & day passes (2 passes)",
-      "Premium driveway markers",
-      "Completed within 8 hours",
-      "Live tracking + alerts",
-      "City plow ridge removal",
-      "Preventative snow management",
-      "Priority routing",
+      "Earliest trigger, we move at 3 cm",
+      "Preventative storm management",
+      "White-glove service, done within 8 hours",
+      "Limited spots so service never slips",
     ],
     excluded: [],
+    badge: "Most Popular · Capped Spots",
+    accent: "#7DD3FC",
+    compare: {
+      triggerDepth: "3 cm",
+      responseTime: "Within 8 hours",
+      passesPerStorm: "2 passes plus preventative",
+      ridgeRemoval: true,
+      liveTracking: true,
+      priorityRouting: true,
+      spotCap: "Capped per route",
+    },
     priceCents: {
       ONE_CAR: 120000,
       TWO_CAR: 145000,
       THREE_PLUS_CAR: 170000,
+      LONG_RURAL: 215000,
     },
   },
 ];
@@ -227,6 +290,76 @@ export const SHOVELING_TIER_DEFS: ShovelingTierDef[] = [
   },
 ];
 
+// =============================================================================
+// ADD-ONS
+// =============================================================================
+// Multi-select extras that ride along with a driveway pass. Walkway shovelling
+// is handled separately because it carries a pack size (see SHOVELING_TIERS).
+
+export const ADD_ON_KEYS = ["SALTING", "RIDGE_PRIORITY", "VETERAN"] as const;
+export type AddOnKey = (typeof ADD_ON_KEYS)[number];
+
+export type AddOnDef = {
+  key: AddOnKey;
+  label: string;
+  /** Short clarifier shown under the chip label. */
+  hint: string;
+  /**
+   * Tiers where the add-on is redundant because the pass already covers it.
+   * The chip stays visible but is marked "already included".
+   */
+  includedIn?: DrivewayTier[];
+};
+
+export const ADD_ON_DEFS: AddOnDef[] = [
+  {
+    key: "SALTING",
+    label: "Salting and de-icing",
+    hint: "Driveway, walkway, and steps treated after clearing",
+  },
+  {
+    key: "RIDGE_PRIORITY",
+    label: "City-ridge priority",
+    hint: "The windrow the city plow leaves across your apron, cleared first",
+    includedIn: ["GOLD", "PLATINUM"],
+  },
+  {
+    key: "VETERAN",
+    label: "I am military or a veteran",
+    hint: "Applies the standing 10% discount to your quote",
+  },
+];
+
+export function getAddOn(key: AddOnKey): AddOnDef {
+  const def = ADD_ON_DEFS.find((a) => a.key === key);
+  if (!def) throw new Error(`Unknown add-on: ${key}`);
+  return def;
+}
+
+/** True when the chosen pass already covers this add-on. */
+export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
+  return getAddOn(key).includedIn?.includes(tier) ?? false;
+}
+
+// =============================================================================
+// COMPARISON TABLE
+// =============================================================================
+// Row order is the reading order in the table. `render` pulls the value off a
+// tier's `compare` block so the table and the cards share one source.
+
+export const COMPARISON_ROWS: {
+  label: string;
+  render: (c: TierComparison) => boolean | string;
+}[] = [
+  { label: "Trigger depth", render: (c) => c.triggerDepth },
+  { label: "Response time", render: (c) => c.responseTime },
+  { label: "Passes per storm", render: (c) => c.passesPerStorm },
+  { label: "City ridge removal", render: (c) => c.ridgeRemoval },
+  { label: "Live tracking", render: (c) => c.liveTracking },
+  { label: "Priority routing", render: (c) => c.priorityRouting },
+  { label: "Spot caps", render: (c) => c.spotCap },
+];
+
 /** Plus-or-minus margin used when showing a price range to customers. */
 export const ESTIMATE_MARGIN = 0.1;
 
@@ -282,4 +415,83 @@ export function formatRange({
   high: number;
 }): string {
   return `${formatCents(low)} – ${formatCents(high)}`;
+}
+
+// =============================================================================
+// SERVICE TOWNS
+// =============================================================================
+// Snow routes run in Petawawa (home routes) and Pembroke (expanding this
+// season). "Other" is accepted so we capture demand outside the routes, the
+// form then asks which town so the lead is still actionable.
+
+export const WINTER_TOWNS = ["PETAWAWA", "PEMBROKE", "OTHER"] as const;
+export type WinterTown = (typeof WINTER_TOWNS)[number];
+
+export const WINTER_TOWN_LABELS: Record<WinterTown, string> = {
+  PETAWAWA: "Petawawa",
+  PEMBROKE: "Pembroke",
+  OTHER: "Other Ottawa Valley",
+};
+
+// =============================================================================
+// SELECTION SUMMARY
+// =============================================================================
+// One shared shape for "what the customer picked". The sticky bar, the
+// shareable image card, the pre-filled SMS, and the owner's email all render
+// from these helpers so the wording is identical everywhere.
+
+export type WinterSelection = {
+  drivewayTier: DrivewayTier;
+  drivewaySize?: DrivewaySize | null;
+  shovelingTier: ShovelingTier;
+  addOns: AddOnKey[];
+};
+
+/** Short add-on wording used in the one-line running summary. */
+const SHORT_ADD_ON: Record<AddOnKey, string> = {
+  SALTING: "salting",
+  RIDGE_PRIORITY: "city-ridge priority",
+  VETERAN: "military rate",
+};
+
+/**
+ * One-line running summary, e.g.
+ * "Platinum + 25 walkway visits + salting".
+ */
+export function selectionSummary(sel: WinterSelection): string {
+  const parts: string[] = [getDrivewayTier(sel.drivewayTier).name];
+  const shovel = getShovelingTier(sel.shovelingTier);
+  if (shovel) parts.push(`${shovel.passes} walkway visits`);
+  for (const key of sel.addOns) parts.push(SHORT_ADD_ON[key]);
+  return parts.join(" + ");
+}
+
+/**
+ * Label/value rows for the shareable card, the confirmation screen, and the
+ * owner notification. Skips anything the customer did not choose.
+ */
+export function selectionLines(
+  sel: WinterSelection
+): { label: string; value: string }[] {
+  const rows: { label: string; value: string }[] = [
+    { label: "Package", value: `${getDrivewayTier(sel.drivewayTier).name} pass` },
+  ];
+  if (sel.drivewaySize) {
+    rows.push({
+      label: "Driveway",
+      value: DRIVEWAY_SIZE_LABELS[sel.drivewaySize],
+    });
+  }
+  const shovel = getShovelingTier(sel.shovelingTier);
+  if (shovel) {
+    rows.push({ label: "Walkways", value: `${shovel.passes} shovelling visits` });
+  }
+  for (const key of sel.addOns) {
+    if (key === "VETERAN") continue; // shown as its own line below
+    rows.push({ label: "Add-on", value: getAddOn(key).label });
+  }
+  if (sel.addOns.includes("VETERAN")) {
+    rows.push({ label: "Discount", value: "Military and veteran 10%" });
+  }
+  return rows;
 }
