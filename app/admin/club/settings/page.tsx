@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import {
   SETTING_DEFS,
+  type SettingDef,
   getClubSettings,
   yyyymmddToInput,
   type SettingKey,
@@ -15,6 +16,15 @@ import { Button } from "@/components/ui/button";
 export const dynamic = "force-dynamic";
 
 const ADMIN_ROLES = ["ultimate_admin", "super_admin", "admin"] as const;
+
+/** Suffix rendered beside each input, so the number can't be misread. */
+const UNIT_SUFFIX: Partial<Record<SettingDef["unit"], string>> = {
+  points: "pts",
+  "cents-per-point": "¢/pt",
+  percent: "%",
+  days: "days",
+  count: "per year",
+};
 
 /**
  * Program Settings — the owner's control panel for every Prestige Club
@@ -34,7 +44,13 @@ export default async function ClubSettingsPage() {
   });
   const outstandingPoints = Math.max(0, outstanding._sum.amount ?? 0);
 
-  const groups = ["Earning", "Redemption", "Tiers"] as const;
+  const groups = [
+    "Earning",
+    "Referrals",
+    "Account Discount",
+    "Redemption",
+    "Tiers",
+  ] as const;
 
   return (
     <div className="space-y-8">
@@ -73,6 +89,22 @@ export default async function ClubSettingsPage() {
                 liability — changing the rate revalues all of it.
               </p>
             )}
+            {group === "Referrals" && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                What each side of a referral gets, and the guards around it.
+                Changes apply to NEW referrals — anything already in flight keeps
+                the reward it was promised.
+              </p>
+            )}
+            {group === "Account Discount" && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                The &ldquo;create a free account and save&rdquo; offer. It is
+                advertised across the site and flagged on every lead from an
+                account holder, so the office knows to apply it before quoting.
+                This is a real discount off your price — it is not funded by
+                points.
+              </p>
+            )}
             {group === "Tiers" && (
               <p className="mt-1 text-xs text-muted-foreground">
                 Rolling 12-month paid spend thresholds, entered in dollars.
@@ -83,6 +115,7 @@ export default async function ClubSettingsPage() {
               {SETTING_DEFS.filter((d) => d.group === group).map((d) => {
                 const stored = settings[d.key];
                 const isDate = d.unit === "date";
+                const isToggle = d.unit === "toggle";
                 const displayValue = isDate
                   ? yyyymmddToInput(stored)
                   : d.unit === "dollars"
@@ -105,6 +138,17 @@ export default async function ClubSettingsPage() {
                       {d.unit === "dollars" && (
                         <span className="text-sm text-muted-foreground">$</span>
                       )}
+                      {isToggle ? (
+                        <select
+                          id={`set-${d.key}`}
+                          name={d.key}
+                          defaultValue={String(stored)}
+                          className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <option value="1">On</option>
+                          <option value="0">Off</option>
+                        </select>
+                      ) : (
                       <input
                         id={`set-${d.key}`}
                         name={d.key}
@@ -128,12 +172,9 @@ export default async function ClubSettingsPage() {
                         defaultValue={displayValue}
                         className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       />
+                      )}
                       <span className="shrink-0 text-xs text-muted-foreground">
-                        {d.unit === "points"
-                          ? "pts"
-                          : d.unit === "cents-per-point"
-                            ? "¢/pt"
-                            : ""}
+                        {UNIT_SUFFIX[d.unit] ?? ""}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -144,7 +185,11 @@ export default async function ClubSettingsPage() {
                           ? formatCents(d.defaultValue)
                           : d.unit === "date"
                             ? yyyymmddToInput(d.defaultValue)
-                            : d.defaultValue}
+                            : d.unit === "toggle"
+                              ? d.defaultValue === 1
+                                ? "On"
+                                : "Off"
+                              : d.defaultValue}
                       </span>
                     </p>
                   </div>
@@ -201,7 +246,9 @@ async function saveSettings(formData: FormData) {
       if (!Number.isFinite(raw)) continue;
       stored = def.unit === "dollars" ? Math.round(raw * 100) : Math.trunc(raw);
     }
-    if (!Number.isFinite(stored) || stored <= 0) continue;
+    // A blank field is a skip; 0 is a real value whenever the setting allows
+    // it (toggles turning off, bonuses being zeroed out).
+    if (!Number.isFinite(stored) || stored < def.min) continue;
     const clamped = Math.min(def.max, Math.max(def.min, stored));
     await db.clubSetting.upsert({
       where: { key: def.key satisfies SettingKey },
@@ -214,6 +261,9 @@ async function saveSettings(formData: FormData) {
   revalidatePath("/account");
   revalidatePath("/account/rewards");
   revalidatePath("/account/referrals");
+  revalidatePath("/refer");
+  revalidatePath("/request-service");
+  revalidatePath("/quote");
 }
 
 async function resetSettings() {
@@ -227,4 +277,7 @@ async function resetSettings() {
   revalidatePath("/account");
   revalidatePath("/account/rewards");
   revalidatePath("/account/referrals");
+  revalidatePath("/refer");
+  revalidatePath("/request-service");
+  revalidatePath("/quote");
 }

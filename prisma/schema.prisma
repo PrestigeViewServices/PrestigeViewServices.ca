@@ -879,10 +879,11 @@ enum RedemptionStatus {
 }
 
 enum ReferralStatus {
-  INVITED
-  BOOKED
-  COMPLETED
-  AWARDED
+  INVITED // Referrer shared the link or sent an invite. Nothing booked yet.
+  BOOKED // The friend submitted a request through the link or code.
+  COMPLETED // The friend's first service is done AND paid. Reward is due.
+  AWARDED // Reward posted to the referrer's ledger.
+  REJECTED // Not eligible: existing customer, self-referral, duplicate, fraud.
 }
 
 enum ClubTicketType {
@@ -947,6 +948,8 @@ model Member {
   points          PointsTransaction[]
   redemptions     Redemption[]
   referralsMade   Referral[]          @relation("Referrer")
+  /// The referral that brought this member in, if any (at most one).
+  referredBy      Referral?           @relation("Referred")
   tickets         ClubTicket[]
   giveawayEntries GiveawayEntry[]
   serviceRecords  ServiceRecord[]
@@ -1040,18 +1043,54 @@ model Redemption {
   @@index([memberId])
 }
 
+/// One referred friend. Created the moment a referral is attributed — a link
+/// click that turns into a request, a typed code, a sign-up, or an emailed
+/// invite — then walked forward through the funnel by lib/referrals.ts.
+///
+/// Rewards are SNAPSHOT on the row (rewardPoints / friendCreditCents) when the
+/// referral is created, so changing program settings later never silently
+/// re-prices a promise already made to a customer.
 model Referral {
-  id            String         @id @default(cuid())
-  code          String         @unique
-  referrerId    String
-  referrer      Member         @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredEmail String?
-  status        ReferralStatus @default(INVITED)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id         String @id @default(cuid())
+  /// Per-referral tracking code, derived from the referrer's share code.
+  code       String @unique
+  referrerId String
+  referrer   Member @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  /// The friend. Email is the identity we match on everywhere.
+  referredEmail    String?
+  referredName     String?
+  referredPhone    String?
+  /// Set once the friend creates their own portal account.
+  referredMemberId String? @unique
+  referredMember   Member? @relation("Referred", fields: [referredMemberId], references: [id], onDelete: SetNull)
+  /// The pipeline Lead this referral produced, for the admin trail.
+  leadId           String?
+
+  /// How it came in: "link" | "code" | "signup" | "invite" | "admin".
+  source String         @default("link")
+  status ReferralStatus @default(INVITED)
+
+  /// Reward snapshot taken when the referral is created: the referrer's
+  /// points and the friend's first-service credit in CAD cents.
+  rewardPoints      Int?
+  friendCreditCents Int?
+  /// True once the friend's welcome credit has been applied to an invoice.
+  friendCreditUsed  Boolean @default(false)
+
+  /// Admin note — rejection reason, manual adjustment, context.
+  note String?
+
+  bookedAt    DateTime?
+  completedAt DateTime?
+  awardedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([referrerId])
   @@index([status])
+  @@index([referredEmail])
+  @@index([createdAt])
 }
 
 /// Customer request / callback ticket. Distinct from the public SupportRequest

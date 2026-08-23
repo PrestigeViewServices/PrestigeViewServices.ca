@@ -12,7 +12,7 @@ import QRCode from "qrcode";
  * High error-correction (M-level) so the QR still scans if part of it
  * is scuffed or printed at small sizes.
  */
-export async function generateReviewQrPng(url: string): Promise<string> {
+export async function generateQrPng(url: string): Promise<string> {
   return QRCode.toDataURL(url, {
     errorCorrectionLevel: "M",
     margin: 2,
@@ -24,4 +24,12 @@ export async function generateReviewQrPng(url: string): Promise<string> {
       light: "#FFFFFF",
     },
   });
+}
+
+/**
+ * Back-compat alias. The QR generator was originally review-only; referral
+ * links print from the same code path.
+ */
+export async function generateReviewQrPng(url: string): Promise<string> {
+  return generateQrPng(url);
 }

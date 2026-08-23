@@ -12,6 +12,11 @@ import { requireRole } from "@/lib/auth";
 import { sendClubEmail } from "@/lib/send-club-email";
 import { formatCents, formatPoints } from "@/lib/loyalty";
 import { getClubSettings } from "@/lib/club-settings";
+import {
+  REFERRAL_STATUS_META,
+  awardReferral as awardReferralReward,
+  rejectReferral,
+} from "@/lib/referrals";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
@@ -45,9 +50,9 @@ export default async function ApprovalsPage() {
       orderBy: { createdAt: "asc" },
     }),
     db.referral.findMany({
-      where: { status: { in: ["BOOKED", "COMPLETED"] } },
+      where: { status: { in: ["INVITED", "BOOKED", "COMPLETED"] } },
       include: { referrer: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ status: "desc" }, { createdAt: "asc" }],
     }),
   ]);
 
@@ -247,11 +252,15 @@ export default async function ApprovalsPage() {
             Referrals ({referrals.length})
           </h2>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          BOOKED = the friend submitted a quote through a referral link
-          (their $25-off applies to their first invoice). Mark completed once
-          their first service is done and paid, then award the{" "}
-          {settings.pointsReferral} points.
+        <p className="mt-1 max-w-3xl text-xs text-muted-foreground">
+          When Jobber is connected this runs itself: the friend&apos;s first
+          paid invoice moves the referral to COMPLETED and
+          {settings.referralAutoAward === 1
+            ? " awards the points automatically."
+            : " parks it here for you to award."}{" "}
+          Anything sitting here needs a hand, so use the buttons. The friend&apos;s{" "}
+          {formatCents(settings.referralFriendCents)} credit is yours to apply
+          on their first invoice.
         </p>
         <div className="mt-3 space-y-3">
           {referrals.length === 0 && (
@@ -259,42 +268,83 @@ export default async function ApprovalsPage() {
               No referrals in flight.
             </p>
           )}
-          {referrals.map((r) => (
-            <div
-              key={r.id}
-              className="surface-card flex flex-wrap items-center justify-between gap-3 p-5"
-            >
-              <div className="min-w-0 text-sm">
-                <p className="font-semibold">{r.referredEmail ?? "Unknown friend"}</p>
-                <p className="text-xs text-muted-foreground">
-                  referred by{" "}
-                  <Link
-                    href={`/admin/club/members/${r.referrerId}`}
-                    className="font-medium text-primary hover:underline"
-                  >
-                    {r.referrer.firstName} {r.referrer.lastName ?? ""}
-                  </Link>{" "}
-                  · {r.status === "BOOKED" ? "booked" : "first service done"} ·{" "}
-                  {r.createdAt.toLocaleDateString("en-CA")}
-                </p>
+          {referrals.map((r) => {
+            const meta = REFERRAL_STATUS_META[r.status];
+            const points = r.rewardPoints ?? settings.pointsReferral;
+            return (
+              <div
+                key={r.id}
+                className="surface-card flex flex-wrap items-center justify-between gap-3 p-5"
+              >
+                <div className="min-w-0 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold">
+                      {r.referredName ?? r.referredEmail ?? "Unknown friend"}
+                    </p>
+                    <span
+                      className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${meta.cls}`}
+                    >
+                      {meta.label}
+                    </span>
+                  </div>
+                  {r.referredName && r.referredEmail && (
+                    <p className="text-xs text-muted-foreground">
+                      {r.referredEmail}
+                      {r.referredPhone ? ` · ${r.referredPhone}` : ""}
+                    </p>
+                  )}
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    referred by{" "}
+                    <Link
+                      href={`/admin/club/members/${r.referrerId}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {r.referrer.firstName} {r.referrer.lastName ?? ""}
+                    </Link>{" "}
+                    · via {r.source} · {r.createdAt.toLocaleDateString("en-CA")}{" "}
+                    · owes {formatPoints(points)} pts
+                  </p>
+                  {r.leadId && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Lead:{" "}
+                      <Link
+                        href="/admin/pipeline"
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {r.leadId.slice(0, 8)}
+                      </Link>
+                    </p>
+                  )}
+                  {r.note && (
+                    <p className="mt-1 text-xs text-amber-200">{r.note}</p>
+                  )}
+                </div>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  {r.status !== "COMPLETED" ? (
+                    <form action={markReferralCompleted}>
+                      <input type="hidden" name="id" value={r.id} />
+                      <Button type="submit" size="sm" variant="outline">
+                        First service done + paid
+                      </Button>
+                    </form>
+                  ) : (
+                    <form action={awardReferralAction}>
+                      <input type="hidden" name="id" value={r.id} />
+                      <Button type="submit" size="sm">
+                        Award {formatPoints(points)} pts
+                      </Button>
+                    </form>
+                  )}
+                  <form action={rejectReferralAction}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <Button type="submit" size="sm" variant="ghost">
+                      Not eligible
+                    </Button>
+                  </form>
+                </div>
               </div>
-              {r.status === "BOOKED" ? (
-                <form action={markReferralCompleted}>
-                  <input type="hidden" name="id" value={r.id} />
-                  <Button type="submit" size="sm" variant="outline">
-                    First service done + paid
-                  </Button>
-                </form>
-              ) : (
-                <form action={awardReferral}>
-                  <input type="hidden" name="id" value={r.id} />
-                  <Button type="submit" size="sm">
-                    Award {settings.pointsReferral} pts
-                  </Button>
-                </form>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
@@ -483,52 +533,34 @@ async function markReferralCompleted(formData: FormData) {
   if (!db) throw new Error("DB not configured");
   const id = String(formData.get("id") ?? "");
   const referral = await db.referral.findUnique({ where: { id } });
-  if (!referral || referral.status !== "BOOKED") return;
-  await db.referral.update({ where: { id }, data: { status: "COMPLETED" } });
+  if (!referral || !["INVITED", "BOOKED"].includes(referral.status)) return;
+  await db.referral.update({
+    where: { id },
+    data: { status: "COMPLETED", completedAt: new Date() },
+  });
   revalidatePath("/admin/club/approvals");
 }
 
-async function awardReferral(formData: FormData) {
+/** Manual award. Same code path the Jobber sync uses, so the ledger entry,
+ * the status flip, and the member's email are identical either way. */
+async function awardReferralAction(formData: FormData) {
   "use server";
   await requireRole([...ADMIN_ROLES]);
   const db = getDb();
   if (!db) throw new Error("DB not configured");
   const id = String(formData.get("id") ?? "");
-  const referral = await db.referral.findUnique({
-    where: { id },
-    include: { referrer: { include: { profile: true } } },
-  });
-  if (!referral || referral.status !== "COMPLETED") return;
-
-  const settings = await getClubSettings(db);
-  await db.$transaction([
-    db.pointsTransaction.create({
-      data: {
-        memberId: referral.referrerId,
-        type: "EARN_REFERRAL",
-        amount: settings.pointsReferral,
-        sourceRef: referral.id,
-        note: "Referral completed their first service, thank you!",
-      },
-    }),
-    db.referral.update({ where: { id }, data: { status: "AWARDED" } }),
-  ]);
-
-  if (referral.referrer.profile?.notifyServiceReminders !== false) {
-    await sendClubEmail({
-      to: referral.referrer.email,
-      subject: `+${settings.pointsReferral} points, your referral came through!`,
-      text: [
-        `Hi ${referral.referrer.firstName},`,
-        ``,
-        `Your friend finished their first PVS service, so ${settings.pointsReferral} points just hit your Prestige Club account. Know anyone else who could use a hand? Your link's always live.`,
-        ``,
-        `Your referrals: ${PORTAL_URL()}/account/referrals`,
-        ``,
-        `Prestige View Services · ${siteConfig.phoneDisplay}`,
-      ].join("\n"),
-    });
-  }
+  await awardReferralReward(db, id);
   revalidatePath("/admin/club/approvals");
   revalidatePath("/admin/club");
+}
+
+/** Close a referral without paying it out. */
+async function rejectReferralAction(formData: FormData) {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+  const id = String(formData.get("id") ?? "");
+  await rejectReferral(db, id, "Marked not eligible by an admin.");
+  revalidatePath("/admin/club/approvals");
 }

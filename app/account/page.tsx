@@ -7,6 +7,7 @@ import {
   MessagesSquare,
   Sparkles,
   Star,
+  Users,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getMember } from "@/lib/customer-auth";
@@ -19,6 +20,7 @@ import {
   rollingSpendCents,
 } from "@/lib/loyalty";
 import { clubTiers, getClubSettings } from "@/lib/club-settings";
+import { ensureReferralCode, referralStats } from "@/lib/referrals";
 import { TierBadge, TierProgress } from "@/components/account/tier-progress";
 import { siteConfig } from "@/lib/site";
 
@@ -34,6 +36,7 @@ export default async function AccountDashboardPage() {
   const db = getDb();
   if (!db) return null;
 
+  const code = await ensureReferralCode(db, member);
   const [settings, balance, spendCents, nextService, openTickets, categoriesUsed] =
     await Promise.all([
       getClubSettings(db),
@@ -56,6 +59,7 @@ export default async function AccountDashboardPage() {
       }),
     ]);
 
+  const referrals = await referralStats(db, member.id, settings, code);
   const isVeteran = member.profile?.veteranStatus !== "NONE";
   const singleCategory = categoriesUsed.length === 1;
   const usedCategory = singleCategory ? categoriesUsed[0].category : null;
@@ -177,6 +181,59 @@ export default async function AccountDashboardPage() {
         )}
       </section>
 
+      {/* ---- Referral earnings ---- */}
+      <section className="surface-card p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Referrals</h2>
+          </div>
+          <Link
+            href="/account/referrals"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
+          >
+            Share your link
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        {referrals.total === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+            Send anyone our way, friend, family, neighbour. They get{" "}
+            {formatCents(settings.referralFriendCents)} off their first service
+            and you earn{" "}
+            {formatCents(settings.pointsReferral * settings.centsPerPoint)} once
+            it&apos;s done and paid.
+          </p>
+        ) : (
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Earned
+              </p>
+              <p className="mt-0.5 text-2xl font-bold tabular-nums">
+                {formatCents(referrals.earnedCents)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                On the way
+              </p>
+              <p className="mt-0.5 text-2xl font-bold tabular-nums">
+                {formatCents(referrals.pendingCents)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Friends referred
+              </p>
+              <p className="mt-0.5 text-2xl font-bold tabular-nums">
+                {referrals.total}
+              </p>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* ---- Cross-category bonus promo (the cross-sell engine) ---- */}
       <section className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 p-5 sm:p-7">
         <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-sky-300">
@@ -228,7 +285,9 @@ export default async function AccountDashboardPage() {
           href="/account/referrals"
           icon={<Star className="h-5 w-5" />}
           title="Refer a friend"
-          sub={`Give $25, get ${settings.pointsReferral} pts`}
+          sub={`Give ${formatCents(settings.referralFriendCents)}, get ${formatCents(
+            settings.pointsReferral * settings.centsPerPoint
+          )}`}
         />
       </div>
 

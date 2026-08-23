@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { Mail, Phone, MapPin, Inbox } from "lucide-react";
+import { Mail, Phone, MapPin, Inbox, BadgePercent, Gift } from "lucide-react";
 import type { LeadStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
@@ -13,6 +13,8 @@ import {
   LEAD_STATUS_META,
 } from "@/lib/dashboard";
 import { getService } from "@/lib/content/services";
+import { accountOffer, getClubSettingsSafe } from "@/lib/club-settings";
+import { formatCents } from "@/lib/loyalty";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +58,37 @@ export default async function LeadsPage(props: {
     take: 200,
   });
 
+  // Two things change the price on a lead, and both are easy to miss in a
+  // notes field: the customer has a free account (member discount), or they
+  // came in on a referral link (first-service credit). Look both up in bulk
+  // and badge them on the card.
+  const settings = await getClubSettingsSafe(db);
+  const offer = accountOffer(settings);
+  const emails = Array.from(new Set(items.map((l) => l.email.toLowerCase())));
+
+  const [accountHolders, referredLeads] = await Promise.all([
+    offer.enabled && emails.length
+      ? db.member.findMany({
+          where: { email: { in: emails }, passwordHash: { not: "" } },
+          select: { email: true },
+        })
+      : Promise.resolve([]),
+    items.length
+      ? db.referral.findMany({
+          where: {
+            leadId: { in: items.map((l) => l.id) },
+            status: { not: "REJECTED" },
+          },
+          select: { leadId: true, friendCreditCents: true },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const memberEmails = new Set(accountHolders.map((m) => m.email.toLowerCase()));
+  const referralByLead = new Map(
+    referredLeads.map((r) => [r.leadId, r.friendCreditCents])
+  );
+
   return (
     <div className="space-y-8">
       <header>
@@ -95,6 +128,8 @@ export default async function LeadsPage(props: {
           const slugs = Array.isArray(l.serviceSlugs)
             ? (l.serviceSlugs as string[])
             : [];
+          const isMember = memberEmails.has(l.email.toLowerCase());
+          const referralCredit = referralByLead.get(l.id);
           return (
             <article key={l.id} className="surface-card p-6">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -106,6 +141,21 @@ export default async function LeadsPage(props: {
                         className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${DIVISION_ACCENT[l.division]}`}
                       >
                         {DIVISION_LABEL[l.division]}
+                      </span>
+                    )}
+                    {isMember && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                        <BadgePercent className="h-3 w-3" />
+                        Account member, apply {offer.label}
+                      </span>
+                    )}
+                    {referralCredit !== undefined && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+                        <Gift className="h-3 w-3" />
+                        Referred, apply{" "}
+                        {formatCents(
+                          referralCredit ?? settings.referralFriendCents
+                        )}
                       </span>
                     )}
                   </div>

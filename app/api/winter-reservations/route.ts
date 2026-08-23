@@ -11,6 +11,8 @@ import {
 } from "@/lib/content/winter-packages";
 import { getDb } from "@/lib/db";
 import { notifyOwner } from "@/lib/notify";
+import { cookies } from "next/headers";
+import { REF_COOKIE, normalizeCode, tryAttributeReferral } from "@/lib/referrals";
 
 export const runtime = "nodejs";
 
@@ -130,6 +132,25 @@ export async function POST(request: Request) {
       },
       select: { id: true },
     });
+
+    // A snow reservation is a booking like any other, so a referral link that
+    // ends here counts. Best-effort, and always after the reservation is safe.
+    try {
+      const store = await cookies();
+      const code = normalizeCode(store.get(REF_COOKIE)?.value);
+      if (code) {
+        await tryAttributeReferral(db, {
+          code,
+          friendEmail: payload.email,
+          friendName: payload.name,
+          friendPhone: payload.phone,
+          source: "link",
+        });
+      }
+    } catch {
+      // Never let referral bookkeeping cost us a winter reservation.
+    }
+
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {
     // eslint-disable-next-line no-console

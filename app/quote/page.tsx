@@ -3,6 +3,7 @@ import { Phone, Mail, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { SectionHeading } from "@/components/section-heading";
 import { ReviewCta } from "@/components/review-cta";
+import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -23,7 +24,7 @@ const popularBundles = [
   "Lawn Mowing + Seasonal Snow Contract",
 ];
 
-export default function QuotePage() {
+export default async function QuotePage() {
   return (
     <section className="container-max pt-14 sm:pt-20 pb-20">
       <SectionHeading
@@ -34,6 +35,7 @@ export default function QuotePage() {
 
       <div className="mt-12 grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7 space-y-6">
+          <AccountSavingsBanner variant="strip" />
           <AuroraLeadForm />
 
           <aside
@@ -71,6 +73,10 @@ export default function QuotePage() {
             label="Already a PVS customer?"
             body="If we've taken care of your property before, a quick Google review would help your neighbours find us."
           />
+
+          <div className="mx-auto w-full max-w-[750px]">
+            <AccountSavingsBanner />
+          </div>
         </div>
 
         <aside className="lg:col-span-5 space-y-5">

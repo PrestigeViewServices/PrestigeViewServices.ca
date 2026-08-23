@@ -9,6 +9,13 @@ import {
   isCustomerAuthConfigured,
 } from "@/lib/customer-auth";
 import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
+import {
+  REF_COOKIE,
+  ensureReferralCode,
+  linkReferredMember,
+  normalizeCode,
+  tryAttributeReferral,
+} from "@/lib/referrals";
 
 export const runtime = "nodejs";
 
@@ -40,6 +47,8 @@ export async function POST(req: Request) {
     email?: string;
     phone?: string;
     password?: string;
+    /** Prestige Club code from a friend, typed in or prefilled from /r/[code]. */
+    referralCode?: string;
     hp?: string; // honeypot
   } | null;
 
@@ -99,6 +108,40 @@ export async function POST(req: Request) {
 
   // Pre-existing Jobber history is claimed on the next scheduled sync
   // (email match) or via the admin "link account" tool.
+
+  // Referral plumbing — all best-effort, none of it can block a sign-up.
+  try {
+    // Their own shareable code, ready the moment they land in the portal.
+    await ensureReferralCode(db, {
+      id: member.id,
+      firstName: member.firstName,
+      referralCode: member.referralCode,
+    });
+
+    // Did a friend send them? Typed code wins over the /r/[code] cookie.
+    const store = await cookies();
+    const code =
+      normalizeCode(body?.referralCode) ||
+      normalizeCode(store.get(REF_COOKIE)?.value);
+    if (code) {
+      await tryAttributeReferral(db, {
+        code,
+        friendEmail: email,
+        friendName: `${firstName} ${lastName}`.trim(),
+        friendPhone: phone || null,
+        friendMemberId: member.id,
+        source: "signup",
+        // An account isn't a booking. It stays at INVITED until they
+        // actually request service, and pays out on their first paid job.
+        status: "INVITED",
+      });
+    }
+    // A referral already recorded from their quote request now gets the
+    // account attached, so their welcome credit shows up in the portal.
+    await linkReferredMember(db, { memberId: member.id, email });
+  } catch {
+    // Never block account creation on referral bookkeeping.
+  }
 
   // Welcome bonus (one-time, admin-tunable, 0 disables).
   try {

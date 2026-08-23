@@ -13,6 +13,7 @@ import { ActionShots } from "@/components/home/action-shots";
 import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
 
@@ -46,6 +47,11 @@ export default function HomePage() {
       </Reveal>
       <Reveal>
         <OffersBand />
+      </Reveal>
+      <Reveal>
+        <section className="container-max py-4">
+          <AccountSavingsBanner />
+        </section>
       </Reveal>
       <Reveal>
         <TrustStrip />

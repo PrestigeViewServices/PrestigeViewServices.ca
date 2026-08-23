@@ -137,6 +137,12 @@ export function Footer() {
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <ReviewCta variant="link" />
+            <Link href="/refer" className="hover:text-foreground">
+              Refer a Friend
+            </Link>
+            <Link href="/account" className="hover:text-foreground">
+              My Account
+            </Link>
             <Link href="/about" className="hover:text-foreground">
               About
             </Link>

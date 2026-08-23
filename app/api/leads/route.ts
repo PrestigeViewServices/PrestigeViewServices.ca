@@ -9,43 +9,51 @@ import {
 import { sendLeadNotification } from "@/lib/send-lead-email";
 import { notifyOwner } from "@/lib/notify";
 import { getDb } from "@/lib/db";
+import {
+  REF_COOKIE,
+  normalizeCode,
+  tryAttributeReferral,
+} from "@/lib/referrals";
+import { accountOffer, getClubSettingsSafe } from "@/lib/club-settings";
+import { formatCents } from "@/lib/loyalty";
 import type { PrismaClient } from "@prisma/client";
 
 export const runtime = "nodejs";
 
 /**
- * Prestige Club referral attribution (best-effort, never blocks intake).
- * The /r/[code] landing set a pvs_ref cookie; if this lead's email is new
- * to the referrer, record a Referral at BOOKED. Admin advances it to
- * COMPLETED → points awarded after the friend's first paid service.
+ * The referral code carried by this submission: the one the visitor typed
+ * into the form wins, otherwise the pvs_ref cookie dropped by /r/[code].
  */
-async function recordReferral(
-  db: PrismaClient,
-  leadEmail: string
-): Promise<string | null> {
+async function referralCodeFor(typed: string | undefined): Promise<string> {
+  const fromForm = normalizeCode(typed);
+  if (fromForm) return fromForm;
   try {
     const store = await cookies();
-    const code = store.get("pvs_ref")?.value?.trim().toUpperCase();
-    if (!code) return null;
-    const referrer = await db.member.findUnique({
-      where: { referralCode: code },
-      select: { id: true, email: true },
+    return normalizeCode(store.get(REF_COOKIE)?.value);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Does this email already have a free PVS account? Account holders get the
+ * member discount, so the note on the lead tells the office to apply it
+ * before the quote goes out.
+ */
+async function memberDiscountNote(
+  db: PrismaClient,
+  email: string
+): Promise<string | null> {
+  try {
+    const settings = await getClubSettingsSafe(db);
+    const offer = accountOffer(settings);
+    if (!offer.enabled) return null;
+    const member = await db.member.findUnique({
+      where: { email: email.trim().toLowerCase() },
+      select: { passwordHash: true },
     });
-    // No self-referrals, and one referral record per referred email.
-    if (!referrer || referrer.email === leadEmail.toLowerCase()) return null;
-    const existing = await db.referral.findFirst({
-      where: { referredEmail: leadEmail.toLowerCase() },
-    });
-    if (existing) return null;
-    await db.referral.create({
-      data: {
-        code: `${code}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-        referrerId: referrer.id,
-        referredEmail: leadEmail.toLowerCase(),
-        status: "BOOKED",
-      },
-    });
-    return code;
+    if (!member || member.passwordHash === "") return null;
+    return `PVS account member: apply the ${offer.label} member discount`;
   } catch {
     return null;
   }
@@ -140,11 +148,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const refCode = await recordReferral(db, payload.email);
+    const memberNote = await memberDiscountNote(db, payload.email);
     const noteParts = [
       payload.promoCode ? `Promo: ${payload.promoCode}` : null,
-      refCode ? `Referred by club code ${refCode}. Friend gets $25 off first service` : null,
+      memberNote,
     ].filter(Boolean);
+
     const created = await db.lead.create({
       data: {
         name: payload.name,
@@ -160,6 +169,36 @@ export async function POST(request: Request) {
       },
       select: { id: true },
     });
+
+    // Referral attribution — best-effort, and always AFTER the lead is safe.
+    const code = await referralCodeFor(payload.referralCode);
+    if (code) {
+      const settings = await getClubSettingsSafe(db);
+      const result = await tryAttributeReferral(db, {
+        code,
+        friendEmail: payload.email,
+        friendName: payload.name,
+        friendPhone: payload.phone,
+        leadId: created.id,
+        source: payload.referralCode ? "code" : "link",
+        settings,
+      });
+      if (result?.ok) {
+        const credit = formatCents(
+          result.referral.friendCreditCents ?? settings.referralFriendCents
+        );
+        await db.lead.update({
+          where: { id: created.id },
+          data: {
+            notes: [
+              ...noteParts,
+              `Referred by club code ${code}. Friend gets ${credit} off their first service`,
+            ].join(" · "),
+          },
+        });
+      }
+    }
+
     await notify();
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {

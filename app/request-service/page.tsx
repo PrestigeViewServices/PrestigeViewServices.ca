@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 import { LeadForm } from "@/components/lead-form";
 import { SectionHeading } from "@/components/section-heading";
+import { ReferralWelcomeBanner } from "@/components/referral-welcome-banner";
+import { getDb } from "@/lib/db";
+import { accountOffer, getClubSettingsSafe } from "@/lib/club-settings";
+import { formatCents } from "@/lib/loyalty";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -15,8 +19,18 @@ export const metadata: Metadata = {
 /**
  * Native lead-capture page. Submissions land directly in the PVS pipeline
  * (no third-party embed). Distinct from /quote, which keeps the Aurora form.
+ *
+ * This is also where /r/[code] referral links land, because /api/leads is
+ * what turns a referral cookie into a tracked Referral.
  */
-export default function RequestServicePage() {
+export default async function RequestServicePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string; from?: string; service?: string }>;
+}) {
+  const { ref, from, service } = await searchParams;
+  const settings = await getClubSettingsSafe(getDb());
+  const offer = accountOffer(settings);
   return (
     <section className="container-max pt-14 sm:pt-20 pb-20">
       <SectionHeading
@@ -26,8 +40,14 @@ export default function RequestServicePage() {
       />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <LeadForm />
+        <div className="lg:col-span-7 space-y-5">
+          <ReferralWelcomeBanner code={ref} from={from} />
+          <LeadForm
+            service={service ?? null}
+            referralCode={ref ?? null}
+            accountDiscountLabel={offer.enabled ? offer.label : null}
+            referralCredit={formatCents(settings.referralFriendCents)}
+          />
         </div>
 
         <aside className="lg:col-span-5 space-y-5">

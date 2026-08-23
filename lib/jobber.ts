@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import type { PrismaClient, PublicCategory } from "@prisma/client";
 import { awardServicePoints, recalcTier } from "./loyalty";
+import { maybeCompleteReferralForMember } from "./referrals";
 import { clubTiers, getClubSettings } from "./club-settings";
 
 /**
@@ -399,6 +400,10 @@ export type SyncSummary = {
   recordsUpserted: number;
   pointsAwarded: number;
   unmatchedClients: number;
+  /** Referrals that reached COMPLETED because a referred friend just paid. */
+  referralsCompleted: number;
+  /** Of those, the ones that auto-awarded the referrer's points. */
+  referralsAwarded: number;
 };
 
 /**
@@ -412,6 +417,8 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
     recordsUpserted: 0,
     pointsAwarded: 0,
     unmatchedClients: 0,
+    referralsCompleted: 0,
+    referralsAwarded: 0,
   };
   const token = await getJobberAccessToken(db);
   if (!token) {
@@ -565,6 +572,14 @@ export async function syncJobber(db: PrismaClient): Promise<SyncSummary> {
 
   for (const memberId of touchedMembers) {
     await recalcTier(db, memberId, tiers);
+    // A referred friend paying their first invoice is what makes the
+    // referrer's reward real. This is the only automatic payout path.
+    const outcome = await maybeCompleteReferralForMember(db, memberId, settings);
+    if (outcome === "completed") summary.referralsCompleted++;
+    if (outcome === "awarded") {
+      summary.referralsCompleted++;
+      summary.referralsAwarded++;
+    }
   }
 
   summary.ok = true;

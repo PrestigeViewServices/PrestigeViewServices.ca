@@ -26,15 +26,31 @@ export type SettingKey =
   | "pointsWelcome"
   | "pointsBookingRequest"
   | "pointsSocialShoutout"
-  | "pointsProfileComplete";
+  | "pointsProfileComplete"
+  | "referralFriendCents"
+  | "referralAutoAward"
+  | "referralMaxPerYear"
+  | "referralWindowDays"
+  | "referralRequirePaid"
+  | "accountDiscountPercent"
+  | "accountDiscountEnabled";
 
 export type SettingDef = {
   key: SettingKey;
   label: string;
   description: string;
-  group: "Earning" | "Redemption" | "Tiers";
-  /** How the stored integer is displayed/edited. "date" stores YYYYMMDD. */
-  unit: "points" | "cents-per-point" | "dollars" | "date";
+  group: "Earning" | "Redemption" | "Tiers" | "Referrals" | "Account Discount";
+  /** How the stored integer is displayed/edited. "date" stores YYYYMMDD,
+   * "toggle" stores 0/1. */
+  unit:
+    | "points"
+    | "cents-per-point"
+    | "dollars"
+    | "date"
+    | "toggle"
+    | "percent"
+    | "days"
+    | "count";
   defaultValue: number;
   min: number;
   max: number;
@@ -61,16 +77,7 @@ export const SETTING_DEFS: SettingDef[] = [
     min: 0,
     max: 10_000,
   },
-  {
-    key: "pointsReferral",
-    label: "Referral bonus",
-    description: "Per referral whose first service is completed and paid.",
-    group: "Earning",
-    unit: "points",
-    defaultValue: POINTS.REFERRAL,
-    min: 0,
-    max: 10_000,
-  },
+
   {
     key: "pointsCrossCategory",
     label: "Second-category bonus",
@@ -198,6 +205,98 @@ export const SETTING_DEFS: SettingDef[] = [
     min: 0,
     max: 100_000_00,
   },
+
+  // ---- Referrals -----------------------------------------------------------
+  {
+    key: "pointsReferral",
+    label: "What the referrer earns",
+    description:
+      "Points posted to the referrer once their friend's first service is completed and paid. Shown to customers as its dollar value.",
+    group: "Referrals",
+    unit: "points",
+    defaultValue: POINTS.REFERRAL,
+    min: 0,
+    max: 10_000,
+  },
+  {
+    key: "referralFriendCents",
+    label: "What the friend gets",
+    description:
+      "Credit off the referred friend's first service. Advertised on the referral link and applied by you at invoicing.",
+    group: "Referrals",
+    unit: "dollars",
+    defaultValue: 2_500,
+    min: 0,
+    max: 50_000,
+  },
+  {
+    key: "referralRequirePaid",
+    label: "Only pay out after the friend pays",
+    description:
+      "On: the referrer's reward waits until the friend's first service is completed AND the invoice is paid. Leave this on.",
+    group: "Referrals",
+    unit: "toggle",
+    defaultValue: 1,
+    min: 0,
+    max: 1,
+  },
+  {
+    key: "referralAutoAward",
+    label: "Award automatically",
+    description:
+      "On: the reward posts by itself the moment the friend's first paid service syncs. Off: it waits for you in Approvals.",
+    group: "Referrals",
+    unit: "toggle",
+    defaultValue: 1,
+    min: 0,
+    max: 1,
+  },
+  {
+    key: "referralMaxPerYear",
+    label: "Max rewarded referrals per member per year",
+    description:
+      "Abuse guard. Referrals past the cap still get tracked, they just wait for your approval. 0 means no cap.",
+    group: "Referrals",
+    unit: "count",
+    defaultValue: 25,
+    min: 0,
+    max: 1_000,
+  },
+  {
+    key: "referralWindowDays",
+    label: "Attribution window",
+    description:
+      "How long after clicking a referral link the friend can still request service and have it count.",
+    group: "Referrals",
+    unit: "days",
+    defaultValue: 90,
+    min: 1,
+    max: 730,
+  },
+
+  // ---- Account discount ----------------------------------------------------
+  {
+    key: "accountDiscountEnabled",
+    label: "Offer the account discount",
+    description:
+      "On: the site advertises a percentage off for creating a free account. Turn off to pull the offer everywhere at once.",
+    group: "Account Discount",
+    unit: "toggle",
+    defaultValue: 1,
+    min: 0,
+    max: 1,
+  },
+  {
+    key: "accountDiscountPercent",
+    label: "Account sign-up discount",
+    description:
+      "Percent off the next service for members with a free account. Applied by you at quoting, flagged on every lead.",
+    group: "Account Discount",
+    unit: "percent",
+    defaultValue: 5,
+    min: 0,
+    max: 50,
+  },
 ];
 
 export type ClubSettings = Record<SettingKey, number>;
@@ -242,4 +341,49 @@ export function clubTiers(settings: ClubSettings): TierDef[] {
     PRESTIGE: settings.tierPrestigeCents,
   };
   return TIERS.map((t) => ({ ...t, minCents: byKey[t.key] ?? t.minCents }));
+}
+
+// ---- Account discount ------------------------------------------------------
+
+/**
+ * The "create a free account and save" offer, resolved from settings. One
+ * helper so every banner, form, and email quotes the same number and the
+ * whole offer can be pulled site-wide with a single toggle.
+ */
+export type AccountOffer = {
+  enabled: boolean;
+  percent: number;
+  /** "5%" — for inline copy. */
+  label: string;
+};
+
+export function accountOffer(settings: ClubSettings): AccountOffer {
+  const percent = Math.max(0, Math.min(100, settings.accountDiscountPercent));
+  return {
+    enabled: settings.accountDiscountEnabled === 1 && percent > 0,
+    percent,
+    label: `${percent}%`,
+  };
+}
+
+/**
+ * Settings for pages that render before the DB is reachable (or when it
+ * isn't configured at all). Code defaults only — never blocks a page.
+ */
+export function defaultSettings(): ClubSettings {
+  return Object.fromEntries(
+    SETTING_DEFS.map((d) => [d.key, d.defaultValue])
+  ) as ClubSettings;
+}
+
+/** getClubSettings that degrades to defaults instead of throwing. */
+export async function getClubSettingsSafe(
+  db: PrismaClient | null
+): Promise<ClubSettings> {
+  if (!db) return defaultSettings();
+  try {
+    return await getClubSettings(db);
+  } catch {
+    return defaultSettings();
+  }
 }

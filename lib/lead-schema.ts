@@ -67,6 +67,9 @@ export const leadSchema = z.object({
   /** Optional promo code typed in by the customer. No promo is advertised
    * today; kept so a future campaign can use it without a schema change. */
   promoCode: z.string().max(30).optional().or(z.literal("")),
+  /** Prestige Club referral code, prefilled from /r/[code] or typed in by
+   * hand ("a friend gave me their code"). Validated server-side. */
+  referralCode: z.string().max(30).optional().or(z.literal("")),
   propertyAddress: z.string().max(200).optional().or(z.literal("")),
   message: z
     .string()
