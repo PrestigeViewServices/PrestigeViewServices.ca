@@ -1,9 +1,17 @@
 import { cookies } from "next/headers";
+import {
+  readAdminCredential,
+  verifyAdminCredentialPassword,
+} from "./admin-credentials";
 
 /**
  * Internal admin authentication — no external auth service.
  *
- * One owner password (ADMIN_PASSWORD env var) unlocks the whole dashboard.
+ * The owner password lives EITHER in Postgres (AdminCredential, set from
+ * /admin/account) or, when that row is absent, in the ADMIN_PASSWORD env
+ * var. The DB row wins when present so a password changed in the dashboard
+ * is genuinely changed; the env var remains the break-glass for when
+ * Postgres is unreachable. See lib/admin-credentials.ts.
  * A signed, expiring token in an httpOnly cookie keeps the session alive;
  * the signature is an HMAC-SHA256 over the expiry timestamp using
  * ADMIN_SESSION_SECRET (falls back to ADMIN_PASSWORD so one env var is
@@ -24,8 +32,16 @@ function envTrimmed(name: string): string {
   return (process.env[name] ?? "").trim();
 }
 
+/**
+ * Whether the admin login is usable at all. Stays synchronous because
+ * verifyAdminToken() runs on every admin request and must not hit the DB.
+ * ADMIN_SESSION_SECRET counts on its own so the owner can eventually drop
+ * ADMIN_PASSWORD once a database credential is set.
+ */
 export function isAdminAuthConfigured(): boolean {
-  return Boolean(envTrimmed("ADMIN_PASSWORD"));
+  return Boolean(
+    envTrimmed("ADMIN_PASSWORD") || envTrimmed("ADMIN_SESSION_SECRET")
+  );
 }
 
 /**
@@ -33,7 +49,11 @@ export function isAdminAuthConfigured(): boolean {
  * set — it identifies the owner account so future integrations can key off
  * the same address.
  */
-export function checkAdminEmail(candidate: string): boolean {
+export async function checkAdminEmail(candidate: string): Promise<boolean> {
+  const { credential } = await readAdminCredential();
+  if (credential) {
+    return candidate.trim().toLowerCase() === credential.email.toLowerCase();
+  }
   const expected = envTrimmed("ADMIN_EMAIL");
   if (!expected) return true; // email not enforced until configured
   return candidate.trim().toLowerCase() === expected.toLowerCase();
@@ -68,8 +88,19 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/** Checks a submitted password against ADMIN_PASSWORD. */
+/**
+ * Checks a submitted password.
+ *
+ * A stored AdminCredential is authoritative: once the owner sets a password
+ * in the dashboard, ADMIN_PASSWORD stops being accepted, otherwise the old
+ * password would live forever. If there is no row — not migrated, empty
+ * table, or Postgres down — we fall back to the env var so the owner can
+ * always get in.
+ */
 export async function checkAdminPassword(candidate: string): Promise<boolean> {
+  const { credential } = await readAdminCredential();
+  if (credential) return verifyAdminCredentialPassword(candidate);
+
   const expected = envTrimmed("ADMIN_PASSWORD");
   if (!expected) return false;
   // Hash both sides first so comparison length never depends on the secret.
@@ -116,7 +147,12 @@ export const ADMIN_SESSION_MAX_AGE_SECONDS = SESSION_MS / 1000;
  * /account and /admin. No-ops for everyone else.
  */
 export async function maybeGrantOwnerSession(email: string): Promise<boolean> {
-  const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const { credential } = await readAdminCredential();
+  const adminEmail = (
+    credential?.email ?? process.env.ADMIN_EMAIL ?? ""
+  )
+    .trim()
+    .toLowerCase();
   if (
     !adminEmail ||
     !isAdminAuthConfigured() ||

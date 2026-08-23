@@ -21,6 +21,7 @@ import {
   SlidersHorizontal,
   PartyPopper,
   TrendingUp,
+  UserCog,
 } from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ const groups: NavGroup[] = [
     items: [
       { href: "/admin", label: "Command Center", icon: LayoutDashboard },
       { href: "/admin/traffic", label: "Website Traffic", icon: BarChart3 },
+      { href: "/admin/account", label: "My Account", icon: UserCog },
     ],
   },
   {

@@ -40,7 +40,13 @@ export async function POST(req: Request) {
   );
   if (!perEmail.ok) return tooMany();
 
-  const ok = checkAdminEmail(email) && (await checkAdminPassword(password));
+  // Evaluate BOTH checks rather than short-circuiting, so a wrong email
+  // does not return measurably faster than a wrong password.
+  const [emailOk, passwordOk] = await Promise.all([
+    checkAdminEmail(email),
+    checkAdminPassword(password),
+  ]);
+  const ok = emailOk && passwordOk;
   if (!ok) {
     // Small fixed delay blunts brute-force loops without hurting real logins.
     await new Promise((r) => setTimeout(r, 600));
