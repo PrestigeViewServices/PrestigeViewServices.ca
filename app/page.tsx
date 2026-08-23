@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
-import { PromoBanner } from "@/components/home/promo-banner";
+import { SeasonBanner } from "@/components/home/season-banner";
 import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
   title:
     "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
   description:
-    "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Serving Petawawa, Pembroke, Deep River & the Ottawa Valley. Get a free quote.",
+    "Fall cleanups, gutter cleaning & seasonal snow removal from one local, veteran-operated crew. Serving Petawawa, Pembroke, Deep River & the Ottawa Valley. Get a free quote.",
   alternates: { canonical: "/" },
   openGraph: {
     title:
-      "The Ottawa Valley's Property Care Team | Prestige View Services",
+      "Get Your Property Winter-Ready | Prestige View Services",
     description:
-      "Windows, lawns, landscaping & snow, done right by one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
+      "Fall cleanups, gutters & winter snow contracts from one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
     url: "/",
     type: "website",
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <PromoBanner />
+      <SeasonBanner />
       <Hero />
       <TrustMarquee />
       <Reveal>

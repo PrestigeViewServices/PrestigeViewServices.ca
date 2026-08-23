@@ -18,9 +18,9 @@ export function OffersBand() {
   return (
     <section className="container-max py-20 sm:py-24">
       <SectionHeading
-        eyebrow="Limited Time"
-        title="Seasonal Offers"
-        description="Lock in a recurring service this season and save."
+        eyebrow="This Season"
+        title="What to Book Right Now"
+        description="Late August is the window: clear the leaves, clear the gutters, and lock your driveway in before the routes close."
       />
       <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {featured.map((o) => (

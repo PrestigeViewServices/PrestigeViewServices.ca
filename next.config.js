@@ -76,6 +76,12 @@ const nextConfig = {
   reactStrictMode: true,
   // Don't advertise the framework in response headers.
   poweredByHeader: false,
+  // Care Plans was retired 2026-08-23 at the owner's request. Old inbound
+  // links and any lingering search results land on the services hub instead
+  // of a 404. Permanent so the ranking signal transfers.
+  async redirects() {
+    return [{ source: "/care-plans", destination: "/services", permanent: true }];
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

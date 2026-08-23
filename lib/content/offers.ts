@@ -18,31 +18,42 @@ export type Offer = {
 };
 
 export const offers: Offer[] = [
+  // No percentage discounts are advertised anywhere on the site. The 15%
+  // early-bird and 15% exterior bundle were both retired 2026-08-23 at the
+  // owner's request. These offers sell timing and bundling instead.
   {
-    id: "exterior15",
-    active: false,
-    eyebrow: "Bundle & Save",
-    headline: "15% Off Window Cleaning, Pressure Washing & Gutter Cleaning",
-    body: "Bundle two or more exterior cleaning services and save on every visit.",
-    ctaLabel: "Claim This Offer",
-    ctaHref: "/quote?offer=exterior15&service=window-cleaning",
+    id: "fall-cleanup",
+    active: true,
+    eyebrow: "Booking Now",
+    headline: "Fall Cleanups Are Open Across the Ottawa Valley",
+    body: "Every leaf and branch cleared, the lawn cut to winter height, and the beds tidied so your property goes into the snow looking sharp and comes out of it healthy. Book before the rush and pick your week.",
+    ctaLabel: "Book My Fall Cleanup",
+    ctaHref: "/quote?offer=fall-cleanup&service=fall-cleanup",
+    accent: "lawn",
+    division: "lawnpros",
+    showInModal: true,
+  },
+  {
+    id: "gutter-fall",
+    active: true,
+    eyebrow: "Before the Freeze",
+    headline: "Gutter Cleaning Before the First Freeze",
+    body: "Packed gutters freeze solid, back up under the shingles, and turn into ice dams by January. We clear the debris, flush the downspouts, and flag anything starting to fail while it is still a cheap fix.",
+    ctaLabel: "Clear My Gutters",
+    ctaHref: "/quote?offer=gutter-fall&service=gutter-cleaning",
     accent: "clearview",
     division: "clearview",
   },
   {
-    // Deactivated 2026-08-16: the 15% early-bird discount is no longer
-    // advertised. Kept (inactive) so the offer can be revived for a future
-    // season alongside EARLYBIRD_ENABLED in lib/lead-schema.ts.
-    id: "snow-early",
-    active: false,
-    eyebrow: "Winter Early Bird: 15% Off",
-    headline: "15% Off Seasonal Snow Contracts Signed Before September 15",
-    body: "Beat the fall rush: lock in your driveway and walkways for the whole winter at 15% off the seasonal rate. Offer ends September 15. Mention code EARLYBIRD26/27.",
-    ctaLabel: "Lock In My Spot",
-    ctaHref: "/quote?offer=snow-early&service=seasonal-snow-contract",
+    id: "winter-reserve",
+    active: true,
+    eyebrow: "Winter Routes Filling",
+    headline: "Reserve Your Driveway for the Whole Winter",
+    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    ctaLabel: "Reserve My Spot",
+    ctaHref: "/quote?offer=winter-reserve&service=snow-removal",
     accent: "snowland",
     division: "snowland",
-    showInModal: true,
   },
 ];
 

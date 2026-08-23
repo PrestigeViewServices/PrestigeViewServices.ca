@@ -15,24 +15,28 @@ import { formatPhone } from "@/lib/utils";
  */
 const HERO_PHOTOS = [
   {
-    src: "/images/gallery/landscaping/interlock-walkway-after-charcoal-border.webp",
-    alt: "New interlock front walkway with charcoal paver border built by PVS in Petawawa",
+    src: "/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp",
+    alt: "PVS tractor snow-blowing a residential driveway at sunrise after an overnight storm",
   },
   {
-    src: "/images/gallery/landscaping/stone-estate-manicured-lawn-gardens.webp",
-    alt: "Manicured lawn and landscaped garden beds at a stone estate home in the Ottawa Valley",
+    src: "/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg",
+    alt: "PVS crew on ladders clearing leaves out of a home's gutters before winter",
   },
   {
-    src: "/images/gallery/window-cleaning/ladder-upper-window-flower-boxes.webp",
-    alt: "PVS technician on a ladder cleaning an upper window above bright flower boxes",
+    src: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
+    alt: "Driveway cleared wall to wall by a PVS tractor on a bright winter morning",
   },
   {
     src: "/images/gallery/lawn-mowing/stand-on-mower-backyard-stripes.webp",
     alt: "Stand-on mower laying fresh stripes across a backyard lawn in Petawawa",
   },
   {
-    src: "/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp",
-    alt: "PVS tractor snow-blowing a residential driveway at sunrise after an overnight storm",
+    src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
+    alt: "PVS tractor snow-blowing a driveway at night under its own headlights mid-storm",
+  },
+  {
+    src: "/images/gallery/landscaping/interlock-walkway-after-charcoal-border.webp",
+    alt: "New interlock front walkway with charcoal paver border built by PVS in Petawawa",
   },
 ];
 
@@ -99,16 +103,17 @@ export function Hero() {
           </p>
 
           <h1 className="heading-display text-balance text-white">
-            The Ottawa Valley&apos;s Property Care Team.{" "}
+            Winter Is Coming to the Ottawa Valley.{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Windows, Lawns, Landscaping &amp; Snow, Done Right.
+              Your Property Will Be Ready.
             </span>
           </h1>
 
           <p className="mt-6 mx-auto lg:mx-0 max-w-xl text-base sm:text-lg text-sky-100/85 leading-relaxed text-balance">
-            One local, insured crew for everything outside your home: window
-            cleaning, lawn care, hedge trimming, landscaping, pressure washing,
-            and winter snow removal. Free quotes in one business day.
+            One local, insured crew to close out the season and carry you
+            through it: fall cleanups, gutter cleaning before the freeze, and
+            seasonal snow removal that keeps your driveway clear all winter.
+            Free quotes in one business day.
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">

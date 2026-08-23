@@ -47,9 +47,15 @@ export function notificationsConfigured(): {
   email: boolean;
   sms: boolean;
   recipients: string[];
+  /** True while LEAD_FROM_EMAIL is unset, so we fall back to Resend's
+   * shared onboarding@resend.dev sender. That sandbox address only
+   * delivers to the Resend account owner's own address — every other
+   * recipient is rejected. A valid API key is NOT enough on its own. */
+  usingDefaultSender: boolean;
 } {
   return {
     email: Boolean(process.env.RESEND_API_KEY),
+    usingDefaultSender: !process.env.LEAD_FROM_EMAIL,
     sms: Boolean(
       (process.env.TWILIO_ACCOUNT_SID &&
         process.env.TWILIO_AUTH_TOKEN &&

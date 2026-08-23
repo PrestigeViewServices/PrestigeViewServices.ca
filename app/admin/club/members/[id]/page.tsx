@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { ArrowLeft, Link2, Medal, PlusCircle } from "lucide-react";
+import { ArrowLeft, KeyRound, Link2, Medal, PlusCircle, UserCog } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import {
@@ -12,6 +12,7 @@ import {
   recalcTier,
   tierDef,
 } from "@/lib/loyalty";
+import { hashPassword } from "@/lib/customer-auth";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -224,6 +225,150 @@ export default async function ClubMemberPage(props: {
         </section>
       </div>
 
+      {/* ---- Account details ---- */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="surface-card p-5">
+          <div className="flex items-center gap-2">
+            <UserCog className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Account details</h2>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Correct a contact detail or address. Changing the email also
+            changes the address this customer signs in with.
+          </p>
+          <form action={updateAccount} className="mt-4 space-y-3">
+            <input type="hidden" name="memberId" value={member.id} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium">
+                  First name
+                </label>
+                <input
+                  name="firstName"
+                  defaultValue={member.firstName}
+                  required
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">
+                  Last name
+                </label>
+                <input
+                  name="lastName"
+                  defaultValue={member.lastName ?? ""}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium">Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  defaultValue={member.email}
+                  required
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">Phone</label>
+                <input
+                  name="phone"
+                  defaultValue={member.phone ?? ""}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium">
+                Street address
+              </label>
+              <input
+                name="streetAddress"
+                defaultValue={member.profile?.streetAddress ?? ""}
+                className={inputCls}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium">City</label>
+                <input
+                  name="city"
+                  defaultValue={member.profile?.city ?? ""}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">
+                  Province
+                </label>
+                <input
+                  name="region"
+                  defaultValue={member.profile?.region ?? "ON"}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">
+                  Postal code
+                </label>
+                <input
+                  name="postalCode"
+                  defaultValue={member.profile?.postalCode ?? ""}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <Button type="submit" size="sm">
+              Save changes
+            </Button>
+          </form>
+        </section>
+
+        <section className="surface-card p-5">
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Password</h2>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sets a new password immediately, for when a customer is locked out
+            and calls in. Read it to them once and tell them to change it from
+            their own account page. It is never stored or shown again.
+          </p>
+          <form action={setMemberPassword} className="mt-4 space-y-3">
+            <input type="hidden" name="memberId" value={member.id} />
+            <div>
+              <label className="mb-1 block text-xs font-medium">
+                New password
+              </label>
+              <input
+                name="password"
+                type="text"
+                required
+                minLength={8}
+                maxLength={72}
+                autoComplete="off"
+                placeholder="At least 8 characters"
+                className={inputCls}
+              />
+            </div>
+            <Button type="submit" size="sm" variant="outline">
+              Set password
+            </Button>
+          </form>
+          <p className="mt-4 border-t border-surface-border pt-3 text-xs text-muted-foreground">
+            Status:{" "}
+            <span className="font-medium text-foreground">
+              {member.passwordHash === ""
+                ? "No password set, account is unclaimed"
+                : "Password on file"}
+            </span>
+          </p>
+        </section>
+      </div>
+
       {/* ---- Service records ---- */}
       <section>
         <h2 className="text-lg font-semibold">Service records</h2>
@@ -361,6 +506,98 @@ async function verifyVeteran(formData: FormData) {
   await db.customerProfile.updateMany({
     where: { memberId, veteranStatus: "SELF_DECLARED" },
     data: { veteranStatus: "VERIFIED" },
+  });
+  revalidatePath(`/admin/club/members/${memberId}`);
+}
+
+async function updateAccount(formData: FormData) {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+
+  const memberId = String(formData.get("memberId") ?? "");
+  if (!memberId) return;
+
+  const str = (k: string, max: number) =>
+    String(formData.get(k) ?? "").trim().slice(0, max);
+  const firstName = str("firstName", 80);
+  const email = str("email", 160).toLowerCase();
+  const lastName = str("lastName", 80);
+  const phone = str("phone", 40);
+
+  if (!firstName || !email) {
+    throw new Error("First name and email are required");
+  }
+
+  // email is @unique — surface a readable message instead of a raw Prisma
+  // P2002 when the address already belongs to a different member.
+  const clash = await db.member.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  if (clash && clash.id !== memberId) {
+    throw new Error(`Another member already uses ${email}`);
+  }
+
+  await db.member.update({
+    where: { id: memberId },
+    data: {
+      firstName,
+      lastName: lastName || null,
+      email,
+      phone: phone || null,
+    },
+  });
+
+  const streetAddress = str("streetAddress", 200);
+  const city = str("city", 80);
+  const region = str("region", 40);
+  const postalCode = str("postalCode", 20);
+  await db.customerProfile.upsert({
+    where: { memberId },
+    create: {
+      memberId,
+      streetAddress: streetAddress || null,
+      city: city || null,
+      region: region || "ON",
+      postalCode: postalCode || null,
+    },
+    update: {
+      streetAddress: streetAddress || null,
+      city: city || null,
+      region: region || "ON",
+      postalCode: postalCode || null,
+    },
+  });
+
+  revalidatePath(`/admin/club/members/${memberId}`);
+  revalidatePath("/admin/club");
+}
+
+/** Admin-set password for a locked-out customer. Hashed with the same
+ * scrypt helper the customer signup path uses; the plaintext is never
+ * stored, logged, or echoed back to the page. */
+async function setMemberPassword(formData: FormData) {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+
+  const memberId = String(formData.get("memberId") ?? "");
+  const password = String(formData.get("password") ?? "");
+  if (!memberId) return;
+  if (password.length < 8 || password.length > 72) {
+    throw new Error("Password must be 8-72 characters");
+  }
+
+  await db.member.update({
+    where: { id: memberId },
+    data: {
+      passwordHash: await hashPassword(password),
+      // Setting a password claims the account, so retire any invite link.
+      inviteToken: null,
+    },
   });
   revalidatePath(`/admin/club/members/${memberId}`);
 }

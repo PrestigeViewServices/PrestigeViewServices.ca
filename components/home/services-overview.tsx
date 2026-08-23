@@ -4,7 +4,7 @@ import {
   Sparkles,
   Droplets,
   Waves,
-  Home,
+  Leaf,
   Scissors,
   TreeDeciduous,
   Shovel,
@@ -28,6 +28,30 @@ type Tile = {
 
 const TILES: Tile[] = [
   {
+    slug: "snow-removal",
+    name: "Snow Removal",
+    pitch: "Seasonal contracts that keep your driveway clear all winter.",
+    icon: Snowflake,
+    iconBg: "bg-sky-500/15",
+    iconText: "text-sky-300",
+  },
+  {
+    slug: "fall-cleanup",
+    name: "Fall Cleanups",
+    pitch: "Every leaf cleared, lawn cut to winter height, beds put to bed.",
+    icon: Leaf,
+    iconBg: "bg-amber-500/15",
+    iconText: "text-amber-400",
+  },
+  {
+    slug: "gutter-cleaning",
+    name: "Gutter Cleaning",
+    pitch: "Cleared and flushed before packed leaves freeze into ice dams.",
+    icon: Droplets,
+    iconBg: "bg-sky-500/15",
+    iconText: "text-sky-400",
+  },
+  {
     slug: "window-cleaning",
     name: "Window Cleaning",
     pitch: "Streak-free glass, inside and out, with frame and sill care.",
@@ -36,33 +60,9 @@ const TILES: Tile[] = [
     iconText: "text-blue-400",
   },
   {
-    slug: "gutter-cleaning",
-    name: "Gutter Cleaning",
-    pitch: "Debris cleared, downspouts flushed, problems flagged early.",
-    icon: Droplets,
-    iconBg: "bg-sky-500/15",
-    iconText: "text-sky-400",
-  },
-  {
-    slug: "pressure-washing",
-    name: "Pressure Washing",
-    pitch: "Driveways, walkways, decks and patios, restored rather than just rinsed.",
-    icon: Waves,
-    iconBg: "bg-cyan-500/15",
-    iconText: "text-cyan-400",
-  },
-  {
-    slug: "house-washing",
-    name: "House Washing",
-    pitch: "Gentle soft-wash that lifts algae and grime off your siding.",
-    icon: Home,
-    iconBg: "bg-indigo-500/15",
-    iconText: "text-indigo-400",
-  },
-  {
     slug: "lawn-mowing",
     name: "Lawn Care & Mowing",
-    pitch: "Weekly cuts, crisp edges, spring cleanups, aeration and overseeding.",
+    pitch: "Weekly cuts, crisp edges, aeration and overseeding.",
     icon: Scissors,
     iconBg: "bg-emerald-500/15",
     iconText: "text-emerald-400",
@@ -84,12 +84,12 @@ const TILES: Tile[] = [
     iconText: "text-lime-400",
   },
   {
-    slug: "snow-removal",
-    name: "Snow Removal",
-    pitch: "Seasonal contracts that keep your driveway clear all winter.",
-    icon: Snowflake,
-    iconBg: "bg-sky-500/15",
-    iconText: "text-sky-300",
+    slug: "pressure-washing",
+    name: "Pressure Washing",
+    pitch: "Driveways, walkways, decks and patios, restored rather than just rinsed.",
+    icon: Waves,
+    iconBg: "bg-cyan-500/15",
+    iconText: "text-cyan-400",
   },
 ];
 
@@ -99,7 +99,7 @@ export function ServicesOverview() {
       <SectionHeading
         eyebrow="What We Do"
         title="One crew. Every season."
-        description="Eight services, one local team. Year-round property care across the Ottawa Valley with one schedule and one easy bill."
+        description="Eight services, one local team. Right now that means fall cleanups, gutters, and locking in your winter, all on one schedule and one easy bill."
       />
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {TILES.map((t) => {
@@ -134,8 +134,8 @@ export function ServicesOverview() {
         })}
       </div>
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        Also available: junk removal, property cleanouts, and seasonal
-        maintenance plans.{" "}
+        Also available: house washing, junk removal, and property
+        cleanouts.{" "}
         <Link href="/services" className="font-semibold text-primary">
           See all services →
         </Link>

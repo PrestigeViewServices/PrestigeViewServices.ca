@@ -8,7 +8,7 @@ import {
   Phone,
   LifeBuoy,
   Snowflake,
-  CalendarHeart,
+  Leaf,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,7 +33,7 @@ import { formatPhone } from "@/lib/utils";
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [
-  { href: "/care-plans", label: "Care Plans", icon: CalendarHeart },
+  { href: "/services/fall-cleanup", label: "Fall Cleanups", icon: Leaf },
   { href: "/winter-packages", label: "Winter Packages", icon: Snowflake },
 ] as const;
 

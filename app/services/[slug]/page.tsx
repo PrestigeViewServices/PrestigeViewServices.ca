@@ -19,8 +19,6 @@ import {
   ambienceForService,
 } from "@/components/service-ambience";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
-import { AutopilotPlans } from "@/components/care-plans/autopilot-plans";
-import { servicePlanMap } from "@/lib/content/care-plans";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -162,16 +160,13 @@ export default async function ServiceDetailPage(
     });
   }
 
-  // Snow pages feature the early-bird contract promo while it's active.
+  // Snow pages carry the seasonal-contract promo. No discount, it sells
+  // route scarcity — see lib/content/offers.ts.
   const snowOffer =
-    service.division === "snowland" ? getOffer("snow-early") : undefined;
+    service.division === "snowland" ? getOffer("winter-reserve") : undefined;
   const showSnowPromo = Boolean(snowOffer?.active);
 
   const Icon = service.icon;
-
-  // Care Plans placement, only the four exterior-cleaning services map to a
-  // config, so LawnPros & SnowLand service pages render unchanged.
-  const planConfig = servicePlanMap[service.slug];
 
   // The draggable before/after hero lives on House Washing only. Swap the real
   // photos by replacing the files at the paths below (same names).
@@ -564,14 +559,6 @@ export default async function ServiceDetailPage(
             ))}
           </div>
         </section>
-      )}
-
-      {planConfig && (
-        <AutopilotPlans
-          serviceName={service.name}
-          serviceSlug={service.slug}
-          config={planConfig}
-        />
       )}
 
       <CtaBand />

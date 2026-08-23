@@ -8,17 +8,12 @@ import {
   CheckCircle2,
   AlertCircle,
   ClipboardList,
-  Snowflake,
   Phone,
 } from "lucide-react";
 import {
   leadSchema,
   LEAD_SERVICES,
   LEAD_SERVICE_VALUES,
-  SNOW_SERVICE_VALUES,
-  EARLYBIRD_CODE,
-  EARLYBIRD_DEADLINE_LABEL,
-  earlyBirdActive as isEarlyBirdActive,
   type LeadFormValues,
 } from "@/lib/lead-schema";
 import { siteConfig } from "@/lib/site";
@@ -38,8 +33,7 @@ import {
 /**
  * Native PVS lead form. Posts to /api/leads, which drops the lead straight
  * into the admin pipeline (status NEW) and emails the office. No third-party
- * embed. Pre-selects the service from ?service= links across the site, and
- * offers the snow early-bird promo while EARLYBIRD_ENABLED is on.
+ * embed. Pre-selects the service from ?service= links across the site.
  */
 export function LeadForm({ id = "quote-form" }: { id?: string }) {
   return (
@@ -69,10 +63,6 @@ function normalizeService(raw: string | null): LeadFormValues["service"] | undef
 function LeadFormInner({ id }: { id: string }) {
   const params = useSearchParams();
   const presetService = normalizeService(params.get("service"));
-  // Reads the shared helper so the EARLYBIRD_ENABLED master switch in
-  // lib/lead-schema.ts turns this checkbox off along with everything else.
-  const earlyBirdActive = isEarlyBirdActive();
-
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle");
@@ -82,8 +72,6 @@ function LeadFormInner({ id }: { id: string }) {
     register,
     handleSubmit,
     control,
-    watch,
-    setValue,
     formState: { errors },
     reset,
   } = useForm<LeadFormValues>({
@@ -93,24 +81,13 @@ function LeadFormInner({ id }: { id: string }) {
       phone: "",
       email: "",
       service: presetService as LeadFormValues["service"],
-      promoCode:
-        earlyBirdActive &&
-        presetService &&
-        SNOW_SERVICE_VALUES.includes(presetService)
-          ? EARLYBIRD_CODE
-          : "",
+      promoCode: "",
       propertyAddress: "",
       message: "",
       hp: "",
     },
   });
 
-  const selectedService = watch("service");
-  const promoCode = watch("promoCode");
-  const showEarlyBird =
-    earlyBirdActive &&
-    Boolean(selectedService) &&
-    SNOW_SERVICE_VALUES.includes(selectedService);
 
   async function onSubmit(values: LeadFormValues) {
     setStatus("submitting");
@@ -222,17 +199,7 @@ function LeadFormInner({ id }: { id: string }) {
             render={({ field }) => (
               <Select
                 value={field.value}
-                onValueChange={(v) => {
-                  field.onChange(v);
-                  // Auto-apply the early-bird code when a snow service is
-                  // picked during the promo window; clear it otherwise.
-                  setValue(
-                    "promoCode",
-                    earlyBirdActive && SNOW_SERVICE_VALUES.includes(v)
-                      ? EARLYBIRD_CODE
-                      : ""
-                  );
-                }}
+                onValueChange={field.onChange}
               >
                 <SelectTrigger aria-invalid={!!errors.service}>
                   <SelectValue placeholder="Pick a service" />
@@ -259,29 +226,6 @@ function LeadFormInner({ id }: { id: string }) {
           />
         </Field>
       </div>
-
-      {showEarlyBird && (
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-sky-400/30 bg-sky-500/5 p-4">
-          <input
-            type="checkbox"
-            className="mt-0.5 h-4 w-4 accent-sky-400"
-            checked={promoCode === EARLYBIRD_CODE}
-            onChange={(e) =>
-              setValue("promoCode", e.target.checked ? EARLYBIRD_CODE : "")
-            }
-          />
-          <span className="text-sm leading-relaxed">
-            <span className="inline-flex items-center gap-1.5 font-semibold">
-              <Snowflake className="h-4 w-4 text-sky-400" aria-hidden />
-              Apply the Winter Early Bird ({EARLYBIRD_CODE})
-            </span>
-            <span className="block text-muted-foreground">
-              15% off seasonal snow contracts signed before{" "}
-              {EARLYBIRD_DEADLINE_LABEL}.
-            </span>
-          </span>
-        </label>
-      )}
 
       <Field label="Anything else? (optional)" error={errors.message?.message}>
         <Textarea

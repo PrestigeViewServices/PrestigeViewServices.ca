@@ -92,7 +92,7 @@ export const roles: Role[] = [
       "Trailer towing experience",
       "Small-engine maintenance basics",
     ],
-    datePosted: "2026-05-01",
+    datePosted: "2026-08-04",
     active: true,
   },
   {
@@ -124,7 +124,7 @@ export const roles: Role[] = [
       "First Aid / WHMIS",
       "Snow plowing experience",
     ],
-    datePosted: "2026-04-15",
+    datePosted: "2026-08-11",
     active: true,
   },
   {
@@ -156,7 +156,7 @@ export const roles: Role[] = [
       "Working at Heights certification",
       "Trailer towing experience",
     ],
-    datePosted: "2026-03-20",
+    datePosted: "2026-08-04",
     active: true,
   },
   {
@@ -187,7 +187,7 @@ export const roles: Role[] = [
       "Mechanical aptitude for in-field troubleshooting",
       "Experience with route software",
     ],
-    datePosted: "2026-09-15",
+    datePosted: "2026-08-18",
     active: true,
   },
   {
@@ -213,7 +213,7 @@ export const roles: Role[] = [
       "Any trades, landscaping, or service-industry background",
       "Local to the Petawawa / Pembroke area",
     ],
-    datePosted: "2026-01-01",
+    datePosted: "2026-08-01",
     active: true,
   },
 ];

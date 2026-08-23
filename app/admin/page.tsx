@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  Bell,
   BellOff,
   Briefcase,
   Eye,
@@ -14,6 +15,7 @@ import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { notificationsConfigured } from "@/lib/notify";
 import { NotConfigured } from "@/components/admin/not-configured";
+import { NotifyTestButton } from "@/components/admin/notify-test-button";
 import {
   LEAD_STATUS_META,
   statusColor,
@@ -324,16 +326,36 @@ export default async function AdminHomePage() {
  * no visible sign. This banner makes the dead channel obvious.
  */
 function NotifyStatusBanner() {
-  const { email, sms, recipients } = notificationsConfigured();
-  if (email && sms) return null;
+  const { email, sms, recipients, usingDefaultSender } =
+    notificationsConfigured();
+
+  // Everything wired up: collapse to a quiet confirmation that still lets
+  // the owner prove delivery end to end.
+  if (email && sms && !usingDefaultSender) {
+    return (
+      <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-5">
+        <p className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
+          <Bell className="h-4 w-4 shrink-0" aria-hidden />
+          Alerts are on for {recipients.join(", ")}
+        </p>
+        <p className="mt-1 text-xs text-emerald-100/70">
+          Quote requests, winter reservations, applications, support tickets,
+          new members, and giveaway entries all send to email and text.
+        </p>
+        <NotifyTestButton />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
       <p className="flex items-center gap-2 text-sm font-semibold text-amber-200">
         <BellOff className="h-4 w-4 shrink-0" aria-hidden />
-        {email
-          ? "Text alerts are off"
-          : "Email alerts are off, nothing is being sent"}
+        {!email
+          ? "Email alerts are off, nothing is being sent"
+          : usingDefaultSender
+            ? "Email alerts will not reach you yet"
+            : "Text alerts are off"}
       </p>
       <ul className="mt-3 space-y-1.5 text-sm text-amber-100/85">
         {!email && (
@@ -342,6 +364,17 @@ function NotifyStatusBanner() {
             receiving quote requests, winter reservations, applications,
             support tickets, new members, and giveaway entries at{" "}
             {recipients.join(", ")}. Until then they are saved here only.
+          </li>
+        )}
+        {email && usingDefaultSender && (
+          <li>
+            <strong>Sender:</strong> <code>LEAD_FROM_EMAIL</code> is not set, so
+            mail goes out as <code>onboarding@resend.dev</code>. That is
+            Resend&apos;s shared sandbox sender and it only delivers to the
+            address that owns the Resend account, so mail to{" "}
+            {recipients.join(", ")} is rejected. Verify your own domain in
+            Resend, then set <code>LEAD_FROM_EMAIL</code> to something like{" "}
+            <code>PVS Website &lt;alerts@prestigeviewservices.ca&gt;</code>.
           </li>
         )}
         {!sms && (
@@ -359,6 +392,7 @@ function NotifyStatusBanner() {
         then redeploy. Nothing submitted through the website is ever lost, it
         is always written to the dashboard first.
       </p>
+      <NotifyTestButton />
     </div>
   );
 }

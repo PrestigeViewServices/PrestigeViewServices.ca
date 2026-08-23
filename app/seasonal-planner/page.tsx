@@ -68,15 +68,16 @@ export default function SeasonalPlannerPage() {
       <section className="container-max pb-14 sm:pb-16">
         <div className="mx-auto max-w-2xl rounded-3xl border border-primary/25 bg-primary/5 p-6 text-center sm:p-8">
           <h2 className="text-lg font-semibold">
-            Rather never think about this calendar again?
+            Booked up before the leaves even fall?
           </h2>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            That is exactly what a care plan is: the right services, on the
-            right schedule, all season, one easy bill.
+            Autumn is the busiest stretch of our year. Get your fall cleanup
+            and gutter cleaning on the schedule now and the whole property
+            goes into winter sorted.
           </p>
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
             <Button asChild>
-              <Link href="/care-plans">See Care Plans</Link>
+              <Link href="/quote?service=fall-cleanup">Book a Fall Cleanup</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/quote">Get a Free Quote</Link>

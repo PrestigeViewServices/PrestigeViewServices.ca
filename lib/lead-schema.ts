@@ -50,29 +50,6 @@ export function divisionForService(service: string): LeadDivision {
 
 export const SNOW_SERVICE_VALUES = ["snow-removal"];
 
-/**
- * MASTER SWITCH for the seasonal snow early-bird discount.
- *
- * Turned OFF 2026-08-16 at the owner's request: the 15% off is no longer
- * advertised anywhere on the site. Every surface (home banner, offers band,
- * offer modal, winter packages countdown, quote form promo checkbox, and the
- * snow SEO copy) reads `earlyBirdActive()`, so flipping this back to true is
- * all it takes to bring the promo back for a future season.
- *
- * Set a fresh code and deadline below before re-enabling.
- */
-export const EARLYBIRD_ENABLED = false;
-
-export const EARLYBIRD_CODE = "EARLYBIRD26/27";
-export const EARLYBIRD_DEADLINE = "2026-09-16T00:00:00-04:00"; // through Sept 15
-export const EARLYBIRD_DEADLINE_LABEL = "September 15";
-
-/** True only while the promo is switched on AND inside its window. */
-export function earlyBirdActive(now: number = Date.now()): boolean {
-  if (!EARLYBIRD_ENABLED) return false;
-  return now < new Date(EARLYBIRD_DEADLINE).getTime();
-}
-
 export const leadSchema = z.object({
   name: z
     .string()
@@ -87,7 +64,8 @@ export const leadSchema = z.object({
   service: z.enum(LEAD_SERVICE_VALUES, {
     errorMap: () => ({ message: "Pick the service you need" }),
   }),
-  /** Set when the early-bird checkbox is ticked on a snow request. */
+  /** Optional promo code typed in by the customer. No promo is advertised
+   * today; kept so a future campaign can use it without a schema change. */
   promoCode: z.string().max(30).optional().or(z.literal("")),
   propertyAddress: z.string().max(200).optional().or(z.literal("")),
   message: z
