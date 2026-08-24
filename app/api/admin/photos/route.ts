@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth";
 import { canManagePhotos } from "@/lib/roles";
 import { getDb } from "@/lib/db";
 import {
+  deletePhotoByPublicId,
   isCloudinaryConfigured,
   uploadPhotoBuffer,
 } from "@/lib/cloudinary";
@@ -120,17 +121,34 @@ export async function POST(request: Request) {
     );
   }
 
-  const record = await db.galleryImage.create({
-    data: {
-      url: uploaded.url,
-      publicId: uploaded.publicId,
-      alt: parsed.data.alt,
-      section: parsed.data.section,
-      caption: parsed.data.caption || null,
-      sortOrder: parsed.data.sortOrder ?? 0,
-      uploadedById: session.userId,
-    },
-  });
+  // The in-house owner login carries a synthetic session id with no row in
+  // the (Clerk-era) User table. Writing it raw violated the FK and 500'd
+  // every upload — only attribute the upload when that User really exists.
+  const uploader = await db.user
+    .findUnique({ where: { id: session.userId }, select: { id: true } })
+    .catch(() => null);
 
-  return NextResponse.json({ ok: true, photo: record });
+  try {
+    const record = await db.galleryImage.create({
+      data: {
+        url: uploaded.url,
+        publicId: uploaded.publicId,
+        alt: parsed.data.alt,
+        section: parsed.data.section,
+        caption: parsed.data.caption || null,
+        sortOrder: parsed.data.sortOrder ?? 0,
+        uploadedById: uploader?.id ?? null,
+      },
+    });
+    return NextResponse.json({ ok: true, photo: record });
+  } catch (err) {
+    // Don't leave the asset orphaned on the host when the record fails.
+    await deletePhotoByPublicId(uploaded.publicId);
+    // eslint-disable-next-line no-console
+    console.error("GalleryImage create failed", err);
+    return NextResponse.json(
+      { ok: false, error: "Saving the photo record failed, please try again" },
+      { status: 500 }
+    );
+  }
 }
