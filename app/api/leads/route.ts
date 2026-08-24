@@ -101,7 +101,10 @@ export async function POST(request: Request) {
     payload.service;
 
   // Notifications are best-effort and must never block or fail intake.
-  const notify = () =>
+  // extraLines carries pricing context (member discount, referral credit)
+  // discovered during the DB write, so the email tells the office exactly
+  // what to apply before quoting.
+  const notify = (extraLines: string[] = []) =>
     Promise.all([
       sendLeadNotification({
         name: payload.name,
@@ -126,7 +129,10 @@ export async function POST(request: Request) {
           `Email: ${payload.email}`,
           `Service: ${serviceLabel}`,
           payload.propertyAddress ? `Address: ${payload.propertyAddress}` : null,
+          ...extraLines.map((l) => `>> ${l}`),
           payload.message ? `Message:\n${payload.message}` : null,
+          ``,
+          `Manage: /admin/leads`,
         ]
           .filter(Boolean)
           .join("\n"),
@@ -152,7 +158,7 @@ export async function POST(request: Request) {
     const noteParts = [
       payload.promoCode ? `Promo: ${payload.promoCode}` : null,
       memberNote,
-    ].filter(Boolean);
+    ].filter((n): n is string => Boolean(n));
 
     const created = await db.lead.create({
       data: {
@@ -187,19 +193,16 @@ export async function POST(request: Request) {
         const credit = formatCents(
           result.referral.friendCreditCents ?? settings.referralFriendCents
         );
+        const refLine = `Referred by club code ${code}. Friend gets ${credit} off their first service`;
+        noteParts.push(refLine);
         await db.lead.update({
           where: { id: created.id },
-          data: {
-            notes: [
-              ...noteParts,
-              `Referred by club code ${code}. Friend gets ${credit} off their first service`,
-            ].join(" · "),
-          },
+          data: { notes: noteParts.join(" · ") },
         });
       }
     }
 
-    await notify();
+    await notify(noteParts);
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {
     // eslint-disable-next-line no-console

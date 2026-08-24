@@ -191,6 +191,16 @@ async function sendOwnerSms(n: OwnerNotification): Promise<ChannelResult> {
 export async function notifyOwner(
   n: OwnerNotification
 ): Promise<{ email: ChannelResult; sms: ChannelResult }> {
+  // Every owner alert also lands in the in-app feed (/admin/notifications),
+  // which works even while the email/SMS providers are unconfigured.
+  try {
+    const { recordNotification } = await import("./admin-notifications");
+    const kind = n.kind === "other" ? "system" : n.kind;
+    await recordNotification({ kind, title: n.subject, body: n.text });
+  } catch {
+    // The feed must never block the channels (or the intake behind them).
+  }
+
   const [email, sms] = await Promise.all([sendOwnerEmail(n), sendOwnerSms(n)]);
   // eslint-disable-next-line no-console
   console.log("[PVS notify]", {

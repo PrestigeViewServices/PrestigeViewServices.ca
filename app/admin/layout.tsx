@@ -1,6 +1,7 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminLoginForm } from "@/components/admin/login-form";
 import { hasAdminSession, isAdminAuthConfigured } from "@/lib/admin-session";
+import { unreadNotificationCount } from "@/lib/admin-notifications";
 
 export const metadata = {
   title: "Admin",
@@ -46,11 +47,13 @@ export default async function AdminLayout({
     );
   }
 
+  const unread = await unreadNotificationCount();
+
   return (
     <section className="container-max py-10 sm:py-12">
       <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start surface-card p-4">
-          <AdminSidebar />
+          <AdminSidebar unread={unread} />
         </aside>
         <div className="min-w-0">{children}</div>
       </div>

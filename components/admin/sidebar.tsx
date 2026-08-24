@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
+  FileEdit,
+  Gift,
   LayoutDashboard,
   Briefcase,
   LifeBuoy,
@@ -30,6 +33,8 @@ type NavItem = {
   href: string;
   label: string;
   icon: typeof LayoutDashboard;
+  /** Show the unread-notifications badge on this item. */
+  badge?: boolean;
 };
 
 type NavGroup = { title: string; items: NavItem[] };
@@ -43,6 +48,12 @@ const groups: NavGroup[] = [
     title: "Overview",
     items: [
       { href: "/admin", label: "Command Center", icon: LayoutDashboard },
+      {
+        href: "/admin/notifications",
+        label: "Notifications",
+        icon: Bell,
+        badge: true,
+      },
       { href: "/admin/traffic", label: "Website Traffic", icon: BarChart3 },
       { href: "/admin/account", label: "My Account", icon: UserCog },
     ],
@@ -52,6 +63,7 @@ const groups: NavGroup[] = [
     items: [
       { href: "/admin/club", label: "Members", icon: Award },
       { href: "/admin/club/approvals", label: "Approvals", icon: BadgeCheck },
+      { href: "/admin/club/referrals", label: "Referrals", icon: Gift },
       { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
       { href: "/admin/club/giveaways", label: "Giveaways", icon: PartyPopper },
       { href: "/admin/club/metrics", label: "Metrics", icon: TrendingUp },
@@ -82,6 +94,7 @@ const groups: NavGroup[] = [
   {
     title: "Website",
     items: [
+      { href: "/admin/site/content", label: "Page Content", icon: FileEdit },
       { href: "/admin/site/photos", label: "Photos", icon: ImageIcon },
       { href: "/admin/reviews", label: "Reviews", icon: MessageSquareQuote },
       { href: "/admin/site", label: "Site Settings", icon: Settings },
@@ -89,7 +102,7 @@ const groups: NavGroup[] = [
   },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ unread = 0 }: { unread?: number }) {
   const pathname = usePathname();
 
   return (
@@ -117,7 +130,12 @@ export function AdminSidebar() {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.badge && unread > 0 && (
+                  <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
               </Link>
             );
           })}

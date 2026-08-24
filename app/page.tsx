@@ -16,6 +16,7 @@ import { CtaBand } from "@/components/cta-band";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
+import { getSiteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title:
@@ -33,11 +34,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+// Owner-edited content (hero, banner, offers, the 5% account push) must
+// show up as soon as it's saved — never frozen into a build.
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const content = await getSiteContent();
   return (
     <>
       <SeasonBanner />
-      <Hero />
+      <Hero content={content.hero} />
       <TrustMarquee />
       <Reveal>
         <ServicesOverview />

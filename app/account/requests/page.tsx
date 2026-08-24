@@ -235,6 +235,17 @@ async function createTicket(formData: FormData) {
     },
   });
 
+  {
+    const { recordNotification } = await import("@/lib/admin-notifications");
+    await recordNotification({
+      kind: "ticket",
+      title: `${member?.firstName ?? "A member"} ${member?.lastName ?? ""}: ${subject}`.trim(),
+      body: body.slice(0, 500),
+      href: `/admin/club/tickets/${ticket.id}`,
+      db,
+    });
+  }
+
   // Booking-request bonus: rewards using the portal to book, capped at one
   // award per 30 days so it can't be farmed with junk tickets.
   if (validType === "BOOK_SERVICE") {

@@ -6,6 +6,7 @@ import {
   BellOff,
   Briefcase,
   Eye,
+  Gift,
   Inbox,
   LifeBuoy,
   Snowflake,
@@ -14,6 +15,7 @@ import {
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { notificationsConfigured } from "@/lib/notify";
+import { kindMeta } from "@/lib/admin-notifications";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { NotifyTestButton } from "@/components/admin/notify-test-button";
 import {
@@ -68,6 +70,10 @@ export default async function AdminHomePage() {
     viewsToday,
     uniques7d,
     daily,
+    referralsInFlight,
+    referralsReady,
+    unreadNotifs,
+    latestNotifs,
   ] = await Promise.all([
     db.lead.count({ where: { status: "NEW" } }),
     db.lead.count({ where: { createdAt: { gte: since7d } } }),
@@ -88,6 +94,13 @@ export default async function AdminHomePage() {
       GROUP BY 1
       ORDER BY 1
     `,
+    db.referral.count({ where: { status: { in: ["INVITED", "BOOKED"] } } }),
+    db.referral.count({ where: { status: "COMPLETED" } }),
+    db.adminNotification.count({ where: { readAt: null } }),
+    db.adminNotification.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 8,
+    }),
   ]);
 
   // Fill the last 14 days so quiet days show as zero, not gaps.
@@ -136,6 +149,22 @@ export default async function AdminHomePage() {
       icon: LifeBuoy,
       href: "/admin/support",
       accent: "text-amber-200 bg-amber-500/15",
+    },
+    {
+      label: "Referrals in flight",
+      value: referralsInFlight,
+      sub: `${referralsReady} ready to award`,
+      icon: Gift,
+      href: "/admin/club/referrals",
+      accent: "text-pink-300 bg-pink-500/15",
+    },
+    {
+      label: "Unread notifications",
+      value: unreadNotifs,
+      sub: "everything the site captured",
+      icon: Bell,
+      href: "/admin/notifications",
+      accent: "text-rose-300 bg-rose-500/15",
     },
     {
       label: "Visitors (7 days)",
@@ -231,6 +260,60 @@ export default async function AdminHomePage() {
           <span>{chart[0]?.label}</span>
           <span>{chart[chart.length - 1]?.label}</span>
         </div>
+      </section>
+
+      {/* ---- Latest activity feed ---- */}
+      <section className="surface-card p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Latest activity</h2>
+          </div>
+          <Link
+            href="/admin/notifications"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
+          >
+            Full feed
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <ul className="mt-4 divide-y divide-surface-border">
+          {latestNotifs.length === 0 && (
+            <li className="py-6 text-sm text-muted-foreground">
+              Nothing yet. Every quote request, reservation, sign-up, referral,
+              and support ticket will land here the moment it happens.
+            </li>
+          )}
+          {latestNotifs.map((n) => {
+            const meta = kindMeta(n.kind);
+            return (
+              <li key={n.id} className="flex items-center gap-3 py-2.5">
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${meta.cls}`}
+                >
+                  {meta.label}
+                </span>
+                <Link
+                  href={n.href ?? meta.href}
+                  className="min-w-0 flex-1 truncate text-sm hover:underline"
+                >
+                  {n.title}
+                </Link>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {n.createdAt.toLocaleString("en-CA", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {!n.readAt && (
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
       {/* ---- Latest inbound ---- */}

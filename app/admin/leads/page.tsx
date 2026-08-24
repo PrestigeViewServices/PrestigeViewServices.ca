@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 
 const ADMIN_ROLES = ["ultimate_admin", "super_admin", "admin", "manager"] as const;
 
-type SearchParams = { status?: string };
+type SearchParams = { status?: string; q?: string };
 
 /**
  * Quote Requests — every lead the public quote form captures, newest first,
@@ -44,19 +44,41 @@ export default async function LeadsPage(props: {
   }
   const db = getDb()!;
 
-  const where: { status?: LeadStatus } = {};
+  const q = (searchParams.q ?? "").trim().slice(0, 100);
+  const where: {
+    status?: LeadStatus;
+    OR?: object[];
+  } = {};
   if (
     searchParams.status &&
     LEAD_STATUS_META.some((s) => s.value === searchParams.status)
   ) {
     where.status = searchParams.status as LeadStatus;
   }
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+      { phone: { contains: q } },
+      { propertyAddress: { contains: q, mode: "insensitive" } },
+    ];
+  }
 
-  const items = await db.lead.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
+  const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  const [items, totalCount, newCount, week, wonAll, lostAll] = await Promise.all([
+    db.lead.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    db.lead.count(),
+    db.lead.count({ where: { status: "NEW" } }),
+    db.lead.count({ where: { createdAt: { gte: weekAgo } } }),
+    db.lead.count({ where: { status: "WON" } }),
+    db.lead.count({ where: { status: "LOST" } }),
+  ]);
+  const decided = wonAll + lostAll;
+  const winRate = decided > 0 ? Math.round((wonAll / decided) * 100) : null;
 
   // Two things change the price on a lead, and both are easy to miss in a
   // notes field: the customer has a free account (member discount), or they
@@ -94,22 +116,38 @@ export default async function LeadsPage(props: {
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Quote Requests</h1>
         <p className="mt-1.5 text-muted-foreground">
-          {items.length} result{items.length === 1 ? "" : "s"} · captured from
-          the website quote form
+          {items.length} shown of {totalCount} total · {newCount} waiting for a
+          first call · {week} new this week
+          {winRate !== null ? ` · ${winRate}% win rate all-time` : ""}
         </p>
       </header>
 
       <div className="flex flex-wrap gap-2 text-sm items-center">
+        <form action="/admin/leads" method="GET" className="mr-2">
+          {searchParams.status && (
+            <input type="hidden" name="status" value={searchParams.status} />
+          )}
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Search name, email, phone, address…"
+            className="h-9 w-64 rounded-full border border-surface-border bg-input/80 px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </form>
         <span className="text-xs uppercase tracking-wider text-muted-foreground">
           Status
         </span>
-        <FilterPill href="/admin/leads" active={!searchParams.status}>
+        <FilterPill
+          href={q ? `/admin/leads?q=${encodeURIComponent(q)}` : "/admin/leads"}
+          active={!searchParams.status}
+        >
           All
         </FilterPill>
         {LEAD_STATUS_META.map((s) => (
           <FilterPill
             key={s.value}
-            href={`/admin/leads?status=${s.value}`}
+            href={`/admin/leads?status=${s.value}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
             active={searchParams.status === s.value}
           >
             {s.label}
@@ -215,6 +253,12 @@ export default async function LeadsPage(props: {
                   label="Received"
                   value={l.createdAt.toLocaleString("en-CA")}
                 />
+                {l.estimateCents != null && (
+                  <Row
+                    label="Quoted"
+                    value={`$${(l.estimateCents / 100).toLocaleString("en-CA")}`}
+                  />
+                )}
               </dl>
 
               {l.message && (

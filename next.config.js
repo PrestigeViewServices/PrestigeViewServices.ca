@@ -49,7 +49,9 @@ const csp = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // 'self' + the Meta pixel's form-based transport (facebook.com/tr) —
+  // without it the pixel logs a CSP violation on every page view.
+  "form-action 'self' https://www.facebook.com",
   "upgrade-insecure-requests",
 ].join("; ");
 

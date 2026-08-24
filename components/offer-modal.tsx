@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Zap } from "lucide-react";
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { modalOffer } from "@/lib/content/offers";
+import type { OfferContent } from "@/lib/site-content";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "pvs-offer-modal-dismissed-v1";
@@ -29,21 +31,69 @@ const ctaVariant = {
   snowland: "snowland",
 } as const;
 
+type ModalOffer = Pick<
+  OfferContent,
+  "headline" | "body" | "ctaLabel" | "ctaHref" | "accent"
+> & { eyebrow?: string };
+
+/** Code-offer fallback, matching the API's shape. */
+function fallbackOffer(): ModalOffer | null {
+  const o = modalOffer();
+  if (!o) return null;
+  return {
+    eyebrow: o.eyebrow,
+    headline: o.headline,
+    body: o.body,
+    ctaLabel: o.ctaLabel,
+    ctaHref: o.ctaHref,
+    accent: o.accent,
+  };
+}
+
 /**
  * Session-gated promo modal. Shows ONCE per browser session, never re-nags.
- * Reads from /lib/content/offers, flip `showInModal: false` to disable.
+ *
+ * The offer comes from /api/site/modal-offer so the owner's edits at
+ * /admin/site/content apply everywhere without making static pages dynamic.
+ * The code offer from /lib/content/offers is the fallback if that fetch
+ * fails, so the modal never breaks with the network.
  */
 export function OfferModal() {
-  const offer = modalOffer();
+  const pathname = usePathname();
+  const [offer, setOffer] = useState<ModalOffer | null>(null);
   const [open, setOpen] = useState(false);
+
+  // The promo popup is for visitors. Never interrupt the owner in the
+  // dashboard or a member in their portal.
+  const suppressed =
+    pathname.startsWith("/admin") || pathname.startsWith("/account");
+
+  useEffect(() => {
+    if (suppressed) return;
+    // Skip the fetch entirely when this session already dismissed the modal.
+    try {
+      if (window.sessionStorage.getItem(STORAGE_KEY)) return;
+    } catch {
+      // Private mode — carry on, worst case the modal shows again.
+    }
+    let cancelled = false;
+    fetch("/api/site/modal-offer")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { offer: ModalOffer | null } | null) => {
+        if (cancelled) return;
+        if (data && "offer" in data) setOffer(data.offer);
+        else setOffer(fallbackOffer());
+      })
+      .catch(() => {
+        if (!cancelled) setOffer(fallbackOffer());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [suppressed]);
 
   useEffect(() => {
     if (!offer) return;
-    // Session storage: cleared when browser tab closes. Perfect "once per session".
-    if (typeof window === "undefined") return;
-    const dismissed = window.sessionStorage.getItem(STORAGE_KEY);
-    if (dismissed) return;
-
     const timer = window.setTimeout(() => setOpen(true), 1200);
     return () => window.clearTimeout(timer);
   }, [offer]);

@@ -33,7 +33,7 @@ const STATUS_COLOR: Record<string, string> = {
   COMPLETED: "bg-slate-500/15 text-slate-200 border-slate-500/25",
 };
 
-type SearchParams = { status?: string };
+type SearchParams = { status?: string; q?: string };
 
 export default async function WinterReservationsPage(
   props: {
@@ -55,19 +55,49 @@ export default async function WinterReservationsPage(
   }
   const db = getDb()!;
 
-  const where: { status?: ReservationStatus } = {};
+  const q = (searchParams.q ?? "").trim().slice(0, 100);
+  const where: { status?: ReservationStatus; OR?: object[] } = {};
   if (
     searchParams.status &&
     RESERVATION_STATUSES.some((s) => s.value === searchParams.status)
   ) {
     where.status = searchParams.status as ReservationStatus;
   }
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+      { phone: { contains: q } },
+      { streetAddress: { contains: q, mode: "insensitive" } },
+      { city: { contains: q, mode: "insensitive" } },
+    ];
+  }
 
-  const items = await db.winterReservation.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
+  const [items, byStatus, confirmedAgg, veteranCount] = await Promise.all([
+    db.winterReservation.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    db.winterReservation.groupBy({ by: ["status"], _count: { status: true } }),
+    db.winterReservation.aggregate({
+      where: { status: { in: ["CONFIRMED", "COMPLETED"] } },
+      _sum: { estimateLowCents: true, estimateHighCents: true },
+    }),
+    db.winterReservation.count({ where: { veteranDiscount: true } }),
+  ]);
+
+  const statusCount = (v: string) =>
+    byStatus.find((b) => b.status === v)?._count.status ?? 0;
+  const totalAll = byStatus.reduce((sum, b) => sum + b._count.status, 0);
+  const bookedLow = confirmedAgg._sum.estimateLowCents ?? 0;
+  const bookedHigh = confirmedAgg._sum.estimateHighCents ?? 0;
+  const money = (cents: number) =>
+    new Intl.NumberFormat("en-CA", {
+      style: "currency",
+      currency: "CAD",
+      maximumFractionDigits: 0,
+    }).format(cents / 100);
 
   return (
     <div className="space-y-8">
@@ -77,28 +107,79 @@ export default async function WinterReservationsPage(
             Winter Reservations
           </h1>
           <p className="mt-1.5 text-muted-foreground">
-            {items.length} result{items.length === 1 ? "" : "s"}
+            {items.length} shown of {totalAll} total · {statusCount("NEW")}{" "}
+            waiting for a first call
           </p>
         </div>
       </header>
 
+      {/* ---- Season at a glance ---- */}
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="surface-card p-4">
+          <p className="text-2xl font-bold tabular-nums">
+            {statusCount("CONFIRMED")}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Confirmed for this winter
+          </p>
+        </div>
+        <div className="surface-card p-4">
+          <p className="text-2xl font-bold tabular-nums">
+            {statusCount("NEW") + statusCount("CONTACTED")}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            In the follow-up queue
+          </p>
+        </div>
+        <div className="surface-card p-4">
+          <p className="text-2xl font-bold tabular-nums">
+            {bookedLow > 0 ? `${money(bookedLow)}–${money(bookedHigh)}` : "$0"}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Season revenue booked (estimates)
+          </p>
+        </div>
+        <div className="surface-card p-4">
+          <p className="text-2xl font-bold tabular-nums">{veteranCount}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Military / veteran (10% off)
+          </p>
+        </div>
+      </section>
+
       <div className="flex flex-wrap gap-2 text-sm items-center">
+        <form action="/admin/winter-reservations" method="GET" className="mr-2">
+          {searchParams.status && (
+            <input type="hidden" name="status" value={searchParams.status} />
+          )}
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Search name, address, city…"
+            className="h-9 w-64 rounded-full border border-surface-border bg-input/80 px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </form>
         <span className="text-xs uppercase tracking-wider text-muted-foreground">
           Status
         </span>
         <FilterPill
-          href="/admin/winter-reservations"
+          href={
+            q
+              ? `/admin/winter-reservations?q=${encodeURIComponent(q)}`
+              : "/admin/winter-reservations"
+          }
           active={!searchParams.status}
         >
-          All
+          All ({totalAll})
         </FilterPill>
         {RESERVATION_STATUSES.map((s) => (
           <FilterPill
             key={s.value}
-            href={`/admin/winter-reservations?status=${s.value}`}
+            href={`/admin/winter-reservations?status=${s.value}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
             active={searchParams.status === s.value}
           >
-            {s.label}
+            {s.label} ({statusCount(s.value)})
           </FilterPill>
         ))}
       </div>

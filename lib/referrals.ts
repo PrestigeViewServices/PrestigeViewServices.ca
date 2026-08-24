@@ -245,6 +245,16 @@ export async function attributeReferral(
           status === "BOOKED" ? (pendingInvite.bookedAt ?? new Date()) : null,
       },
     });
+    try {
+      const { recordNotification } = await import("./admin-notifications");
+      await recordNotification({
+        kind: "referral",
+        title: `Referral: ${opts.friendName || email} followed up on their invite`,
+        db,
+      });
+    } catch {
+      // Best-effort only.
+    }
     return { ok: true, referral, upgraded: true };
   }
 
@@ -264,6 +274,35 @@ export async function attributeReferral(
       bookedAt: status === "BOOKED" ? new Date() : null,
     },
   });
+  try {
+    if (opts.source !== "invite") {
+      const { recordNotification } = await import("./admin-notifications");
+      const { notifyOwner } = await import("./notify");
+      const who = opts.friendName || email;
+      const title =
+        status === "BOOKED"
+          ? `Referral: ${who} requested service through a member's link`
+          : `Referral: ${who} signed up with a member's code`;
+      await recordNotification({ kind: "referral", title, db });
+      await notifyOwner({
+        kind: "other",
+        subject: title,
+        text: [
+          `Friend: ${who} (${email})`,
+          opts.friendPhone ? `Phone: ${opts.friendPhone}` : null,
+          `Came in via: ${opts.source}`,
+          `Their first-service credit: ${formatCents(referral.friendCreditCents ?? 0)} — apply it on their first invoice.`,
+          ``,
+          `Track it: ${siteConfig.url}/admin/club/referrals`,
+        ]
+          .filter(Boolean)
+          .join(String.fromCharCode(10)),
+        sms: `PVS referral: ${who} came in through a member's link`,
+      });
+    }
+  } catch {
+    // Notifications never block attribution.
+  }
   return { ok: true, referral, upgraded: false };
 }
 
@@ -423,6 +462,20 @@ export async function awardReferral(
       data: { status: "AWARDED", awardedAt: new Date() },
     }),
   ]);
+
+  try {
+    const { recordNotification } = await import("./admin-notifications");
+    await recordNotification({
+      kind: "referral",
+      title: `Referral reward paid: ${referral.referrer.firstName} earned ${points} pts`,
+      body: referral.referredName
+        ? `${referral.referredName} completed their first paid service.`
+        : null,
+      db,
+    });
+  } catch {
+    // Best-effort only.
+  }
 
   // Tell the referrer. Best-effort: the ledger entry is what counts.
   try {

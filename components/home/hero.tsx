@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
 import { ArrowRight, Phone, ShieldCheck, MapPin, Star, Medal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
+import { DEFAULT_HERO, type HeroContent } from "@/lib/site-content";
 import { formatPhone } from "@/lib/utils";
 
 /**
@@ -42,7 +43,7 @@ const HERO_PHOTOS = [
 
 const ROTATE_MS = 6000;
 
-export function Hero() {
+export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const [slide, setSlide] = useState(0);
@@ -103,17 +104,14 @@ export function Hero() {
           </p>
 
           <h1 className="heading-display text-balance text-white">
-            Winter Is Coming to the Ottawa Valley.{" "}
+            {content.headlineTop}{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Your Property Will Be Ready.
+              {content.headlineAccent}
             </span>
           </h1>
 
           <p className="mt-6 mx-auto lg:mx-0 max-w-xl text-base sm:text-lg text-sky-100/85 leading-relaxed text-balance">
-            One local, insured crew to close out the season and carry you
-            through it: fall cleanups, gutter cleaning before the freeze, and
-            seasonal snow removal that keeps your driveway clear all winter.
-            Free quotes in one business day.
+            {content.subtext}
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">

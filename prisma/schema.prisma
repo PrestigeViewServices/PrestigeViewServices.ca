@@ -1248,3 +1248,32 @@ model AdminCredential {
   passwordHash String
   updatedAt    DateTime @updatedAt
 }
+
+/// In-app notification feed for the admin dashboard. Written by the same
+/// paths that send the owner email/SMS (lib/notify.ts fan-out) plus referral
+/// events, so the bell works even while RESEND_API_KEY is missing.
+model AdminNotification {
+  id        String    @id @default(cuid())
+  /// "lead" | "winter" | "application" | "support" | "member" | "referral"
+  /// | "giveaway" | "ticket" | "redemption" | "claim" | "system"
+  kind      String
+  title     String
+  body      String?
+  /// Admin page where the work happens, e.g. "/admin/leads".
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([readAt])
+  @@index([createdAt])
+  @@index([kind])
+}
+
+/// Owner-editable website content (hero copy, season banner, offers). One
+/// JSON value per key; lib/site-content.ts owns the shapes and the code
+/// defaults that apply when a key is missing.
+model SiteContent {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

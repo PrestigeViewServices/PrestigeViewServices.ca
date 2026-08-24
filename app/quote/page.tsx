@@ -7,6 +7,8 @@ import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Get a Free Quote, Lawn, Window, Snow Services",
   description:

@@ -612,6 +612,16 @@ async function requestRedemption(formData: FormData) {
     },
   });
 
+  {
+    const { recordNotification } = await import("@/lib/admin-notifications");
+    await recordNotification({
+      kind: "redemption",
+      title: `${member?.firstName ?? "A member"} requested ${formatCents(redemption.creditCents)} in service credit`,
+      body: `${redemption.points} points held until you approve or decline.`,
+      db,
+    });
+  }
+
   await sendClubEmail({
     to: clubNotifyEmail(),
     subject: `Redemption request: ${formatCents(redemption.creditCents)} — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
@@ -646,6 +656,15 @@ async function claimReview() {
 
   const member = await db.member.findUnique({ where: { id: memberId } });
   await db.reviewClaim.create({ data: { memberId, kind: "review" } });
+  {
+    const { recordNotification } = await import("@/lib/admin-notifications");
+    await recordNotification({
+      kind: "claim",
+      title: `${member?.firstName ?? "A member"} claims a Google review bonus`,
+      body: "Verify the review, then approve it in Approvals.",
+      db,
+    });
+  }
   await sendClubEmail({
     to: clubNotifyEmail(),
     subject: `Review bonus claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
@@ -687,6 +706,15 @@ async function claimSocial(formData: FormData) {
   await db.reviewClaim.create({
     data: { memberId, kind: "social", note: link || null },
   });
+  {
+    const { recordNotification } = await import("@/lib/admin-notifications");
+    await recordNotification({
+      kind: "claim",
+      title: `${member?.firstName ?? "A member"} claims a social shoutout bonus`,
+      body: link || "No link provided — check the tagged posts.",
+      db,
+    });
+  }
   await sendClubEmail({
     to: clubNotifyEmail(),
     subject: `Social shoutout claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
