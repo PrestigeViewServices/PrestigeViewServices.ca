@@ -207,9 +207,14 @@ export default function AboutPvsPage() {
               {siteConfig.email}
             </a>
           </div>
-          <div className="flex items-center gap-2.5">
-            <Clock className="h-4 w-4 shrink-0 text-primary" />
-            <span>{siteConfig.hours}</span>
+          <div className="flex items-start gap-2.5">
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>
+              {siteConfig.hours}
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {siteConfig.hoursNote}
+              </span>
+            </span>
           </div>
         </dl>
       </section>

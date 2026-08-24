@@ -128,7 +128,7 @@ export default function RootLayout({
       addressRegion: siteConfig.address.region,
       addressCountry: siteConfig.address.country,
     },
-    openingHours: "Mo-Sa 07:00-19:00",
+    openingHours: "Mo-Fr 08:00-17:00",
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Property Care Services",

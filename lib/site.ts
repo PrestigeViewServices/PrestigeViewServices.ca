@@ -10,7 +10,10 @@ export const siteConfig = {
   phoneDisplay: "(613) 334-5858",
   email: "contact@prestigeviewservices.ca",
   serviceArea: "Petawawa, Pembroke & the Ottawa Valley",
-  hours: "Mon–Sat, 7:00am–7:00pm",
+  hours: "Mon–Fri, 8:00am–5:00pm",
+  /** Rendered under the hours wherever they appear. */
+  hoursNote:
+    "Calls and texts after hours are returned the next morning. Or email us anytime and we will get back to you shortly.",
   address: {
     streetAddress: "45 Water Tower Road",
     locality: "Petawawa",

@@ -52,6 +52,7 @@ export default function ContactPage() {
               icon={<Clock className="h-5 w-5" />}
               label="Hours"
               value={siteConfig.hours}
+              sub={siteConfig.hoursNote}
             />
           </div>
 
@@ -69,11 +70,14 @@ function ContactCard({
   icon,
   label,
   value,
+  sub,
   href,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  /** Smaller line under the value, e.g. the after-hours callback note. */
+  sub?: string;
   href?: string;
 }) {
   const inner = (
@@ -86,6 +90,11 @@ function ContactCard({
           {label}
         </p>
         <p className="mt-0.5 font-semibold">{value}</p>
+        {sub && (
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+            {sub}
+          </p>
+        )}
       </div>
     </>
   );

@@ -109,7 +109,7 @@ export default async function ServiceAreaPage(
         latitude: area.geo.lat,
         longitude: area.geo.lng,
       },
-      openingHours: "Mo-Sa 07:00-19:00",
+      openingHours: "Mo-Fr 08:00-17:00",
     },
     ...(area.faqs && area.faqs.length > 0
       ? [

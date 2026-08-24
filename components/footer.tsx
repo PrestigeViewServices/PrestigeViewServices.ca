@@ -125,7 +125,12 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0 opacity-70" />
-                <span>{siteConfig.hours}</span>
+                <span>
+                  {siteConfig.hours}
+                  <span className="mt-0.5 block text-xs opacity-70">
+                    {siteConfig.hoursNote}
+                  </span>
+                </span>
               </li>
             </ul>
           </div>

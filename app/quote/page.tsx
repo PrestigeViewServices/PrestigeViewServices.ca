@@ -104,9 +104,14 @@ export default async function QuotePage() {
                   {siteConfig.email}
                 </a>
               </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
-                <Clock className="h-4 w-4 text-primary" />
-                {siteConfig.hours}
+              <li className="flex items-start gap-3 text-muted-foreground">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>
+                  {siteConfig.hours}
+                  <span className="mt-0.5 block text-xs opacity-80">
+                    {siteConfig.hoursNote}
+                  </span>
+                </span>
               </li>
             </ul>
           </div>
