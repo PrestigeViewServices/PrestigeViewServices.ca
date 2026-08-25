@@ -74,6 +74,11 @@ export type TierComparison = {
   passesPerStorm: string;
   ridgeRemoval: boolean | string;
   liveTracking: boolean;
+  /** What this tier's customer-portal experience includes, one short phrase.
+   *  `false` = no portal access (Bronze). */
+  portal: boolean | string;
+  /** "Driveway cleared" alerts with a time-stamped photo in the portal. */
+  photoProof: boolean;
   priorityRouting: boolean;
   spotCap: string;
 };
@@ -117,6 +122,8 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       passesPerStorm: "1 pass",
       ridgeRemoval: "Add-on",
       liveTracking: false,
+      portal: false,
+      photoProof: false,
       priorityRouting: false,
       spotCap: "Open",
     },
@@ -144,6 +151,8 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       passesPerStorm: "1 pass",
       ridgeRemoval: "Add-on",
       liveTracking: true,
+      portal: "Billing + live storm map",
+      photoProof: false,
       priorityRouting: false,
       spotCap: "Open",
     },
@@ -162,6 +171,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       "Night and day passes, cleared both ways",
       "City plow ridge removal included",
       "Priority routing, done within 10 hours",
+      "Portal alerts + photo proof of every visit",
     ],
     excluded: [],
     accent: "#FFD700",
@@ -171,6 +181,8 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       passesPerStorm: "2 passes, night and day",
       ridgeRemoval: true,
       liveTracking: true,
+      portal: "Alerts, photos & history",
+      photoProof: true,
       priorityRouting: true,
       spotCap: "Open",
     },
@@ -190,6 +202,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       "Earliest trigger, we move at 3 cm",
       "Preventative storm management",
       "White-glove service, done within 8 hours",
+      "VIP portal: photo proof + priority line",
       "Limited spots so service never slips",
     ],
     excluded: [],
@@ -201,6 +214,8 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       passesPerStorm: "2 passes plus preventative",
       ridgeRemoval: true,
       liveTracking: true,
+      portal: "VIP: full experience",
+      photoProof: true,
       priorityRouting: true,
       spotCap: "Capped per route",
     },
@@ -342,6 +357,86 @@ export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
 }
 
 // =============================================================================
+// CUSTOMER PORTAL (Aurora Suite)
+// =============================================================================
+// Silver, Gold, and Platinum passes include an account in our customer portal
+// (portal.aurorasuite.ca, run by the same dispatch platform that routes the
+// tractors). Bronze has no portal access. The full experience is what sells
+// Gold and Platinum, so each feature declares which tiers unlock it.
+//
+// ⚠️ MARKETING CLAIMS. Confirm each line against what the portal actually
+// shows customers before launch, then edit here — the showcase section, the
+// tier cards, the comparison table, and the FAQ all read from this file.
+
+export type PortalFeature = {
+  key: string;
+  title: string;
+  body: string;
+  /** Tiers whose pass includes this portal feature. */
+  tiers: DrivewayTier[];
+};
+
+export const PORTAL_FEATURES: PortalFeature[] = [
+  {
+    key: "live-map",
+    title: "Live storm map",
+    body: "Watch your operator work toward your driveway in real time during a storm. No wondering, no waiting by the window.",
+    tiers: ["SILVER", "GOLD", "PLATINUM"],
+  },
+  {
+    key: "cleared-alerts",
+    title: "“Driveway cleared” alerts",
+    body: "Get told the moment each pass is finished — the overnight one included, so you walk out to a driveway you already know is open.",
+    tiers: ["GOLD", "PLATINUM"],
+  },
+  {
+    key: "photo-proof",
+    title: "Photo proof of every visit",
+    body: "Every clearing is logged with a time-stamped photo. Deployed, travelling, or managing a rental? See your driveway from anywhere on earth.",
+    tiers: ["GOLD", "PLATINUM"],
+  },
+  {
+    key: "visit-history",
+    title: "Season-long visit history",
+    body: "Every pass on record with its date and time. Handy for insurance, tenants, and settling “did they even come?” for good.",
+    tiers: ["GOLD", "PLATINUM"],
+  },
+  {
+    key: "one-tap-requests",
+    title: "One-tap requests",
+    body: "Need an extra pass or a walkway top-up? Send it from your phone in seconds instead of playing phone tag mid-storm.",
+    tiers: ["GOLD", "PLATINUM"],
+  },
+  {
+    key: "billing",
+    title: "Billing in one place",
+    body: "Your quote, your seasonal invoice, and your payments, all in your portal. No paper, no surprises after a heavy month.",
+    tiers: ["SILVER", "GOLD", "PLATINUM"],
+  },
+  {
+    key: "priority-line",
+    title: "Platinum priority line",
+    body: "Platinum messages jump the queue and get answered first, with proactive updates before big storms hit.",
+    tiers: ["PLATINUM"],
+  },
+];
+
+/** Chip label for where a portal feature starts, e.g. "Gold & Platinum". */
+export function portalTierLabel(f: PortalFeature): string {
+  if (f.tiers.length === DRIVEWAY_TIERS.length) return "All passes";
+  if (f.tiers.length === 1) return `${getDrivewayTier(f.tiers[0]).name} only`;
+  // A run of three or more ending at Platinum reads better as "<tier> & up".
+  const first = DRIVEWAY_TIERS.indexOf(f.tiers[0]);
+  const isSuffixRun =
+    f.tiers.length === DRIVEWAY_TIERS.length - first &&
+    f.tiers.every((t, i) => t === DRIVEWAY_TIERS[first + i]);
+  if (isSuffixRun && f.tiers.length > 2) {
+    return `${getDrivewayTier(f.tiers[0]).name} & up`;
+  }
+  return f.tiers.map((t) => getDrivewayTier(t).name).join(" & ");
+}
+
+// =============================================================================
 // COMPARISON TABLE
 // =============================================================================
 // Row order is the reading order in the table. `render` pulls the value off a
@@ -356,6 +451,8 @@ export const COMPARISON_ROWS: {
   { label: "Passes per storm", render: (c) => c.passesPerStorm },
   { label: "City ridge removal", render: (c) => c.ridgeRemoval },
   { label: "Live tracking", render: (c) => c.liveTracking },
+  { label: "Customer portal", render: (c) => c.portal },
+  { label: "Cleared alerts + photo proof", render: (c) => c.photoProof },
   { label: "Priority routing", render: (c) => c.priorityRouting },
   { label: "Spot caps", render: (c) => c.spotCap },
 ];

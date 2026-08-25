@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  Camera,
   Check,
   MapPin,
   Medal,
@@ -20,6 +21,7 @@ import { ServiceAmbience } from "@/components/service-ambience";
 import { SamImage } from "@/components/sam";
 import { OfferCountdown } from "@/components/winter/offer-countdown";
 import { PackageSelector } from "@/components/winter/package-selector";
+import { PortalShowcase } from "@/components/winter/portal-showcase";
 import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
@@ -32,13 +34,13 @@ export const metadata: Metadata = {
   title:
     "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
   description:
-    "Seasonal snow removal passes in Petawawa & Pembroke. Auto-dispatch when it storms, no calling. Bronze to Platinum packages. Military discount. Free quote.",
+    "Seasonal snow removal passes in Petawawa & Pembroke. Auto-dispatch when it storms, live tracking & photo proof in your customer portal. Bronze to Platinum. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
       "Seasonal Snow Passes in Petawawa & Pembroke | Prestige View Services",
     description:
-      "Storms trigger us automatically, you never make a call. Bronze to Platinum seasonal passes. Military discount. Free quote, no payment today.",
+      "Storms trigger us automatically, you never make a call. Watch your plow live and get photo proof in your customer portal. Bronze to Platinum passes. Military discount.",
     url: "/winter-packages",
     type: "website",
     images: [
@@ -73,6 +75,7 @@ const HOW_IT_WORKS = [
 const TRUST_STRIP = [
   { icon: Medal, label: "Military and veterans always save 10%" },
   { icon: Radar, label: "Auto-dispatch, no calling needed" },
+  { icon: Camera, label: "Live tracking & photo proof in your portal" },
   { icon: Snowflake, label: "Limited spots per route" },
 ];
 
@@ -127,12 +130,16 @@ const WINTER_FAQS = [
     a: "That is the normal case, and it is what the tiers are built around. Gold and Platinum include a night pass and a day pass, so you are cleared both ways: open for the early departure and open again after the storm finishes. Silver and Bronze are cleared within their stated window.",
   },
   {
+    q: "How do I know when my driveway has been cleared?",
+    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive — you never have to wonder.",
+  },
+  {
     q: "Do I need to be home?",
     a: "No. Once your markers are staked, the operator knows your edges even in a whiteout. Just leave the driveway clear of vehicles where you can, and tell us anything we should know, gate codes, dogs, or a spot you would rather we did not push snow onto.",
   },
   {
     q: "How do seasonal passes get billed?",
-    a: "One flat seasonal rate for the whole winter, no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then you choose how to pay it. Nothing is collected when you send a quote request.",
+    a: "One flat seasonal rate for the whole winter, no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then you choose how to pay it, and on Silver and up your quote, invoice, and payments all live in your customer portal. Nothing is collected when you send a quote request.",
   },
   {
     q: "Can I upgrade mid-season?",
@@ -277,7 +284,7 @@ export default function WinterPackagesPage() {
             </div>
           </div>
 
-          <ul className="mt-12 grid gap-3 sm:grid-cols-3">
+          <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST_STRIP.map((t) => (
               <li
                 key={t.label}
@@ -316,6 +323,9 @@ export default function WinterPackagesPage() {
           ))}
         </ol>
       </section>
+
+      {/* ── Customer portal showcase ── */}
+      <PortalShowcase />
 
       {/* ── Selector, add-ons, comparison, save card, quote form ── */}
       <PackageSelector comparison={<ComparisonTable />} />
