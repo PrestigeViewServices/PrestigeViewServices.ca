@@ -62,9 +62,9 @@ export function PortalShowcase() {
               </h2>
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                Every seasonal pass now includes a private customer portal,
-                powered by Aurora — the same dispatch system that routes our
-                tractors.{" "}
+                Every Silver, Gold, and Platinum pass now includes a private
+                customer portal, powered by Aurora — the same dispatch system
+                that routes our tractors.{" "}
                 <strong className="text-foreground">
                   Gold and Platinum unlock the full experience
                 </strong>
@@ -99,8 +99,9 @@ export function PortalShowcase() {
                   className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-300"
                   aria-hidden
                 />
-                Included with your pass at no extra cost. We set your portal up
-                for you when we confirm your route spot.
+                Included with every Silver, Gold, and Platinum pass at no extra
+                cost. We set your portal up for you when we confirm your route
+                spot.
               </p>
             </div>
 

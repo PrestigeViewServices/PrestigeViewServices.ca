@@ -131,7 +131,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do I know when my driveway has been cleared?",
-    a: "Every pass includes an account in our customer portal. Silver and up can watch the operator on a live map while the storm is on, and Gold and Platinum get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive — you never have to wonder.",
+    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive — you never have to wonder.",
   },
   {
     q: "Do I need to be home?",
@@ -139,7 +139,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do seasonal passes get billed?",
-    a: "One flat seasonal rate for the whole winter, no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then you choose how to pay it, and your quote, invoice, and payments all live in your customer portal. Nothing is collected when you send a quote request.",
+    a: "One flat seasonal rate for the whole winter, no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then you choose how to pay it, and on Silver and up your quote, invoice, and payments all live in your customer portal. Nothing is collected when you send a quote request.",
   },
   {
     q: "Can I upgrade mid-season?",

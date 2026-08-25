@@ -74,8 +74,9 @@ export type TierComparison = {
   passesPerStorm: string;
   ridgeRemoval: boolean | string;
   liveTracking: boolean;
-  /** What this tier's customer-portal experience includes, one short phrase. */
-  portal: string;
+  /** What this tier's customer-portal experience includes, one short phrase.
+   *  `false` = no portal access (Bronze). */
+  portal: boolean | string;
   /** "Driveway cleared" alerts with a time-stamped photo in the portal. */
   photoProof: boolean;
   priorityRouting: boolean;
@@ -121,7 +122,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       passesPerStorm: "1 pass",
       ridgeRemoval: "Add-on",
       liveTracking: false,
-      portal: "Billing & invoices",
+      portal: false,
       photoProof: false,
       priorityRouting: false,
       spotCap: "Open",
@@ -358,10 +359,10 @@ export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
 // =============================================================================
 // CUSTOMER PORTAL (Aurora Suite)
 // =============================================================================
-// Every seasonal pass includes an account in our customer portal
+// Silver, Gold, and Platinum passes include an account in our customer portal
 // (portal.aurorasuite.ca, run by the same dispatch platform that routes the
-// tractors). The full experience is what sells Gold and Platinum, so each
-// feature declares which tiers unlock it.
+// tractors). Bronze has no portal access. The full experience is what sells
+// Gold and Platinum, so each feature declares which tiers unlock it.
 //
 // ⚠️ MARKETING CLAIMS. Confirm each line against what the portal actually
 // shows customers before launch, then edit here — the showcase section, the
@@ -410,7 +411,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
     key: "billing",
     title: "Billing in one place",
     body: "Your quote, your seasonal invoice, and your payments, all in your portal. No paper, no surprises after a heavy month.",
-    tiers: ["BRONZE", "SILVER", "GOLD", "PLATINUM"],
+    tiers: ["SILVER", "GOLD", "PLATINUM"],
   },
   {
     key: "priority-line",
