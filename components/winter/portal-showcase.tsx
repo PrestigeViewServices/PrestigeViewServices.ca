@@ -63,7 +63,8 @@ export function PortalShowcase() {
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
                 Every seasonal pass now includes a private customer portal,
-                powered by the same dispatch system that routes our tractors.{" "}
+                powered by Aurora — the same dispatch system that routes our
+                tractors.{" "}
                 <strong className="text-foreground">
                   Gold and Platinum unlock the full experience
                 </strong>
