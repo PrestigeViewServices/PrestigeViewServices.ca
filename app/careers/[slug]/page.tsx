@@ -17,7 +17,7 @@ import {
 } from "@/lib/content/careers";
 import { siteConfig } from "@/lib/site";
 import { DivisionBadge } from "@/components/careers/division-badge";
-import { ApplicationForm } from "@/components/application-form";
+import { ApplicationQuestionnaire } from "@/components/careers/application-questionnaire";
 import { Button } from "@/components/ui/button";
 
 type Params = { slug: string };
@@ -130,8 +130,8 @@ export default async function RoleDetailPage(props: { params: Promise<Params> })
         </dl>
       </section>
 
-      <section className="container-max py-10 grid gap-10 lg:grid-cols-12">
-        <div className="lg:col-span-7 space-y-8">
+      <section className="container-max py-10">
+        <div className="max-w-3xl space-y-8">
           <ListBlock
             heading="Responsibilities"
             items={role.responsibilities}
@@ -145,11 +145,9 @@ export default async function RoleDetailPage(props: { params: Promise<Params> })
             />
           )}
         </div>
-
-        <div className="lg:col-span-5">
-          <ApplicationForm defaultRoleSlug={role.slug} />
-        </div>
       </section>
+
+      <ApplicationQuestionnaire />
     </>
   );
 }

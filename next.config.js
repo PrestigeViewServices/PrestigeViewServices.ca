@@ -42,6 +42,7 @@ const csp = [
   [
     "frame-src",
     "https://aurorasuite.ca", // quote/contact lead form iframe
+    "https://docs.google.com", // careers application questionnaire (Google Forms)
     "https://www.facebook.com",
     "https://*.trustindex.io",
   ].join(" "),
