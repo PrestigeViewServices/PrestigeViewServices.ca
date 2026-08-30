@@ -19,14 +19,29 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { SamImage } from "@/components/sam";
-import { OfferCountdown } from "@/components/winter/offer-countdown";
+import { EquipmentGrid } from "@/components/winter/equipment-grid";
 import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
+import { PovSection } from "@/components/winter/pov-section";
+import { PromoCountdown } from "@/components/winter/promo-countdown";
+import { StormNightLazy } from "@/components/winter/storm-night-lazy";
+import { WinterOffersStrip } from "@/components/winter/winter-offers-strip";
 import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
 } from "@/lib/content/winter-packages";
+import {
+  promoEndsLabel,
+  promoIsLive,
+  promoPercentLabel,
+} from "@/lib/content/winter-campaign";
+import { getSiteContent } from "@/lib/site-content";
 import { siteConfig } from "@/lib/site";
+
+// The promo badge, countdown, and discount ladder are owner-editable at
+// /admin/site/content, so this page renders per-request instead of being
+// frozen at build time.
+export const dynamic = "force-dynamic";
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
 
@@ -122,8 +137,12 @@ const WINTER_FAQS = [
     a: "Passes run for the whole winter season. We stake driveway markers before freeze-up, usually through late October and November, and coverage begins with the first snowfall that hits your package's trigger depth. Reserve early: routes are capped and they fill before the first storm.",
   },
   {
-    q: "What counts as a storm, and what triggers a visit?",
-    a: "Your package sets the trigger depth. Platinum moves at 3 cm, Silver and Gold at 5 cm, and Bronze runs one pass once the snow has stopped. We watch accumulation on your route, so when it crosses your threshold your driveway is already on the run. You never phone it in.",
+    q: "What counts as 3 cm, and who decides?",
+    a: "We measure accumulation on your route, not at the airport. When snowfall on the ground crosses 3 cm, dispatch triggers automatically for Bronze, Gold, and Platinum (Silver dispatches at 5 cm). You never phone it in, and you never have to argue about whether it snowed enough.",
+  },
+  {
+    q: "When do you actually come?",
+    a: "It depends on the package, and that is the honest difference between the tiers. Gold and Platinum run a night pass while the storm is on and a second pass before the morning commute. Bronze runs one pass per storm event within its 24-hour window. Long-duration storms are worked in waves so nobody is buried until the end.",
   },
   {
     q: "What if it snows overnight?",
@@ -159,11 +178,17 @@ const WINTER_FAQS = [
   },
   {
     q: "Do military members get a discount on snow passes?",
-    a: "Yes. Serving members, veterans, military families, and first responders get 10% off, and it applies to every service we offer. Tick the box on the quote form, or just mention your service when you call.",
+    a: "Yes. Serving members, veterans, military families, and first responders get 10% off, and it applies to every service we offer. Tick the box on the quote form, or just mention your service when you call. If a bigger discount is running, we apply whichever single discount saves you the most; discounts never stack.",
+  },
+  {
+    q: "Do you do commercial lots?",
+    a: "Yes. Plow trucks handle commercial parking lots, storefronts, and multi-unit properties in Petawawa and Pembroke, with salting and walkway crews available. Commercial work is quoted on a site visit, so send a quote request and mention the property type.",
   },
 ];
 
-export default function WinterPackagesPage() {
+export default async function WinterPackagesPage() {
+  const { winterPromo } = await getSiteContent();
+  const promoLive = promoIsLive(winterPromo);
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -254,32 +279,43 @@ export default function WinterPackagesPage() {
 
         <div className="container-max py-16 sm:py-24">
           <div className="max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
-              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Petawawa · New: Pembroke
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
+                <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                Petawawa · New: Pembroke
+              </p>
+              {promoLive && (
+                <p className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-400/10 px-4 py-1.5 text-xs font-bold text-amber-200">
+                  {promoPercentLabel(winterPromo)} off · ends{" "}
+                  {promoEndsLabel(winterPromo)}
+                  <PromoCountdown
+                    endsAt={winterPromo.endsAt}
+                    className="border-l border-amber-300/30 pl-2 font-semibold"
+                  />
+                </p>
+              )}
+            </div>
 
             <h1 className="heading-section mt-5 text-balance">
-              It&apos;s a SnowLand in the Valley
+              The storm hits at midnight. You watch it handled from bed.
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Seasonal snow passes for Petawawa and Pembroke. Storms trigger us
-              automatically, so you never make a call.
+              Seasonal snow contracts from a local Petawawa crew running its
+              own tractors and plow trucks. Snowfall crosses 3 cm and we
+              dispatch, with live storm updates on your phone until your
+              driveway is open.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="xl">
                 <a href="#packages">
-                  Choose my package
+                  Get my winter quote
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </a>
               </Button>
               <Button asChild size="xl" variant="outline">
-                <a href={`sms:${TEL}`}>
-                  <MessageSquare className="h-4 w-4" aria-hidden />
-                  Text us: {siteConfig.phoneDisplay}
-                </a>
+                <a href="#storm-night">See how a storm night works</a>
               </Button>
             </div>
           </div>
@@ -297,6 +333,32 @@ export default function WinterPackagesPage() {
           </ul>
         </div>
       </section>
+
+      {/* ── Storm Night walkthrough ── */}
+      <section id="storm-night" className="container-max scroll-mt-24 py-14">
+        <div className="max-w-2xl">
+          <p className="eyebrow text-primary">Storm Night</p>
+          <h2 className="heading-section mt-2 text-balance">
+            Watch a storm night play out
+          </h2>
+          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+            A simulated overnight storm, start to finish: the 3 cm trigger,
+            the route being cleared toward your house, and the alerts landing
+            on your phone. Flip between the tractor and plow truck, and
+            between single-pass and two-pass packages, to see the difference.
+          </p>
+        </div>
+        <div className="mt-8">
+          <StormNightLazy
+            ctaHref="/winter-packages#packages"
+            ctaLabel="Lock in your spot"
+            source="storm-night"
+          />
+        </div>
+      </section>
+
+      {/* ── Your POV ── */}
+      <PovSection />
 
       {/* ── How it works ── */}
       <section className="container-max py-14">
@@ -330,8 +392,14 @@ export default function WinterPackagesPage() {
       {/* ── Selector, add-ons, comparison, save card, quote form ── */}
       <PackageSelector comparison={<ComparisonTable />} />
 
-      {/* ── Urgency ── */}
-      <OfferCountdown />
+      {/* ── Discounts + urgency ── */}
+      <WinterOffersStrip promo={winterPromo} />
+
+      {/* ── Local crew, real equipment ── */}
+      <EquipmentGrid />
+
+      {/* ── Commercial + Pembroke plow trucks ── */}
+      <CommercialSection />
 
       {/* ── Trust ── */}
       <section className="container-max py-14">
@@ -482,6 +550,73 @@ export default function WinterPackagesPage() {
         </div>
       </section>
     </>
+  );
+}
+
+/**
+ * Commercial lots and the Pembroke plow-truck route get their own short
+ * pitch: different equipment, different buyer, same lead flow.
+ */
+function CommercialSection() {
+  return (
+    <section id="commercial" className="container-max scroll-mt-24 py-6">
+      <div className="overflow-hidden rounded-3xl border border-surface-border bg-surface/60">
+        <div className="grid items-stretch lg:grid-cols-[1fr_1.2fr]">
+          <div className="relative min-h-[220px] lg:min-h-0">
+            <Image
+              src="/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp"
+              alt="PVS plow truck clearing a commercial parking lot at night"
+              fill
+              loading="lazy"
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="p-6 sm:p-8">
+            <p className="eyebrow text-primary">Commercial &amp; Pembroke</p>
+            <h2 className="mt-2 text-xl font-bold sm:text-2xl">
+              Lots, storefronts, and the new Pembroke truck route
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Plow trucks handle what the tractors do not: commercial parking
+              lots, storefront frontage, and the Pembroke residential route we
+              are opening this season. Salting, walkway crews, and
+              open-by-morning scheduling are all quoted to the property.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm">
+              {[
+                "Seasonal commercial contracts with per-storm records",
+                "Pembroke residential spots are capped while the route builds",
+                "Salting and shovel crew add-ons for entrances and walks",
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-2">
+                  <Check
+                    className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400"
+                    strokeWidth={3}
+                    aria-hidden
+                  />
+                  <span className="text-muted-foreground">{line}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href="/request-service?service=snow-removal&src=winter-commercial">
+                  Get a commercial quote
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href={`tel:${TEL}`}>
+                  <Phone className="h-4 w-4" aria-hidden />
+                  {siteConfig.phoneDisplay}
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

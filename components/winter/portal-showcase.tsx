@@ -6,6 +6,7 @@ import {
   Crown,
   History,
   MapPin,
+  PhoneCall,
   Radar,
   Receipt,
   Send,
@@ -41,6 +42,7 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
   "visit-history": History,
   "one-tap-requests": Send,
   billing: Receipt,
+  callback: PhoneCall,
   "priority-line": Crown,
 };
 
@@ -85,6 +87,9 @@ export function PortalShowcase() {
                     Get the full experience with Gold
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </a>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/account">Sign up and get your portal</Link>
                 </Button>
                 <Link
                   href="#compare"

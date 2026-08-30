@@ -92,6 +92,12 @@ export type DrivewayTierDef = {
   excluded: string[];
   /** Badge printed above the card, e.g. Platinum's capped-spots callout. */
   badge?: string;
+  /**
+   * Public price label shown on the card. Only Bronze carries a number (the
+   * $625 season anchor from the 2026-27 campaign brief); undefined = the
+   * card shows "Custom quote" and the office prices to the property.
+   */
+  priceLabel?: string;
   /** Tier accent, used for the card border glow, dot, and the share image. */
   accent: string;
   compare: TierComparison;
@@ -108,18 +114,21 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
   {
     slug: "BRONZE",
     name: "Bronze",
-    blurb: "Entry-level seasonal plowing for budget-minded homeowners.",
+    blurb:
+      "Get on the route. The season anchor: one pass per storm event at the same 3 cm dispatch trigger as everyone else.",
     features: [
-      "1 clearing pass after each storm",
+      "1 clearing pass per storm event",
+      "3 cm dispatch trigger, no calling",
       "Driveway markers included",
       "Done within 24 hours",
     ],
     excluded: ["No night pass", "Flexible routing, not priority"],
+    priceLabel: "From $625 / season",
     accent: "#CD7F32",
     compare: {
-      triggerDepth: "After the storm ends",
+      triggerDepth: "3 cm",
       responseTime: "Within 24 hours",
-      passesPerStorm: "1 pass",
+      passesPerStorm: "1 pass per event",
       ridgeRemoval: "Add-on",
       liveTracking: false,
       portal: false,
@@ -127,13 +136,18 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       priorityRouting: false,
       spotCap: "Open",
     },
+    // Bronze anchor is the published $625 (single). Larger sizes are
+    // PLACEHOLDER scaling, confirm before launch.
     priceCents: {
-      ONE_CAR: 45000,
-      TWO_CAR: 55000,
-      THREE_PLUS_CAR: 65000,
-      LONG_RURAL: 85000,
+      ONE_CAR: 62500,
+      TWO_CAR: 72500,
+      THREE_PLUS_CAR: 85000,
+      LONG_RURAL: 105000,
     },
   },
+  // Silver inclusions below are carried over from the existing config
+  // (5 cm trigger, single pass, 12-hour window). PLACEHOLDER until the
+  // owner confirms 2026-27 Silver terms.
   {
     slug: "SILVER",
     name: "Silver",
@@ -166,17 +180,19 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
   {
     slug: "GOLD",
     name: "Gold",
-    blurb: "Two-pass coverage so you are clear morning and evening.",
+    blurb:
+      "The peace-of-mind tier: two passes per storm event on a 3 cm trigger, so you are clear overnight and again for the commute.",
     features: [
-      "Night and day passes, cleared both ways",
+      "2 passes per event, night and day",
+      "3 cm dispatch trigger",
       "City plow ridge removal included",
-      "Priority routing, done within 10 hours",
       "Portal alerts + photo proof of every visit",
     ],
     excluded: [],
+    badge: "Most Popular",
     accent: "#FFD700",
     compare: {
-      triggerDepth: "5 cm",
+      triggerDepth: "3 cm",
       responseTime: "Within 10 hours",
       passesPerStorm: "2 passes, night and day",
       ridgeRemoval: true,
@@ -197,10 +213,10 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
     slug: "PLATINUM",
     name: "Platinum",
     blurb:
-      "Proactive storm management for busy households. Capped each season so the service never slips, first come first served.",
+      "Top tier, priority timing. Two passes per event at 3 cm with proactive storm management, capped each season so the service never slips.",
     features: [
-      "Earliest trigger, we move at 3 cm",
-      "Preventative storm management",
+      "2 passes per event + preventative work",
+      "3 cm trigger, priority timing",
       "White-glove service, done within 8 hours",
       "VIP portal: photo proof + priority line",
       "Limited spots so service never slips",
@@ -409,8 +425,14 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   },
   {
     key: "billing",
-    title: "Billing in one place",
-    body: "Your quote, your seasonal invoice, and your payments, all in your portal. No paper, no surprises after a heavy month.",
+    title: "Contracts, installments & billing",
+    body: "Your contract, your seasonal invoice, and installment payments, all in your portal. No paper, no surprises after a heavy month.",
+    tiers: ["SILVER", "GOLD", "PLATINUM"],
+  },
+  {
+    key: "callback",
+    title: "Request a callback",
+    body: "Ask for a call from your portal and the office phones you back. No hold music in the middle of a storm week.",
     tiers: ["SILVER", "GOLD", "PLATINUM"],
   },
   {
