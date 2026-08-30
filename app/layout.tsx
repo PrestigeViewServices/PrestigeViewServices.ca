@@ -6,6 +6,7 @@ import { TrackPageview } from "@/components/track-pageview";
 // no auth provider wraps the tree.
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { WinterAnnouncementBar } from "@/components/winter/announcement-bar";
 import { OfferModal } from "@/components/offer-modal";
 import { StickyCta } from "@/components/sticky-cta";
 import { ScrollProgress } from "@/components/scroll-progress";
@@ -166,6 +167,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <ScrollProgress />
+        {/* Winter promo bar — config-driven, dismissible, hides itself on
+            internal surfaces and once the promo window closes. */}
+        <WinterAnnouncementBar />
         <Header />
         <main id="main" className="flex-1">
           {children}
