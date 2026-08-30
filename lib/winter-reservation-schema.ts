@@ -52,6 +52,9 @@ export const winterReservationSchema = z.object({
     .max(1500, "Keep it under 1500 characters")
     .optional()
     .or(z.literal("")),
+  /** Which page/CTA produced this reservation, e.g. "winter-packages via
+   * lawn-mowing". Stored for the admin winter dashboard. */
+  sourcePage: z.string().max(160).optional().or(z.literal("")),
   /** Anti-spam honeypot — must be empty */
   hp: z.string().max(0).optional(),
 });

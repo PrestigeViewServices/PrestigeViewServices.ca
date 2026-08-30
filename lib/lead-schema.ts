@@ -76,6 +76,14 @@ export const leadSchema = z.object({
     .max(2000, "Keep it under 2000 characters")
     .optional()
     .or(z.literal("")),
+  /** Which page/CTA produced this lead, e.g. "fall-cleanup-page". Stored on
+   * the Lead so the admin pipeline can see what converts. */
+  sourcePage: z.string().max(160).optional().or(z.literal("")),
+  /** Winter package/pack the visitor had in mind, when a cross-sell or the
+   * winter selector pre-filled one. */
+  packageInterest: z.string().max(80).optional().or(z.literal("")),
+  /** "Add snow removal" bundle toggle: also record seasonal snow interest. */
+  addSnow: z.boolean().optional(),
   /** Anti-spam honeypot — must be empty. */
   hp: z.string().max(0).optional(),
 });
