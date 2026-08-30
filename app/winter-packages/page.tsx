@@ -150,7 +150,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do I know when my driveway has been cleared?",
-    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive — you never have to wonder.",
+    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive. You never have to wonder.",
   },
   {
     q: "Do I need to be home?",
