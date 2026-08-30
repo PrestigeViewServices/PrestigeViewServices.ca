@@ -87,6 +87,7 @@ export async function POST(request: Request) {
       `Military/veteran 10%: ${payload.addOns.includes("VETERAN") ? "YES" : "no"}`,
       ``,
       `Internal estimate: $${(low / 100).toFixed(0)}–$${(high / 100).toFixed(0)} (before discounts)`,
+      payload.sourcePage ? `Source page: ${payload.sourcePage}` : null,
       payload.customerNotes ? `\nNotes:\n${payload.customerNotes}` : null,
       ``,
       `Manage: /admin/winter-reservations`,
@@ -111,27 +112,46 @@ export async function POST(request: Request) {
   }
 
   try {
-    const created = await db.winterReservation.create({
-      data: {
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        streetAddress: payload.streetAddress,
-        city: payload.city,
-        region: payload.region || "ON",
-        postalCode: payload.postalCode || null,
-        drivewayTier: payload.drivewayTier,
-        drivewaySize: payload.drivewaySize,
-        shovelingTier: payload.shovelingTier,
-        saltingAddOn: payload.addOns.includes("SALTING"),
-        ridgePriority: payload.addOns.includes("RIDGE_PRIORITY"),
-        veteranDiscount: payload.addOns.includes("VETERAN"),
-        estimateLowCents: low,
-        estimateHighCents: high,
-        customerNotes: payload.customerNotes || null,
-      },
-      select: { id: true },
-    });
+    const data = {
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      streetAddress: payload.streetAddress,
+      city: payload.city,
+      region: payload.region || "ON",
+      postalCode: payload.postalCode || null,
+      drivewayTier: payload.drivewayTier,
+      drivewaySize: payload.drivewaySize,
+      shovelingTier: payload.shovelingTier,
+      saltingAddOn: payload.addOns.includes("SALTING"),
+      ridgePriority: payload.addOns.includes("RIDGE_PRIORITY"),
+      veteranDiscount: payload.addOns.includes("VETERAN"),
+      estimateLowCents: low,
+      estimateHighCents: high,
+      customerNotes: payload.customerNotes || null,
+    };
+    let created: { id: string };
+    try {
+      created = await db.winterReservation.create({
+        data: { ...data, sourcePage: payload.sourcePage || null },
+        select: { id: true },
+      });
+    } catch (colErr) {
+      // Pre-migration database (sourcePage column missing): keep the
+      // reservation by folding the source into the customer notes.
+      // eslint-disable-next-line no-console
+      console.warn("Winter reservation create with sourcePage failed, retrying", colErr);
+      created = await db.winterReservation.create({
+        data: {
+          ...data,
+          customerNotes:
+            [data.customerNotes, payload.sourcePage ? `Source: ${payload.sourcePage}` : null]
+              .filter(Boolean)
+              .join("\n") || null,
+        },
+        select: { id: true },
+      });
+    }
 
     // A snow reservation is a booking like any other, so a referral link that
     // ends here counts. Best-effort, and always after the reservation is safe.

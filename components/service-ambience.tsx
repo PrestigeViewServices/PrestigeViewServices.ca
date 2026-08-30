@@ -1,5 +1,6 @@
 import { Snowflake, Sprout, Droplet, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AmbienceParticles } from "@/components/service-ambience-particles";
 
 /**
  * Subtle, full-viewport ambient layer for service pages. Sits behind every
@@ -18,13 +19,6 @@ type Theme = "snow" | "lawn" | "water" | "autumn";
 
 export type ServiceAmbienceTheme = Theme;
 
-const ICON: Record<Theme, typeof Snowflake> = {
-  snow: Snowflake,
-  lawn: Sprout,
-  water: Droplet,
-  autumn: Leaf,
-};
-
 const TINT: Record<Theme, string> = {
   // A very soft, atmospheric radial wash. Sits on top of the existing dark
   // body bg so the modern look is preserved.
@@ -38,38 +32,7 @@ const TINT: Record<Theme, string> = {
     "bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.10),transparent_60%)]",
 };
 
-const PARTICLE_COLOR: Record<Theme, string> = {
-  snow: "text-sky-200",
-  lawn: "text-emerald-300",
-  water: "text-blue-300",
-  autumn: "text-amber-300",
-};
-
-// Falling vs rising, only lawn rises (like grass clippings drifting up).
-const ANIM_CLASS: Record<Theme, string> = {
-  snow: "animate-ambience-fall",
-  lawn: "animate-ambience-rise",
-  water: "animate-ambience-fall-fast",
-  autumn: "animate-ambience-fall-tumble",
-};
-
-/**
- * 16 particles. Positions, delays, durations, and sizes derived from the
- * index so SSR + hydrate match deterministically. The %-based math gives a
- * "scattered" feel without rng.
- */
-const PARTICLES = Array.from({ length: 16 }, (_, i) => ({
-  left: ((i * 6.25) + ((i * 17) % 8)) % 100,            // 0–100% across viewport
-  delay: ((i * 0.7) % 8).toFixed(2),                    // 0.00–7.00s stagger
-  duration: 9 + (i % 7),                                // 9–15s per traversal
-  size: 8 + (i % 5),                                    // 8–12px
-  opacity: 0.16 + (i % 4) * 0.05,                       // 0.16–0.31
-  drift: ((i * 13) % 60) - 30,                          // ±30px horizontal drift
-  rotate: ((i * 41) % 360),                             // 0–360deg final rotation
-}));
-
 export function ServiceAmbience({ theme }: { theme: Theme }) {
-  const Icon = ICON[theme];
   return (
     <div
       aria-hidden
@@ -78,31 +41,9 @@ export function ServiceAmbience({ theme }: { theme: Theme }) {
         TINT[theme]
       )}
     >
-      {/* Reduced-motion: hide particles entirely; soft tint remains. */}
-      <div className="motion-reduce:hidden">
-        {PARTICLES.map((p, i) => (
-          <span
-            key={i}
-            className={cn(
-              "absolute will-change-transform",
-              PARTICLE_COLOR[theme],
-              ANIM_CLASS[theme]
-            )}
-            style={{
-              left: `${p.left}%`,
-              top: 0,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-              opacity: p.opacity,
-              // CSS custom props consumed by the keyframes for varied drift + rotation
-              ["--p-drift" as string]: `${p.drift}px`,
-              ["--p-rotate" as string]: `${p.rotate}deg`,
-            }}
-          >
-            <Icon size={p.size} strokeWidth={1.5} />
-          </span>
-        ))}
-      </div>
+      {/* Particles mount after the browser goes idle (and never for
+          reduced-motion users); the soft tint above renders immediately. */}
+      <AmbienceParticles theme={theme} />
     </div>
   );
 }

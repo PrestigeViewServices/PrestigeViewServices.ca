@@ -1,12 +1,24 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { Mail, Phone, MapPin, Inbox, BadgePercent, Gift } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Inbox,
+  BadgePercent,
+  ExternalLink,
+  Gift,
+  Megaphone,
+  Snowflake,
+} from "lucide-react";
 import type { LeadStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { StatusSelect } from "@/components/admin/status-select";
 import { NotesEditor } from "@/components/admin/notes-editor";
+import { CopyButton } from "@/components/admin/copy-button";
+import { QuickActionButton } from "@/components/admin/quick-action-button";
 import {
   DIVISION_ACCENT,
   DIVISION_LABEL,
@@ -65,18 +77,21 @@ export default async function LeadsPage(props: {
   }
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
-  const [items, totalCount, newCount, week, wonAll, lostAll] = await Promise.all([
+  const [items, totalCount, week, byStatus] = await Promise.all([
     db.lead.findMany({
       where,
       orderBy: { createdAt: "desc" },
       take: 200,
     }),
     db.lead.count(),
-    db.lead.count({ where: { status: "NEW" } }),
     db.lead.count({ where: { createdAt: { gte: weekAgo } } }),
-    db.lead.count({ where: { status: "WON" } }),
-    db.lead.count({ where: { status: "LOST" } }),
+    db.lead.groupBy({ by: ["status"], _count: { status: true } }),
   ]);
+  const countFor = (s: LeadStatus) =>
+    byStatus.find((b) => b.status === s)?._count.status ?? 0;
+  const newCount = countFor("NEW");
+  const wonAll = countFor("WON");
+  const lostAll = countFor("LOST");
   const decided = wonAll + lostAll;
   const winRate = decided > 0 ? Math.round((wonAll / decided) * 100) : null;
 
@@ -114,13 +129,31 @@ export default async function LeadsPage(props: {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Quote Requests</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Leads Pipeline</h1>
         <p className="mt-1.5 text-muted-foreground">
           {items.length} shown of {totalCount} total · {newCount} waiting for a
           first call · {week} new this week
-          {winRate !== null ? ` · ${winRate}% win rate all-time` : ""}
+          {winRate !== null ? ` · ${winRate}% booked of decided, all-time` : ""}
         </p>
       </header>
+
+      {/* ---- Pipeline at a glance ---- */}
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {LEAD_STATUS_META.map((s) => (
+          <Link
+            key={s.value}
+            href={`/admin/leads?status=${s.value}`}
+            className="surface-card surface-card-hover p-4"
+          >
+            <p className="text-2xl font-bold tabular-nums">{countFor(s.value)}</p>
+            <span
+              className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[11px] font-medium ${s.color}`}
+            >
+              {s.label}
+            </span>
+          </Link>
+        ))}
+      </section>
 
       <div className="flex flex-wrap gap-2 text-sm items-center">
         <form action="/admin/leads" method="GET" className="mr-2">
@@ -197,7 +230,7 @@ export default async function LeadsPage(props: {
                       </span>
                     )}
                   </div>
-                  {slugs.length > 0 && (
+                  {(slugs.length > 0 || l.sourcePage || l.packageInterest) && (
                     <p className="mt-1 flex flex-wrap gap-1.5">
                       {slugs.map((slug) => (
                         <span
@@ -207,6 +240,18 @@ export default async function LeadsPage(props: {
                           {getService(slug)?.name ?? slug}
                         </span>
                       ))}
+                      {l.packageInterest && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-0.5 text-xs text-cyan-200">
+                          <Snowflake className="h-3 w-3" aria-hidden />
+                          {l.packageInterest}
+                        </span>
+                      )}
+                      {l.sourcePage && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-surface-border bg-surface/60 px-2.5 py-0.5 text-xs text-muted-foreground">
+                          <Megaphone className="h-3 w-3" aria-hidden />
+                          {l.sourcePage}
+                        </span>
+                      )}
                     </p>
                   )}
                 </div>
@@ -272,7 +317,34 @@ export default async function LeadsPage(props: {
                 </div>
               )}
 
-              <div className="mt-5 pt-5 border-t border-surface-border">
+              {/* Quick actions: one-tap follow-up moves without opening menus. */}
+              <div className="mt-5 flex flex-wrap items-center gap-2 pt-5 border-t border-surface-border">
+                {l.status === "NEW" && (
+                  <QuickActionButton
+                    rowId={l.id}
+                    action={markLeadContacted}
+                    label="Mark contacted"
+                    doneLabel="Contacted"
+                  />
+                )}
+                <CopyButton
+                  text={l.email}
+                  label="Copy email"
+                  variant="outline"
+                  size="sm"
+                />
+                <a
+                  href={`https://secure.getjobber.com/clients?search=${encodeURIComponent(l.email)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-surface-border px-4 text-sm font-semibold text-muted-foreground transition-colors hover:border-white/20 hover:text-foreground"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  Open in Jobber
+                </a>
+              </div>
+
+              <div className="mt-4">
                 <NotesEditor
                   rowId={l.id}
                   initialNotes={l.notes}
@@ -345,6 +417,19 @@ async function updateLeadStatus(id: string, status: string) {
   await db.lead.update({
     where: { id },
     data: { status: status as LeadStatus },
+  });
+  revalidatePath("/admin/leads");
+  revalidatePath("/admin");
+}
+
+async function markLeadContacted(id: string) {
+  "use server";
+  await requireRole([...ADMIN_ROLES]);
+  const db = getDb();
+  if (!db) throw new Error("DB not configured");
+  await db.lead.update({
+    where: { id },
+    data: { status: "CONTACTED" },
   });
   revalidatePath("/admin/leads");
   revalidatePath("/admin");

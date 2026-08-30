@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { TrackPageview } from "@/components/track-pageview";
@@ -6,6 +6,7 @@ import { TrackPageview } from "@/components/track-pageview";
 // no auth provider wraps the tree.
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { WinterAnnouncementBar } from "@/components/winter/announcement-bar";
 import { OfferModal } from "@/components/offer-modal";
 import { StickyCta } from "@/components/sticky-cta";
 import { ScrollProgress } from "@/components/scroll-progress";
@@ -29,6 +30,20 @@ const sora = Sora({
   display: "swap",
   weight: ["500", "600", "700", "800"],
 });
+
+/**
+ * minimum-scale pins the mobile layout viewport at device width. Without it,
+ * any element poking past the viewport (decorative layers, wide tables in
+ * scroll wrappers during layout) flips Chrome into zoomed-out "overview
+ * mode": window.innerWidth inflates, the promo modal's scroll-lock then
+ * computes a huge fake scrollbar gap, and the page visibly collapses
+ * (~0.19 CLS). Zooming IN for accessibility is unaffected.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -166,6 +181,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <ScrollProgress />
+        {/* Winter promo bar — config-driven, dismissible, hides itself on
+            internal surfaces and once the promo window closes. */}
+        <WinterAnnouncementBar />
         <Header />
         <main id="main" className="flex-1">
           {children}

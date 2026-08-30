@@ -14,6 +14,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import { FallBundle } from "@/components/fall/fall-bundle";
+import { GutterShowcase } from "@/components/gutter/gutter-showcase";
+import { SnowCrossSell } from "@/components/winter/snow-cross-sell";
 import {
   ServiceAmbience,
   ambienceForService,
@@ -191,6 +194,15 @@ export default async function ServiceDetailPage(
   // / autumn. Returns null for "property-touch-ups" so that page stays plain.
   const ambience = ambienceForService(service.slug);
 
+  // Fall cleanup and gutter cleaning carry their own on-page quote form
+  // (with the snow bundle toggle), so their hero CTA scrolls to it instead
+  // of leaving for /quote, and they skip the generic snow cross-sell band.
+  const hasEmbeddedForm =
+    service.slug === "fall-cleanup" || service.slug === "gutter-cleaning";
+  const quoteHref = hasEmbeddedForm
+    ? "#quote-form"
+    : `/quote?service=${service.slug}`;
+
   return (
     <>
       <script
@@ -230,7 +242,7 @@ export default async function ServiceDetailPage(
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <Link href={`/quote?service=${service.slug}`}>
+                  <Link href={quoteHref}>
                     Get a Free Quote
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -250,13 +262,24 @@ export default async function ServiceDetailPage(
                 alt={gallery.photos[0].alt}
                 fill
                 priority
-                sizes="(min-width:1024px) 40vw, 100vw"
+                // This hero photo only renders at lg+. The 1px mobile slot
+                // keeps phones from preloading a full-width image they never
+                // show (it was eating the LCP bandwidth budget).
+                sizes="(min-width:1024px) 40vw, 1px"
                 className="object-cover"
               />
             </div>
           )}
         </div>
       </section>
+
+      {/* Fall cleanup: the bundle pitch, process visual, Storm Night preview,
+          and the native quote form with snow pre-selected. */}
+      {service.slug === "fall-cleanup" && <FallBundle />}
+
+      {/* Gutter cleaning: how-we-do-it, before/after, safety story,
+          cross-sell bundle, and the native quote form. */}
+      {service.slug === "gutter-cleaning" && <GutterShowcase />}
 
       {service.division === "snowland" && (
         <section className="container-max pt-8 pb-2">
@@ -337,7 +360,7 @@ export default async function ServiceDetailPage(
         </section>
       )}
 
-      <section className="container-max py-14 sm:py-20">
+      <section className="cv-auto container-max py-14 sm:py-20">
         <SectionHeading
           eyebrow="What's Included"
           title={`What You Get with ${service.name}`}
@@ -360,7 +383,7 @@ export default async function ServiceDetailPage(
       </section>
 
       {copy && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="Why PVS"
             title={`Why Homeowners Book Our ${service.name}`}
@@ -380,7 +403,7 @@ export default async function ServiceDetailPage(
       )}
 
       {copy && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="How It Works"
             title="From Quote to Done"
@@ -454,7 +477,7 @@ export default async function ServiceDetailPage(
       )}
 
       {gallery && gallery.photos.length > 0 && (
-        <section className="container-max pb-14 sm:pb-20 relative">
+        <section className="cv-auto container-max pb-14 sm:pb-20 relative">
           <SectionHeading
             eyebrow="Recent Work"
             title={`See recent ${service.name.toLowerCase()} jobs`}
@@ -519,16 +542,18 @@ export default async function ServiceDetailPage(
       )}
 
       {serviceFaqs[service.slug] && (
+        <div className="cv-auto">
         <FaqSection
           items={serviceFaqs[service.slug]}
           eyebrow={`${service.name} FAQs`}
           title={`${service.name}, Common Questions`}
           description={`What Petawawa & Pembroke homeowners ask about ${service.name.toLowerCase()}.`}
         />
+        </div>
       )}
 
       {related.length > 0 && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="Pairs Well With"
             title="Bundle & Save"
@@ -561,7 +586,15 @@ export default async function ServiceDetailPage(
         </section>
       )}
 
-      <CtaBand />
+      {/* "Add snow removal" cross-sell on every non-winter service page.
+          Fall + gutter skip it: their embedded forms carry the bundle. */}
+      {service.division !== "snowland" && !hasEmbeddedForm && (
+        <SnowCrossSell source={`service-${service.slug}`} />
+      )}
+
+      <CtaBand
+        primaryHref={hasEmbeddedForm ? "#quote-form" : "/quote"}
+      />
     </>
   );
 }

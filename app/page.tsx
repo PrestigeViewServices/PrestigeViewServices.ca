@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
 import { SeasonBanner } from "@/components/home/season-banner";
+import { WinterSpotlight } from "@/components/home/winter-spotlight";
 import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
@@ -45,6 +46,9 @@ export default async function HomePage() {
       <SeasonBanner />
       <Hero content={content.hero} />
       <TrustMarquee />
+      {/* Growth-season priority: the winter sell sits directly under the
+          hero until contracts close. */}
+      <WinterSpotlight promo={content.winterPromo} />
       <Reveal>
         <ServicesOverview />
       </Reveal>

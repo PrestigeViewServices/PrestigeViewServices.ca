@@ -68,10 +68,13 @@ const SLATE = "bg-slate-500/15 text-slate-200 border-slate-500/25";
 const VIOLET = "bg-violet-500/15 text-violet-300 border-violet-500/25";
 const AMBER = "bg-amber-500/15 text-amber-200 border-amber-500/25";
 
+// Pipeline reading order: New → Contacted → Quoted → Booked (WON) → Lost.
+// "Booked" renders the WON enum value; no data migration needed for it.
 export const LEAD_STATUS_META: StatusMeta<LeadStatus>[] = [
   { value: "NEW", label: "New", color: BLUE },
+  { value: "CONTACTED", label: "Contacted", color: VIOLET },
   { value: "QUOTED", label: "Quoted", color: YELLOW },
-  { value: "WON", label: "Won", color: EMERALD },
+  { value: "WON", label: "Booked", color: EMERALD },
   { value: "LOST", label: "Lost", color: ROSE },
 ];
 

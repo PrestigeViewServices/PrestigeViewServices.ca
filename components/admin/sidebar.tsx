@@ -73,7 +73,8 @@ const groups: NavGroup[] = [
   {
     title: "Inbound",
     items: [
-      { href: "/admin/leads", label: "Quote Requests", icon: Inbox },
+      { href: "/admin/leads", label: "Leads Pipeline", icon: Inbox },
+      { href: "/admin/winter", label: "Winter Dashboard", icon: TrendingUp },
       {
         href: "/admin/winter-reservations",
         label: "Winter Reservations",
@@ -113,10 +114,13 @@ export function AdminSidebar({ unread = 0 }: { unread?: number }) {
             {group.title}
           </p>
           {group.items.map((item) => {
+            // Exact-or-child match. Plain startsWith would light up
+            // "/admin/winter" on /admin/winter-reservations too.
             const active =
               item.href === "/admin"
                 ? pathname === "/admin"
-                : pathname.startsWith(item.href);
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
             const Icon = item.icon;
             return (
               <Link

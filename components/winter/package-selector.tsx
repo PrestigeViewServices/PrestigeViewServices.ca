@@ -45,6 +45,7 @@ import {
   sharePackageCard,
   type PackageCardData,
 } from "@/components/winter/package-card-image";
+import { trackLeadConversion } from "@/lib/analytics";
 import { siteConfig } from "@/lib/site";
 
 /** Walkway packs offered on this page. The 15-pack stays sellable by phone. */
@@ -94,6 +95,18 @@ export function PackageSelector({
   const [submit, setSubmit] = useState<SubmitState>({ kind: "idle" });
   const [sent, setSent] = useState(false);
   const [card, setCard] = useState<CardState>({ kind: "idle" });
+  // Which page/CTA sent the visitor here, carried on ?src= by cross-sell
+  // blocks. Stored with the reservation so the admin sees what converts.
+  const [sourcePage, setSourcePage] = useState("winter-packages");
+
+  useEffect(() => {
+    try {
+      const src = new URLSearchParams(window.location.search).get("src");
+      if (src) setSourcePage(`winter-packages via ${src.slice(0, 60)}`);
+    } catch {
+      // Leave the default.
+    }
+  }, []);
 
   const formRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLDivElement>(null);
@@ -205,11 +218,17 @@ export function PackageSelector({
         shovelingTier: pack,
         addOns,
         customerNotes: notes,
+        sourcePage,
         hp,
       }),
     }).catch(() => null);
 
     if (res?.ok) {
+      trackLeadConversion({
+        service: "snow-removal",
+        sourcePage,
+        packageInterest: summary,
+      });
       setSent(true);
       setSubmit({ kind: "idle" });
       // Move focus and view to the confirmation so screen readers announce it.
@@ -263,8 +282,9 @@ export function PackageSelector({
         </div>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          No prices shown on purpose: every driveway is a different size, slope,
-          and layout. Pick a package and we quote it to your property.{" "}
+          Bronze anchors the season at $625 for a single driveway. Every other
+          pass is priced to your property, because size, slope, and layout all
+          change the work. Pick a package and we quote it exactly.{" "}
           <strong className="text-foreground">
             Free quote, no payment today.
           </strong>
@@ -698,7 +718,15 @@ function TierCard({
       </ul>
 
       <div className="mt-auto pt-6">
-        <p className="text-xs text-muted-foreground">Free quote, no payment today</p>
+        <p
+          className="text-base font-bold tracking-tight"
+          style={{ color: tier.priceLabel ? tier.accent : undefined }}
+        >
+          {tier.priceLabel ?? "Custom quote"}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Free quote, no payment today
+        </p>
         <span
           className={`mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold transition-colors ${
             selected
@@ -1039,6 +1067,24 @@ function Confirmation({
           {cardState.message}
         </p>
       )}
+
+      <div className="mx-auto mt-7 max-w-md rounded-2xl border border-primary/30 bg-primary/10 p-5 text-left">
+        <p className="text-sm font-semibold">
+          Next step: set up your Aurora portal account
+        </p>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Use the same email as this request and your contract, storm alerts,
+          and service history will be waiting in it once your spot is
+          confirmed.
+        </p>
+        <a
+          href="/account"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+        >
+          Create my portal account
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </a>
+      </div>
 
       <p className="mt-6 text-xs text-muted-foreground">
         <Snowflake className="mr-1 inline h-3 w-3" aria-hidden />

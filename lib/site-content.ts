@@ -1,6 +1,12 @@
 import type { PrismaClient } from "@prisma/client";
 import { getDb } from "./db";
 import { offers as codeOffers, type Offer } from "./content/offers";
+import {
+  DEFAULT_WINTER_PROMO,
+  type WinterPromoContent,
+} from "./content/winter-campaign";
+
+export type { WinterPromoContent } from "./content/winter-campaign";
 
 /**
  * Owner-editable website content — hero copy, the season banner, and the
@@ -51,6 +57,8 @@ export type SiteContentData = {
   seasonBanner: SeasonBannerContent;
   hero: HeroContent;
   offers: OfferContent[];
+  /** Winter 2026-27 public promo: percentage, end date, announcement bar. */
+  winterPromo: WinterPromoContent;
 };
 
 // ---- Code defaults ---------------------------------------------------------
@@ -86,8 +94,35 @@ export function defaultOffers(): OfferContent[] {
 
 // ---- Read ------------------------------------------------------------------
 
-const KEYS = ["seasonBanner", "hero", "offers"] as const;
+const KEYS = ["seasonBanner", "hero", "offers", "winterPromo"] as const;
 export type SiteContentKey = (typeof KEYS)[number];
+
+function sanitizeWinterPromo(v: unknown): WinterPromoContent | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  if (typeof o.percent !== "number" && typeof o.endsAt !== "string") return null;
+  const percent = Number(o.percent);
+  const endsAt = String(o.endsAt ?? DEFAULT_WINTER_PROMO.endsAt);
+  return {
+    enabled: o.enabled !== false,
+    percent:
+      Number.isFinite(percent) && percent > 0 && percent < 100
+        ? percent
+        : DEFAULT_WINTER_PROMO.percent,
+    endsAt: Number.isNaN(new Date(endsAt).getTime())
+      ? DEFAULT_WINTER_PROMO.endsAt
+      : endsAt,
+    label:
+      String(o.label ?? "").slice(0, 80) || DEFAULT_WINTER_PROMO.label,
+    bannerLine:
+      String(o.bannerLine ?? "").slice(0, 160) ||
+      DEFAULT_WINTER_PROMO.bannerLine,
+    ctaLabel:
+      String(o.ctaLabel ?? "").slice(0, 40) || DEFAULT_WINTER_PROMO.ctaLabel,
+    ctaHref: sanitizeHref(o.ctaHref) ?? DEFAULT_WINTER_PROMO.ctaHref,
+    bundleIncentive: String(o.bundleIncentive ?? "").slice(0, 200),
+  };
+}
 
 function sanitizeSeasonBanner(v: unknown): SeasonBannerContent | null {
   if (!v || typeof v !== "object") return null;
@@ -153,6 +188,7 @@ export async function getSiteContent(
     seasonBanner: DEFAULT_SEASON_BANNER,
     hero: DEFAULT_HERO,
     offers: defaultOffers(),
+    winterPromo: DEFAULT_WINTER_PROMO,
   };
   if (!db) return data;
   try {
@@ -169,6 +205,9 @@ export async function getSiteContent(
       } else if (row.key === "offers") {
         const v = sanitizeOffers(row.value);
         if (v) data.offers = v;
+      } else if (row.key === "winterPromo") {
+        const v = sanitizeWinterPromo(row.value);
+        if (v) data.winterPromo = v;
       }
     }
   } catch {
@@ -215,7 +254,11 @@ export function toOffer(o: OfferContent): Offer {
 export async function saveSiteContentKey(
   db: PrismaClient,
   key: SiteContentKey,
-  value: SeasonBannerContent | HeroContent | OfferContent[]
+  value:
+    | SeasonBannerContent
+    | HeroContent
+    | OfferContent[]
+    | WinterPromoContent
 ): Promise<void> {
   await db.siteContent.upsert({
     where: { key },

@@ -391,6 +391,126 @@ export async function applyCreditToInvoice(opts: {
   };
 }
 
+// ---- Lead push (guarded write) ---------------------------------------------
+
+export type LeadPushResult = {
+  pushed: boolean;
+  /** True when a write was actually attempted (writes enabled + connected). */
+  attempted: boolean;
+  reason: string;
+};
+
+/**
+ * Push a website lead into Jobber as a client + work request.
+ *
+ * Best-effort and strictly guarded: it only attempts anything when Jobber is
+ * connected AND JOBBER_ALLOW_WRITES=true, mirroring applyCreditToInvoice, so
+ * the integration stays read-only until the owner opts in. Every failure is
+ * swallowed into the result — a Jobber hiccup must never affect intake.
+ *
+ * NOTE: verify the mutation shapes against the live Jobber account before
+ * enabling writes; the API version is pinned above and userErrors are
+ * surfaced in the result reason either way.
+ */
+export async function pushLeadToJobber(
+  db: PrismaClient,
+  lead: {
+    name: string;
+    email: string;
+    phone: string;
+    address?: string | null;
+    title: string;
+    message?: string | null;
+  }
+): Promise<LeadPushResult> {
+  if ((process.env.JOBBER_ALLOW_WRITES ?? "").trim() !== "true") {
+    return { pushed: false, attempted: false, reason: "Jobber writes disabled" };
+  }
+  let token: string | null = null;
+  try {
+    token = await getJobberAccessToken(db);
+  } catch {
+    token = null;
+  }
+  if (!token) {
+    return { pushed: false, attempted: false, reason: "Jobber not connected" };
+  }
+
+  try {
+    const [firstName, ...rest] = lead.name.trim().split(/\s+/);
+    const clientData: {
+      clientCreate: {
+        client: { id: string } | null;
+        userErrors: { message: string }[];
+      };
+    } = await jobberQuery(
+      token,
+      `mutation PvsLeadClient($input: ClientCreateInput!) {
+        clientCreate(input: $input) {
+          client { id }
+          userErrors { message }
+        }
+      }`,
+      {
+        input: {
+          firstName: firstName || lead.name,
+          lastName: rest.join(" ") || undefined,
+          emails: [
+            { description: "MAIN", primary: true, address: lead.email },
+          ],
+          phones: [{ description: "MAIN", primary: true, number: lead.phone }],
+        },
+      }
+    );
+    const clientErr = clientData.clientCreate.userErrors[0]?.message;
+    const clientId = clientData.clientCreate.client?.id;
+    if (!clientId) {
+      return {
+        pushed: false,
+        attempted: true,
+        reason: `clientCreate: ${clientErr ?? "no client returned"}`,
+      };
+    }
+
+    const requestData: {
+      requestCreate: {
+        request: { id: string } | null;
+        userErrors: { message: string }[];
+      };
+    } = await jobberQuery(
+      token,
+      `mutation PvsLeadRequest($input: RequestCreateInput!) {
+        requestCreate(input: $input) {
+          request { id }
+          userErrors { message }
+        }
+      }`,
+      {
+        input: {
+          clientId,
+          title: lead.title,
+        },
+      }
+    );
+    if (!requestData.requestCreate.request?.id) {
+      return {
+        pushed: false,
+        attempted: true,
+        reason: `requestCreate: ${
+          requestData.requestCreate.userErrors[0]?.message ?? "no request returned"
+        } (client ${clientId} was created)`,
+      };
+    }
+    return { pushed: true, attempted: true, reason: "ok" };
+  } catch (err) {
+    return {
+      pushed: false,
+      attempted: true,
+      reason: err instanceof Error ? err.message : "unknown error",
+    };
+  }
+}
+
 // ---- Sync ------------------------------------------------------------------
 
 export type SyncSummary = {

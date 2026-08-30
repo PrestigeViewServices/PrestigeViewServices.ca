@@ -47,6 +47,10 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
   const ref = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const [slide, setSlide] = useState(0);
+  // Only the first photo ships with the initial load; the other five mount
+  // once the rotation is about to need them, so they never compete with the
+  // LCP for mobile bandwidth.
+  const [rotationReady, setRotationReady] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -58,11 +62,16 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
 
   useEffect(() => {
     if (prefersReducedMotion) return;
+    // Warm the other slides shortly before the first rotation.
+    const warm = setTimeout(() => setRotationReady(true), ROTATE_MS - 2000);
     const id = setInterval(
       () => setSlide((s) => (s + 1) % HERO_PHOTOS.length),
       ROTATE_MS
     );
-    return () => clearInterval(id);
+    return () => {
+      clearTimeout(warm);
+      clearInterval(id);
+    };
   }, [prefersReducedMotion]);
 
   return (
@@ -73,19 +82,20 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           className="absolute inset-[-6%]"
           style={prefersReducedMotion ? undefined : { y: photoY }}
         >
-          {HERO_PHOTOS.map((p, i) => (
-            <Image
-              key={p.src}
-              src={p.src}
-              alt={i === slide ? p.alt : ""}
-              fill
-              priority={i === 0}
-              loading={i === 0 ? undefined : "lazy"}
-              sizes="100vw"
-              className="object-cover object-center transition-opacity duration-1000"
-              style={{ opacity: i === slide ? 1 : 0 }}
-            />
-          ))}
+          {HERO_PHOTOS.map((p, i) =>
+            i === 0 || rotationReady ? (
+              <Image
+                key={p.src}
+                src={p.src}
+                alt={i === slide ? p.alt : ""}
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className="object-cover object-center transition-opacity duration-1000"
+                style={{ opacity: i === slide ? 1 : 0 }}
+              />
+            ) : null
+          )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/15" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />

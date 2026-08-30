@@ -38,6 +38,18 @@
     scroll-behavior: smooth;
   }
 
+  /* Kill sideways panning on phones. Any element that pokes past the
+     viewport (marquees, decorative layers, off-screen sheets) would expand
+     the mobile layout viewport; that both lets the page wiggle sideways and
+     makes the promo modal's scroll-lock compute a bogus scrollbar gap,
+     collapsing the whole layout (a ~0.19 CLS hit on the winter page).
+     `clip` blocks the overflow without creating a scroll container, so
+     position: sticky keeps working. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     background-image:
@@ -115,6 +127,16 @@
   /* Reusable gradient text — pairs with the brand primary gradient. */
   .text-gradient {
     @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  /* Below-fold sections on long landing pages: the browser skips styling
+     and layout until they approach the viewport, which is worth seconds of
+     mobile LCP on the winter/fall/gutter pages. The intrinsic-size estimate
+     keeps the scrollbar stable; anchors inside still work (the browser
+     renders the target on navigation). */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
   }
 }
 

@@ -6,6 +6,7 @@ import {
   Crown,
   History,
   MapPin,
+  PhoneCall,
   Radar,
   Receipt,
   Send,
@@ -41,6 +42,7 @@ const FEATURE_ICONS: Record<string, LucideIcon> = {
   "visit-history": History,
   "one-tap-requests": Send,
   billing: Receipt,
+  callback: PhoneCall,
   "priority-line": Crown,
 };
 
@@ -63,13 +65,13 @@ export function PortalShowcase() {
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
                 Every Silver, Gold, and Platinum pass now includes a private
-                customer portal, powered by Aurora — the same dispatch system
+                customer portal, powered by Aurora, the same dispatch system
                 that routes our tractors.{" "}
                 <strong className="text-foreground">
                   Gold and Platinum unlock the full experience
                 </strong>
                 : watch the storm being fought in real time, get told the moment
-                you&apos;re clear, and see the photo that proves it — from the
+                you&apos;re clear, and see the photo that proves it, from the
                 kitchen, the office, or a beach in February.
               </p>
 
@@ -85,6 +87,9 @@ export function PortalShowcase() {
                     Get the full experience with Gold
                     <ArrowRight className="h-4 w-4" aria-hidden />
                   </a>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/account">Sign up and get your portal</Link>
                 </Button>
                 <Link
                   href="#compare"

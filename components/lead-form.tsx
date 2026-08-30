@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   AlertCircle,
@@ -11,8 +12,10 @@ import {
   ClipboardList,
   Gift,
   Phone,
+  Snowflake,
   Tag,
 } from "lucide-react";
+import { trackLeadConversion } from "@/lib/analytics";
 import {
   leadSchema,
   LEAD_SERVICES,
@@ -48,6 +51,14 @@ export type LeadFormProps = {
   accountDiscountLabel?: string | null;
   /** e.g. "$25" — what a referred friend saves on their first service. */
   referralCredit?: string | null;
+  /** Which page hosts this form, stored with the lead (e.g. "fall-cleanup"). */
+  sourcePage?: string;
+  /** Winter package interest carried in from a cross-sell, if any. */
+  packageInterest?: string | null;
+  /** Show the "Add snow removal" bundle toggle. */
+  snowBundle?: boolean;
+  /** Whether the bundle toggle starts checked (fall page pre-selects it). */
+  snowBundleDefault?: boolean;
 };
 
 /**
@@ -83,8 +94,14 @@ function LeadFormInner({
   referralCode = null,
   accountDiscountLabel = null,
   referralCredit = null,
+  sourcePage = "request-service",
+  packageInterest = null,
+  snowBundle = false,
+  snowBundleDefault = false,
 }: LeadFormProps) {
+  const router = useRouter();
   const presetService = normalizeService(service);
+  const [addSnow, setAddSnow] = useState(snowBundle && snowBundleDefault);
   // Carried in by /r/[code]. An httpOnly cookie backs this up server-side, so
   // the referral still counts even if the visitor strips the query string.
   const presetRef = (referralCode ?? "").trim().toUpperCase();
@@ -119,11 +136,17 @@ function LeadFormInner({
   async function onSubmit(values: LeadFormValues) {
     setStatus("submitting");
     setServerError(null);
+    const bundle = snowBundle && addSnow && values.service !== "snow-removal";
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          sourcePage,
+          packageInterest: packageInterest ?? "",
+          addSnow: bundle,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -131,6 +154,15 @@ function LeadFormInner({
         setServerError(data?.error || "Something went wrong.");
         return;
       }
+      trackLeadConversion({
+        service: values.service,
+        sourcePage,
+        packageInterest: packageInterest ?? undefined,
+      });
+      // The thank-you page pushes the next steps (portal account, referral).
+      const params = new URLSearchParams({ service: values.service });
+      if (bundle) params.set("bundle", "snow");
+      router.push(`/thank-you?${params.toString()}`);
       setStatus("success");
       reset();
     } catch {
@@ -290,6 +322,34 @@ function LeadFormInner({
           {...register("message")}
         />
       </Field>
+
+      {snowBundle && (
+        <label
+          className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+            addSnow
+              ? "border-sky-400/50 bg-sky-500/10"
+              : "border-surface-border hover:border-white/15"
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={addSnow}
+            onChange={() => setAddSnow((v) => !v)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-surface-border accent-sky-400"
+          />
+          <span className="text-sm">
+            <span className="flex items-center gap-1.5 font-semibold">
+              <Snowflake className="h-4 w-4 text-sky-300" aria-hidden />
+              Add snow removal and lock my winter spot
+            </span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+              We quote both in the same call: this service now, and a Winter
+              2026-27 seasonal contract with a 3 cm dispatch trigger before
+              routes fill.
+            </span>
+          </span>
+        </label>
+      )}
 
       {status === "error" && (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 flex items-start gap-2.5">

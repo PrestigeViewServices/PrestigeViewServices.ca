@@ -8,6 +8,7 @@ import {
   MonitorPlay,
   RotateCcw,
   Save,
+  Snowflake,
   Sparkles,
 } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
@@ -28,7 +29,13 @@ export const dynamic = "force-dynamic";
 const EDIT_ROLES = ["ultimate_admin", "super_admin", "admin"] as const;
 
 /** Every public page that renders the edited content. */
-const CONTENT_PATHS = ["/", "/quote", "/request-service", "/refer"];
+const CONTENT_PATHS = [
+  "/",
+  "/quote",
+  "/request-service",
+  "/refer",
+  "/winter-packages",
+];
 
 /**
  * Page Content — the owner's editor for the public site's marketing surfaces:
@@ -161,6 +168,90 @@ export default async function SiteContentPage() {
           />
         </div>
         <SectionButtons resetAction={resetBanner} />
+      </form>
+
+      {/* ================= Winter promo ================= */}
+      <form
+        id="winter-promo"
+        action={saveWinterPromo}
+        className="surface-card scroll-mt-24 space-y-4 p-5 sm:p-7"
+      >
+        <SectionHeader
+          icon={<Snowflake className="h-5 w-5" />}
+          title="Winter promo & announcement bar"
+          sub="The site-wide winter bar, the promo badge on the winter page, and the countdown. Turning this off (or the end date passing) removes all of it, everywhere, instantly."
+          customized={customized.includes("winterPromo")}
+        />
+        <label className="flex items-center gap-2.5 text-sm font-medium">
+          <input
+            type="checkbox"
+            name="enabled"
+            defaultChecked={content.winterPromo.enabled}
+            className="h-4 w-4 rounded border-surface-border"
+          />
+          Promo is on
+        </label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="f-percent" className="mb-1 block text-sm font-medium">
+              Discount percent
+            </label>
+            <input
+              id="f-percent"
+              name="percent"
+              type="number"
+              step="0.5"
+              min="0.5"
+              max="99"
+              defaultValue={content.winterPromo.percent}
+              className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+          <div>
+            <label htmlFor="f-endsOn" className="mb-1 block text-sm font-medium">
+              Last day of the promo
+            </label>
+            <input
+              id="f-endsOn"
+              name="endsOn"
+              type="date"
+              defaultValue={content.winterPromo.endsAt.slice(0, 10)}
+              className="h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              The countdown runs to 11:59 PM Eastern on this day.
+            </p>
+          </div>
+        </div>
+        <FieldText
+          name="bannerLine"
+          label="Announcement bar line"
+          value={content.winterPromo.bannerLine}
+          max={160}
+          hint="Start it with the percentage, e.g. 12.5% off Winter 2026-27 snow contracts."
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FieldText
+            name="ctaLabel"
+            label="Button label"
+            value={content.winterPromo.ctaLabel}
+            max={40}
+          />
+          <FieldText
+            name="ctaHref"
+            label="Button link (must start with /)"
+            value={content.winterPromo.ctaHref}
+            max={200}
+          />
+        </div>
+        <FieldText
+          name="bundleIncentive"
+          label="Fall + snow bundle incentive (optional)"
+          value={content.winterPromo.bundleIncentive}
+          max={200}
+          hint="Shown on the fall cleanup page's bundle section. Leave empty to hide the band until a bundle deal is confirmed."
+        />
+        <SectionButtons resetAction={resetWinterPromo} />
       </form>
 
       {/* ================= Offers ================= */}
@@ -456,6 +547,37 @@ async function saveOffers(formData: FormData) {
   if (offers.length === 0) return;
   await saveSiteContentKey(db, "offers", offers);
   refreshContentPaths();
+}
+
+async function saveWinterPromo(formData: FormData) {
+  "use server";
+  await requireRole([...EDIT_ROLES]);
+  const db = getDb();
+  if (!db) return;
+  const percent = Number(formData.get("percent"));
+  const endsOn = String(formData.get("endsOn") ?? "").trim();
+  await saveSiteContentKey(db, "winterPromo", {
+    enabled: formData.get("enabled") === "on",
+    percent: Number.isFinite(percent) && percent > 0 && percent < 100 ? percent : 12.5,
+    // End of the chosen day, Eastern time. Sanitized again on read.
+    endsAt: /^\d{4}-\d{2}-\d{2}$/.test(endsOn)
+      ? `${endsOn}T23:59:59-04:00`
+      : String(formData.get("endsOn") ?? ""),
+    label: "Winter contract promo",
+    bannerLine: String(formData.get("bannerLine") ?? "").trim().slice(0, 160),
+    ctaLabel: String(formData.get("ctaLabel") ?? "").trim().slice(0, 40),
+    ctaHref: String(formData.get("ctaHref") ?? "").trim().slice(0, 200),
+    bundleIncentive: String(formData.get("bundleIncentive") ?? "")
+      .trim()
+      .slice(0, 200),
+  });
+  refreshContentPaths();
+}
+
+async function resetWinterPromo() {
+  "use server";
+  await requireRole([...EDIT_ROLES]);
+  await makeReset("winterPromo");
 }
 
 async function makeReset(key: SiteContentKey) {

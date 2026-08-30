@@ -19,7 +19,9 @@ export function MetaPixel() {
 
   return (
     <>
-      <Script id="meta-pixel-init" strategy="afterInteractive">
+      {/* lazyOnload: the pixel waits for idle so it never competes with
+          hydration on mobile. PageView still fires on every visit. */}
+      <Script id="meta-pixel-init" strategy="lazyOnload">
         {`
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

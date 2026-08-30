@@ -52,8 +52,20 @@ export default async function AdminLayout({
   return (
     <section className="container-max py-10 sm:py-12">
       <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
-        <aside className="lg:sticky lg:top-24 lg:self-start surface-card p-4">
-          <AdminSidebar unread={unread} />
+        {/* On phones the full nav collapses behind a Menu toggle so the
+            actual work is one scroll away, not thirty links down. */}
+        <aside className="surface-card p-4 lg:sticky lg:top-24 lg:self-start">
+          <details className="lg:hidden">
+            <summary className="cursor-pointer select-none text-sm font-semibold text-primary">
+              Admin menu
+            </summary>
+            <div className="mt-4">
+              <AdminSidebar unread={unread} />
+            </div>
+          </details>
+          <div className="hidden lg:block">
+            <AdminSidebar unread={unread} />
+          </div>
         </aside>
         <div className="min-w-0">{children}</div>
       </div>

@@ -64,9 +64,15 @@ export function OfferModal() {
   const [open, setOpen] = useState(false);
 
   // The promo popup is for visitors. Never interrupt the owner in the
-  // dashboard or a member in their portal.
+  // dashboard or a member in their portal. Also stay out of the way on the
+  // winter page and the thank-you page: the winter page is the season's
+  // flagship lead flow (a competing popup there costs conversions), and
+  // thank-you already delivers its next step.
   const suppressed =
-    pathname.startsWith("/admin") || pathname.startsWith("/account");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/winter-packages") ||
+    pathname.startsWith("/thank-you");
 
   useEffect(() => {
     if (suppressed) return;

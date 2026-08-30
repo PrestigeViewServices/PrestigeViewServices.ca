@@ -9,6 +9,7 @@ import {
 import { sendLeadNotification } from "@/lib/send-lead-email";
 import { notifyOwner } from "@/lib/notify";
 import { getDb } from "@/lib/db";
+import { pushLeadToJobber } from "@/lib/jobber";
 import {
   REF_COOKIE,
   normalizeCode,
@@ -100,6 +101,14 @@ export async function POST(request: Request) {
     LEAD_SERVICES.find((s) => s.value === payload.service)?.label ??
     payload.service;
 
+  // "Add snow removal" bundle: record seasonal snow interest alongside the
+  // primary service so the office quotes both in one call.
+  const bundleSnow =
+    payload.addSnow === true && payload.service !== "snow-removal";
+  const serviceSlugs = bundleSnow
+    ? [payload.service, "snow-removal"]
+    : [payload.service];
+
   // Notifications are best-effort and must never block or fail intake.
   // extraLines carries pricing context (member discount, referral credit)
   // discovered during the DB write, so the email tells the office exactly
@@ -128,6 +137,11 @@ export async function POST(request: Request) {
           `Phone: ${payload.phone}`,
           `Email: ${payload.email}`,
           `Service: ${serviceLabel}`,
+          bundleSnow ? `Bundle: also wants a seasonal snow contract` : null,
+          payload.sourcePage ? `Source page: ${payload.sourcePage}` : null,
+          payload.packageInterest
+            ? `Package interest: ${payload.packageInterest}`
+            : null,
           payload.propertyAddress ? `Address: ${payload.propertyAddress}` : null,
           ...extraLines.map((l) => `>> ${l}`),
           payload.message ? `Message:\n${payload.message}` : null,
@@ -157,24 +171,85 @@ export async function POST(request: Request) {
     const memberNote = await memberDiscountNote(db, payload.email);
     const noteParts = [
       payload.promoCode ? `Promo: ${payload.promoCode}` : null,
+      bundleSnow ? "Bundle: also wants a seasonal snow contract" : null,
       memberNote,
     ].filter((n): n is string => Boolean(n));
 
-    const created = await db.lead.create({
-      data: {
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        division: divisionForService(payload.service),
-        propertyAddress: payload.propertyAddress || null,
-        message: payload.message || null,
-        serviceSlugs: [payload.service],
-        notes: noteParts.length ? noteParts.join(" · ") : null,
-        status: "NEW",
-        source: "PUBLIC_FORM",
-      },
-      select: { id: true },
-    });
+    const baseData = {
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      division: divisionForService(payload.service),
+      propertyAddress: payload.propertyAddress || null,
+      message: payload.message || null,
+      serviceSlugs,
+      notes: noteParts.length ? noteParts.join(" · ") : null,
+      status: "NEW" as const,
+      source: "PUBLIC_FORM" as const,
+    };
+
+    let created: { id: string };
+    try {
+      created = await db.lead.create({
+        data: {
+          ...baseData,
+          sourcePage: payload.sourcePage || null,
+          packageInterest: payload.packageInterest || null,
+        },
+        select: { id: true },
+      });
+    } catch (colErr) {
+      // Pre-migration database (sourcePage/packageInterest columns missing):
+      // never drop the lead — fold the tracking into notes and retry.
+      // eslint-disable-next-line no-console
+      console.warn("Lead create with tracking columns failed, retrying", colErr);
+      const trackingNotes = [
+        payload.sourcePage ? `Source: ${payload.sourcePage}` : null,
+        payload.packageInterest ? `Package: ${payload.packageInterest}` : null,
+      ].filter(Boolean) as string[];
+      created = await db.lead.create({
+        data: {
+          ...baseData,
+          notes:
+            [...noteParts, ...trackingNotes].join(" · ") || null,
+        },
+        select: { id: true },
+      });
+    }
+
+    // Best-effort push into Jobber as a client + work request. Gated by
+    // JOBBER_ALLOW_WRITES and never blocks or fails intake.
+    void pushLeadToJobber(db, {
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      address: payload.propertyAddress || null,
+      title: `Website quote request: ${serviceLabel}${bundleSnow ? " + seasonal snow" : ""}`,
+      message: payload.message || null,
+    })
+      .then(async (r) => {
+        // Only annotate when a push was actually attempted; the normal
+        // writes-disabled state should not add noise to every lead.
+        if (!r.attempted) return;
+        try {
+          const lead = await db.lead.findUnique({
+            where: { id: created.id },
+            select: { notes: true },
+          });
+          const line = r.pushed
+            ? "Pushed to Jobber as a request"
+            : `Jobber push skipped: ${r.reason}`;
+          await db.lead.update({
+            where: { id: created.id },
+            data: {
+              notes: [lead?.notes, line].filter(Boolean).join(" · "),
+            },
+          });
+        } catch {
+          // Notes annotation is cosmetic.
+        }
+      })
+      .catch(() => {});
 
     // Referral attribution — best-effort, and always AFTER the lead is safe.
     const code = await referralCodeFor(payload.referralCode);
