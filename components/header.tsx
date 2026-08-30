@@ -33,8 +33,8 @@ import { formatPhone } from "@/lib/utils";
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [
+  { href: "/winter-packages", label: "Winter 2026-27", icon: Snowflake },
   { href: "/services/fall-cleanup", label: "Fall Cleanups", icon: Leaf },
-  { href: "/winter-packages", label: "Winter Packages", icon: Snowflake },
 ] as const;
 
 const exploreLinks = [

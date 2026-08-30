@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Facebook,
+  Instagram,
+  Snowflake,
+  ArrowRight,
+} from "lucide-react";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ReviewCta } from "@/components/review-cta";
 import { services } from "@/lib/content/services";
@@ -136,7 +145,29 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground">
+        {/* Winter 2026-27 quote CTA — the growth-season priority, present on
+            every page's footer while contracts are open. */}
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-blue-950 via-slate-900 to-sky-950 p-5 sm:flex-row sm:items-center sm:p-6">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 text-sm font-bold text-white">
+              <Snowflake className="h-4 w-4 shrink-0 text-sky-300" aria-hidden />
+              Winter 2026-27 snow contracts are open
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-sky-100/70">
+              3 cm dispatch trigger, live storm updates, capped routes. Free
+              quote, no payment today.
+            </p>
+          </div>
+          <Link
+            href="/winter-packages?src=footer"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-sky-400 px-5 py-2.5 text-xs font-bold uppercase tracking-wide text-blue-950 transition-colors hover:bg-sky-300"
+          >
+            Get my winter quote
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-surface-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
