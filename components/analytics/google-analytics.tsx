@@ -13,11 +13,13 @@ export function GoogleAnalytics() {
 
   return (
     <>
+      {/* lazyOnload keeps gtag off the critical path on mobile; page views
+          and utm attribution still record, just a beat later. */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${id}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
-      <Script id="ga4-init" strategy="afterInteractive">
+      <Script id="ga4-init" strategy="lazyOnload">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

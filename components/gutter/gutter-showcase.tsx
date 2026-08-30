@@ -114,7 +114,7 @@ export function GutterShowcase() {
       </section>
 
       {/* ── Before / after ── */}
-      <section className="container-max pt-12">
+      <section className="cv-auto container-max pt-12">
         <div className="grid gap-4 sm:grid-cols-2">
           <figure className="overflow-hidden rounded-2xl border border-surface-border">
             <div className="relative aspect-[4/3]">
@@ -158,7 +158,7 @@ export function GutterShowcase() {
       </section>
 
       {/* ── Safety and training ── */}
-      <section className="container-max pt-12">
+      <section className="cv-auto container-max pt-12">
         <div className="overflow-hidden rounded-3xl border border-surface-border bg-surface/60">
           <div className="grid items-stretch lg:grid-cols-[1.2fr_1fr]">
             <div className="p-6 sm:p-8">
@@ -202,7 +202,7 @@ export function GutterShowcase() {
       </section>
 
       {/* ── Cross-sell bundle ── */}
-      <section className="container-max pt-12">
+      <section className="cv-auto container-max pt-12">
         <div className="overflow-hidden rounded-3xl border border-sky-400/25 bg-gradient-to-r from-blue-950 via-slate-900 to-sky-950 p-6 sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
@@ -236,7 +236,7 @@ export function GutterShowcase() {
       </section>
 
       {/* ── Native quote form ── */}
-      <section className="container-max pt-10">
+      <section className="cv-auto container-max pt-10">
         <div className="mx-auto max-w-2xl">
           <LeadForm
             service="gutter-cleaning"

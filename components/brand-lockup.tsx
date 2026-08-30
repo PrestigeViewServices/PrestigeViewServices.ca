@@ -69,10 +69,13 @@ const VARIANTS: Record<LockupVariant, VariantConfig> = {
   },
 };
 
+// width/height set the intrinsic ratio AND the srcset next/image generates.
+// Keep them ~2x the rendered CSS size: the old 720/960/1280 values made the
+// header logo download a w=1920 file for a 36px-tall render on every page.
 const SIZES: Record<LockupSize, { imgClass: string; w: number; h: number }> = {
-  sm: { imgClass: "h-9 w-auto", w: 720, h: 180 },
-  md: { imgClass: "h-12 w-auto", w: 960, h: 240 },
-  lg: { imgClass: "h-16 sm:h-20 w-auto", w: 1280, h: 320 },
+  sm: { imgClass: "h-9 w-auto", w: 288, h: 72 },
+  md: { imgClass: "h-12 w-auto", w: 384, h: 96 },
+  lg: { imgClass: "h-16 sm:h-20 w-auto", w: 640, h: 160 },
 };
 
 const accentGradient: Record<VariantConfig["accent"], string> = {
@@ -118,7 +121,10 @@ export function BrandLockup({
         alt={v.alt}
         width={s.w}
         height={s.h}
-        priority={size !== "sm"}
+        // Always eager: the "sm" lockup is the sticky-header logo, above the
+        // fold on every page. Lazy-loading it made it the page's LCP element
+        // and cost ~1.5s of mobile LCP on every route.
+        priority
         className={s.imgClass}
         fallback={<TextLockup variant={variant} />}
       />

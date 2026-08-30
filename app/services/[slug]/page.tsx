@@ -262,7 +262,10 @@ export default async function ServiceDetailPage(
                 alt={gallery.photos[0].alt}
                 fill
                 priority
-                sizes="(min-width:1024px) 40vw, 100vw"
+                // This hero photo only renders at lg+. The 1px mobile slot
+                // keeps phones from preloading a full-width image they never
+                // show (it was eating the LCP bandwidth budget).
+                sizes="(min-width:1024px) 40vw, 1px"
                 className="object-cover"
               />
             </div>
@@ -357,7 +360,7 @@ export default async function ServiceDetailPage(
         </section>
       )}
 
-      <section className="container-max py-14 sm:py-20">
+      <section className="cv-auto container-max py-14 sm:py-20">
         <SectionHeading
           eyebrow="What's Included"
           title={`What You Get with ${service.name}`}
@@ -380,7 +383,7 @@ export default async function ServiceDetailPage(
       </section>
 
       {copy && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="Why PVS"
             title={`Why Homeowners Book Our ${service.name}`}
@@ -400,7 +403,7 @@ export default async function ServiceDetailPage(
       )}
 
       {copy && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="How It Works"
             title="From Quote to Done"
@@ -474,7 +477,7 @@ export default async function ServiceDetailPage(
       )}
 
       {gallery && gallery.photos.length > 0 && (
-        <section className="container-max pb-14 sm:pb-20 relative">
+        <section className="cv-auto container-max pb-14 sm:pb-20 relative">
           <SectionHeading
             eyebrow="Recent Work"
             title={`See recent ${service.name.toLowerCase()} jobs`}
@@ -539,16 +542,18 @@ export default async function ServiceDetailPage(
       )}
 
       {serviceFaqs[service.slug] && (
+        <div className="cv-auto">
         <FaqSection
           items={serviceFaqs[service.slug]}
           eyebrow={`${service.name} FAQs`}
           title={`${service.name}, Common Questions`}
           description={`What Petawawa & Pembroke homeowners ask about ${service.name.toLowerCase()}.`}
         />
+        </div>
       )}
 
       {related.length > 0 && (
-        <section className="container-max pb-14 sm:pb-20">
+        <section className="cv-auto container-max pb-14 sm:pb-20">
           <SectionHeading
             eyebrow="Pairs Well With"
             title="Bundle & Save"

@@ -108,7 +108,7 @@ export function FallBundle() {
       </section>
 
       {/* ── Compact Storm Night ── */}
-      <section className="container-max pt-6">
+      <section className="cv-auto container-max pt-6">
         <StormNightLazy
           compact
           ctaHref="#quote-form"
@@ -118,7 +118,7 @@ export function FallBundle() {
       </section>
 
       {/* ── Native bundle quote form ── */}
-      <section className="container-max pt-10">
+      <section className="cv-auto container-max pt-10">
         <div className="mx-auto max-w-2xl">
           <LeadForm
             service="fall-cleanup"

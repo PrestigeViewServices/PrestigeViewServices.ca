@@ -66,6 +66,10 @@ const HOUSES: { x: number; y: number }[] = [
   { x: 396, y: 150 },
   { x: 396, y: 254 },
   { x: 288, y: 258 },
+  { x: 120, y: 30 },
+  { x: 30, y: 96 },
+  { x: 106, y: 96 },
+  { x: 160, y: 140 },
 ];
 
 export function StormNight({
@@ -195,7 +199,9 @@ export function StormNight({
         className={`mt-4 grid gap-5 ${compact ? "lg:grid-cols-[1.2fr_0.8fr]" : "lg:grid-cols-[1.35fr_1fr] lg:gap-8"}`}
       >
         {/* ── Map ── */}
-        <div>
+        {/* min-w-0: without it the SVG's intrinsic min-content blows the
+            grid track out to ~690px and the whole card overflows on phones. */}
+        <div className="min-w-0">
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0A1424]">
             <NeighbourhoodMap
               equipment={equipment}
@@ -264,7 +270,7 @@ export function StormNight({
         </div>
 
         {/* ── Phone ── */}
-        <div className="mx-auto w-full max-w-[300px]">
+        <div className="mx-auto w-full min-w-0 max-w-[300px]">
           <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-[#070E1A] p-2 shadow-2xl">
             <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#0A1220]">
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
@@ -418,15 +424,17 @@ function NeighbourhoodMap({
   return (
     <svg
       viewBox="0 0 440 340"
+      width={440}
+      height={340}
       role="img"
       aria-label="Animated demo map of a snow route being cleared through a Petawawa neighbourhood"
       className="block h-auto w-full"
     >
       {/* Ground */}
-      <rect width="440" height="340" fill="#0A1424" />
+      <rect width="440" height="340" fill="#0D1B30" />
 
       {/* Streets: each pair of consecutive stops travels along one of these. */}
-      <g stroke="#16233A" strokeLinecap="round">
+      <g stroke="#24385C" strokeLinecap="round">
         <path d="M20 296 H200" strokeWidth="18" />
         <path d="M128 320 V186 " strokeWidth="18" />
         <path d="M104 208 H278" strokeWidth="18" />
@@ -437,10 +445,12 @@ function NeighbourhoodMap({
         <path d="M20 172 H210" strokeWidth="14" opacity="0.7" />
         <path d="M300 296 H420" strokeWidth="14" opacity="0.7" />
         <path d="M396 296 V130" strokeWidth="14" opacity="0.7" />
+        <path d="M20 52 H190" strokeWidth="14" opacity="0.7" />
+        <path d="M64 30 V150" strokeWidth="14" opacity="0.7" />
       </g>
       {/* centre lines */}
       <g
-        stroke="rgba(148,196,255,0.14)"
+        stroke="rgba(148,196,255,0.3)"
         strokeWidth="1.5"
         strokeDasharray="6 8"
       >
@@ -468,7 +478,7 @@ function NeighbourhoodMap({
           width={14}
           height={24}
           rx={2}
-          fill={drivewayCleared ? "#16233A" : "rgba(226,240,255,0.85)"}
+          fill={drivewayCleared ? "#0F2036" : "rgba(226,240,255,0.9)"}
           stroke={drivewayCleared ? "rgba(125,211,252,0.5)" : "none"}
           strokeWidth="1"
           style={{ transition: "fill 0.8s ease" }}
@@ -501,7 +511,7 @@ function NeighbourhoodMap({
           cx={s.x}
           cy={s.y}
           r={i === YOUR_STOP ? 5 : 3.5}
-          fill={visited.has(i) ? "#38BDF8" : "rgba(148,196,255,0.25)"}
+          fill={visited.has(i) ? "#38BDF8" : "rgba(148,196,255,0.45)"}
           style={{ transition: "fill 0.5s ease" }}
         />
       ))}
@@ -600,13 +610,13 @@ function House({
         width="18"
         height="12"
         rx="1.5"
-        fill={accent ? "#1D3A5F" : "#152238"}
-        stroke={accent ? "rgba(125,211,252,0.6)" : "rgba(148,196,255,0.15)"}
+        fill={accent ? "#27548C" : "#1B2E4E"}
+        stroke={accent ? "rgba(125,211,252,0.7)" : "rgba(148,196,255,0.3)"}
         strokeWidth="1"
       />
       <path
         d="M-11 -6 L0 -14 L11 -6 Z"
-        fill={accent ? "#2B5384" : "#1B2C47"}
+        fill={accent ? "#3A6FB0" : "#25436E"}
       />
       {/* warm window */}
       <rect x="-4" y="-3" width="3.5" height="3.5" fill="rgba(251,191,36,0.7)" />

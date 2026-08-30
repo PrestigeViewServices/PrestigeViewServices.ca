@@ -335,7 +335,10 @@ export default async function WinterPackagesPage() {
       </section>
 
       {/* ── Storm Night walkthrough ── */}
-      <section id="storm-night" className="container-max scroll-mt-24 py-14">
+      <section
+        id="storm-night"
+        className="cv-auto container-max scroll-mt-24 py-14"
+      >
         <div className="max-w-2xl">
           <p className="eyebrow text-primary">Storm Night</p>
           <h2 className="heading-section mt-2 text-balance">
@@ -361,7 +364,7 @@ export default async function WinterPackagesPage() {
       <PovSection />
 
       {/* ── How it works ── */}
-      <section className="container-max py-14">
+      <section className="cv-auto container-max py-14">
         <div className="max-w-2xl">
           <p className="eyebrow text-primary">How It Works</p>
           <h2 className="heading-section mt-2 text-balance">
@@ -387,22 +390,32 @@ export default async function WinterPackagesPage() {
       </section>
 
       {/* ── Customer portal showcase ── */}
-      <PortalShowcase />
+      <div className="cv-auto">
+        <PortalShowcase />
+      </div>
 
       {/* ── Selector, add-ons, comparison, save card, quote form ── */}
-      <PackageSelector comparison={<ComparisonTable />} />
+      <div className="cv-auto">
+        <PackageSelector comparison={<ComparisonTable />} />
+      </div>
 
       {/* ── Discounts + urgency ── */}
-      <WinterOffersStrip promo={winterPromo} />
+      <div className="cv-auto">
+        <WinterOffersStrip promo={winterPromo} />
+      </div>
 
       {/* ── Local crew, real equipment ── */}
-      <EquipmentGrid />
+      <div className="cv-auto">
+        <EquipmentGrid />
+      </div>
 
       {/* ── Commercial + Pembroke plow trucks ── */}
-      <CommercialSection />
+      <div className="cv-auto">
+        <CommercialSection />
+      </div>
 
       {/* ── Trust ── */}
-      <section className="container-max py-14">
+      <section className="cv-auto container-max py-14">
         <div className="max-w-2xl">
           <p className="eyebrow text-primary">Why Neighbours Pick Us</p>
           <h2 className="heading-section mt-2 text-balance">
@@ -471,7 +484,7 @@ export default async function WinterPackagesPage() {
       </section>
 
       {/* ── Sam ── */}
-      <section className="container-max pb-6">
+      <section className="cv-auto container-max pb-6">
         <div className="surface-card flex flex-col items-center gap-6 p-7 text-center sm:flex-row sm:text-left">
           <SamImage pose="hero" size={124} className="shrink-0" />
           <div>
@@ -493,15 +506,17 @@ export default async function WinterPackagesPage() {
       </section>
 
       {/* ── FAQs ── */}
-      <FaqSection
-        items={WINTER_FAQS}
-        eyebrow="Snow Pass FAQs"
-        title="Questions homeowners ask before winter"
-        description="Straight answers on coverage, triggers, billing, and what happens overnight."
-      />
+      <div className="cv-auto">
+        <FaqSection
+          items={WINTER_FAQS}
+          eyebrow="Snow Pass FAQs"
+          title="Questions homeowners ask before winter"
+          description="Straight answers on coverage, triggers, billing, and what happens overnight."
+        />
+      </div>
 
       {/* ── Closing CTA ── */}
-      <section className="container-max pb-16">
+      <section className="cv-auto container-max pb-16">
         <div className="overflow-hidden rounded-3xl border border-sky-400/25 bg-gradient-to-br from-blue-950 via-blue-900 to-sky-950 p-8 sm:p-11">
           <h2 className="heading-section text-balance text-white">
             Reserve your driveway. Free quote. No payment today.
