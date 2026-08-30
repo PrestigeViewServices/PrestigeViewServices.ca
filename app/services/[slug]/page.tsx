@@ -14,6 +14,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
+import { FallBundle } from "@/components/fall/fall-bundle";
+import { GutterShowcase } from "@/components/gutter/gutter-showcase";
+import { SnowCrossSell } from "@/components/winter/snow-cross-sell";
 import {
   ServiceAmbience,
   ambienceForService,
@@ -191,6 +194,15 @@ export default async function ServiceDetailPage(
   // / autumn. Returns null for "property-touch-ups" so that page stays plain.
   const ambience = ambienceForService(service.slug);
 
+  // Fall cleanup and gutter cleaning carry their own on-page quote form
+  // (with the snow bundle toggle), so their hero CTA scrolls to it instead
+  // of leaving for /quote, and they skip the generic snow cross-sell band.
+  const hasEmbeddedForm =
+    service.slug === "fall-cleanup" || service.slug === "gutter-cleaning";
+  const quoteHref = hasEmbeddedForm
+    ? "#quote-form"
+    : `/quote?service=${service.slug}`;
+
   return (
     <>
       <script
@@ -230,7 +242,7 @@ export default async function ServiceDetailPage(
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <Link href={`/quote?service=${service.slug}`}>
+                  <Link href={quoteHref}>
                     Get a Free Quote
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -257,6 +269,14 @@ export default async function ServiceDetailPage(
           )}
         </div>
       </section>
+
+      {/* Fall cleanup: the bundle pitch, process visual, Storm Night preview,
+          and the native quote form with snow pre-selected. */}
+      {service.slug === "fall-cleanup" && <FallBundle />}
+
+      {/* Gutter cleaning: how-we-do-it, before/after, safety story,
+          cross-sell bundle, and the native quote form. */}
+      {service.slug === "gutter-cleaning" && <GutterShowcase />}
 
       {service.division === "snowland" && (
         <section className="container-max pt-8 pb-2">
@@ -561,7 +581,15 @@ export default async function ServiceDetailPage(
         </section>
       )}
 
-      <CtaBand />
+      {/* "Add snow removal" cross-sell on every non-winter service page.
+          Fall + gutter skip it: their embedded forms carry the bundle. */}
+      {service.division !== "snowland" && !hasEmbeddedForm && (
+        <SnowCrossSell source={`service-${service.slug}`} />
+      )}
+
+      <CtaBand
+        primaryHref={hasEmbeddedForm ? "#quote-form" : "/quote"}
+      />
     </>
   );
 }
