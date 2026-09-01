@@ -1,10 +1,12 @@
 /**
  * Winter package definitions, single source of truth.
  *
- * ⚠️ PRICING IS A PLACEHOLDER. Replace the `priceCents` numbers below with the
- * real "Starts at" amounts from the marketing flyer before launch. Everything
- * else (UI, estimator, admin view, reservation form) reads from this file, so
- * updating prices here updates the whole site.
+ * Driveway-tier starting prices were set by the owner (Sept 2026):
+ * Bronze $599.99, Silver $749.99, Gold $959.99, Platinum $1,259.99 per season
+ * for a single-car driveway. Larger-size prices are scaled estimates —
+ * confirm before quoting. ⚠️ Walkway pass-pack prices are still placeholders.
+ * Everything (UI, estimator, admin view, reservation form) reads from this
+ * file, so updating prices here updates the whole site.
  *
  * The site displays each tier's price as a MONTHLY payment: the single-car
  * seasonal price divided into MONTHLY_INSTALLMENTS equal payments, rounded to
@@ -135,10 +137,10 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       spotCap: "Open",
     },
     priceCents: {
-      ONE_CAR: 45000,
-      TWO_CAR: 55000,
-      THREE_PLUS_CAR: 65000,
-      LONG_RURAL: 85000,
+      ONE_CAR: 59999, // $99.99/month over 6 payments
+      TWO_CAR: 73500,
+      THREE_PLUS_CAR: 86500,
+      LONG_RURAL: 113500,
     },
   },
   {
@@ -164,10 +166,10 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       spotCap: "Open",
     },
     priceCents: {
-      ONE_CAR: 65000,
-      TWO_CAR: 80000,
-      THREE_PLUS_CAR: 95000,
-      LONG_RURAL: 120000,
+      ONE_CAR: 74999, // $124.99/month over 6 payments
+      TWO_CAR: 92500,
+      THREE_PLUS_CAR: 109500,
+      LONG_RURAL: 138500,
     },
   },
   {
@@ -194,10 +196,10 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       spotCap: "Open",
     },
     priceCents: {
-      ONE_CAR: 90000,
-      TWO_CAR: 110000,
-      THREE_PLUS_CAR: 130000,
-      LONG_RURAL: 165000,
+      ONE_CAR: 95999, // $159.99/month over 6 payments
+      TWO_CAR: 117500,
+      THREE_PLUS_CAR: 138500,
+      LONG_RURAL: 176000,
     },
   },
   {
@@ -227,10 +229,10 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       spotCap: "Capped per route",
     },
     priceCents: {
-      ONE_CAR: 120000,
-      TWO_CAR: 145000,
-      THREE_PLUS_CAR: 170000,
-      LONG_RURAL: 215000,
+      ONE_CAR: 125999, // $209.99/month over 6 payments
+      TWO_CAR: 152500,
+      THREE_PLUS_CAR: 178500,
+      LONG_RURAL: 226000,
     },
   },
 ];
