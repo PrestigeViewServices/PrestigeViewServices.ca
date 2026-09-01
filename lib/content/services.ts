@@ -297,9 +297,9 @@ export const services: Service[] = [
     name: "Seasonal Snow Contracts",
     division: "snowland",
     shortDescription:
-      "One flat winter rate. Unlimited visits during qualifying storms.",
+      "One simple monthly payment. Unlimited visits during qualifying storms.",
     features: [
-      "Flat seasonal pricing",
+      "Easy monthly payments",
       "Unlimited qualifying visits",
       "Priority routing",
       "Locked in before snowfall",

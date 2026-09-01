@@ -28,10 +28,15 @@ import {
   WINTER_TOWNS,
   WINTER_TOWN_LABELS,
   addOnIsIncluded,
+  formatCents,
+  formatMonthly,
   getDrivewayTier,
   getShovelingTier,
+  monthlyCents,
   selectionLines,
   selectionSummary,
+  tierMonthlyFromCents,
+  MONTHLY_INSTALLMENTS,
   type AddOnKey,
   type DrivewaySize,
   type DrivewayTier,
@@ -107,6 +112,12 @@ export function PackageSelector({
   );
 
   const summary = selection ? selectionSummary(selection) : "";
+
+  // Live "from" price for the chosen tier and driveway size. Walkway packs
+  // and add-ons are quoted to the property, so they are not folded in here.
+  const monthlyFrom = tier
+    ? monthlyCents(getDrivewayTier(tier).priceCents[size])
+    : null;
 
   /** Everything the shareable card needs, derived from the live selection. */
   const cardData: PackageCardData | null = useMemo(() => {
@@ -245,9 +256,10 @@ export function PackageSelector({
             Pick your package
           </h2>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Every pass covers your driveway and apron for the whole season at
-            one flat rate. Moving up the tiers buys speed: an earlier trigger,
-            more passes per storm, and a tighter completion window.
+            Every pass covers your driveway and apron for the whole winter,
+            paid in {MONTHLY_INSTALLMENTS} easy monthly payments. Moving up the
+            tiers buys speed: an earlier trigger, more passes per storm, and a
+            tighter completion window.
           </p>
         </div>
 
@@ -263,8 +275,10 @@ export function PackageSelector({
         </div>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          No prices shown on purpose: every driveway is a different size, slope,
-          and layout. Pick a package and we quote it to your property.{" "}
+          Starting prices are for a single-car driveway, split into{" "}
+          {MONTHLY_INSTALLMENTS} equal monthly payments across the winter.
+          Larger and rural driveways are quoted to your exact property before
+          anything is billed.{" "}
           <strong className="text-foreground">
             Free quote, no payment today.
           </strong>
@@ -535,6 +549,17 @@ export function PackageSelector({
                     <p className="mt-2 text-lg font-bold tracking-tight">
                       {summary}
                     </p>
+                    {monthlyFrom !== null && (
+                      <p className="mt-1.5 text-sm text-muted-foreground">
+                        Driveway pass from{" "}
+                        <strong className="text-foreground">
+                          {formatMonthly(monthlyFrom)}/month
+                        </strong>{" "}
+                        for a {DRIVEWAY_SIZE_LABELS[size].toLowerCase()}{" "}
+                        driveway. Walkway packs and add-ons are priced in your
+                        free quote.
+                      </p>
+                    )}
                     <p className="mt-1.5 text-xs text-muted-foreground">
                       Not right?{" "}
                       <a href="#packages" className="text-primary hover:underline">
@@ -621,7 +646,16 @@ export function PackageSelector({
 
       {/* ── Sticky selection bar ── */}
       {tier && !sent && (
-        <StickyBar summary={summary} onQuote={scrollToForm} smsHref={smsHref} />
+        <StickyBar
+          summary={summary}
+          priceLabel={
+            monthlyFrom !== null
+              ? `From ${formatMonthly(monthlyFrom)}/mo`
+              : null
+          }
+          onQuote={scrollToForm}
+          smsHref={smsHref}
+        />
       )}
     </>
   );
@@ -683,6 +717,25 @@ function TierCard({
       <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
         {tier.blurb}
       </p>
+
+      <div className="mt-5 border-t border-surface-border pt-4">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Starting at
+        </p>
+        <p className="mt-1 flex items-baseline gap-1">
+          <span className="text-3xl font-bold tracking-tight">
+            {formatMonthly(tierMonthlyFromCents(tier))}
+          </span>
+          <span className="text-sm font-medium text-muted-foreground">
+            /month
+          </span>
+        </p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground">
+          Single-car driveway · {MONTHLY_INSTALLMENTS} monthly payments ·{" "}
+          {formatCents(tierMonthlyFromCents(tier) * MONTHLY_INSTALLMENTS)} per
+          season
+        </p>
+      </div>
 
       <ul className="mt-5 space-y-2.5 text-sm">
         {tier.features.map((f) => (
@@ -932,10 +985,12 @@ function CardPreview({
 
 function StickyBar({
   summary,
+  priceLabel,
   onQuote,
   smsHref,
 }: {
   summary: string;
+  priceLabel: string | null;
   onQuote: () => void;
   smsHref: string;
 }) {
@@ -960,7 +1015,14 @@ function StickyBar({
           <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
             Your selection
           </p>
-          <p className="truncate text-sm font-semibold">{summary}</p>
+          <p className="truncate text-sm font-semibold">
+            {summary}
+            {priceLabel && (
+              <span className="ml-2 font-normal text-muted-foreground">
+                {priceLabel}
+              </span>
+            )}
+          </p>
         </div>
         <a
           href={smsHref}
