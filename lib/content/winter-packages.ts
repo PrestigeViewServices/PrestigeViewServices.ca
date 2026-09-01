@@ -6,6 +6,11 @@
  * else (UI, estimator, admin view, reservation form) reads from this file, so
  * updating prices here updates the whole site.
  *
+ * The site displays each tier's price as a MONTHLY payment: the single-car
+ * seasonal price divided into MONTHLY_INSTALLMENTS equal payments, rounded to
+ * a .99 price point (see monthlyCents). Editing a tier's `priceCents` is
+ * therefore all it takes to change the advertised monthly number.
+ *
  * Money is stored as integer cents to keep arithmetic exact.
  */
 
@@ -97,9 +102,11 @@ export type DrivewayTierDef = {
   compare: TierComparison;
   /**
    * Seasonal "starts at" pricing per driveway size, in cents.
-   * PLACEHOLDER VALUES, update before launch. Never rendered publicly, the
-   * site shows "Custom quote" everywhere. Used only for the internal estimate
-   * captured alongside each reservation.
+   * PLACEHOLDER VALUES, update before launch. The single-car figure is shown
+   * publicly as the tier's "Starting at $X.XX/month" price (seasonal total ÷
+   * MONTHLY_INSTALLMENTS, see monthlyCents). Larger sizes feed the running
+   * estimate on the quote form and the internal estimate captured alongside
+   * each reservation.
    */
   priceCents: Record<DrivewaySize, number>;
 };
@@ -437,24 +444,55 @@ export function portalTierLabel(f: PortalFeature): string {
 }
 
 // =============================================================================
+// MONTHLY PRICING
+// =============================================================================
+// Seasonal passes are advertised and billed as equal monthly payments across
+// the winter (November through April). All public price displays derive from
+// the seasonal `priceCents` through these helpers, so the seasonal source of
+// truth and the advertised monthly numbers can never drift apart.
+
+/** Number of equal monthly payments a seasonal pass is split into (Nov–Apr). */
+export const MONTHLY_INSTALLMENTS = 6;
+
+/**
+ * One monthly payment for a seasonal price, in cents, rounded UP to the next
+ * dollar then dropped a cent for a clean ".99" price point. Rounding up keeps
+ * the advertised monthly total at or slightly above the seasonal price, so
+ * "Starting at $X.XX/month" can never undersell the real quote.
+ */
+export function monthlyCents(seasonCents: number): number {
+  return Math.ceil(seasonCents / MONTHLY_INSTALLMENTS / 100) * 100 - 1;
+}
+
+/** The tier's advertised monthly price: its single-car seasonal price. */
+export function tierMonthlyFromCents(tier: DrivewayTierDef): number {
+  return monthlyCents(tier.priceCents.ONE_CAR);
+}
+
+// =============================================================================
 // COMPARISON TABLE
 // =============================================================================
-// Row order is the reading order in the table. `render` pulls the value off a
-// tier's `compare` block so the table and the cards share one source.
+// Row order is the reading order in the table. `render` pulls the value off
+// the tier def so the table, the cards, and the price display share one
+// source.
 
 export const COMPARISON_ROWS: {
   label: string;
-  render: (c: TierComparison) => boolean | string;
+  render: (t: DrivewayTierDef) => boolean | string;
 }[] = [
-  { label: "Trigger depth", render: (c) => c.triggerDepth },
-  { label: "Response time", render: (c) => c.responseTime },
-  { label: "Passes per storm", render: (c) => c.passesPerStorm },
-  { label: "City ridge removal", render: (c) => c.ridgeRemoval },
-  { label: "Live tracking", render: (c) => c.liveTracking },
-  { label: "Customer portal", render: (c) => c.portal },
-  { label: "Cleared alerts + photo proof", render: (c) => c.photoProof },
-  { label: "Priority routing", render: (c) => c.priorityRouting },
-  { label: "Spot caps", render: (c) => c.spotCap },
+  {
+    label: "Monthly price (from)",
+    render: (t) => `${formatMonthly(tierMonthlyFromCents(t))}/mo`,
+  },
+  { label: "Trigger depth", render: (t) => t.compare.triggerDepth },
+  { label: "Response time", render: (t) => t.compare.responseTime },
+  { label: "Passes per storm", render: (t) => t.compare.passesPerStorm },
+  { label: "City ridge removal", render: (t) => t.compare.ridgeRemoval },
+  { label: "Live tracking", render: (t) => t.compare.liveTracking },
+  { label: "Customer portal", render: (t) => t.compare.portal },
+  { label: "Cleared alerts + photo proof", render: (t) => t.compare.photoProof },
+  { label: "Priority routing", render: (t) => t.compare.priorityRouting },
+  { label: "Spot caps", render: (t) => t.compare.spotCap },
 ];
 
 /** Plus-or-minus margin used when showing a price range to customers. */
@@ -500,8 +538,20 @@ const fmt = new Intl.NumberFormat("en-CA", {
   maximumFractionDigits: 0,
 });
 
+const fmtExact = new Intl.NumberFormat("en-CA", {
+  style: "currency",
+  currency: "CAD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export function formatCents(cents: number): string {
   return fmt.format(cents / 100);
+}
+
+/** Monthly prices keep their cents so "$124.99" reads as intended. */
+export function formatMonthly(cents: number): string {
+  return fmtExact.format(cents / 100);
 }
 
 export function formatRange({
