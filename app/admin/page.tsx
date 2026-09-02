@@ -5,11 +5,16 @@ import {
   Bell,
   BellOff,
   Briefcase,
+  ExternalLink,
   Eye,
   Gift,
   Inbox,
   LifeBuoy,
+  Mail,
+  MessageCircle,
+  Phone,
   Snowflake,
+  TrendingUp,
   Users,
 } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
@@ -18,11 +23,7 @@ import { notificationsConfigured } from "@/lib/notify";
 import { kindMeta } from "@/lib/admin-notifications";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { NotifyTestButton } from "@/components/admin/notify-test-button";
-import {
-  LEAD_STATUS_META,
-  statusColor,
-  statusLabel,
-} from "@/lib/dashboard";
+import { getService } from "@/lib/content/services";
 import {
   DRIVEWAY_SIZE_LABELS,
   getDrivewayTier,
@@ -33,9 +34,13 @@ export const dynamic = "force-dynamic";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Command Center — the master view of everything the website generates:
- * quote requests, winter reservations, applications, support, and site
- * traffic. Every tile links to the page where the work happens.
+ * Command Center — the master view of everything the website generates.
+ *
+ * Layout philosophy: two work queues, kept strictly apart.
+ *  - NEW LEADS: money coming in (quote requests nobody has called yet).
+ *  - OPEN REQUESTS: people waiting on an answer (winter reservations,
+ *    support, club requests, applications).
+ * Everything else (traffic, activity) is context below the fold.
  */
 export default async function AdminHomePage() {
   await requireRole(["ultimate_admin", "super_admin", "admin", "manager"]);
@@ -61,11 +66,15 @@ export default async function AdminHomePage() {
   const [
     newLeads,
     leads7d,
-    latestLeads,
+    freshLeads,
     pendingReservations,
     latestReservations,
     newApplications,
+    latestApplications,
     openSupport,
+    latestSupport,
+    openTickets,
+    latestTickets,
     views7d,
     viewsToday,
     uniques7d,
@@ -77,11 +86,38 @@ export default async function AdminHomePage() {
   ] = await Promise.all([
     db.lead.count({ where: { status: "NEW" } }),
     db.lead.count({ where: { createdAt: { gte: since7d } } }),
-    db.lead.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
+    db.lead.findMany({
+      where: { status: "NEW" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    }),
     db.winterReservation.count({ where: { status: { in: ["NEW", "CONTACTED"] } } }),
-    db.winterReservation.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    db.winterReservation.findMany({
+      where: { status: { in: ["NEW", "CONTACTED"] } },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }),
     db.application.count({ where: { status: "NEW" } }),
+    db.application.findMany({
+      where: { status: "NEW" },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, name: true, roleSlug: true, createdAt: true },
+    }),
     db.supportRequest.count({ where: { status: { in: ["NEW", "IN_PROGRESS"] } } }),
+    db.supportRequest.findMany({
+      where: { status: { in: ["NEW", "IN_PROGRESS"] } },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, name: true, createdAt: true, status: true },
+    }),
+    db.clubTicket.count({ where: { status: "OPEN" } }),
+    db.clubTicket.findMany({
+      where: { status: "OPEN" },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, subject: true, createdAt: true },
+    }),
     db.pageView.count({ where: { createdAt: { gte: since7d } } }),
     db.pageView.count({ where: { createdAt: { gte: todayStart } } }),
     db.pageView
@@ -99,7 +135,7 @@ export default async function AdminHomePage() {
     db.adminNotification.count({ where: { readAt: null } }),
     db.adminNotification.findMany({
       orderBy: { createdAt: "desc" },
-      take: 8,
+      take: 6,
     }),
   ]);
 
@@ -117,14 +153,76 @@ export default async function AdminHomePage() {
   }
   const maxViews = Math.max(1, ...chart.map((c) => c.views));
 
+  const openRequestCount =
+    pendingReservations + openSupport + openTickets + newApplications;
+
+  // One merged, newest-first queue of everything that is NOT a sales lead.
+  type RequestRow = {
+    key: string;
+    title: string;
+    detail: string;
+    href: string;
+    createdAt: Date;
+    badge: string;
+    cls: string;
+  };
+  const requestRows: RequestRow[] = [
+    ...latestReservations.map((r) => ({
+      key: `w-${r.id}`,
+      title: r.name,
+      detail: `${getDrivewayTier(r.drivewayTier).name} · ${DRIVEWAY_SIZE_LABELS[r.drivewaySize]} · ${r.city}`,
+      href: "/admin/winter-reservations",
+      createdAt: r.createdAt,
+      badge: "Winter",
+      cls: "bg-cyan-500/15 text-cyan-200 border-cyan-500/25",
+    })),
+    ...latestSupport.map((s) => ({
+      key: `s-${s.id}`,
+      title: s.name,
+      detail: s.status === "IN_PROGRESS" ? "In progress" : "New ticket",
+      href: "/admin/support",
+      createdAt: s.createdAt,
+      badge: "Support",
+      cls: "bg-amber-500/15 text-amber-200 border-amber-500/25",
+    })),
+    ...latestTickets.map((t) => ({
+      key: `t-${t.id}`,
+      title: t.subject,
+      detail: "Open club request",
+      href: "/admin/club/tickets",
+      createdAt: t.createdAt,
+      badge: "Club",
+      cls: "bg-sky-500/15 text-sky-300 border-sky-500/25",
+    })),
+    ...latestApplications.map((a) => ({
+      key: `a-${a.id}`,
+      title: a.name,
+      detail: `Applied: ${a.roleSlug.replace(/-/g, " ")}`,
+      href: "/admin/applications",
+      createdAt: a.createdAt,
+      badge: "Hiring",
+      cls: "bg-violet-500/15 text-violet-300 border-violet-500/25",
+    })),
+  ]
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, 8);
+
   const stats = [
     {
-      label: "New quote requests",
+      label: "New leads",
       value: newLeads,
-      sub: `${leads7d} received this week`,
+      sub: `${leads7d} this week`,
       icon: Inbox,
       href: "/admin/leads",
       accent: "text-blue-300 bg-blue-500/15",
+    },
+    {
+      label: "Open requests",
+      value: openRequestCount,
+      sub: "winter, support, club, hiring",
+      icon: LifeBuoy,
+      href: "/admin/support",
+      accent: "text-amber-200 bg-amber-500/15",
     },
     {
       label: "Winter reservations",
@@ -135,22 +233,6 @@ export default async function AdminHomePage() {
       accent: "text-cyan-200 bg-cyan-500/15",
     },
     {
-      label: "New applications",
-      value: newApplications,
-      sub: "to review",
-      icon: Briefcase,
-      href: "/admin/applications",
-      accent: "text-violet-300 bg-violet-500/15",
-    },
-    {
-      label: "Open support",
-      value: openSupport,
-      sub: "new + in progress",
-      icon: LifeBuoy,
-      href: "/admin/support",
-      accent: "text-amber-200 bg-amber-500/15",
-    },
-    {
       label: "Referrals in flight",
       value: referralsInFlight,
       sub: `${referralsReady} ready to award`,
@@ -159,9 +241,17 @@ export default async function AdminHomePage() {
       accent: "text-pink-300 bg-pink-500/15",
     },
     {
-      label: "Unread notifications",
+      label: "Applications",
+      value: newApplications,
+      sub: "to review",
+      icon: Briefcase,
+      href: "/admin/applications",
+      accent: "text-violet-300 bg-violet-500/15",
+    },
+    {
+      label: "Unread alerts",
       value: unreadNotifs,
-      sub: "everything the site captured",
+      sub: "in the feed",
       icon: Bell,
       href: "/admin/notifications",
       accent: "text-rose-300 bg-rose-500/15",
@@ -169,7 +259,7 @@ export default async function AdminHomePage() {
     {
       label: "Visitors (7 days)",
       value: uniques7d,
-      sub: `${viewsToday} page views today`,
+      sub: `${viewsToday} views today`,
       icon: Users,
       href: "/admin/traffic",
       accent: "text-emerald-300 bg-emerald-500/15",
@@ -185,216 +275,277 @@ export default async function AdminHomePage() {
   ];
 
   return (
-    <div className="space-y-10">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Command Center</h1>
-        <p className="mt-1.5 text-muted-foreground">
-          {now.toLocaleDateString("en-CA", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}{" "}
-          · everything the website is generating, in one place.
-        </p>
+    <div className="space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Command Center</h1>
+          <p className="mt-1.5 text-muted-foreground">
+            {now.toLocaleDateString("en-CA", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}{" "}
+            · everything the website is generating, in one place.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/marketing"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+          >
+            <TrendingUp className="h-4 w-4" />
+            Marketing &amp; SEO
+          </Link>
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+          >
+            <ExternalLink className="h-4 w-4" />
+            View site
+          </Link>
+        </div>
       </header>
 
       <NotifyStatusBanner />
 
-      {/* ---- Stat tiles ---- */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* ---- KPI strip ---- */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <Link
             key={s.label}
             href={s.href}
-            className="surface-card surface-card-hover group p-5"
+            className="surface-card surface-card-hover group p-4"
           >
             <div className="flex items-center justify-between">
               <span
-                className={`grid h-9 w-9 place-items-center rounded-xl ${s.accent}`}
+                className={`grid h-8 w-8 place-items-center rounded-lg ${s.accent}`}
               >
                 <s.icon className="h-4 w-4" />
               </span>
               <ArrowRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-1" />
             </div>
-            <p className="mt-4 text-3xl font-bold tabular-nums tracking-tight">
+            <p className="mt-3 text-2xl font-bold tabular-nums tracking-tight">
               {s.value}
             </p>
-            <p className="mt-0.5 text-sm font-medium">{s.label}</p>
+            <p className="text-sm font-medium">{s.label}</p>
             <p className="text-xs text-muted-foreground">{s.sub}</p>
           </Link>
         ))}
       </div>
 
-      {/* ---- Traffic sparkline ---- */}
-      <section className="surface-card p-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Traffic, last 14 days</h2>
-          </div>
-          <Link
-            href="/admin/traffic"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
-          >
-            Full report
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="mt-5 flex h-32 items-end gap-1.5">
-          {chart.map((c) => (
-            <div
-              key={c.label}
-              className="group relative flex-1"
-              title={`${c.label}: ${c.views} views`}
-            >
-              <div
-                className="w-full rounded-t-md bg-primary/40 transition-colors group-hover:bg-primary/70"
-                style={{
-                  height: `${Math.max(4, (c.views / maxViews) * 100)}%`,
-                }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
-          <span>{chart[0]?.label}</span>
-          <span>{chart[chart.length - 1]?.label}</span>
-        </div>
-      </section>
-
-      {/* ---- Latest activity feed ---- */}
-      <section className="surface-card p-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Latest activity</h2>
-          </div>
-          <Link
-            href="/admin/notifications"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
-          >
-            Full feed
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <ul className="mt-4 divide-y divide-surface-border">
-          {latestNotifs.length === 0 && (
-            <li className="py-6 text-sm text-muted-foreground">
-              Nothing yet. Every quote request, reservation, sign-up, referral,
-              and support ticket will land here the moment it happens.
-            </li>
-          )}
-          {latestNotifs.map((n) => {
-            const meta = kindMeta(n.kind);
-            return (
-              <li key={n.id} className="flex items-center gap-3 py-2.5">
-                <span
-                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${meta.cls}`}
-                >
-                  {meta.label}
-                </span>
-                <Link
-                  href={n.href ?? meta.href}
-                  className="min-w-0 flex-1 truncate text-sm hover:underline"
-                >
-                  {n.title}
-                </Link>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {n.createdAt.toLocaleString("en-CA", {
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </span>
-                {!n.readAt && (
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      {/* ---- Latest inbound ---- */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* ---- The two work queues: leads vs requests ---- */}
+      <div className="grid gap-6 xl:grid-cols-2">
         <section className="surface-card p-6">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Latest quote requests</h2>
+            <div className="flex items-center gap-2">
+              <Inbox className="h-5 w-5 text-blue-300" />
+              <h2 className="text-lg font-semibold">New leads</h2>
+              {newLeads > 0 && (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-blue-500/20 px-1.5 text-[11px] font-bold text-blue-200">
+                  {newLeads}
+                </span>
+              )}
+            </div>
             <Link
               href="/admin/leads"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
             >
-              All requests
+              Leads inbox
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Quote requests nobody has called yet. Fastest call wins the job.
+          </p>
           <ul className="mt-4 divide-y divide-surface-border">
-            {latestLeads.length === 0 && (
+            {freshLeads.length === 0 && (
               <li className="py-6 text-sm text-muted-foreground">
-                No quote requests yet, they&apos;ll appear here the moment the
-                website form is submitted.
+                Inbox zero. New quote requests land here the moment the form is
+                submitted.
               </li>
             )}
-            {latestLeads.map((l) => (
-              <li
-                key={l.id}
-                className="flex items-center justify-between gap-3 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{l.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {Array.isArray(l.serviceSlugs)
-                      ? (l.serviceSlugs as string[]).join(", ")
-                      : "General inquiry"}{" "}
-                    · {l.createdAt.toLocaleDateString("en-CA")}
-                  </p>
-                </div>
-                <span
-                  className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${statusColor(LEAD_STATUS_META, l.status)}`}
-                >
-                  {statusLabel(LEAD_STATUS_META, l.status)}
-                </span>
-              </li>
-            ))}
+            {freshLeads.map((l) => {
+              const slugs = Array.isArray(l.serviceSlugs)
+                ? (l.serviceSlugs as string[])
+                : [];
+              return (
+                <li key={l.id} className="py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{l.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {slugs.length > 0
+                          ? slugs
+                              .map((s) => getService(s)?.name ?? s)
+                              .join(", ")
+                          : "General inquiry"}{" "}
+                        ·{" "}
+                        {l.createdAt.toLocaleDateString("en-CA", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <a
+                        href={`tel:${l.phone}`}
+                        title={`Call ${l.name}`}
+                        className="grid h-8 w-8 place-items-center rounded-full border border-surface-border text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                      </a>
+                      <a
+                        href={`mailto:${l.email}`}
+                        title={`Email ${l.name}`}
+                        className="grid h-8 w-8 place-items-center rounded-full border border-surface-border text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
         <section className="surface-card p-6">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Latest winter reservations</h2>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-amber-300" />
+              <h2 className="text-lg font-semibold">Open requests</h2>
+              {openRequestCount > 0 && (
+                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-amber-500/20 px-1.5 text-[11px] font-bold text-amber-200">
+                  {openRequestCount}
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Winter reservations, support tickets, club requests, and job
+            applications waiting on an answer.
+          </p>
+          <ul className="mt-4 divide-y divide-surface-border">
+            {requestRows.length === 0 && (
+              <li className="py-6 text-sm text-muted-foreground">
+                All caught up. Nothing is waiting on a reply.
+              </li>
+            )}
+            {requestRows.map((r) => (
+              <li key={r.key} className="flex items-center gap-3 py-3">
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${r.cls}`}
+                >
+                  {r.badge}
+                </span>
+                <Link href={r.href} className="min-w-0 flex-1 hover:underline">
+                  <p className="truncate text-sm font-medium">{r.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {r.detail}
+                  </p>
+                </Link>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {r.createdAt.toLocaleDateString("en-CA", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      {/* ---- Context: traffic + activity ---- */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className="surface-card p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">Traffic, last 14 days</h2>
+            </div>
             <Link
-              href="/admin/winter-reservations"
+              href="/admin/traffic"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
             >
-              All reservations
+              Full report
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="mt-5 flex h-32 items-end gap-1.5">
+            {chart.map((c) => (
+              <div
+                key={c.label}
+                className="group relative flex-1"
+                title={`${c.label}: ${c.views} views`}
+              >
+                <div
+                  className="w-full rounded-t-md bg-primary/40 transition-colors group-hover:bg-primary/70"
+                  style={{
+                    height: `${Math.max(4, (c.views / maxViews) * 100)}%`,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+            <span>{chart[0]?.label}</span>
+            <span>{chart[chart.length - 1]?.label}</span>
+          </div>
+        </section>
+
+        <section className="surface-card p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">Latest activity</h2>
+            </div>
+            <Link
+              href="/admin/notifications"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary"
+            >
+              Full feed
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
           <ul className="mt-4 divide-y divide-surface-border">
-            {latestReservations.length === 0 && (
+            {latestNotifs.length === 0 && (
               <li className="py-6 text-sm text-muted-foreground">
-                No reservations yet, snow pass requests from /winter-packages
-                land here.
+                Nothing yet. Every quote request, reservation, sign-up,
+                referral, and support ticket will land here the moment it
+                happens.
               </li>
             )}
-            {latestReservations.map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center justify-between gap-3 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{r.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {getDrivewayTier(r.drivewayTier).name} ·{" "}
-                    {DRIVEWAY_SIZE_LABELS[r.drivewaySize]} · {r.city}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded-full border border-surface-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                  {r.status}
-                </span>
-              </li>
-            ))}
+            {latestNotifs.map((n) => {
+              const meta = kindMeta(n.kind);
+              return (
+                <li key={n.id} className="flex items-center gap-3 py-2.5">
+                  <span
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${meta.cls}`}
+                  >
+                    {meta.label}
+                  </span>
+                  <Link
+                    href={n.href ?? meta.href}
+                    className="min-w-0 flex-1 truncate text-sm hover:underline"
+                  >
+                    {n.title}
+                  </Link>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {n.createdAt.toLocaleString("en-CA", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  {!n.readAt && (
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       </div>
@@ -466,7 +617,10 @@ function NotifyStatusBanner() {
             <code>TWILIO_AUTH_TOKEN</code>, and{" "}
             <code>TWILIO_FROM_NUMBER</code>, or set{" "}
             <code>OWNER_SMS_GATEWAY</code> to use your carrier&apos;s
-            email-to-text address.
+            email-to-text address (for 613-762-6009: Telus is{" "}
+            <code>6137626009@msg.telus.com</code>, Bell is{" "}
+            <code>6137626009@txt.bell.ca</code>, Rogers is{" "}
+            <code>6137626009@pcs.rogers.com</code>).
           </li>
         )}
       </ul>

@@ -111,10 +111,17 @@ export default async function LeadsPage(props: {
     referredLeads.map((r) => [r.leadId, r.friendCreditCents])
   );
 
+  // With no status filter active, the inbox splits into two clearly
+  // separate queues: leads nobody has touched yet, then everything already
+  // being worked. A status filter collapses it back to a single list.
+  const splitView = !where.status;
+  const fresh = splitView ? items.filter((l) => l.status === "NEW") : items;
+  const worked = splitView ? items.filter((l) => l.status !== "NEW") : [];
+
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">Quote Requests</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Leads Inbox</h1>
         <p className="mt-1.5 text-muted-foreground">
           {items.length} shown of {totalCount} total · {newCount} waiting for a
           first call · {week} new this week
@@ -155,14 +162,52 @@ export default async function LeadsPage(props: {
         ))}
       </div>
 
-      <div className="space-y-4">
-        {items.length === 0 && (
-          <div className="surface-card p-10 text-center text-muted-foreground">
-            <Inbox className="mx-auto h-8 w-8 opacity-50" />
-            <p className="mt-3">No quote requests match these filters.</p>
+      {items.length === 0 && (
+        <div className="surface-card p-10 text-center text-muted-foreground">
+          <Inbox className="mx-auto h-8 w-8 opacity-50" />
+          <p className="mt-3">No quote requests match these filters.</p>
+        </div>
+      )}
+
+      {splitView && items.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="grid h-6 min-w-6 place-items-center rounded-full bg-blue-500/20 px-1.5 text-xs font-bold text-blue-200">
+            {fresh.length}
+          </span>
+          <h2 className="text-lg font-semibold">New leads</h2>
+          <span className="text-xs text-muted-foreground">
+            nobody has called these yet
+          </span>
+        </div>
+      )}
+      {splitView && items.length > 0 && fresh.length === 0 && (
+        <div className="surface-card p-6 text-sm text-muted-foreground">
+          Inbox zero. Every lead below is already being worked.
+        </div>
+      )}
+
+      <div className="space-y-4">{fresh.map(renderLead)}</div>
+
+      {splitView && worked.length > 0 && (
+        <>
+          <div className="mt-10 flex items-center gap-2">
+            <span className="grid h-6 min-w-6 place-items-center rounded-full border border-surface-border px-1.5 text-xs font-bold text-muted-foreground">
+              {worked.length}
+            </span>
+            <h2 className="text-lg font-semibold">Being worked</h2>
+            <span className="text-xs text-muted-foreground">
+              quoted, won, or lost
+            </span>
           </div>
-        )}
-        {items.map((l) => {
+          <div className="space-y-4">{worked.map(renderLead)}</div>
+        </>
+      )}
+    </div>
+  );
+
+  // Shared card renderer for both queues (hoisted; closes over the member
+  // and referral lookups computed above).
+  function renderLead(l: (typeof items)[number]) {
           const slugs = Array.isArray(l.serviceSlugs)
             ? (l.serviceSlugs as string[])
             : [];
@@ -281,10 +326,7 @@ export default async function LeadsPage(props: {
               </div>
             </article>
           );
-        })}
-      </div>
-    </div>
-  );
+  }
 }
 
 function FilterPill({

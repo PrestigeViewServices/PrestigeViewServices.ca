@@ -40,8 +40,10 @@ type NavItem = {
 type NavGroup = { title: string; items: NavItem[] };
 
 /**
- * Single-owner dashboard, the password unlocks everything, so there is no
- * per-role filtering. Grouped so the daily surfaces sit on top.
+ * Both dashboard passwords unlock everything, so there is no per-role
+ * filtering. Grouped by how the owner actually works the business:
+ * leads (money coming in) and requests (people waiting on an answer) are
+ * separate groups so neither ever hides inside the other.
  */
 const groups: NavGroup[] = [
   {
@@ -55,7 +57,27 @@ const groups: NavGroup[] = [
         badge: true,
       },
       { href: "/admin/traffic", label: "Website Traffic", icon: BarChart3 },
-      { href: "/admin/account", label: "My Account", icon: UserCog },
+    ],
+  },
+  {
+    title: "Leads & Sales",
+    items: [
+      { href: "/admin/leads", label: "Leads Inbox", icon: Inbox },
+      { href: "/admin/pipeline", label: "Job Pipeline", icon: KanbanSquare },
+      {
+        href: "/admin/winter-reservations",
+        label: "Winter Reservations",
+        icon: Snowflake,
+      },
+      { href: "/admin/marketing", label: "Marketing & SEO", icon: TrendingUp },
+    ],
+  },
+  {
+    title: "Requests",
+    items: [
+      { href: "/admin/support", label: "Support", icon: LifeBuoy },
+      { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
+      { href: "/admin/applications", label: "Applications", icon: Briefcase },
     ],
   },
   {
@@ -64,29 +86,14 @@ const groups: NavGroup[] = [
       { href: "/admin/club", label: "Members", icon: Award },
       { href: "/admin/club/approvals", label: "Approvals", icon: BadgeCheck },
       { href: "/admin/club/referrals", label: "Referrals", icon: Gift },
-      { href: "/admin/club/tickets", label: "Club Requests", icon: MessageCircle },
       { href: "/admin/club/giveaways", label: "Giveaways", icon: PartyPopper },
-      { href: "/admin/club/metrics", label: "Metrics", icon: TrendingUp },
+      { href: "/admin/club/metrics", label: "Metrics", icon: BarChart3 },
       { href: "/admin/club/settings", label: "Program Settings", icon: SlidersHorizontal },
-    ],
-  },
-  {
-    title: "Inbound",
-    items: [
-      { href: "/admin/leads", label: "Quote Requests", icon: Inbox },
-      {
-        href: "/admin/winter-reservations",
-        label: "Winter Reservations",
-        icon: Snowflake,
-      },
-      { href: "/admin/applications", label: "Applications", icon: Briefcase },
-      { href: "/admin/support", label: "Support", icon: LifeBuoy },
     ],
   },
   {
     title: "Operations",
     items: [
-      { href: "/admin/pipeline", label: "Job Pipeline", icon: KanbanSquare },
       { href: "/admin/accounts", label: "Accounts", icon: Contact },
       { href: "/admin/dispatch", label: "Crew Dispatch", icon: Truck },
     ],
@@ -100,10 +107,23 @@ const groups: NavGroup[] = [
       { href: "/admin/site", label: "Site Settings", icon: Settings },
     ],
   },
+  {
+    title: "Account",
+    items: [{ href: "/admin/account", label: "Sign-ins", icon: UserCog }],
+  },
 ];
 
 export function AdminSidebar({ unread = 0 }: { unread?: number }) {
   const pathname = usePathname();
+
+  // Longest matching href wins, so /admin/club/tickets lights up "Club
+  // Requests" and not also "Members" (/admin/club).
+  const activeHref = groups
+    .flatMap((g) => g.items)
+    .filter((i) =>
+      i.href === "/admin" ? pathname === "/admin" : pathname.startsWith(i.href)
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <nav className="space-y-5">
@@ -113,10 +133,7 @@ export function AdminSidebar({ unread = 0 }: { unread?: number }) {
             {group.title}
           </p>
           {group.items.map((item) => {
-            const active =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
+            const active = item.href === activeHref;
             const Icon = item.icon;
             return (
               <Link

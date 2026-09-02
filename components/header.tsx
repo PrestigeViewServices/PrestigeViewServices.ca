@@ -33,7 +33,7 @@ import { formatPhone } from "@/lib/utils";
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [
-  { href: "/services/fall-cleanup", label: "Fall Cleanups", icon: Leaf },
+  { href: "/fall-winter", label: "Fall & Winter", icon: Leaf },
   { href: "/winter-packages", label: "Winter Packages", icon: Snowflake },
 ] as const;
 
@@ -41,10 +41,12 @@ const exploreLinks = [
   { href: "/account", label: "My Account · Prestige Club" },
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
+  { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
   { href: "/guides", label: "Tips & Guides" },
   { href: "/seasonal-planner", label: "Seasonal Planner" },
+  { href: "/meet-sam", label: "Meet Sam" },
   { href: "/faq", label: "FAQ" },
   { href: "/reviews", label: "Reviews" },
   { href: "/careers", label: "Careers" },

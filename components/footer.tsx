@@ -145,6 +145,12 @@ export function Footer() {
             <Link href="/refer" className="hover:text-foreground">
               Refer a Friend
             </Link>
+            <Link href="/fall-winter" className="hover:text-foreground">
+              Fall &amp; Winter
+            </Link>
+            <Link href="/meet-sam" className="hover:text-foreground">
+              Meet Sam
+            </Link>
             <Link href="/account" className="hover:text-foreground">
               My Account
             </Link>

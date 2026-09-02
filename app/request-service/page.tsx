@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 import { LeadForm } from "@/components/lead-form";
+import { SamTip } from "@/components/sam";
 import { SectionHeading } from "@/components/section-heading";
 import { ReferralWelcomeBanner } from "@/components/referral-welcome-banner";
 import { getDb } from "@/lib/db";
@@ -51,6 +52,10 @@ export default async function RequestServicePage({
         </div>
 
         <aside className="lg:col-span-5 space-y-5">
+          <SamTip pose="hero" eyebrow="Sam's booking tip">
+            Bundling saves you money. Add gutter cleaning or a snow pass to
+            your request and we price everything together in one quote.
+          </SamTip>
           <div className="surface-card p-6">
             <h2 className="text-lg font-semibold">Prefer to talk?</h2>
             <p className="mt-1.5 text-sm text-muted-foreground">
