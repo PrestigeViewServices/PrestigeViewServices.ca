@@ -209,5 +209,29 @@ export async function notifyOwner(
     email,
     sms,
   });
+
+  // A configured channel that still failed is a delivery problem the owner
+  // must SEE, not a console line on a serverless box nobody reads. Surface
+  // it in the in-app feed with the provider's actual error. Unconfigured
+  // channels are excluded — the dashboard banner already covers those.
+  const cfg = notificationsConfigured();
+  const failures: string[] = [];
+  if (cfg.email && !email.sent) failures.push(`Email: ${email.reason}`);
+  if (cfg.sms && !sms.sent) failures.push(`Text: ${sms.reason}`);
+  if (failures.length > 0) {
+    try {
+      const { recordNotification } = await import("./admin-notifications");
+      await recordNotification({
+        kind: "system",
+        title: `Alert delivery failed for "${n.subject}"`,
+        body:
+          failures.join("\n") +
+          "\nThe submission itself is saved in the dashboard. Check the provider keys in Vercel (RESEND_API_KEY, LEAD_FROM_EMAIL, TWILIO_* / OWNER_SMS_GATEWAY).",
+      });
+    } catch {
+      // Never let bookkeeping break the intake path.
+    }
+  }
+
   return { email, sms };
 }

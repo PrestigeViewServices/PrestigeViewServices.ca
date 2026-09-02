@@ -3,8 +3,7 @@ import { cookies } from "next/headers";
 import {
   ADMIN_COOKIE,
   ADMIN_SESSION_MAX_AGE_SECONDS,
-  checkAdminEmail,
-  checkAdminPassword,
+  checkAdminLogin,
   createAdminToken,
   isAdminAuthConfigured,
 } from "@/lib/admin-session";
@@ -40,13 +39,9 @@ export async function POST(req: Request) {
   );
   if (!perEmail.ok) return tooMany();
 
-  // Evaluate BOTH checks rather than short-circuiting, so a wrong email
-  // does not return measurably faster than a wrong password.
-  const [emailOk, passwordOk] = await Promise.all([
-    checkAdminEmail(email),
-    checkAdminPassword(password),
-  ]);
-  const ok = emailOk && passwordOk;
+  // Resolves the account by email (owner or an extra sign-in like
+  // contact@) and verifies the password against that account's own hash.
+  const ok = await checkAdminLogin(email, password);
   if (!ok) {
     // Small fixed delay blunts brute-force loops without hurting real logins.
     await new Promise((r) => setTimeout(r, 600));

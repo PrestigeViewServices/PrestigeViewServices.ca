@@ -4,6 +4,7 @@ import { SeasonBanner } from "@/components/home/season-banner";
 import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
+import { FallWinterPromo } from "@/components/home/fall-winter-promo";
 import { OffersBand } from "@/components/home/offers-band";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { FreshFromField } from "@/components/home/fresh-from-field";
@@ -45,6 +46,9 @@ export default async function HomePage() {
       <SeasonBanner />
       <Hero content={content.hero} />
       <TrustMarquee />
+      <Reveal>
+        <FallWinterPromo />
+      </Reveal>
       <Reveal>
         <ServicesOverview />
       </Reveal>

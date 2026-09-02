@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import {
+  findAdminCredentialByEmail,
   readAdminCredential,
   verifyAdminCredentialPassword,
 } from "./admin-credentials";
+import { verifyPassword } from "./customer-auth";
 
 /**
  * Internal admin authentication — no external auth service.
@@ -98,6 +100,44 @@ function timingSafeEqual(a: string, b: string): boolean {
  * always get in.
  */
 export async function checkAdminPassword(candidate: string): Promise<boolean> {
+  return checkEnvOrOwnerPassword(candidate);
+}
+
+/**
+ * The full login check: matches the submitted email to ONE dashboard
+ * sign-in (owner or an extra account like contact@) and verifies the
+ * password against that account's own hash.
+ *
+ * Env fallback rules are unchanged from the single-account days: while the
+ * OWNER has no database row, ADMIN_EMAIL/ADMIN_PASSWORD still work, so a
+ * broken database can never lock the owner out. Once the owner row exists,
+ * the env password dies for good.
+ */
+export async function checkAdminLogin(
+  email: string,
+  password: string
+): Promise<boolean> {
+  const row = await findAdminCredentialByEmail(email);
+  if (row) {
+    try {
+      return await verifyPassword(password, row.passwordHash);
+    } catch {
+      return false;
+    }
+  }
+
+  // No row for this email — the env path is only valid while the owner has
+  // no stored credential, and only for the configured ADMIN_EMAIL.
+  const { credential } = await readAdminCredential();
+  if (credential) return false;
+  const [emailOk, passwordOk] = await Promise.all([
+    checkAdminEmail(email),
+    checkEnvOrOwnerPassword(password),
+  ]);
+  return emailOk && passwordOk;
+}
+
+async function checkEnvOrOwnerPassword(candidate: string): Promise<boolean> {
   const { credential } = await readAdminCredential();
   if (credential) return verifyAdminCredentialPassword(candidate);
 

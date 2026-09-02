@@ -26,11 +26,34 @@ import { hashPassword, verifyPassword } from "./customer-auth";
 
 export const ADMIN_CREDENTIAL_ID = "owner";
 
+/**
+ * Additional dashboard sign-ins beyond the owner row. Each is provisioned
+ * lazily (first time its email tries to log in, or the accounts page loads)
+ * so no manual migration or seed run is needed on the live database.
+ *
+ * Only the scrypt HASH lives in the repo, never the plaintext. The password
+ * can be changed afterward from /admin/account like any other account.
+ */
+export const DEFAULT_ADMIN_ACCOUNTS: ReadonlyArray<{
+  id: string;
+  email: string;
+  passwordHash: string;
+}> = [
+  {
+    id: "contact",
+    email: "contact@prestigeviewservices.ca",
+    passwordHash:
+      "scrypt$3b7e32390fe6f257095867bfb06c9796$68279ffb73077f69bcd9a1f0b7d4ef7d4fbd9b8b7b09af445fce5ed57f443305b71e4e681c18569bcf641c85825d8b73dfafa12ec8591bbd749c8d2d73642c8a",
+  },
+];
+
 export type AdminCredential = {
   email: string;
   passwordHash: string;
   updatedAt: Date;
 };
+
+export type AdminCredentialRow = AdminCredential & { id: string };
 
 /** Why there is no usable DB credential right now. */
 export type CredentialStatus =
@@ -70,6 +93,78 @@ export async function readAdminCredential(): Promise<{
   }
 }
 
+/**
+ * Ensures every DEFAULT_ADMIN_ACCOUNTS row exists. Safe to call often —
+ * it only writes when a row is missing, and it never throws (an unreachable
+ * database simply means the defaults wait for the next call).
+ */
+export async function ensureDefaultAdminAccounts(): Promise<void> {
+  const db = getDb();
+  if (!db) return;
+  for (const acct of DEFAULT_ADMIN_ACCOUNTS) {
+    try {
+      const existing = await db.adminCredential.findUnique({
+        where: { id: acct.id },
+        select: { id: true },
+      });
+      if (!existing) {
+        await db.adminCredential.create({
+          data: {
+            id: acct.id,
+            email: acct.email.toLowerCase(),
+            passwordHash: acct.passwordHash,
+          },
+        });
+      }
+    } catch {
+      // Missing table / connection trouble — env auth still works, and the
+      // account will be provisioned on a later attempt.
+    }
+  }
+}
+
+/**
+ * Finds the credential row whose email matches, provisioning the default
+ * accounts first so contact@ works on its very first login. NEVER throws.
+ */
+export async function findAdminCredentialByEmail(
+  email: string
+): Promise<AdminCredentialRow | null> {
+  const db = getDb();
+  if (!db) return null;
+  const clean = email.trim().toLowerCase();
+  if (!clean) return null;
+  try {
+    if (DEFAULT_ADMIN_ACCOUNTS.some((a) => a.email === clean)) {
+      await ensureDefaultAdminAccounts();
+    }
+    const row = await db.adminCredential.findFirst({
+      where: { email: { equals: clean, mode: "insensitive" } },
+      select: { id: true, email: true, passwordHash: true, updatedAt: true },
+    });
+    return row ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Every dashboard sign-in on record, owner first. NEVER throws. */
+export async function listAdminCredentials(): Promise<AdminCredentialRow[]> {
+  const db = getDb();
+  if (!db) return [];
+  try {
+    await ensureDefaultAdminAccounts();
+    const rows = await db.adminCredential.findMany({
+      select: { id: true, email: true, passwordHash: true, updatedAt: true },
+    });
+    return rows.sort((a, b) =>
+      a.id === ADMIN_CREDENTIAL_ID ? -1 : b.id === ADMIN_CREDENTIAL_ID ? 1 : 0
+    );
+  } catch {
+    return [];
+  }
+}
+
 /** True when a DB credential is in force (env password no longer accepted). */
 export async function adminCredentialInUse(): Promise<boolean> {
   const { status } = await readAdminCredential();
@@ -98,7 +193,8 @@ export const MIN_ADMIN_PASSWORD_LENGTH = 10;
  */
 export async function setAdminCredential(
   email: string,
-  password: string
+  password: string,
+  accountId: string = ADMIN_CREDENTIAL_ID
 ): Promise<void> {
   const db = getDb();
   if (!db) throw new Error("Database is not configured");
@@ -116,10 +212,22 @@ export async function setAdminCredential(
     throw new Error("Password is too long");
   }
 
+  // Two sign-ins sharing one email would make login ambiguous.
+  const clash = await db.adminCredential.findFirst({
+    where: {
+      email: { equals: cleanEmail, mode: "insensitive" },
+      id: { not: accountId },
+    },
+    select: { id: true },
+  });
+  if (clash) {
+    throw new Error("Another dashboard sign-in already uses that email");
+  }
+
   const passwordHash = await hashPassword(password);
   await db.adminCredential.upsert({
-    where: { id: ADMIN_CREDENTIAL_ID },
-    create: { id: ADMIN_CREDENTIAL_ID, email: cleanEmail, passwordHash },
+    where: { id: accountId },
+    create: { id: accountId, email: cleanEmail, passwordHash },
     update: { email: cleanEmail, passwordHash },
   });
 }
