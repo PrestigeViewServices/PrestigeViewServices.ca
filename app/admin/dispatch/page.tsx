@@ -279,7 +279,7 @@ export default async function DispatchPage(props: {
       <section className="grid gap-5 lg:grid-cols-2">
         {crews.length === 0 && (
           <div className="surface-card p-8 text-center text-muted-foreground lg:col-span-2">
-            No crews yet — add your first one below and jobs become
+            No crews yet. Add your first one below and jobs become
             assignable.
           </div>
         )}
@@ -383,7 +383,7 @@ export default async function DispatchPage(props: {
                 name="name"
                 required
                 maxLength={60}
-                placeholder="Crew 2 — Windows"
+                placeholder="Crew 2 (Windows)"
                 className="h-9 w-full rounded-lg border border-surface-border bg-input/80 px-3 text-sm"
               />
             </div>

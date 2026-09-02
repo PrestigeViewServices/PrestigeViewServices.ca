@@ -86,13 +86,13 @@ export default async function ClubSettingsPage() {
                 Careful: {formatPoints(outstandingPoints)} points are
                 outstanding. At the current rate that&apos;s{" "}
                 {formatCents(outstandingPoints * settings.centsPerPoint)} of
-                liability — changing the rate revalues all of it.
+                liability. Changing the rate revalues all of it.
               </p>
             )}
             {group === "Referrals" && (
               <p className="mt-1 text-xs text-muted-foreground">
                 What each side of a referral gets, and the guards around it.
-                Changes apply to NEW referrals — anything already in flight keeps
+                Changes apply to NEW referrals. Anything already in flight keeps
                 the reward it was promised.
               </p>
             )}
@@ -101,7 +101,7 @@ export default async function ClubSettingsPage() {
                 The &ldquo;create a free account and save&rdquo; offer. It is
                 advertised across the site and flagged on every lead from an
                 account holder, so the office knows to apply it before quoting.
-                This is a real discount off your price — it is not funded by
+                This is a real discount off your price. It is not funded by
                 points.
               </p>
             )}

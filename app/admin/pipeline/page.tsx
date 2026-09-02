@@ -284,7 +284,7 @@ function LeadCard({ lead }: { lead: LeadRow }) {
         <p className={stale ? "font-semibold text-amber-300" : ""}>
           <Clock className="mr-1 inline h-3 w-3" />
           {age === 0 ? "Today" : `${age} day${age === 1 ? "" : "s"} in stage`}
-          {stale && " — follow up"}
+          {stale && ", follow up"}
         </p>
         {lead.notes && <p className="line-clamp-2">{lead.notes}</p>}
       </div>

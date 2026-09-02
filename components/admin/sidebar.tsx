@@ -15,6 +15,7 @@ import {
   Snowflake,
   KanbanSquare,
   Contact,
+  PhoneCall,
   Truck,
   Inbox,
   BarChart3,
@@ -50,6 +51,7 @@ const groups: NavGroup[] = [
     title: "Overview",
     items: [
       { href: "/admin", label: "Command Center", icon: LayoutDashboard },
+      { href: "/admin/follow-ups", label: "Follow-Ups", icon: PhoneCall },
       {
         href: "/admin/notifications",
         label: "Notifications",

@@ -118,20 +118,20 @@ async function runImport(formData: FormData) {
   if (file instanceof File && file.size > 0) {
     if (file.size > 2 * 1024 * 1024) {
       redirect(
-        `/admin/club/import?result=${encodeURIComponent("File too large (2 MB max) — split it and run twice.")}`
+        `/admin/club/import?result=${encodeURIComponent("File too large (2 MB max). Split it and run twice.")}`
       );
     }
     text = await file.text();
   }
   if (!text.trim()) {
     redirect(
-      `/admin/club/import?result=${encodeURIComponent("Nothing to import — upload a file or paste rows first.")}`
+      `/admin/club/import?result=${encodeURIComponent("Nothing to import. Upload a file or paste rows first.")}`
     );
   }
 
   const rows = parseCustomerCsv(text);
   const s = await provisionMembers(db, rows);
-  const msg = `Done: ${s.rowsSeen} rows read — ${s.created} accounts created, ${s.existed} already existed, ${s.invalid} without a valid email.`;
+  const msg = `Done: ${s.rowsSeen} rows read, ${s.created} accounts created, ${s.existed} already existed, ${s.invalid} without a valid email.`;
   revalidatePath("/admin/club");
   redirect(`/admin/club/import?result=${encodeURIComponent(msg)}`);
 }

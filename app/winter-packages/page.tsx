@@ -139,7 +139,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do I know when my driveway has been cleared?",
-    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive — you never have to wonder.",
+    a: "Silver, Gold, and Platinum passes include an account in our customer portal, where you can watch the operator on a live map while the storm is on. Gold and Platinum also get a notification the moment each pass is finished, backed by a time-stamped photo saved to their season-long visit history. Check from work, from vacation, or from bed before the morning drive. You never have to wonder.",
   },
   {
     q: "Do I need to be home?",
@@ -147,7 +147,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do seasonal passes get billed?",
-    a: `One seasonal rate for the whole winter, split into ${MONTHLY_INSTALLMENTS} equal monthly payments — no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then confirm your payment schedule, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
+    a: `One seasonal rate for the whole winter, split into ${MONTHLY_INSTALLMENTS} equal monthly payments. No per-storm invoices and no surprise bills after a heavy month. We quote your property first, then confirm your payment schedule, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
   },
   {
     q: "Can I upgrade mid-season?",
@@ -163,7 +163,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Passes start at ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[0]))} per month for a single-car driveway on Bronze, up to ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[DRIVEWAY_TIER_DEFS.length - 1]))} per month for white-glove Platinum, spread over ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Larger and rural driveways are quoted to your exact property. Send a quote request and we confirm your price within 24 hours, free and with no obligation — nothing is collected today.`,
+    a: `Passes start at ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[0]))} per month for a single-car driveway on Bronze, up to ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[DRIVEWAY_TIER_DEFS.length - 1]))} per month for white-glove Platinum, spread over ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Larger and rural driveways are quoted to your exact property. Send a quote request and we confirm your price within 24 hours, free and with no obligation. Nothing is collected today.`,
   },
   {
     q: "Do military members get a discount on snow passes?",

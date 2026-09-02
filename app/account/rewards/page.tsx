@@ -624,7 +624,7 @@ async function requestRedemption(formData: FormData) {
 
   await sendClubEmail({
     to: clubNotifyEmail(),
-    subject: `Redemption request: ${formatCents(redemption.creditCents)} — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    subject: `Redemption request: ${formatCents(redemption.creditCents)} from ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
     replyTo: member?.email,
     text: [
       `${member?.firstName ?? "A member"} requested a ${formatCents(redemption.creditCents)} service credit (${points} pts).`,
@@ -667,7 +667,7 @@ async function claimReview() {
   }
   await sendClubEmail({
     to: clubNotifyEmail(),
-    subject: `Review bonus claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    subject: `Review bonus claim from ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
     replyTo: member?.email,
     text: [
       `${member?.firstName ?? "A member"} says they left a Google review.`,
@@ -711,17 +711,17 @@ async function claimSocial(formData: FormData) {
     await recordNotification({
       kind: "claim",
       title: `${member?.firstName ?? "A member"} claims a social shoutout bonus`,
-      body: link || "No link provided — check the tagged posts.",
+      body: link || "No link provided. Check the tagged posts.",
       db,
     });
   }
   await sendClubEmail({
     to: clubNotifyEmail(),
-    subject: `Social shoutout claim — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    subject: `Social shoutout claim from ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
     replyTo: member?.email,
     text: [
       `${member?.firstName ?? "A member"} says they posted a social shoutout about PVS.`,
-      link ? `Post: ${link}` : "No link provided — check the tagged posts.",
+      link ? `Post: ${link}` : "No link provided. Check the tagged posts.",
       `Verify it, then approve the bonus:`,
       `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca"}/admin/club/approvals`,
     ].join("\n"),

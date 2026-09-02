@@ -71,7 +71,7 @@ export default async function SiteContentPage() {
           <h1 className="text-3xl font-bold tracking-tight">Page Content</h1>
         </div>
         <p className="mt-1.5 max-w-2xl text-muted-foreground">
-          Edit what the public site says — no code, no waiting. Saves go live
+          Edit what the public site says. No code, no waiting. Saves go live
           immediately.{" "}
           <a
             href="/"
@@ -210,7 +210,7 @@ export default async function SiteContentPage() {
         <Link href="/admin/club/settings" className="font-medium text-primary hover:underline">
           Program Settings
         </Link>
-        . Service descriptions and city pages are SEO-tuned code content — ask
+        . Service descriptions and city pages are SEO-tuned code content, ask
         for changes there and they ship with a deploy.
       </p>
     </div>
@@ -314,7 +314,7 @@ function OfferEditor({ offer, index }: { offer: OfferContent; index: number }) {
       <div className="flex flex-wrap items-center gap-4">
         <legend className="text-sm font-semibold">
           Offer {index + 1}
-          {offer.headline ? ` — ${offer.headline.slice(0, 40)}` : ""}
+          {offer.headline ? `: ${offer.headline.slice(0, 40)}` : ""}
         </legend>
         <label className="flex items-center gap-2 text-xs font-medium">
           <input

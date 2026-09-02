@@ -197,7 +197,7 @@ export default async function GiveawayAdminPage() {
                 </p>
                 {g.skillTestResult ? (
                   <p className="mt-2 text-xs text-emerald-200">
-                    Skill test recorded: {g.skillTestResult} — winner
+                    Skill test recorded: {g.skillTestResult}. Winner
                     confirmed.
                   </p>
                 ) : (
@@ -289,7 +289,7 @@ async function drawWinner(formData: FormData) {
     const label = await winnerDisplay(db, result.winnerEntryId);
     await sendClubEmail({
       to: process.env.CLUB_NOTIFY_EMAIL || siteConfig.email,
-      subject: `Giveaway drawn: ${giveaway?.title} — ${label}`,
+      subject: `Giveaway drawn: ${giveaway?.title} (${label})`,
       text: [
         `The draw for "${giveaway?.title}" selected: ${label}`,
         `Total entries: ${result.totalEntries}`,

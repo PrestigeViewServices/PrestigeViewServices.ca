@@ -21,11 +21,11 @@ export function ApplicationQuestionnaire() {
           <ClipboardList className="h-6 w-6" aria-hidden />
         </div>
         <h2 className="heading-section mt-4 text-balance">
-          Apply here — fill out the questionnaire
+          Apply here: fill out the questionnaire
         </h2>
         <p className="mt-3 text-base leading-relaxed text-muted-foreground">
           Every application starts with this short questionnaire. No résumé
-          needed to start — answer honestly and we respond to qualified
+          needed to start. Answer honestly and we respond to qualified
           applicants within a few business days.
         </p>
       </div>
