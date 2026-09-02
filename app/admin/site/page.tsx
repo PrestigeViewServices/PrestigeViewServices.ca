@@ -23,7 +23,7 @@ export default async function SiteModificationsPage() {
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Site Modifications</h1>
         <p className="mt-1.5 max-w-2xl text-muted-foreground">
-          Change what the public site shows — copy, offers, photos — and it
+          Change what the public site shows (copy, offers, photos) and it
           goes live immediately. Every editable section has a reset back to
           the original, so nothing can be broken for good.
         </p>
@@ -57,7 +57,7 @@ export default async function SiteModificationsPage() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Service pages and city pages are SEO-tuned and ship from code — ask
+        Service pages and city pages are SEO-tuned and ship from code, ask
         for changes there and they go out with the next deploy.
       </p>
     </div>

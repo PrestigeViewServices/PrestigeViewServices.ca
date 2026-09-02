@@ -269,7 +269,7 @@ async function createTicket(formData: FormData) {
   // Best-effort internal notification — never blocks the customer.
   await sendClubEmail({
     to: clubNotifyEmail(),
-    subject: `Portal request: ${subject} — ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
+    subject: `Portal request: ${subject} from ${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim(),
     replyTo: member?.email,
     text: [
       `New ${TICKET_TYPES.find((t) => t.value === validType)?.label ?? validType} from the customer portal.`,

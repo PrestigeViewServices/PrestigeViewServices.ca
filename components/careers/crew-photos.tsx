@@ -26,6 +26,16 @@ const TILES = [
     alt: "Three PVS crew members posing on ladders around the company banner",
     caption: "The window crew",
   },
+  {
+    src: "/images/careers/crew-gutter-scoop-roof.webp",
+    alt: "PVS crew member scooping debris from a gutter at the roofline",
+    caption: "Hands-on gutter work",
+  },
+  {
+    src: "/images/careers/crew-loading-equipment.webp",
+    alt: "PVS crew loading equipment onto the trailer at the shop",
+    caption: "Morning load-out",
+  },
 ];
 
 export function CrewPhotos() {
@@ -50,7 +60,7 @@ export function CrewPhotos() {
         </figcaption>
       </figure>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-3">
         {TILES.map((t) => (
           <figure
             key={t.src}

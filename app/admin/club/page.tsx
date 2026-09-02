@@ -167,7 +167,7 @@ export default async function ClubAdminPage(props: {
             </p>
             {searchParams.jobber === "connected" && (
               <p className="mt-1 text-xs font-semibold text-emerald-300">
-                Authorized successfully — you&apos;re live.
+                Authorized successfully. You&apos;re live.
               </p>
             )}
             {searchParams.jobber === "error" && (

@@ -395,7 +395,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   {
     key: "cleared-alerts",
     title: "“Driveway cleared” alerts",
-    body: "Get told the moment each pass is finished — the overnight one included, so you walk out to a driveway you already know is open.",
+    body: "Get told the moment each pass is finished, the overnight one included, so you walk out to a driveway you already know is open.",
     tiers: ["GOLD", "PLATINUM"],
   },
   {
