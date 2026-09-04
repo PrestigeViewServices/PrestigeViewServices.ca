@@ -24,6 +24,7 @@ import { kindMeta } from "@/lib/admin-notifications";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { NotifyTestButton } from "@/components/admin/notify-test-button";
 import { getService } from "@/lib/content/services";
+import { OPEN_LEAD_STATUSES } from "@/lib/dashboard";
 import {
   DRIVEWAY_SIZE_LABELS,
   getDrivewayTier,
@@ -66,6 +67,7 @@ export default async function AdminHomePage() {
   const [
     newLeads,
     leads7d,
+    followUpsDue,
     freshLeads,
     pendingReservations,
     latestReservations,
@@ -86,6 +88,9 @@ export default async function AdminHomePage() {
   ] = await Promise.all([
     db.lead.count({ where: { status: "NEW" } }),
     db.lead.count({ where: { createdAt: { gte: since7d } } }),
+    db.lead.count({
+      where: { status: { in: OPEN_LEAD_STATUSES }, followUpAt: { lte: now } },
+    }),
     db.lead.findMany({
       where: { status: "NEW" },
       orderBy: { createdAt: "desc" },
@@ -211,7 +216,10 @@ export default async function AdminHomePage() {
     {
       label: "New leads",
       value: newLeads,
-      sub: `${leads7d} this week`,
+      sub:
+        followUpsDue > 0
+          ? `${leads7d} this week · ${followUpsDue} follow-up${followUpsDue === 1 ? "" : "s"} due`
+          : `${leads7d} this week`,
       icon: Inbox,
       href: "/admin/leads",
       accent: "text-blue-300 bg-blue-500/15",

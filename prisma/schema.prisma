@@ -331,6 +331,7 @@ enum Division {
 
 enum LeadStatus {
   NEW
+  CONTACTED
   QUOTED
   WON
   LOST
@@ -529,6 +530,13 @@ model Lead {
   source          LeadSource @default(PUBLIC_FORM)
   estimateCents   Int?
   notes           String?
+  /// Set the first time the lead leaves NEW — measures speed-to-first-call.
+  contactedAt     DateTime?
+  /// Set when the lead reaches WON or LOST; cleared if the lead is reopened.
+  closedAt        DateTime?
+  /// Next promised touch. Open leads with followUpAt in the past surface in
+  /// the "due for follow-up" queue on /admin/leads.
+  followUpAt      DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
@@ -538,6 +546,7 @@ model Lead {
   @@index([status])
   @@index([source])
   @@index([createdAt])
+  @@index([followUpAt])
 }
 
 // -----------------------------------------------------------------------------
