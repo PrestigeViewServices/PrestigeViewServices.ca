@@ -26,6 +26,7 @@ import {
   DIVISION_ACCENT,
   formatCents,
   customerName,
+  leadTransitionData,
 } from "@/lib/dashboard";
 import { Button } from "@/components/ui/button";
 
@@ -71,7 +72,7 @@ export default async function PipelinePage() {
 
   const [leads, jobs, wonThisMonth, lostCount] = await Promise.all([
     db.lead.findMany({
-      where: { status: { in: ["NEW", "QUOTED"] } },
+      where: { status: { in: ["NEW", "CONTACTED", "QUOTED"] } },
       orderBy: { createdAt: "desc" },
     }),
     db.job.findMany({
@@ -83,8 +84,8 @@ export default async function PipelinePage() {
         service: { select: { name: true } },
       },
     }),
-    db.lead.count({ where: { status: "WON", updatedAt: { gte: monthStart } } }),
-    db.lead.count({ where: { status: "LOST", updatedAt: { gte: monthStart } } }),
+    db.lead.count({ where: { status: "WON", closedAt: { gte: monthStart } } }),
+    db.lead.count({ where: { status: "LOST", closedAt: { gte: monthStart } } }),
   ]);
 
   const leadsByStatus = (s: LeadStatus) => leads.filter((l) => l.status === s);
@@ -115,6 +116,14 @@ export default async function PipelinePage() {
       hint: "Call within one business day",
       count: leadsByStatus("NEW").length,
       render: () => leadsByStatus("NEW").map((l) => <LeadCard key={l.id} lead={l} />),
+    },
+    {
+      key: "lead-contacted",
+      label: "Contacted",
+      hint: "Talked, quote not out yet",
+      count: leadsByStatus("CONTACTED").length,
+      render: () =>
+        leadsByStatus("CONTACTED").map((l) => <LeadCard key={l.id} lead={l} />),
     },
     {
       key: "lead-quoted",
@@ -470,8 +479,17 @@ async function updateLeadStatus(id: string, status: string) {
   }
   const db = getDb();
   if (!db) throw new Error("DB not configured");
-  await db.lead.update({ where: { id }, data: { status: status as LeadStatus } });
+  const lead = await db.lead.findUnique({
+    where: { id },
+    select: { contactedAt: true },
+  });
+  if (!lead) throw new Error("Lead not found");
+  await db.lead.update({
+    where: { id },
+    data: leadTransitionData(status as LeadStatus, lead),
+  });
   revalidatePath("/admin/pipeline");
+  revalidatePath("/admin/leads");
   revalidatePath("/admin");
 }
 
@@ -535,7 +553,7 @@ async function convertLeadToJob(formData: FormData) {
   // A job for this lead already exists — don't double-create on a re-click.
   const existing = await db.job.findFirst({ where: { leadId: lead.id }, select: { id: true } });
   if (existing) {
-    await db.lead.update({ where: { id }, data: { status: "WON" } });
+    await db.lead.update({ where: { id }, data: leadTransitionData("WON", lead) });
     revalidatePath("/admin/pipeline");
     return;
   }
@@ -587,7 +605,7 @@ async function convertLeadToJob(formData: FormData) {
   });
   await db.lead.update({
     where: { id },
-    data: { status: "WON", customerId: customer.id },
+    data: { ...leadTransitionData("WON", lead), customerId: customer.id },
   });
 
   revalidatePath("/admin/pipeline");

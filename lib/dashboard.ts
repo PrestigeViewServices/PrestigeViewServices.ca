@@ -9,6 +9,7 @@
 import type {
   Division,
   JobStatus,
+  LeadSource,
   LeadStatus,
   InvoiceStatus,
   ContractStatus,
@@ -70,10 +71,80 @@ const AMBER = "bg-amber-500/15 text-amber-200 border-amber-500/25";
 
 export const LEAD_STATUS_META: StatusMeta<LeadStatus>[] = [
   { value: "NEW", label: "New", color: BLUE },
+  { value: "CONTACTED", label: "Contacted", color: VIOLET },
   { value: "QUOTED", label: "Quoted", color: YELLOW },
   { value: "WON", label: "Won", color: EMERALD },
   { value: "LOST", label: "Lost", color: ROSE },
 ];
+
+/** Statuses still being worked (everything before a WON/LOST decision). */
+export const OPEN_LEAD_STATUSES: LeadStatus[] = ["NEW", "CONTACTED", "QUOTED"];
+
+/** Decided statuses — the "previous leads" history. */
+export const CLOSED_LEAD_STATUSES: LeadStatus[] = ["WON", "LOST"];
+
+export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
+  PUBLIC_FORM: "Website",
+  PORTAL: "Portal",
+  MANUAL: "Manual",
+  PHONE: "Phone",
+  DOOR_TO_DOOR: "Door-to-door",
+};
+
+/**
+ * The extra timestamps a lead status change carries. Pure so both the leads
+ * inbox and the pipeline board apply identical rules:
+ *  - first move off NEW stamps contactedAt (speed-to-first-call metric);
+ *  - WON/LOST stamps closedAt and clears the pending follow-up;
+ *  - reopening a decided lead clears closedAt again.
+ */
+export function leadTransitionData(
+  next: LeadStatus,
+  lead: { contactedAt: Date | null }
+): {
+  status: LeadStatus;
+  contactedAt?: Date;
+  closedAt: Date | null;
+  followUpAt?: null;
+} {
+  const now = new Date();
+  const closing = next === "WON" || next === "LOST";
+  return {
+    status: next,
+    ...(next !== "NEW" && !lead.contactedAt ? { contactedAt: now } : {}),
+    closedAt: closing ? now : null,
+    ...(closing ? { followUpAt: null } : {}),
+  };
+}
+
+// ---- Lead aging ------------------------------------------------------------
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS_INTERNAL = 24 * HOUR_MS;
+
+/** "just now", "35m", "4h", "3d" — compact age for lead cards. */
+export function formatAge(from: Date, now: Date = new Date()): string {
+  const ms = Math.max(0, now.getTime() - from.getTime());
+  if (ms < MINUTE_MS) return "just now";
+  if (ms < HOUR_MS) return `${Math.floor(ms / MINUTE_MS)}m`;
+  if (ms < DAY_MS_INTERNAL) return `${Math.floor(ms / HOUR_MS)}h`;
+  return `${Math.floor(ms / DAY_MS_INTERNAL)}d`;
+}
+
+/**
+ * Escalating urgency for an untouched NEW lead. The sales rule is "call the
+ * same day": green under 4h, amber under 24h, red after that.
+ */
+export function newLeadUrgency(
+  createdAt: Date,
+  now: Date = new Date()
+): "fresh" | "aging" | "stale" {
+  const ms = now.getTime() - createdAt.getTime();
+  if (ms < 4 * HOUR_MS) return "fresh";
+  if (ms < 24 * HOUR_MS) return "aging";
+  return "stale";
+}
 
 export const JOB_STATUS_META: StatusMeta<JobStatus>[] = [
   { value: "SCHEDULED", label: "Scheduled", color: BLUE },
