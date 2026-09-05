@@ -1,0 +1,70 @@
+{
+  "name": "pvs-dispatch",
+  "productName": "PVS Dispatch",
+  "version": "0.1.0",
+  "description": "Prestige View Services scheduling & crew planning desktop app",
+  "private": true,
+  "main": "dist-electron/electron/main.js",
+  "author": "Prestige View Services",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "vite",
+    "dev:electron": "npm run build:electron && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "build": "npm run typecheck && vite build && npm run build:electron",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:seed": "tsx scripts/seed.ts",
+    "package": "npm run build && electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@tanstack/react-query": "^5.51.0",
+    "better-sqlite3": "^11.3.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "drizzle-orm": "^0.33.0",
+    "lucide-react": "^0.427.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.4.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.1.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "cross-env": "^7.0.3",
+    "drizzle-kit": "^0.24.0",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.7",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5"
+  },
+  "build": {
+    "appId": "ca.prestigeviewservices.dispatch",
+    "productName": "PVS Dispatch",
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "drizzle/**"
+    ],
+    "extraResources": [
+      { "from": "drizzle", "to": "drizzle" }
+    ],
+    "mac": { "target": "dmg", "category": "public.app-category.business" },
+    "win": { "target": "nsis" }
+  }
+}
