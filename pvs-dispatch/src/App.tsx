@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './screens/Dashboard'
 import { Schedule } from './screens/Schedule'
+import { Planner } from './screens/Planner'
 import { Workers } from './screens/Workers'
 import { Crews } from './screens/Crews'
 import { Customers } from './screens/Customers'
@@ -92,6 +93,7 @@ export default function App() {
         <main className="min-h-0 flex-1 overflow-auto">
           {screen === 'dashboard' && <Dashboard />}
           {screen === 'schedule' && <Schedule />}
+          {screen === 'planner' && <Planner />}
           {screen === 'workers' && <Workers />}
           {screen === 'crews' && <Crews />}
           {screen === 'customers' && <Customers />}

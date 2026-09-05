@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   LayoutDashboard,
+  Sparkles,
   Users,
   UsersRound,
   Contact,
@@ -17,6 +18,7 @@ import { Button } from './ui'
 const NAV: { screen: ScreenName; label: string; icon: typeof CalendarDays }[] = [
   { screen: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { screen: 'schedule', label: 'Schedule', icon: CalendarDays },
+  { screen: 'planner', label: 'AI Planner', icon: Sparkles },
   { screen: 'workers', label: 'Workers', icon: Users },
   { screen: 'crews', label: 'Crews', icon: UsersRound },
   { screen: 'customers', label: 'Customers', icon: Contact },
@@ -58,7 +60,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="flex items-center justify-between border-t border-border px-3 py-2">
-        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 2</span>
+        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 3</span>
         <Button variant="ghost" size="icon" title={`Theme: ${theme}`} onClick={() => setTheme(nextTheme)}>
           <ThemeIcon className="h-4 w-4" />
         </Button>

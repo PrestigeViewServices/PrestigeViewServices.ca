@@ -19,6 +19,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@dnd-kit/core": "^6.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@tanstack/react-query": "^5.51.0",
@@ -72,16 +73,27 @@
       "build/icon.png"
     ],
     "extraResources": [
-      { "from": "drizzle", "to": "drizzle" }
+      {
+        "from": "drizzle",
+        "to": "drizzle"
+      }
     ],
-    "mac": { "target": "dmg", "category": "public.app-category.business" },
-    "win": { "target": "nsis" },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.business"
+    },
+    "win": {
+      "target": "nsis"
+    },
     "nsis": {
       "shortcutName": "PVS Dispatch",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": true
     },
-    "linux": { "target": "AppImage", "category": "Office" }
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    }
   }
 }

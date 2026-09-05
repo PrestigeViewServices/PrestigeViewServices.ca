@@ -22,6 +22,13 @@ import type { CatalogSaveInput, CustomerSaveInput, PropertySaveInput } from '../
 import type { JobListFilter } from '../../electron/services/jobs'
 import type { JobDetailExtras } from '../../electron/services/jobdetail'
 import type { PrintExportInput } from '../../electron/print'
+import type {
+  ApproveCrewPlanInput,
+  AssembleOptions,
+  Plan,
+  PlannerChatMessage,
+  PlannerContext,
+} from '../../electron/services/planner'
 
 declare global {
   interface Window {
@@ -91,6 +98,12 @@ export const api = {
   },
   print: {
     export: (input: PrintExportInput) => invoke<string | null>('print:export', input),
+  },
+  planner: {
+    build: (input: AssembleOptions) => invoke<{ plan: Plan; context: PlannerContext }>('planner:build', input),
+    chat: (input: { options: AssembleOptions; plan: Plan | null; messages: PlannerChatMessage[] }) =>
+      invoke<{ reply: string; plan?: Plan }>('planner:chat', input),
+    apply: (input: { date: string; approved: ApproveCrewPlanInput[] }) => invoke<void>('planner:apply', input),
   },
   dashboard: {
     stats: (date: string) => invoke<DashboardStats>('dashboard:stats', date),

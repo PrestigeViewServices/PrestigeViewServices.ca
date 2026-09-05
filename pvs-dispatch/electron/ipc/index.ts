@@ -1,7 +1,9 @@
 import { dialog, ipcMain, safeStorage } from 'electron'
 import { getDb, backupNow, getDbFilePath, getBackupDir } from '../db'
 import * as jobdetail from '../services/jobdetail'
+import * as planner from '../services/planner'
 import { exportPrintView, type PrintExportInput } from '../print'
+import Anthropic from '@anthropic-ai/sdk'
 import * as people from '../services/people'
 import * as customersSvc from '../services/customers'
 import * as jobsSvc from '../services/jobs'
@@ -91,6 +93,53 @@ export function registerIpcHandlers() {
 
   // Print / export
   handle('print:export', (input: PrintExportInput) => exportPrintView(input))
+
+  // AI planner — the model call happens here in the main process; the plan is
+  // only written to the database via planner:apply after human approval.
+  const PLANNER_MODEL = 'claude-sonnet-4-6'
+  const callAnthropicModel: planner.ModelCaller = async (system, userContent) => {
+    const ciphertext = settingsSvc.getEncryptedKey(db(), 'anthropic')
+    if (!ciphertext) {
+      throw new Error('No Anthropic API key configured — add one under Settings → API keys')
+    }
+    if (!safeStorage.isEncryptionAvailable()) {
+      throw new Error('Secure key storage is not available, cannot decrypt the API key')
+    }
+    const apiKey = safeStorage.decryptString(Buffer.from(ciphertext, 'base64'))
+    const client = new Anthropic({ apiKey, timeout: 120_000, maxRetries: 1 })
+    const response = await client.messages.create({
+      model: PLANNER_MODEL,
+      max_tokens: 16000,
+      system,
+      messages: [{ role: 'user', content: userContent }],
+    })
+    return response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+  }
+
+  handle('planner:build', async (input: planner.AssembleOptions) => {
+    const context = planner.assemblePlannerContext(db(), input)
+    if (context.crews.length === 0) throw new Error('No active crews match the selected divisions')
+    if (context.jobs.length === 0) throw new Error('No jobs to plan for that date')
+    const plan = await planner.buildPlan(context, callAnthropicModel)
+    return { plan, context }
+  })
+  handle(
+    'planner:chat',
+    async (input: {
+      options: planner.AssembleOptions
+      plan: planner.Plan | null
+      messages: planner.PlannerChatMessage[]
+    }) => {
+      const context = planner.assemblePlannerContext(db(), input.options)
+      return planner.plannerChat(context, input.plan, input.messages, callAnthropicModel)
+    },
+  )
+  handle('planner:apply', (input: { date: string; approved: planner.ApproveCrewPlanInput[] }) =>
+    planner.applyPlan(db(), input.date, input.approved),
+  )
 
   // Dashboard
   handle('dashboard:stats', (date: string) => jobsSvc.dashboardStats(db(), date))

@@ -5,6 +5,7 @@ import { todayStr } from './utils'
 export type ScreenName =
   | 'dashboard'
   | 'schedule'
+  | 'planner'
   | 'workers'
   | 'crews'
   | 'customers'

@@ -92,8 +92,16 @@ stack (`Ctrl/Cmd+Z`, `Shift+Ctrl/Cmd+Z`).
   `pvsphoto://` protocol, crew notes, activity log), crew run sheet and
   master day schedule print views, PDF export via `printToPDF` and PNG
   export for texting, app icon + pinnable installers (NSIS shortcuts).
-- **Phase 3** — AI daily planner (Anthropic API, Zod-validated JSON plans,
-  side-by-side diff, approve/reject) + follow-up chat.
+- **Phase 3 (done)** — AI daily planner: the app assembles the full context
+  (jobs with durations/prices/cert levels, crews with certifications, a
+  drive-time matrix, your economics) and calls the Anthropic API from the
+  main process with the key from `safeStorage`. Plans are Zod-validated with
+  one retry — the model can never invent jobs/crews or write to the database;
+  only per-crew human approval applies a plan (stored on `day_plans` with the
+  rationale). Includes proposed-vs-current diff view and a follow-up chat
+  that proposes revisions through the same approve/reject flow. Privacy: the
+  model sees addresses, durations, prices, and crew first names — never
+  customer phone numbers or emails.
 - **Phase 4** — Snow dispatch mode: storm events, contract triggers, SLA
   clocks, storm summary report.
 - **Phase 5** — reports, Jobber CSV import, recurring jobs from RRULE,

@@ -45,6 +45,13 @@ export function updateSettings(db: Db, input: SettingsUpdateInput): PublicSettin
   return getSettings(db)
 }
 
+/** Main-process only: fetch stored ciphertext for decryption. Never sent to the renderer. */
+export function getEncryptedKey(db: Db, which: 'anthropic' | 'travel'): string | null {
+  const row = db.select().from(s.settings).where(eq(s.settings.id, 'singleton')).get()
+  if (!row) return null
+  return which === 'anthropic' ? row.anthropicApiKeyEncrypted : row.travelApiKeyEncrypted
+}
+
 /** Store already-encrypted API key ciphertext (base64). Empty string clears. */
 export function storeEncryptedKey(
   db: Db,
