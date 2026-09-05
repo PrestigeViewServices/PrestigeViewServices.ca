@@ -53,9 +53,18 @@
     "typescript": "^5.5.4",
     "vite": "^5.3.5"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrestigeViewServices/PrestigeViewServices.ca.git"
+  },
   "build": {
     "appId": "ca.prestigeviewservices.dispatch",
     "productName": "PVS Dispatch",
+    "publish": null,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
     "files": [
       "dist/**",
       "dist-electron/**",

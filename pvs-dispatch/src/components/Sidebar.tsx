@@ -58,7 +58,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="flex items-center justify-between border-t border-border px-3 py-2">
-        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 1</span>
+        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 2</span>
         <Button variant="ghost" size="icon" title={`Theme: ${theme}`} onClick={() => setTheme(nextTheme)}>
           <ThemeIcon className="h-4 w-4" />
         </Button>
