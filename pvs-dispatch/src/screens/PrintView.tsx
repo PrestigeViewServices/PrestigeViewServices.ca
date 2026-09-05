@@ -5,13 +5,28 @@ import { dateFromStr, minutesLabel, timeOf } from '@/lib/utils'
 import type { CrewWithMembers, JobListItem } from '@shared/types'
 import type { JobDetailExtras } from '../../electron/services/jobdetail'
 import type { PublicSettings } from '../../electron/services/settings'
+import type { ReportsData } from '../../electron/services/reports'
+
+const PRINT_CSS = `
+  .print-doc { background: #fff; color: #000; font-size: 12px; line-height: 1.35; padding: 24px; }
+  .print-doc table { border-collapse: collapse; width: 100%; }
+  .print-doc th, .print-doc td { border: 1px solid #000; padding: 4px 6px; text-align: left; vertical-align: top; }
+  .print-doc th { font-weight: 700; background: #fff; }
+  .print-doc .page-break { page-break-after: always; }
+  .print-doc .tickbox { display: inline-block; width: 11px; height: 11px; border: 1.5px solid #000; margin-right: 6px; vertical-align: -1px; }
+  .print-doc .alert { font-weight: 700; }
+  .print-doc h1 { font-size: 18px; font-weight: 800; margin: 0; }
+  .print-doc h2 { font-size: 15px; font-weight: 700; margin: 16px 0 4px; }
+  .print-doc .muted { color: #333; }
+  @media print { .print-doc { padding: 0; } }
+`
 
 /**
  * Standalone print document rendered in a hidden window (#print/<kind>?date=…).
  * Black-and-white, no dark fills, one page per crew for run sheets.
  */
 export function PrintView() {
-  const { kind, date, crewId } = useMemo(() => {
+  const { kind, date, crewId, dateTo } = useMemo(() => {
     const hash = window.location.hash // #print/runsheet?date=...&crew=...
     const [pathPart, queryPart] = hash.slice(1).split('?')
     const params = new URLSearchParams(queryPart ?? '')
@@ -19,8 +34,15 @@ export function PrintView() {
       kind: pathPart.split('/')[1] ?? 'runsheet',
       date: params.get('date') ?? format(new Date(), 'yyyy-MM-dd'),
       crewId: params.get('crew'),
+      dateTo: params.get('to'),
     }
   }, [])
+
+  if (kind === 'reports') return <ReportsPrint from={date} to={dateTo ?? date} />
+  return <SchedulePrint kind={kind} date={date} crewId={crewId} />
+}
+
+function SchedulePrint({ kind, date, crewId }: { kind: string; date: string; crewId: string | null }) {
 
   const [data, setData] = useState<{
     crews: CrewWithMembers[]
@@ -58,19 +80,7 @@ export function PrintView() {
 
   return (
     <div className="print-doc">
-      <style>{`
-        .print-doc { background: #fff; color: #000; font-size: 12px; line-height: 1.35; padding: 24px; }
-        .print-doc table { border-collapse: collapse; width: 100%; }
-        .print-doc th, .print-doc td { border: 1px solid #000; padding: 4px 6px; text-align: left; vertical-align: top; }
-        .print-doc th { font-weight: 700; background: #fff; }
-        .print-doc .page-break { page-break-after: always; }
-        .print-doc .tickbox { display: inline-block; width: 11px; height: 11px; border: 1.5px solid #000; margin-right: 6px; vertical-align: -1px; }
-        .print-doc .alert { font-weight: 700; }
-        .print-doc h1 { font-size: 18px; font-weight: 800; margin: 0; }
-        .print-doc h2 { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
-        .print-doc .muted { color: #333; }
-        @media print { .print-doc { padding: 0; } }
-      `}</style>
+      <style>{PRINT_CSS}</style>
 
       {kind === 'masterday' ? (
         <MasterDay dayLabel={dayLabel} crews={visibleCrews} jobs={data.jobs} company={data.settings.companyName} />
@@ -258,6 +268,106 @@ function MasterDay({
           {unassigned.map((j) => `${j.customerName} (${j.title})`).join('; ')}
         </p>
       )}
+    </div>
+  )
+}
+
+function ReportsPrint({ from, to }: { from: string; to: string }) {
+  const [data, setData] = useState<{ reports: ReportsData; company: string } | null>(null)
+
+  useEffect(() => {
+    document.documentElement.classList.remove('dark')
+    void (async () => {
+      const [reports, settings] = await Promise.all([
+        api.reports.data({ from, to }),
+        api.settings.get(),
+      ])
+      setData({ reports, company: settings.companyName })
+      requestAnimationFrame(() => {
+        void window.pvs.invoke('pvs:print:ready')
+      })
+    })()
+  }, [from, to])
+
+  if (!data) return <div className="p-8 text-sm">Preparing…</div>
+  const r = data.reports
+  const moneyFmt = (n: number) =>
+    n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 })
+
+  return (
+    <div className="print-doc">
+      <style>{PRINT_CSS}</style>
+      <div style={{ borderBottom: '2px solid #000', paddingBottom: 6, marginBottom: 8 }}>
+        <h1>{data.company} — Operations Report</h1>
+        <div className="muted">
+          {format(dateFromStr(from), 'MMM d, yyyy')} – {format(dateFromStr(to), 'MMM d, yyyy')} · completed work only
+        </div>
+      </div>
+
+      <h2>Revenue by division</h2>
+      <table>
+        <thead><tr><th>Division</th><th>Jobs</th><th>Revenue</th></tr></thead>
+        <tbody>
+          {r.revenueByDivision.map((d) => (
+            <tr key={d.division}><td>{d.division}</td><td>{d.jobs}</td><td>{moneyFmt(d.revenue)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>Revenue per crew hour by month (target {moneyFmt(r.targetRevenuePerCrewHour)}/hr)</h2>
+      <table>
+        <thead><tr><th>Month</th><th>Revenue</th><th>Crew hours</th><th>$/crew hour</th></tr></thead>
+        <tbody>
+          {r.revenueByMonth.map((m) => (
+            <tr key={m.month}>
+              <td>{m.month}</td><td>{moneyFmt(m.revenue)}</td><td>{m.crewHours.toFixed(1)}</td>
+              <td className={m.revenuePerHour < r.targetRevenuePerCrewHour ? 'alert' : ''}>{moneyFmt(m.revenuePerHour)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>Revenue &amp; utilization by crew</h2>
+      <table>
+        <thead><tr><th>Crew</th><th>Jobs</th><th>Crew hours</th><th>Revenue</th><th>$/crew hour</th></tr></thead>
+        <tbody>
+          {r.revenueByCrew.map((c) => (
+            <tr key={c.crewId}>
+              <td>{c.crewName}</td><td>{c.jobs}</td><td>{c.crewHours.toFixed(1)}</td>
+              <td>{moneyFmt(c.revenue)}</td><td>{moneyFmt(c.revenuePerHour)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>Photo &amp; checklist compliance</h2>
+      <table>
+        <thead><tr><th>Crew</th><th>Completed</th><th>With after photo</th><th>Checklist complete</th></tr></thead>
+        <tbody>
+          {r.compliance.map((c) => (
+            <tr key={c.crewId}>
+              <td>{c.crewName}</td><td>{c.completed}</td><td>{c.withAfterPhoto}</td><td>{c.checklistComplete}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2>Recurring revenue</h2>
+      <p>
+        {r.recurring.activeRecurringJobs} active recurring jobs ({moneyFmt(r.recurring.recurringJobValue)}/visit booked) ·{' '}
+        {r.recurring.activeSnowContracts} snow contracts ({moneyFmt(r.recurring.snowContractValue)} season value)
+        {r.driveTimeShare != null ? ` · drive time ≈ ${Math.round(r.driveTimeShare * 100)}% of crew time` : ''}
+      </p>
+
+      <h2>Top customers by lifetime value</h2>
+      <table>
+        <thead><tr><th>#</th><th>Customer</th><th>Lifetime value</th></tr></thead>
+        <tbody>
+          {r.customerLtv.slice(0, 15).map((c, i) => (
+            <tr key={c.customerId}><td>{i + 1}</td><td>{c.name}</td><td>{moneyFmt(c.lifetimeValue + c.completedRevenue)}</td></tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

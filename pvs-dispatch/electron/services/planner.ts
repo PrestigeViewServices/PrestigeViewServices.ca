@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { and, eq, isNull, inArray } from 'drizzle-orm'
 import type { Db } from '../db'
 import * as s from '../db/schema'
-import { estimateDriveMinutes } from './jobs'
+import { haversineProvider, type TravelProvider } from './travel'
 
 // ---------------------------------------------------------------------------
 // Context assembly — the app decides exactly what the model sees. Privacy
@@ -53,7 +53,11 @@ export interface AssembleOptions {
   lockExisting: boolean // keep current assignments fixed
 }
 
-export function assemblePlannerContext(db: Db, opts: AssembleOptions): PlannerContext {
+export async function assemblePlannerContext(
+  db: Db,
+  opts: AssembleOptions,
+  travel: TravelProvider = haversineProvider,
+): Promise<PlannerContext> {
   const settings = db.select().from(s.settings).where(eq(s.settings.id, 'singleton')).get()
   const target = settings?.targetRevenuePerCrewHour ?? 145
   const maxHours = settings?.maxCrewHoursPerDay ?? 10
@@ -140,20 +144,12 @@ export function assemblePlannerContext(db: Db, opts: AssembleOptions): PlannerCo
     }
   })
 
-  // Straight-line drive-minutes matrix between all stops with coordinates
-  const coords = new Map(allJobs.map((r) => [r.job.id, { lat: r.lat, lng: r.lng }]))
-  const driveMinutes: PlannerContext['driveMinutes'] = {}
-  for (const a of jobIds) {
-    const ca = coords.get(a)
-    if (ca?.lat == null || ca.lng == null) continue
-    driveMinutes[a] = {}
-    for (const b of jobIds) {
-      if (a === b) continue
-      const cb = coords.get(b)
-      if (cb?.lat == null || cb.lng == null) continue
-      driveMinutes[a][b] = estimateDriveMinutes(ca.lat, ca.lng, cb.lat, cb.lng)
-    }
-  }
+  // Drive-minutes matrix between all stops with coordinates — from the
+  // configured TravelProvider (haversine by default, Google/Mapbox when keyed)
+  const points = allJobs
+    .filter((r) => r.lat != null && r.lng != null)
+    .map((r) => ({ id: r.job.id, lat: r.lat!, lng: r.lng! }))
+  const driveMinutes = await travel.matrix(points)
 
   return {
     date: opts.date,

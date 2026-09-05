@@ -138,7 +138,7 @@ export function updateJob(
       | 'internalNotes'
       | 'customerFacingNotes'
     >
-  > & { status?: (typeof s.jobs.$inferSelect)['status'] },
+  > & { status?: (typeof s.jobs.$inferSelect)['status']; recurrenceRule?: string | null },
 ) {
   const { id, ...rest } = input
   db.transaction((tx) => {

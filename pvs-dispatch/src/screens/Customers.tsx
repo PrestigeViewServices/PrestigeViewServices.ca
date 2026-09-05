@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Plus, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type { CustomerSaveInput, PropertySaveInput } from '../../electron/services/customers'
+import type { CsvPreview, ImportMapping } from '../../electron/services/importer'
 import { money } from '@/lib/utils'
 import { Badge, Button, Card, Dialog, EmptyState, Field, Input, Select, Skeleton, Textarea } from '@/components/ui'
 import { useUi } from '@/lib/store'
@@ -82,9 +83,12 @@ function CustomerList({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Button className="ml-auto" onClick={() => setEditing(emptyCustomer())}>
-          <Plus className="h-4 w-4" /> Add customer
-        </Button>
+        <div className="ml-auto flex gap-2">
+          <ImportCsvButton />
+          <Button onClick={() => setEditing(emptyCustomer())}>
+            <Plus className="h-4 w-4" /> Add customer
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -131,6 +135,127 @@ function CustomerList({
 
       {editing && <CustomerDialog editing={editing} setEditing={setEditing} onSave={save} />}
     </div>
+  )
+}
+
+const IMPORT_FIELDS: { key: keyof ImportMapping; label: string; required?: boolean; guesses: string[] }[] = [
+  { key: 'name', label: 'Customer name', required: true, guesses: ['name', 'client', 'customer'] },
+  { key: 'phone', label: 'Phone', guesses: ['phone', 'mobile'] },
+  { key: 'email', label: 'Email', guesses: ['email'] },
+  { key: 'billingAddress', label: 'Billing address', guesses: ['billing', 'address'] },
+  { key: 'propertyAddress', label: 'Property address', guesses: ['property', 'street', 'service address'] },
+  { key: 'customerType', label: 'Customer type', guesses: ['type', 'company'] },
+  { key: 'jobberClientId', label: 'Jobber client ID', guesses: ['id', 'client id'] },
+  { key: 'routeZone', label: 'Route zone', guesses: ['zone', 'city', 'town'] },
+  { key: 'notes', label: 'Notes', guesses: ['note'] },
+]
+
+function guessColumn(headers: string[], guesses: string[]): string | null {
+  for (const g of guesses) {
+    const hit = headers.find((h) => h.toLowerCase().includes(g))
+    if (hit) return hit
+  }
+  return null
+}
+
+function ImportCsvButton() {
+  const queryClient = useQueryClient()
+  const [preview, setPreview] = useState<CsvPreview | null>(null)
+  const [mapping, setMapping] = useState<Partial<Record<keyof ImportMapping, string | null>>>({})
+  const [updateExisting, setUpdateExisting] = useState(false)
+  const [importing, setImporting] = useState(false)
+
+  async function pick() {
+    const p = await api.csv.pick()
+    if (!p) return
+    setPreview(p)
+    const auto: Partial<Record<keyof ImportMapping, string | null>> = {}
+    for (const f of IMPORT_FIELDS) auto[f.key] = guessColumn(p.headers, f.guesses)
+    setMapping(auto)
+  }
+
+  async function runImport() {
+    if (!preview) return
+    if (!mapping.name) {
+      toast.error('Map the Customer name column first')
+      return
+    }
+    setImporting(true)
+    try {
+      const result = await api.csv.import({
+        filePath: preview.filePath,
+        mapping: {
+          name: mapping.name,
+          phone: mapping.phone ?? null,
+          email: mapping.email ?? null,
+          billingAddress: mapping.billingAddress ?? null,
+          propertyAddress: mapping.propertyAddress ?? null,
+          customerType: mapping.customerType ?? null,
+          jobberClientId: mapping.jobberClientId ?? null,
+          routeZone: mapping.routeZone ?? null,
+          notes: mapping.notes ?? null,
+        },
+        updateExisting,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success(
+        `Import done: ${result.created} created, ${result.updated} updated, ${result.skipped} skipped, ${result.propertiesCreated} properties` +
+          (result.errors.length ? ` — ${result.errors.length} rows had errors` : ''),
+      )
+      if (result.errors.length) {
+        for (const err of result.errors.slice(0, 3)) toast.warning(`Line ${err.line}: ${err.message}`)
+      }
+      setPreview(null)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  return (
+    <>
+      <Button variant="outline" onClick={pick}>
+        <Upload className="h-4 w-4" /> Import CSV
+      </Button>
+      {preview && (
+        <Dialog open onOpenChange={(o) => !o && setPreview(null)} title={`Map columns — ${preview.rowCount} rows`} wide>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Jobber client exports work out of the box. Match each field to a column from your file; unmapped
+            fields are skipped. Every row is validated before anything is written.
+          </p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {IMPORT_FIELDS.map((f) => (
+              <Field key={f.key} label={`${f.label}${f.required ? ' *' : ''}`}>
+                <Select
+                  value={mapping[f.key] ?? ''}
+                  onChange={(e) => setMapping({ ...mapping, [f.key]: e.target.value || null })}
+                >
+                  <option value="">— not in file —</option>
+                  {preview.headers.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            ))}
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={updateExisting} onChange={(e) => setUpdateExisting(e.target.checked)} />
+            Update existing customers (matched by Jobber ID, then name + phone) — unchecked skips them
+          </label>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setPreview(null)}>
+              Cancel
+            </Button>
+            <Button onClick={runImport} disabled={importing}>
+              {importing ? 'Importing…' : `Import ${preview.rowCount} rows`}
+            </Button>
+          </div>
+        </Dialog>
+      )}
+    </>
   )
 }
 

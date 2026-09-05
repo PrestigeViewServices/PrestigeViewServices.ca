@@ -3,6 +3,10 @@ import { getDb, backupNow, getDbFilePath, getBackupDir } from '../db'
 import * as jobdetail from '../services/jobdetail'
 import * as planner from '../services/planner'
 import * as snow from '../services/snow'
+import * as reports from '../services/reports'
+import * as importer from '../services/importer'
+import { generateRecurringJobs } from '../services/recurring'
+import { selectProvider } from '../services/travel'
 import path from 'node:path'
 import fs from 'node:fs'
 import { exportPrintView, type PrintExportInput } from '../print'
@@ -122,8 +126,18 @@ export function registerIpcHandlers() {
       .join('')
   }
 
+  const travelProvider = () => {
+    const provider = settingsSvc.getSettings(db()).travelProvider
+    const ciphertext = settingsSvc.getEncryptedKey(db(), 'travel')
+    const key =
+      ciphertext && safeStorage.isEncryptionAvailable()
+        ? safeStorage.decryptString(Buffer.from(ciphertext, 'base64'))
+        : null
+    return selectProvider(provider, key)
+  }
+
   handle('planner:build', async (input: planner.AssembleOptions) => {
-    const context = planner.assemblePlannerContext(db(), input)
+    const context = await planner.assemblePlannerContext(db(), input, travelProvider())
     if (context.crews.length === 0) throw new Error('No active crews match the selected divisions')
     if (context.jobs.length === 0) throw new Error('No jobs to plan for that date')
     const plan = await planner.buildPlan(context, callAnthropicModel)
@@ -136,7 +150,7 @@ export function registerIpcHandlers() {
       plan: planner.Plan | null
       messages: planner.PlannerChatMessage[]
     }) => {
-      const context = planner.assemblePlannerContext(db(), input.options)
+      const context = await planner.assemblePlannerContext(db(), input.options, travelProvider())
       return planner.plannerChat(context, input.plan, input.messages, callAnthropicModel)
     },
   )
@@ -183,6 +197,38 @@ export function registerIpcHandlers() {
     snow.completeStormStop(db(), { ...input, photoStoredPath: stored })
   })
   handle('snow:summary', (stormId: string) => snow.stormSummary(db(), stormId))
+
+  // Reports
+  handle('reports:data', (input: reports.ReportsInput) => reports.reportsData(db(), input))
+  handle('export:csv', async (input: { defaultName: string; content: string }) => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Export CSV',
+      defaultPath: input.defaultName,
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    })
+    if (canceled || !filePath) return null
+    fs.writeFileSync(filePath, input.content, 'utf8')
+    return filePath
+  })
+
+  // Jobber CSV import
+  handle('csv:pick', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Choose a Jobber customer export (CSV)',
+      properties: ['openFile'],
+      filters: [{ name: 'CSV', extensions: ['csv'] }],
+    })
+    if (canceled || filePaths.length === 0) return null
+    return importer.previewCsv(filePaths[0])
+  })
+  handle(
+    'csv:import',
+    (input: { filePath: string; mapping: importer.ImportMapping; updateExisting: boolean }) =>
+      importer.importCustomersCsv(db(), input),
+  )
+
+  // Recurring jobs
+  handle('recurring:generate', () => generateRecurringJobs(db()))
 
   // Dashboard
   handle('dashboard:stats', (date: string) => jobsSvc.dashboardStats(db(), date))

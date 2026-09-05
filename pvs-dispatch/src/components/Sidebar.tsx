@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CalendarDays,
   LayoutDashboard,
   Snowflake,
@@ -21,6 +22,7 @@ const NAV: { screen: ScreenName; label: string; icon: typeof CalendarDays }[] = 
   { screen: 'schedule', label: 'Schedule', icon: CalendarDays },
   { screen: 'planner', label: 'AI Planner', icon: Sparkles },
   { screen: 'snow', label: 'Snow Dispatch', icon: Snowflake },
+  { screen: 'reports', label: 'Reports', icon: BarChart3 },
   { screen: 'workers', label: 'Workers', icon: Users },
   { screen: 'crews', label: 'Crews', icon: UsersRound },
   { screen: 'customers', label: 'Customers', icon: Contact },
@@ -62,7 +64,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="flex items-center justify-between border-t border-border px-3 py-2">
-        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 4</span>
+        <span className="text-[10px] text-muted-foreground">v0.1.0 · Phase 5</span>
         <Button variant="ghost" size="icon" title={`Theme: ${theme}`} onClick={() => setTheme(nextTheme)}>
           <ThemeIcon className="h-4 w-4" />
         </Button>

@@ -3,8 +3,9 @@ import path from 'node:path'
 import fs from 'node:fs'
 
 export interface PrintExportInput {
-  kind: 'runsheet' | 'masterday'
-  date: string // YYYY-MM-DD
+  kind: 'runsheet' | 'masterday' | 'reports'
+  date: string // YYYY-MM-DD (reports: range start)
+  dateTo?: string // reports: range end
   crewId?: string | null // runsheet: omit for all crews
   format: 'pdf' | 'png'
   openWhenDone?: boolean
@@ -40,7 +41,7 @@ function waitForReady(win: BrowserWindow, timeoutMs = 15_000): Promise<void> {
 export async function exportPrintView(input: PrintExportInput): Promise<string | null> {
   const hash = `#print/${input.kind}?date=${encodeURIComponent(input.date)}${
     input.crewId ? `&crew=${encodeURIComponent(input.crewId)}` : ''
-  }`
+  }${input.dateTo ? `&to=${encodeURIComponent(input.dateTo)}` : ''}`
 
   const win = new BrowserWindow({
     show: false,
@@ -63,7 +64,9 @@ export async function exportPrintView(input: PrintExportInput): Promise<string |
     }
     await ready
 
-    const defaultName = `${input.kind === 'runsheet' ? 'run-sheet' : 'day-schedule'}-${input.date}.${input.format}`
+    const baseName =
+      input.kind === 'runsheet' ? 'run-sheet' : input.kind === 'masterday' ? 'day-schedule' : 'reports'
+    const defaultName = `${baseName}-${input.date}.${input.format}`
     let filePath: string
     if (process.env.PVS_EXPORT_DIR) {
       // Test hook: automated runs export without a save dialog

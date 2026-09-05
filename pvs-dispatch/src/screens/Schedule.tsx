@@ -336,13 +336,23 @@ function PrintDialog({
           </Select>
         </Field>
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>
-          Cancel
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled
+          title="Publishes a read-only day view to the web at a private link. Requires internet and cloud storage credentials, which are not configured — and note it puts customer addresses on the web."
+        >
+          Publish share link (needs cloud setup)
         </Button>
-        <Button onClick={doExport} disabled={busy}>
-          {busy ? 'Exporting…' : 'Export'}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={doExport} disabled={busy}>
+            {busy ? 'Exporting…' : 'Export'}
+          </Button>
+        </div>
       </div>
     </Dialog>
   )

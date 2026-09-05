@@ -109,5 +109,15 @@ stack (`Ctrl/Cmd+Z`, `Shift+Ctrl/Cmd+Z`).
   crew-per-route-zone assignment, completion check-off with a required
   photo (the liability record), and a storm summary on close: serviced,
   breaches, average response time, season revenue covered.
-- **Phase 5** — reports, Jobber CSV import, recurring jobs from RRULE,
-  optional cloud share link and real drive-time provider.
+- **Phase 5 (done)** — Reports (revenue by division/crew/month, $/crew-hour
+  trend vs target, photo/checklist compliance, customer LTV ranking,
+  recurring revenue, drive-time share; every table exports CSV and the
+  whole set exports as one PDF), Jobber-compatible CSV import with column
+  mapping, per-row Zod validation, and update/skip-existing dedupe,
+  recurring job generation from RRULE (60-day horizon, idempotent, runs
+  at startup), and a real drive-time `TravelProvider` — a Google Distance
+  Matrix or Mapbox key upgrades the planner's matrix, with haversine as
+  the per-element offline fallback. The optional cloud share link ships
+  as a disabled control with an explanation: it needs cloud storage
+  credentials and a conscious decision to put customer addresses on the
+  web.

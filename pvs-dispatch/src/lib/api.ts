@@ -30,6 +30,8 @@ import type {
   PlannerContext,
 } from '../../electron/services/planner'
 import type { StormCreateInput, StormDispatch, StormEvent, StormSummary } from '../../electron/services/snow'
+import type { ReportsData, ReportsInput } from '../../electron/services/reports'
+import type { CsvPreview, ImportMapping, ImportResult } from '../../electron/services/importer'
 
 declare global {
   interface Window {
@@ -117,6 +119,18 @@ export const api = {
       invoke<number>('snow:assignZone', input),
     complete: (input: { stormId: string; contractId: string; notes?: string }) => invoke<void>('snow:complete', input),
     summary: (stormId: string) => invoke<StormSummary>('snow:summary', stormId),
+  },
+  reports: {
+    data: (input: ReportsInput) => invoke<ReportsData>('reports:data', input),
+    exportCsv: (input: { defaultName: string; content: string }) => invoke<string | null>('export:csv', input),
+  },
+  csv: {
+    pick: () => invoke<CsvPreview | null>('csv:pick'),
+    import: (input: { filePath: string; mapping: ImportMapping; updateExisting: boolean }) =>
+      invoke<ImportResult>('csv:import', input),
+  },
+  recurring: {
+    generate: () => invoke<number>('recurring:generate'),
   },
   dashboard: {
     stats: (date: string) => invoke<DashboardStats>('dashboard:stats', date),

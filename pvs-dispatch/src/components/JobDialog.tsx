@@ -24,6 +24,7 @@ export function JobDialog() {
   const [duration, setDuration] = useState(60)
   const [amount, setAmount] = useState(0)
   const [weatherDependent, setWeatherDependent] = useState(false)
+  const [recurrence, setRecurrence] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -58,7 +59,7 @@ export function JobDialog() {
         d.setHours(h, m, 0, 0)
         scheduledStartAt = d.getTime()
       }
-      await api.jobs.create({
+      const jobId = await api.jobs.create({
         customerId,
         propertyId,
         division,
@@ -80,6 +81,11 @@ export function JobDialog() {
           },
         ],
       })
+      if (recurrence) {
+        await api.jobs.update({ id: jobId, recurrenceRule: recurrence })
+        const created = await api.recurring.generate()
+        if (created > 0) toast.info(`${created} upcoming visits generated from the recurrence`)
+      }
       await queryClient.invalidateQueries({ queryKey: ['jobs'] })
       await queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       toast.success('Job created — it is in the unassigned rail until you drag it onto a crew')
@@ -169,6 +175,15 @@ export function JobDialog() {
           <input type="checkbox" checked={weatherDependent} onChange={(e) => setWeatherDependent(e.target.checked)} />
           Weather-dependent
         </label>
+        <Field label="Repeats">
+          <Select value={recurrence} onChange={(e) => setRecurrence(e.target.value)}>
+            <option value="">Does not repeat</option>
+            <option value="FREQ=WEEKLY">Weekly</option>
+            <option value="FREQ=WEEKLY;INTERVAL=2">Every 2 weeks</option>
+            <option value="FREQ=WEEKLY;INTERVAL=4">Every 4 weeks</option>
+            <option value="FREQ=DAILY">Daily</option>
+          </Select>
+        </Field>
         <Field label="Description" className="col-span-2">
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         </Field>

@@ -3,6 +3,8 @@ import path from 'node:path'
 import { initDb, scheduleNightlyBackup, closeDb } from './db'
 import { registerIpcHandlers } from './ipc'
 import { initPhotoStorage, getPhotosRoot } from './services/jobdetail'
+import { generateRecurringJobs } from './services/recurring'
+import { getDb } from './db'
 import { registerPrintReadyChannel } from './print'
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL
@@ -72,6 +74,9 @@ function createWindow() {
         await exportPrintView({ kind: 'runsheet', date, format: 'pdf', openWhenDone: false })
         await exportPrintView({ kind: 'runsheet', date, format: 'png', openWhenDone: false })
         await exportPrintView({ kind: 'masterday', date, format: 'pdf', openWhenDone: false })
+        const from = new Date(Date.now() - 90 * 86400e3).toISOString().slice(0, 10)
+        const to = new Date().toISOString().slice(0, 10)
+        await exportPrintView({ kind: 'reports', date: from, dateTo: to, format: 'png', openWhenDone: false })
       }
       app.quit()
     })
@@ -100,6 +105,15 @@ app.whenReady().then(() => {
   registerIpcHandlers()
   registerPrintReadyChannel()
   scheduleNightlyBackup()
+
+  // Materialize upcoming visits from recurring jobs (60-day horizon)
+  try {
+    const created = generateRecurringJobs(getDb())
+    if (created > 0) console.log(`Recurring generator created ${created} upcoming visits`)
+  } catch (err) {
+    console.error('Recurring job generation failed', err)
+  }
+
   createWindow()
 
   app.on('activate', () => {

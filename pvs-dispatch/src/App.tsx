@@ -7,6 +7,7 @@ import { Dashboard } from './screens/Dashboard'
 import { Schedule } from './screens/Schedule'
 import { Planner } from './screens/Planner'
 import { SnowDispatch } from './screens/SnowDispatch'
+import { Reports } from './screens/Reports'
 import { Workers } from './screens/Workers'
 import { Crews } from './screens/Crews'
 import { Customers } from './screens/Customers'
@@ -96,6 +97,7 @@ export default function App() {
           {screen === 'schedule' && <Schedule />}
           {screen === 'planner' && <Planner />}
           {screen === 'snow' && <SnowDispatch />}
+          {screen === 'reports' && <Reports />}
           {screen === 'workers' && <Workers />}
           {screen === 'crews' && <Crews />}
           {screen === 'customers' && <Customers />}
