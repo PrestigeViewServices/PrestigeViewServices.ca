@@ -3,8 +3,13 @@ import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import App from './App'
+import { PrintView } from './screens/PrintView'
 import { applyTheme, useUi } from './lib/store'
 import './index.css'
+
+// Hidden print windows load the app with #print/<kind>?…: render the print
+// document alone, no shell, no theme.
+const isPrintRoute = window.location.hash.startsWith('#print/')
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,16 +17,22 @@ const queryClient = new QueryClient({
   },
 })
 
-applyTheme(useUi.getState().theme)
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+if (!isPrintRoute) {
   applyTheme(useUi.getState().theme)
-})
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    applyTheme(useUi.getState().theme)
+  })
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-      <Toaster richColors position="bottom-right" />
-    </QueryClientProvider>
+    {isPrintRoute ? (
+      <PrintView />
+    ) : (
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <Toaster richColors position="bottom-right" />
+      </QueryClientProvider>
+    )}
   </React.StrictMode>,
 )

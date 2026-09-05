@@ -59,12 +59,20 @@
     "files": [
       "dist/**",
       "dist-electron/**",
-      "drizzle/**"
+      "drizzle/**",
+      "build/icon.png"
     ],
     "extraResources": [
       { "from": "drizzle", "to": "drizzle" }
     ],
     "mac": { "target": "dmg", "category": "public.app-category.business" },
-    "win": { "target": "nsis" }
+    "win": { "target": "nsis" },
+    "nsis": {
+      "shortcutName": "PVS Dispatch",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true
+    },
+    "linux": { "target": "AppImage", "category": "Office" }
   }
 }

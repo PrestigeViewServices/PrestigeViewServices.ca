@@ -83,13 +83,15 @@ stack (`Ctrl/Cmd+Z`, `Shift+Ctrl/Cmd+Z`).
 
 ## Build phases
 
-- **Phase 1 (this)** — Electron shell, full schema + migrations, settings,
+- **Phase 1 (done)** — Electron shell, full schema + migrations, settings,
   workers, crews, customers, properties, service catalog, manual job creation,
   Day/3-Day/Week/Month schedule board with drag-and-drop assignment,
   drop validation warnings (certification, time off, max hours, drive time),
   dashboard KPIs, demo seed data.
-- **Phase 2** — full job drawer (checklists, photos, notes, activity log),
-  crew run sheet print views, PDF/PNG export.
+- **Phase 2 (done)** — full job drawer (checklists, photos via the
+  `pvsphoto://` protocol, crew notes, activity log), crew run sheet and
+  master day schedule print views, PDF export via `printToPDF` and PNG
+  export for texting, app icon + pinnable installers (NSIS shortcuts).
 - **Phase 3** — AI daily planner (Anthropic API, Zod-validated JSON plans,
   side-by-side diff, approve/reject) + follow-up chat.
 - **Phase 4** — Snow dispatch mode: storm events, contract triggers, SLA

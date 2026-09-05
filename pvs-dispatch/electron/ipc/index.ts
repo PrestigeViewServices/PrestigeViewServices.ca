@@ -1,5 +1,7 @@
-import { ipcMain, safeStorage } from 'electron'
+import { dialog, ipcMain, safeStorage } from 'electron'
 import { getDb, backupNow, getDbFilePath, getBackupDir } from '../db'
+import * as jobdetail from '../services/jobdetail'
+import { exportPrintView, type PrintExportInput } from '../print'
 import * as people from '../services/people'
 import * as customersSvc from '../services/customers'
 import * as jobsSvc from '../services/jobs'
@@ -67,6 +69,28 @@ export function registerIpcHandlers() {
   handle('jobs:validate', (input: Parameters<typeof jobsSvc.validateAssignment>[1]) =>
     jobsSvc.validateAssignment(db(), input),
   )
+
+  // Job detail extras: checklist, photos, notes, activity
+  handle('jobs:extras', (jobId: string) => jobdetail.getJobDetailExtras(db(), jobId))
+  handle('checklist:toggle', (itemId: string) => jobdetail.toggleChecklistItem(db(), itemId))
+  handle('checklist:add', (input: { jobId: string; label: string; required: boolean }) =>
+    jobdetail.addChecklistItem(db(), input),
+  )
+  handle('checklist:remove', (itemId: string) => jobdetail.removeChecklistItem(db(), itemId))
+  handle('notes:add', (input: { jobId: string; body: string }) => jobdetail.addJobNote(db(), input))
+  handle('photos:add', async (input: { jobId: string; type: 'before' | 'after' | 'issue' }) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Add photos',
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'] }],
+    })
+    if (canceled || filePaths.length === 0) return 0
+    return jobdetail.addJobPhotos(db(), { ...input, sourcePaths: filePaths })
+  })
+  handle('photos:remove', (photoId: string) => jobdetail.removeJobPhoto(db(), photoId))
+
+  // Print / export
+  handle('print:export', (input: PrintExportInput) => exportPrintView(input))
 
   // Dashboard
   handle('dashboard:stats', (date: string) => jobsSvc.dashboardStats(db(), date))

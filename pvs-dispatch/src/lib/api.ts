@@ -20,6 +20,8 @@ import type {
 import type { PublicSettings, SettingsUpdateInput } from '../../electron/services/settings'
 import type { CatalogSaveInput, CustomerSaveInput, PropertySaveInput } from '../../electron/services/customers'
 import type { JobListFilter } from '../../electron/services/jobs'
+import type { JobDetailExtras } from '../../electron/services/jobdetail'
+import type { PrintExportInput } from '../../electron/print'
 
 declare global {
   interface Window {
@@ -75,6 +77,20 @@ export const api = {
     archive: (id: string) => invoke<void>('jobs:archive', id),
     schedule: (input: ScheduleJobInput) => invoke<ScheduleJobResult>('jobs:schedule', input),
     validate: (input: ScheduleJobInput) => invoke<ScheduleWarning[]>('jobs:validate', input),
+  },
+  jobExtras: {
+    get: (jobId: string) => invoke<JobDetailExtras>('jobs:extras', jobId),
+    toggleChecklist: (itemId: string) => invoke<void>('checklist:toggle', itemId),
+    addChecklist: (input: { jobId: string; label: string; required: boolean }) =>
+      invoke<void>('checklist:add', input),
+    removeChecklist: (itemId: string) => invoke<void>('checklist:remove', itemId),
+    addNote: (input: { jobId: string; body: string }) => invoke<void>('notes:add', input),
+    addPhotos: (input: { jobId: string; type: 'before' | 'after' | 'issue' }) =>
+      invoke<number>('photos:add', input),
+    removePhoto: (photoId: string) => invoke<void>('photos:remove', photoId),
+  },
+  print: {
+    export: (input: PrintExportInput) => invoke<string | null>('print:export', input),
   },
   dashboard: {
     stats: (date: string) => invoke<DashboardStats>('dashboard:stats', date),

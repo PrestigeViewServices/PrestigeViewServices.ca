@@ -11,14 +11,14 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { addDays, format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, Redo2, Undo2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Printer, Redo2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { useUi } from '@/lib/store'
 import { cn, dateFromStr, minutesLabel, todayStr } from '@/lib/utils'
 import type { CrewWithMembers, JobListItem, ScheduleJobInput } from '@shared/types'
 import { DIVISIONS } from '@shared/types'
-import { Button, EmptyState, Input, Select, Skeleton } from '@/components/ui'
+import { Button, Dialog, EmptyState, Field, Input, Select, Skeleton } from '@/components/ui'
 import { DraggableJobCard, JobCardInner } from '@/components/JobCard'
 import { JobDrawer } from '@/components/JobDrawer'
 
@@ -54,6 +54,7 @@ export function Schedule() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [activeJob, setActiveJob] = useState<JobListItem | null>(null)
+  const [printOpen, setPrintOpen] = useState(false)
 
   const rangeDays = scheduleView === 'day' ? 1 : scheduleView === '3day' ? 3 : scheduleView === 'week' ? 7 : 31
   const rangeStart =
@@ -236,11 +237,17 @@ export function Schedule() {
           <Button variant="ghost" size="icon" disabled={redoStack.length === 0} onClick={() => handleUndoRedo(true)} title="Redo (Ctrl+Shift+Z)">
             <Redo2 className="h-4 w-4" />
           </Button>
+          <Button variant="outline" onClick={() => setPrintOpen(true)} title="Print / export run sheets">
+            <Printer className="h-4 w-4" /> Print
+          </Button>
           <Button onClick={() => setNewJobOpen(true)}>
             <Plus className="h-4 w-4" /> New job
           </Button>
         </div>
       </div>
+      {printOpen && (
+        <PrintDialog date={scheduleDate} crews={visibleCrews} onClose={() => setPrintOpen(false)} />
+      )}
 
       <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <div className="flex min-h-0 flex-1">
@@ -264,6 +271,80 @@ export function Schedule() {
       </DndContext>
       <JobDrawer />
     </div>
+  )
+}
+
+function PrintDialog({
+  date,
+  crews,
+  onClose,
+}: {
+  date: string
+  crews: CrewWithMembers[]
+  onClose: () => void
+}) {
+  const [kind, setKind] = useState<'runsheet' | 'masterday'>('runsheet')
+  const [crewId, setCrewId] = useState<string>('')
+  const [format, setFormat] = useState<'pdf' | 'png'>('pdf')
+  const [busy, setBusy] = useState(false)
+
+  async function doExport() {
+    setBusy(true)
+    try {
+      const file = await api.print.export({
+        kind,
+        date,
+        crewId: kind === 'runsheet' && crewId ? crewId : null,
+        format,
+      })
+      if (file) {
+        toast.success(`Saved ${file}`)
+        onClose()
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Export failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()} title={`Print / export — ${date}`}>
+      <div className="space-y-3">
+        <Field label="Document">
+          <Select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}>
+            <option value="runsheet">Crew run sheets (one page per crew)</option>
+            <option value="masterday">Master day schedule (office wall)</option>
+          </Select>
+        </Field>
+        {kind === 'runsheet' && (
+          <Field label="Crew">
+            <Select value={crewId} onChange={(e) => setCrewId(e.target.value)}>
+              <option value="">All crews</option>
+              {crews.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
+        <Field label="Format">
+          <Select value={format} onChange={(e) => setFormat(e.target.value as typeof format)}>
+            <option value="pdf">PDF (print or email)</option>
+            <option value="png">PNG image (text to a crew lead)</option>
+          </Select>
+        </Field>
+      </div>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={doExport} disabled={busy}>
+          {busy ? 'Exporting…' : 'Export'}
+        </Button>
+      </div>
+    </Dialog>
   )
 }
 

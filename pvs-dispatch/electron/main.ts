@@ -1,7 +1,9 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, protocol, shell } from 'electron'
 import path from 'node:path'
 import { initDb, scheduleNightlyBackup, closeDb } from './db'
 import { registerIpcHandlers } from './ipc'
+import { initPhotoStorage, getPhotosRoot } from './services/jobdetail'
+import { registerPrintReadyChannel } from './print'
 
 const isDev = !!process.env.VITE_DEV_SERVER_URL
 
@@ -26,6 +28,7 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 700,
     title: 'PVS Dispatch',
+    icon: path.join(app.getAppPath(), 'build', 'icon.png'),
     backgroundColor: '#09090b',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -63,6 +66,13 @@ function createWindow() {
       win.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'T' })
       await sleep(1500)
       await capture('schedule')
+      if (process.env.PVS_EXPORT_DIR && process.env.PVS_EXPORT_DATE) {
+        const { exportPrintView } = await import('./print')
+        const date = process.env.PVS_EXPORT_DATE
+        await exportPrintView({ kind: 'runsheet', date, format: 'pdf', openWhenDone: false })
+        await exportPrintView({ kind: 'runsheet', date, format: 'png', openWhenDone: false })
+        await exportPrintView({ kind: 'masterday', date, format: 'pdf', openWhenDone: false })
+      }
       app.quit()
     })
   }
@@ -70,7 +80,25 @@ function createWindow() {
 
 app.whenReady().then(() => {
   initDb(app.getPath('userData'), migrationsFolder())
+  initPhotoStorage(path.join(app.getPath('userData'), 'photos'))
+
+  // pvsphoto://<jobId>/<file> serves job photos to the renderer in both dev
+  // (http origin) and production (file origin) without exposing the full fs.
+  protocol.registerFileProtocol('pvsphoto', (request, callback) => {
+    try {
+      const url = new URL(request.url)
+      const jobId = url.hostname
+      const fileName = path.basename(decodeURIComponent(url.pathname))
+      const resolved = path.join(getPhotosRoot(), jobId, fileName)
+      if (!resolved.startsWith(getPhotosRoot())) throw new Error('outside photo root')
+      callback({ path: resolved })
+    } catch {
+      callback({ error: -6 }) // net::ERR_FILE_NOT_FOUND
+    }
+  })
+
   registerIpcHandlers()
+  registerPrintReadyChannel()
   scheduleNightlyBackup()
   createWindow()
 
