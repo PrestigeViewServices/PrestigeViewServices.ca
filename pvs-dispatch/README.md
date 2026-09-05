@@ -102,7 +102,12 @@ stack (`Ctrl/Cmd+Z`, `Shift+Ctrl/Cmd+Z`).
   that proposes revisions through the same approve/reject flow. Privacy: the
   model sees addresses, durations, prices, and crew first names — never
   customer phone numbers or emails.
-- **Phase 4** — Snow dispatch mode: storm events, contract triggers, SLA
-  clocks, storm summary report.
+- **Phase 4 (done)** — Snow dispatch mode: storm events (forecast snowfall +
+  classification) auto-build a dispatch list from every active contract
+  whose trigger threshold is met, grouped by tier and sorted tightest-SLA
+  first. Live SLA countdown per property (green/amber/red), one-click
+  crew-per-route-zone assignment, completion check-off with a required
+  photo (the liability record), and a storm summary on close: serviced,
+  breaches, average response time, season revenue covered.
 - **Phase 5** — reports, Jobber CSV import, recurring jobs from RRULE,
   optional cloud share link and real drive-time provider.

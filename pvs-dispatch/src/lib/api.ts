@@ -29,6 +29,7 @@ import type {
   PlannerChatMessage,
   PlannerContext,
 } from '../../electron/services/planner'
+import type { StormCreateInput, StormDispatch, StormEvent, StormSummary } from '../../electron/services/snow'
 
 declare global {
   interface Window {
@@ -104,6 +105,18 @@ export const api = {
     chat: (input: { options: AssembleOptions; plan: Plan | null; messages: PlannerChatMessage[] }) =>
       invoke<{ reply: string; plan?: Plan }>('planner:chat', input),
     apply: (input: { date: string; approved: ApproveCrewPlanInput[] }) => invoke<void>('planner:apply', input),
+  },
+  snow: {
+    storms: () => invoke<StormEvent[]>('snow:storms'),
+    create: (input: StormCreateInput) => invoke<string>('snow:create', input),
+    updateSnowfall: (input: { stormId: string; snowfallCm: number }) => invoke<void>('snow:updateSnowfall', input),
+    setStatus: (input: { stormId: string; status: 'Forecast' | 'Active' | 'Closed' }) =>
+      invoke<void>('snow:setStatus', input),
+    dispatch: (stormId: string) => invoke<StormDispatch>('snow:dispatch', stormId),
+    assignZone: (input: { stormId: string; routeZone: string; crewId: string | null }) =>
+      invoke<number>('snow:assignZone', input),
+    complete: (input: { stormId: string; contractId: string; notes?: string }) => invoke<void>('snow:complete', input),
+    summary: (stormId: string) => invoke<StormSummary>('snow:summary', stormId),
   },
   dashboard: {
     stats: (date: string) => invoke<DashboardStats>('dashboard:stats', date),

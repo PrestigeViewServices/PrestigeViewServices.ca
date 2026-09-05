@@ -2,6 +2,9 @@ import { dialog, ipcMain, safeStorage } from 'electron'
 import { getDb, backupNow, getDbFilePath, getBackupDir } from '../db'
 import * as jobdetail from '../services/jobdetail'
 import * as planner from '../services/planner'
+import * as snow from '../services/snow'
+import path from 'node:path'
+import fs from 'node:fs'
 import { exportPrintView, type PrintExportInput } from '../print'
 import Anthropic from '@anthropic-ai/sdk'
 import * as people from '../services/people'
@@ -140,6 +143,46 @@ export function registerIpcHandlers() {
   handle('planner:apply', (input: { date: string; approved: planner.ApproveCrewPlanInput[] }) =>
     planner.applyPlan(db(), input.date, input.approved),
   )
+
+  // Snow dispatch
+  handle('snow:storms', () => snow.listStorms(db()))
+  handle('snow:create', (input: snow.StormCreateInput) => snow.createStorm(db(), input))
+  handle('snow:updateSnowfall', (input: { stormId: string; snowfallCm: number }) =>
+    snow.updateStormSnowfall(db(), input.stormId, input.snowfallCm),
+  )
+  handle('snow:setStatus', (input: { stormId: string; status: 'Forecast' | 'Active' | 'Closed' }) =>
+    snow.setStormStatus(db(), input.stormId, input.status),
+  )
+  handle('snow:dispatch', (stormId: string) => {
+    const dispatch = snow.getStormDispatch(db(), stormId)
+    // Convert stored photo paths into pvsphoto:// URLs for the renderer
+    dispatch.rows = dispatch.rows.map((r) =>
+      r.photoPath
+        ? { ...r, photoPath: `pvsphoto://${path.basename(path.dirname(r.photoPath))}/${path.basename(r.photoPath)}` }
+        : r,
+    )
+    return dispatch
+  })
+  handle('snow:assignZone', (input: { stormId: string; routeZone: string; crewId: string | null }) =>
+    snow.assignZoneToCrew(db(), input.stormId, input.routeZone, input.crewId),
+  )
+  handle('snow:complete', async (input: { stormId: string; contractId: string; notes?: string }) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Completion photo (required — this is the service record)',
+      properties: ['openFile'],
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'heic'] }],
+    })
+    if (canceled || filePaths.length === 0) {
+      throw new Error('A completion photo is required — it is the liability record')
+    }
+    const dir = path.join(jobdetail.getPhotosRoot(), `storm-${input.stormId}`)
+    fs.mkdirSync(dir, { recursive: true })
+    const ext = path.extname(filePaths[0]).toLowerCase() || '.jpg'
+    const stored = path.join(dir, `${crypto.randomUUID()}${ext}`)
+    fs.copyFileSync(filePaths[0], stored)
+    snow.completeStormStop(db(), { ...input, photoStoredPath: stored })
+  })
+  handle('snow:summary', (stormId: string) => snow.stormSummary(db(), stormId))
 
   // Dashboard
   handle('dashboard:stats', (date: string) => jobsSvc.dashboardStats(db(), date))

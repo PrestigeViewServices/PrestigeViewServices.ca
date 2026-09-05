@@ -6,6 +6,7 @@ export type ScreenName =
   | 'dashboard'
   | 'schedule'
   | 'planner'
+  | 'snow'
   | 'workers'
   | 'crews'
   | 'customers'

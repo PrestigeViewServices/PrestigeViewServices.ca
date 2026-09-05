@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { Dashboard } from './screens/Dashboard'
 import { Schedule } from './screens/Schedule'
 import { Planner } from './screens/Planner'
+import { SnowDispatch } from './screens/SnowDispatch'
 import { Workers } from './screens/Workers'
 import { Crews } from './screens/Crews'
 import { Customers } from './screens/Customers'
@@ -94,6 +95,7 @@ export default function App() {
           {screen === 'dashboard' && <Dashboard />}
           {screen === 'schedule' && <Schedule />}
           {screen === 'planner' && <Planner />}
+          {screen === 'snow' && <SnowDispatch />}
           {screen === 'workers' && <Workers />}
           {screen === 'crews' && <Crews />}
           {screen === 'customers' && <Customers />}
