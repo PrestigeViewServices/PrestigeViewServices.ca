@@ -27,3 +27,9 @@ docs/
 .claude/
 *.log
 .env*.local
+
+# ---------------------------------------------------------------------------
+# PVS Dispatch desktop app — separate Electron project, never part of the
+# website build or deployment
+# ---------------------------------------------------------------------------
+pvs-dispatch/
