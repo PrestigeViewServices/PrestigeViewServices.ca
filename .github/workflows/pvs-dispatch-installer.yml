@@ -7,6 +7,10 @@ on:
   workflow_dispatch:
   push:
     tags: ['dispatch-v*']
+    branches: ['claude/pvs-dispatch-app-m4k2jd']
+    paths:
+      - 'pvs-dispatch/**'
+      - '.github/workflows/pvs-dispatch-installer.yml'
 
 jobs:
   windows-installer:
