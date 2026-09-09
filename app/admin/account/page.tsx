@@ -1,248 +1,245 @@
 import { revalidatePath } from "next/cache";
-import { KeyRound, ShieldCheck, TriangleAlert, Users } from "lucide-react";
+import { LifeBuoy, TriangleAlert, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import {
   ADMIN_CREDENTIAL_ID,
   MIN_ADMIN_PASSWORD_LENGTH,
-  findAdminCredentialByEmail,
+  createAdminAccount,
+  deleteAdminAccount,
   listAdminCredentials,
-  readAdminCredential,
-  setAdminCredential,
+  setAdminAccountEmail,
+  setAdminAccountPassword,
 } from "@/lib/admin-credentials";
-import { checkAdminPassword } from "@/lib/admin-session";
-import { verifyPassword } from "@/lib/customer-auth";
-import { Button } from "@/components/ui/button";
+import { isRecoveryLoginConfigured } from "@/lib/admin-session";
+import {
+  SignInsManager,
+  type ActionState,
+  type SignInRow,
+} from "@/components/admin/sign-ins-manager";
 
 export const dynamic = "force-dynamic";
-
-const inputCls =
-  "h-10 w-full rounded-xl border border-surface-border bg-input/80 px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
  * Dashboard sign-ins.
  *
- * Two accounts exist: the owner's, and the office account
- * (contact@prestigeviewservices.ca), which is provisioned automatically the
- * first time this page loads or that email signs in. Either password can be
- * changed here; changing one never touches the other. Both unlock the same
- * dashboard, so treat both passwords with the same care.
+ * Any number of admins can exist, each with their own email and password,
+ * created right here. They all get the SAME full access — there is no admin
+ * hierarchy in this dashboard, so only add people you'd trust with the
+ * whole business.
+ *
+ * Behind all of them sits the recovery login (ADMIN_EMAIL +
+ * ADMIN_PASSWORD from the hosting environment), which always works. That is
+ * the way back in if a password is forgotten or Postgres is unreachable.
  */
 export default async function AdminAccountPage() {
   await requireRole(["ultimate_admin", "admin"]);
-  const [{ credential, status }, accounts] = await Promise.all([
-    readAdminCredential(),
-    listAdminCredentials(),
-  ]);
+  const { accounts, status } = await listAdminCredentials();
 
   const envEmail = (process.env.ADMIN_EMAIL ?? "").trim();
-  const ownerEmail = credential?.email ?? envEmail;
   const needsMigration = status === "no-table";
   const dbDown = status === "error" || status === "no-db";
+  const recoveryOn = isRecoveryLoginConfigured();
 
-  const rows =
-    accounts.length > 0
-      ? accounts
-      : ownerEmail
-        ? [
-            {
-              id: ADMIN_CREDENTIAL_ID,
-              email: ownerEmail,
-              passwordHash: "",
-              updatedAt: new Date(),
-            },
-          ]
-        : [];
+  const rows: SignInRow[] = accounts.map((a) => ({
+    id: a.id,
+    email: a.email,
+    isOwner: a.id === ADMIN_CREDENTIAL_ID,
+    updatedAt: a.updatedAt.toLocaleDateString("en-CA"),
+  }));
 
   return (
     <div className="max-w-2xl space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight">Sign-ins</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          The accounts that can open this dashboard, and where their passwords
-          are changed.
+          The accounts that can open this dashboard. Add as many admins as you
+          need — each gets their own email and password.
         </p>
       </header>
 
+      {(needsMigration || dbDown) && (
+        <p className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100/90">
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <span>
+            {needsMigration ? (
+              <>
+                The admin sign-in table does not exist in this database yet, so
+                admins cannot be saved. Run <code>npm run db:deploy</code>, then
+                reload. Sign-in keeps working from the recovery login until
+                then.
+              </>
+            ) : (
+              <>
+                The database is unreachable, so admins cannot be listed or
+                saved right now. Sign-in is falling back to the recovery login.
+              </>
+            )}
+          </span>
+        </p>
+      )}
+
+      <SignInsManager
+        accounts={rows}
+        minPasswordLength={MIN_ADMIN_PASSWORD_LENGTH}
+        addAction={addAdmin}
+        passwordAction={resetAdminPassword}
+        emailAction={changeAdminEmail}
+        removeAction={removeAdmin}
+      />
+
       <section className="surface-card p-5">
         <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Dashboard accounts</h2>
+          <LifeBuoy className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Locked out? Recovery login</h2>
         </div>
-        <ul className="mt-4 divide-y divide-surface-border text-sm">
-          {rows.map((a) => (
-            <li
-              key={a.id}
-              className="flex flex-wrap items-center justify-between gap-2 py-3"
-            >
-              <div>
-                <p className="font-medium">{a.email}</p>
-                <p className="text-xs text-muted-foreground">
-                  {a.id === ADMIN_CREDENTIAL_ID
-                    ? "Owner account"
-                    : "Office account"}
-                  {a.passwordHash
-                    ? ` · password updated ${a.updatedAt.toLocaleDateString("en-CA")}`
-                    : " · using the environment password"}
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
-                <ShieldCheck className="h-3 w-3" />
-                Full access
-              </span>
-            </li>
-          ))}
-          {rows.length === 0 && (
-            <li className="py-3 text-muted-foreground">
-              No accounts on record yet. Sign-in is using the{" "}
-              <code>ADMIN_PASSWORD</code> environment variable.
-            </li>
-          )}
-        </ul>
-
-        {(needsMigration || dbDown) && (
-          <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-100/90">
-            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-            <span>
-              {needsMigration ? (
-                <>
-                  The credential table does not exist in this database yet. Run{" "}
-                  <code>npm run db:deploy</code>, then reload. Sign-in keeps
-                  working from <code>ADMIN_PASSWORD</code> until then.
-                </>
-              ) : (
-                <>
-                  The database is unreachable, so sign-in is falling back to{" "}
-                  <code>ADMIN_PASSWORD</code>. Password changes will not save
-                  until the connection is restored.
-                </>
-              )}
-            </span>
+        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+          <p>
+            Signing in with <code>ADMIN_EMAIL</code> and{" "}
+            <code>ADMIN_PASSWORD</code> from the hosting environment always
+            works, even when a password above is forgotten or the database is
+            down. Keep both set in Vercel.
           </p>
-        )}
+          <p>
+            Recovery login is currently{" "}
+            {recoveryOn ? (
+              <strong className="text-emerald-300">on</strong>
+            ) : (
+              <strong className="text-rose-300">
+                off — ADMIN_PASSWORD is not set
+              </strong>
+            )}
+            {envEmail ? (
+              <>
+                {" "}
+                for <strong className="text-foreground">{envEmail}</strong>.
+              </>
+            ) : recoveryOn ? (
+              <>
+                {" "}
+                for any email, because <code>ADMIN_EMAIL</code> is not set. Set
+                it so the recovery password alone isn&apos;t enough.
+              </>
+            ) : (
+              "."
+            )}
+          </p>
+          <p>
+            From a terminal with <code>DATABASE_URL</code> in{" "}
+            <code>.env.local</code>, <code>npm run admin</code> lists, adds,
+            resets, and removes these accounts without signing in at all.
+          </p>
+          <p>
+            To force every device to sign in again, rotate{" "}
+            <code>ADMIN_SESSION_SECRET</code> in Vercel.
+          </p>
+        </div>
       </section>
 
       <section className="surface-card p-5">
         <div className="flex items-center gap-2">
-          <KeyRound className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">Change a password</h2>
+          <Users className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Before you add someone</h2>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Enter the account&apos;s email and its current password to confirm it
-          is you, then set the new one.
+        <p className="mt-3 text-sm text-muted-foreground">
+          Every sign-in has full access: customer records, pricing, leads, site
+          content, and this page. There are no read-only or limited admins yet,
+          so treat adding an admin as handing over the keys, and remove people
+          the day they stop needing access.
         </p>
-
-        <form action={changeAdminCredential} className="mt-4 space-y-3">
-          <div>
-            <label className="mb-1 block text-xs font-medium">
-              Account email
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              defaultValue={ownerEmail}
-              autoComplete="username"
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium">
-              Current password for that account
-            </label>
-            <input
-              name="currentPassword"
-              type="password"
-              required
-              autoComplete="current-password"
-              className={inputCls}
-            />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-xs font-medium">
-                New password
-              </label>
-              <input
-                name="newPassword"
-                type="password"
-                required
-                minLength={MIN_ADMIN_PASSWORD_LENGTH}
-                autoComplete="new-password"
-                placeholder={`At least ${MIN_ADMIN_PASSWORD_LENGTH} characters`}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium">
-                Confirm new password
-              </label>
-              <input
-                name="confirmPassword"
-                type="password"
-                required
-                minLength={MIN_ADMIN_PASSWORD_LENGTH}
-                autoComplete="new-password"
-                className={inputCls}
-              />
-            </div>
-          </div>
-          <Button type="submit">Save new password</Button>
-        </form>
-
-        <div className="mt-5 space-y-2 border-t border-surface-border pt-4 text-xs text-muted-foreground">
-          <p>
-            Existing sign-ins on other devices stay valid after a change. To
-            force everyone out, rotate <code>ADMIN_SESSION_SECRET</code> in
-            Vercel.
-          </p>
-          <p>
-            Keep <code>ADMIN_PASSWORD</code> set in Vercel. It is the way back
-            in if the database is ever unreachable.
-          </p>
-        </div>
       </section>
     </div>
   );
 }
 
+// ---- Server actions --------------------------------------------------------
+
 /**
- * Verifies the CURRENT password of the account named by email — through the
- * account's own stored hash, or the env fallback while the owner has no
- * stored credential yet — then writes the new one to that same account.
+ * Every action RETURNS its outcome instead of throwing. A thrown server
+ * action drops the owner on a Next.js error page, which is the last thing
+ * anyone needs while sorting out dashboard access.
  */
-async function changeAdminCredential(formData: FormData) {
-  "use server";
+async function guard(): Promise<void> {
   await requireRole(["ultimate_admin", "admin"]);
+}
 
-  const currentPassword = String(formData.get("currentPassword") ?? "");
+function failure(err: unknown): ActionState {
+  return {
+    ok: false,
+    message:
+      err instanceof Error ? err.message : "Something went wrong. Try again.",
+  };
+}
+
+async function addAdmin(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  "use server";
+  await guard();
   const email = String(formData.get("email") ?? "");
-  const newPassword = String(formData.get("newPassword") ?? "");
-  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const password = String(formData.get("password") ?? "");
+  try {
+    const created = await createAdminAccount(email, password);
+    revalidatePath("/admin/account");
+    return {
+      ok: true,
+      message: `${created.email} can now sign in. Send them the password, and have them reset it once they're in.`,
+    };
+  } catch (err) {
+    return failure(err);
+  }
+}
 
-  const row = await findAdminCredentialByEmail(email);
-  let accountId = ADMIN_CREDENTIAL_ID;
-  let currentOk = false;
-  if (row) {
-    accountId = row.id;
-    currentOk = await verifyPassword(currentPassword, row.passwordHash).catch(
-      () => false
-    );
-  } else {
-    // Owner without a stored credential yet — same env path as login.
-    currentOk = await checkAdminPassword(currentPassword);
+async function resetAdminPassword(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  "use server";
+  await guard();
+  const id = String(formData.get("id") ?? "");
+  const password = String(formData.get("password") ?? "");
+  try {
+    await setAdminAccountPassword(id, password);
+    revalidatePath("/admin/account");
+    return {
+      ok: true,
+      message:
+        "Password saved. Sessions already open on other devices stay signed in — rotate ADMIN_SESSION_SECRET to end those too.",
+    };
+  } catch (err) {
+    return failure(err);
   }
-  if (!currentOk) {
-    throw new Error("Current password is incorrect");
-  }
-  if (newPassword !== confirmPassword) {
-    throw new Error("The two new passwords do not match");
-  }
-  if (newPassword === currentPassword) {
-    throw new Error("The new password must be different from the current one");
-  }
+}
 
-  // Throws with a readable message on validation failure.
-  await setAdminCredential(email, newPassword, accountId);
+async function changeAdminEmail(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  "use server";
+  await guard();
+  const id = String(formData.get("id") ?? "");
+  const email = String(formData.get("email") ?? "");
+  try {
+    await setAdminAccountEmail(id, email);
+    revalidatePath("/admin/account");
+    return { ok: true, message: `Sign-in email is now ${email.trim().toLowerCase()}.` };
+  } catch (err) {
+    return failure(err);
+  }
+}
 
-  revalidatePath("/admin/account");
+async function removeAdmin(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  "use server";
+  await guard();
+  const id = String(formData.get("id") ?? "");
+  try {
+    await deleteAdminAccount(id);
+    revalidatePath("/admin/account");
+    return { ok: true, message: "Sign-in removed." };
+  } catch (err) {
+    return failure(err);
+  }
 }

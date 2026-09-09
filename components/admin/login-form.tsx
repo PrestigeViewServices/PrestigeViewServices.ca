@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /**
- * Standalone owner login for the internal admin dashboard. Posts the
- * password to /api/admin/login; a valid password sets the session cookie
- * and the refresh re-renders the dashboard server-side.
+ * Standalone login for the internal admin dashboard. Posts the email and
+ * password to /api/admin/login; a match sets the session cookie and the
+ * refresh re-renders the dashboard server-side.
+ *
+ * Any saved sign-in works here, as does the ADMIN_EMAIL / ADMIN_PASSWORD
+ * recovery login — see lib/admin-session.ts.
  */
 export function AdminLoginForm() {
   const router = useRouter();
@@ -49,7 +52,7 @@ export function AdminLoginForm() {
           PVS Admin
         </h1>
         <p className="mt-1.5 text-center text-sm text-muted-foreground">
-          Owner access only. Enter the admin password to open the dashboard.
+          Staff access only. Sign in with your dashboard email and password.
         </p>
 
         <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -104,9 +107,25 @@ export function AdminLoginForm() {
           </Button>
         </form>
       </div>
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Sessions last 30 days on this device.
-      </p>
+      <div className="mt-4 space-y-2 text-center text-xs text-muted-foreground">
+        <p>Sessions last 30 days on this device.</p>
+        <details className="mx-auto max-w-xs text-left">
+          <summary className="cursor-pointer text-center hover:text-foreground">
+            Can&apos;t get in?
+          </summary>
+          <ul className="mt-2 list-disc space-y-1 pl-4 leading-relaxed">
+            <li>
+              Use the recovery email and password set in the site&apos;s
+              hosting environment — those always work, even if a saved
+              password was changed.
+            </li>
+            <li>
+              Or reset any password from a terminal with{" "}
+              <code>npm run admin reset your@email</code>.
+            </li>
+          </ul>
+        </details>
+      </div>
     </div>
   );
 }
