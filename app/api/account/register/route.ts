@@ -74,37 +74,64 @@ export async function POST(req: Request) {
   }
 
   const existing = await db.member.findUnique({ where: { email } });
-  if (existing && existing.passwordHash !== "") {
+  if (existing) {
+    // NEVER let sign-up take over an existing row — claimed or not.
+    //
+    // A pre-provisioned (Jobber-imported) account carries a real customer's
+    // service history, points, addresses and profile, and is marked
+    // unclaimed by an empty passwordHash. Claiming it must prove control of
+    // the mailbox, which is what the emailed /claim/<inviteToken> link is
+    // for. Letting sign-up claim it on the strength of a KNOWN EMAIL handed
+    // that customer's records to anyone who could guess their address.
+    //
+    // Both cases answer identically so sign-up cannot be used to tell a
+    // claimed account from an unclaimed one.
+    if (existing.passwordHash === "" && existing.inviteToken) {
+      // Real customers land here too, so make it recoverable: tell the owner
+      // to send this person their claim link. Best-effort, never blocking.
+      const { notifyOwner } = await import("@/lib/notify");
+      const base =
+        process.env.NEXT_PUBLIC_SITE_URL ?? "https://prestigeviewservices.ca";
+      await notifyOwner({
+        kind: "member",
+        subject: `Send a Club claim link: ${email}`,
+        text: [
+          `${firstName} ${lastName}`.trim() ||
+            `Someone using ${email}`,
+          `tried to sign up for the Prestige Club, but that email already has`,
+          `an unclaimed pre-provisioned account.`,
+          ``,
+          `If this is really them, send their claim link:`,
+          `${base}/claim/${existing.inviteToken}`,
+          ``,
+          `Do NOT send it anywhere except the address on file — the link sets`,
+          `the password on that account.`,
+          ``,
+          `Account: /admin/club/members/${existing.id}`,
+        ].join("\n"),
+        sms: `PVS: ${email} needs their Club claim link sent.`,
+      }).catch(() => {});
+    }
     return NextResponse.json(
-      { error: "An account with this email already exists. Try signing in instead." },
+      {
+        error:
+          "An account with this email already exists. Try signing in — or if you've never set a password, call us at 613-334-5858 and we'll send your setup link.",
+      },
       { status: 409 }
     );
   }
 
   const passwordHash = await hashPassword(password);
-  // An UNCLAIMED pre-provisioned account (Jobber import) gets claimed by
-  // signing up with the email on file — history and points come attached.
-  const member = existing
-    ? await db.member.update({
-        where: { id: existing.id },
-        data: {
-          passwordHash,
-          firstName,
-          lastName: lastName || existing.lastName,
-          phone: phone || existing.phone,
-          inviteToken: null,
-        },
-      })
-    : await db.member.create({
-        data: {
-          email,
-          passwordHash,
-          firstName,
-          lastName: lastName || null,
-          phone: phone || null,
-          profile: { create: {} },
-        },
-      });
+  const member = await db.member.create({
+    data: {
+      email,
+      passwordHash,
+      firstName,
+      lastName: lastName || null,
+      phone: phone || null,
+      profile: { create: {} },
+    },
+  });
 
   // Pre-existing Jobber history is claimed on the next scheduled sync
   // (email match) or via the admin "link account" tool.
@@ -167,9 +194,7 @@ export async function POST(req: Request) {
       `Name: ${firstName} ${lastName}`.trim(),
       `Email: ${email}`,
       phone ? `Phone: ${phone}` : null,
-      existing
-        ? `Claimed a pre-provisioned account (Jobber history attaches on next sync).`
-        : `Brand new sign-up.`,
+      `Brand new sign-up.`,
       ``,
       `Manage: /admin/club`,
     ]
