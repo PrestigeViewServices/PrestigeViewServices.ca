@@ -1,6 +1,10 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminLoginForm } from "@/components/admin/login-form";
-import { hasAdminSession, isAdminAuthConfigured } from "@/lib/admin-session";
+import {
+  adminAuthDiagnostics,
+  hasAdminSession,
+  isAdminAuthConfigured,
+} from "@/lib/admin-session";
 import { unreadNotificationCount } from "@/lib/admin-notifications";
 
 export const metadata = {
@@ -42,7 +46,7 @@ export default async function AdminLayout({
   if (!signedIn) {
     return (
       <section className="container-max flex min-h-[70vh] items-center py-16">
-        <AdminLoginForm />
+        <AdminLoginForm diagnostics={adminAuthDiagnostics()} />
       </section>
     );
   }

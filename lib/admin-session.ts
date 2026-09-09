@@ -56,6 +56,46 @@ export function isAdminAuthConfigured(): boolean {
   );
 }
 
+/**
+ * What the deployment actually has configured, for the signed-out login
+ * screen. Booleans and a MASKED email only — never a value, never a hash.
+ *
+ * This exists because "wrong email or password" is indistinguishable from
+ * "the environment variable never got set", and the owner has no server
+ * logs on a phone at the side of a road. It reveals nothing an attacker can
+ * use: that admin auth is configured at all is already visible from the
+ * login form existing.
+ */
+export type AdminAuthDiagnostics = {
+  hasPassword: boolean;
+  hasEmail: boolean;
+  hasSessionSecret: boolean;
+  /** e.g. "g***@o***.com" — enough to recognise, not enough to target. */
+  maskedEmail: string | null;
+};
+
+export function adminAuthDiagnostics(): AdminAuthDiagnostics {
+  const email = envTrimmed("ADMIN_EMAIL");
+  return {
+    hasPassword: Boolean(envTrimmed("ADMIN_PASSWORD")),
+    hasEmail: Boolean(email),
+    hasSessionSecret: Boolean(envTrimmed("ADMIN_SESSION_SECRET")),
+    maskedEmail: email ? maskEmail(email) : null,
+  };
+}
+
+/** "guerlensky@outlook.com" -> "g***@o***.com" */
+function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at < 1) return "***";
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  const host = dot > 0 ? domain.slice(0, dot) : domain;
+  const tld = dot > 0 ? domain.slice(dot) : "";
+  return `${local[0]}***@${host[0] ?? "*"}***${tld}`;
+}
+
 /** True when the env recovery login is usable (both halves present). */
 export function isRecoveryLoginConfigured(): boolean {
   return Boolean(envTrimmed("ADMIN_PASSWORD"));
