@@ -24,6 +24,13 @@ import { verifyPassword } from "./customer-auth";
  *
  * Uses Web Crypto only, no Node-specific imports, so the helpers stay
  * portable across runtimes.
+ *
+ * NO CROSS-GRANT. Signing into the customer portal (/account) must NEVER
+ * hand out an admin session, however well the emails match. The two use
+ * different secrets, and /account sign-up is self-serve with no email
+ * verification — so anyone who typed an admin's address into the sign-up
+ * form would have walked straight into the dashboard. The admin cookie is
+ * set in exactly one place: POST /api/admin/login.
  */
 
 export const ADMIN_COOKIE = "pvs_admin";
@@ -191,24 +198,4 @@ export async function setAdminSessionCookie(): Promise<void> {
     path: "/",
     maxAge: ADMIN_SESSION_MAX_AGE_SECONDS,
   });
-}
-
-/**
- * Convenience: when someone who is ALSO a dashboard admin signs into the
- * customer portal, grant the admin session too, so one login opens both
- * /account and /admin. No-ops for everyone else.
- */
-export async function maybeGrantOwnerSession(email: string): Promise<boolean> {
-  if (!isAdminAuthConfigured()) return false;
-  const clean = email.trim().toLowerCase();
-  if (!clean) return false;
-
-  const adminEmail = envTrimmed("ADMIN_EMAIL").toLowerCase();
-  const isAdmin =
-    (adminEmail !== "" && clean === adminEmail) ||
-    Boolean(await findAdminCredentialByEmail(clean));
-  if (!isAdmin) return false;
-
-  await setAdminSessionCookie();
-  return true;
 }

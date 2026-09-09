@@ -188,7 +188,5 @@ export async function POST(req: Request) {
     path: "/",
     maxAge: MEMBER_SESSION_MAX_AGE_SECONDS,
   });
-  const { maybeGrantOwnerSession } = await import("@/lib/admin-session");
-  await maybeGrantOwnerSession(member.email);
   return NextResponse.json({ ok: true });
 }

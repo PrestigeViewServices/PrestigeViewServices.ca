@@ -65,9 +65,6 @@ export async function POST(req: Request) {
     path: "/",
     maxAge: MEMBER_SESSION_MAX_AGE_SECONDS,
   });
-  // Owner's email? One login opens the admin dashboard too.
-  const { maybeGrantOwnerSession } = await import("@/lib/admin-session");
-  await maybeGrantOwnerSession(member.email);
   return NextResponse.json({ ok: true });
 }
 
