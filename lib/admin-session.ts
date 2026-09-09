@@ -1,19 +1,22 @@
 import { cookies } from "next/headers";
-import {
-  findAdminCredentialByEmail,
-  readAdminCredential,
-  verifyAdminCredentialPassword,
-} from "./admin-credentials";
+import { findAdminCredentialByEmail } from "./admin-credentials";
 import { verifyPassword } from "./customer-auth";
 
 /**
  * Internal admin authentication — no external auth service.
  *
- * The owner password lives EITHER in Postgres (AdminCredential, set from
- * /admin/account) or, when that row is absent, in the ADMIN_PASSWORD env
- * var. The DB row wins when present so a password changed in the dashboard
- * is genuinely changed; the env var remains the break-glass for when
- * Postgres is unreachable. See lib/admin-credentials.ts.
+ * There are two ways in, and both are ours:
+ *
+ *  1. A dashboard sign-in stored in Postgres (AdminCredential). Any number
+ *     of these can exist; each has its own email and scrypt password hash,
+ *     and they are created/changed from /admin/account or `npm run admin`.
+ *
+ *  2. The RECOVERY login: ADMIN_EMAIL + ADMIN_PASSWORD from the environment.
+ *     This works ALWAYS — even when database rows exist, and even when
+ *     Postgres is unreachable. It is the way back in after a forgotten
+ *     password or a database outage, which is exactly the failure this
+ *     dashboard cannot afford. Rotate ADMIN_PASSWORD in Vercel to revoke it.
+ *
  * A signed, expiring token in an httpOnly cookie keeps the session alive;
  * the signature is an HMAC-SHA256 over the expiry timestamp using
  * ADMIN_SESSION_SECRET (falls back to ADMIN_PASSWORD so one env var is
@@ -21,6 +24,13 @@ import { verifyPassword } from "./customer-auth";
  *
  * Uses Web Crypto only, no Node-specific imports, so the helpers stay
  * portable across runtimes.
+ *
+ * NO CROSS-GRANT. Signing into the customer portal (/account) must NEVER
+ * hand out an admin session, however well the emails match. The two use
+ * different secrets, and /account sign-up is self-serve with no email
+ * verification — so anyone who typed an admin's address into the sign-up
+ * form would have walked straight into the dashboard. The admin cookie is
+ * set in exactly one place: POST /api/admin/login.
  */
 
 export const ADMIN_COOKIE = "pvs_admin";
@@ -38,7 +48,7 @@ function envTrimmed(name: string): string {
  * Whether the admin login is usable at all. Stays synchronous because
  * verifyAdminToken() runs on every admin request and must not hit the DB.
  * ADMIN_SESSION_SECRET counts on its own so the owner can eventually drop
- * ADMIN_PASSWORD once a database credential is set.
+ * ADMIN_PASSWORD once database sign-ins are set.
  */
 export function isAdminAuthConfigured(): boolean {
   return Boolean(
@@ -47,15 +57,55 @@ export function isAdminAuthConfigured(): boolean {
 }
 
 /**
- * The owner's login email (ADMIN_EMAIL). Login requires it to match when
- * set — it identifies the owner account so future integrations can key off
- * the same address.
+ * What the deployment actually has configured, for the signed-out login
+ * screen. Booleans and a MASKED email only — never a value, never a hash.
+ *
+ * This exists because "wrong email or password" is indistinguishable from
+ * "the environment variable never got set", and the owner has no server
+ * logs on a phone at the side of a road. It reveals nothing an attacker can
+ * use: that admin auth is configured at all is already visible from the
+ * login form existing.
+ */
+export type AdminAuthDiagnostics = {
+  hasPassword: boolean;
+  hasEmail: boolean;
+  hasSessionSecret: boolean;
+  /** e.g. "g***@o***.com" — enough to recognise, not enough to target. */
+  maskedEmail: string | null;
+};
+
+export function adminAuthDiagnostics(): AdminAuthDiagnostics {
+  const email = envTrimmed("ADMIN_EMAIL");
+  return {
+    hasPassword: Boolean(envTrimmed("ADMIN_PASSWORD")),
+    hasEmail: Boolean(email),
+    hasSessionSecret: Boolean(envTrimmed("ADMIN_SESSION_SECRET")),
+    maskedEmail: email ? maskEmail(email) : null,
+  };
+}
+
+/** "guerlensky@outlook.com" -> "g***@o***.com" */
+function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at < 1) return "***";
+  const local = email.slice(0, at);
+  const domain = email.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  const host = dot > 0 ? domain.slice(0, dot) : domain;
+  const tld = dot > 0 ? domain.slice(dot) : "";
+  return `${local[0]}***@${host[0] ?? "*"}***${tld}`;
+}
+
+/** True when the env recovery login is usable (both halves present). */
+export function isRecoveryLoginConfigured(): boolean {
+  return Boolean(envTrimmed("ADMIN_PASSWORD"));
+}
+
+/**
+ * The owner's login email (ADMIN_EMAIL). Used by the RECOVERY path only;
+ * database sign-ins carry their own emails.
  */
 export async function checkAdminEmail(candidate: string): Promise<boolean> {
-  const { credential } = await readAdminCredential();
-  if (credential) {
-    return candidate.trim().toLowerCase() === credential.email.toLowerCase();
-  }
   const expected = envTrimmed("ADMIN_EMAIL");
   if (!expected) return true; // email not enforced until configured
   return candidate.trim().toLowerCase() === expected.toLowerCase();
@@ -90,57 +140,52 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/**
- * Checks a submitted password.
- *
- * A stored AdminCredential is authoritative: once the owner sets a password
- * in the dashboard, ADMIN_PASSWORD stops being accepted, otherwise the old
- * password would live forever. If there is no row — not migrated, empty
- * table, or Postgres down — we fall back to the env var so the owner can
- * always get in.
- */
-export async function checkAdminPassword(candidate: string): Promise<boolean> {
-  return checkEnvOrOwnerPassword(candidate);
-}
+/** Why a login attempt failed, so the UI can say something useful. */
+export type AdminLoginResult =
+  | { ok: true; via: "database" | "recovery"; email: string }
+  | { ok: false; reason: "bad-credentials" | "not-configured" };
 
 /**
- * The full login check: matches the submitted email to ONE dashboard
- * sign-in (owner or an extra account like contact@) and verifies the
- * password against that account's own hash.
+ * The full login check.
  *
- * Env fallback rules are unchanged from the single-account days: while the
- * OWNER has no database row, ADMIN_EMAIL/ADMIN_PASSWORD still work, so a
- * broken database can never lock the owner out. Once the owner row exists,
- * the env password dies for good.
+ * Order matters, and it is deliberately forgiving:
+ *   1. If a stored sign-in owns this email, its own hash decides.
+ *   2. Otherwise (or if that password was wrong), the env recovery login
+ *      gets a turn: ADMIN_EMAIL + ADMIN_PASSWORD.
+ *
+ * Step 2 running even when step 1 exists is what makes a lockout
+ * impossible: a database row can never shut the owner out of his own site.
  */
 export async function checkAdminLogin(
   email: string,
   password: string
-): Promise<boolean> {
-  const row = await findAdminCredentialByEmail(email);
+): Promise<AdminLoginResult> {
+  if (!isAdminAuthConfigured()) return { ok: false, reason: "not-configured" };
+
+  const clean = email.trim().toLowerCase();
+
+  const row = await findAdminCredentialByEmail(clean);
   if (row) {
-    try {
-      return await verifyPassword(password, row.passwordHash);
-    } catch {
-      return false;
-    }
+    const ok = await verifyPassword(password, row.passwordHash).catch(
+      () => false
+    );
+    if (ok) return { ok: true, via: "database", email: row.email };
   }
 
-  // No row for this email — the env path is only valid while the owner has
-  // no stored credential, and only for the configured ADMIN_EMAIL.
-  const { credential } = await readAdminCredential();
-  if (credential) return false;
+  // Recovery login — always available, database or no database.
   const [emailOk, passwordOk] = await Promise.all([
-    checkAdminEmail(email),
-    checkEnvOrOwnerPassword(password),
+    checkAdminEmail(clean),
+    checkEnvPassword(password),
   ]);
-  return emailOk && passwordOk;
+  if (emailOk && passwordOk) {
+    return { ok: true, via: "recovery", email: clean };
+  }
+
+  return { ok: false, reason: "bad-credentials" };
 }
 
-async function checkEnvOrOwnerPassword(candidate: string): Promise<boolean> {
-  const { credential } = await readAdminCredential();
-  if (credential) return verifyAdminCredentialPassword(candidate);
-
+/** Compares against ADMIN_PASSWORD without leaking length via timing. */
+async function checkEnvPassword(candidate: string): Promise<boolean> {
   const expected = envTrimmed("ADMIN_PASSWORD");
   if (!expected) return false;
   // Hash both sides first so comparison length never depends on the secret.
@@ -181,25 +226,9 @@ export async function hasAdminSession(): Promise<boolean> {
 
 export const ADMIN_SESSION_MAX_AGE_SECONDS = SESSION_MS / 1000;
 
-/**
- * Owner convenience: when the OWNER (email === ADMIN_EMAIL) signs into the
- * customer portal, also grant the admin session so one login opens both
- * /account and /admin. No-ops for everyone else.
- */
-export async function maybeGrantOwnerSession(email: string): Promise<boolean> {
-  const { credential } = await readAdminCredential();
-  const adminEmail = (
-    credential?.email ?? process.env.ADMIN_EMAIL ?? ""
-  )
-    .trim()
-    .toLowerCase();
-  if (
-    !adminEmail ||
-    !isAdminAuthConfigured() ||
-    email.trim().toLowerCase() !== adminEmail
-  ) {
-    return false;
-  }
+/** Writes the admin session cookie. Shared by the login route and the
+ * customer-portal convenience grant below. */
+export async function setAdminSessionCookie(): Promise<void> {
   const token = await createAdminToken();
   const store = await cookies();
   store.set(ADMIN_COOKIE, token, {
@@ -209,5 +238,4 @@ export async function maybeGrantOwnerSession(email: string): Promise<boolean> {
     path: "/",
     maxAge: ADMIN_SESSION_MAX_AGE_SECONDS,
   });
-  return true;
 }

@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2, Lock, ShieldCheck } from "lucide-react";
+import { AlertCircle, Check, Loader2, Lock, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 /**
- * Standalone owner login for the internal admin dashboard. Posts the
- * password to /api/admin/login; a valid password sets the session cookie
- * and the refresh re-renders the dashboard server-side.
+ * Standalone login for the internal admin dashboard. Posts the email and
+ * password to /api/admin/login; a match sets the session cookie and the
+ * refresh re-renders the dashboard server-side.
+ *
+ * Any saved sign-in works here, as does the ADMIN_EMAIL / ADMIN_PASSWORD
+ * recovery login — see lib/admin-session.ts.
  */
-export function AdminLoginForm() {
+export function AdminLoginForm({
+  diagnostics,
+}: {
+  diagnostics?: {
+    hasPassword: boolean;
+    hasEmail: boolean;
+    hasSessionSecret: boolean;
+    maskedEmail: string | null;
+  };
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +61,7 @@ export function AdminLoginForm() {
           PVS Admin
         </h1>
         <p className="mt-1.5 text-center text-sm text-muted-foreground">
-          Owner access only. Enter the admin password to open the dashboard.
+          Staff access only. Sign in with your dashboard email and password.
         </p>
 
         <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -104,9 +116,68 @@ export function AdminLoginForm() {
           </Button>
         </form>
       </div>
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        Sessions last 30 days on this device.
-      </p>
+      <div className="mt-4 space-y-2 text-center text-xs text-muted-foreground">
+        <p>Sessions last 30 days on this device.</p>
+        <details className="mx-auto max-w-xs text-left">
+          <summary className="cursor-pointer text-center hover:text-foreground">
+            Can&apos;t get in?
+          </summary>
+          {diagnostics && (
+            <div className="mt-3 rounded-xl border border-surface-border p-3">
+              <p className="mb-2 font-medium text-foreground">
+                What this deployment has:
+              </p>
+              <ul className="space-y-1">
+                <Check2 ok={diagnostics.hasPassword} label="ADMIN_PASSWORD" />
+                <Check2
+                  ok={diagnostics.hasEmail}
+                  label={
+                    diagnostics.maskedEmail
+                      ? `ADMIN_EMAIL (${diagnostics.maskedEmail})`
+                      : "ADMIN_EMAIL"
+                  }
+                />
+                <Check2
+                  ok={diagnostics.hasSessionSecret}
+                  label="ADMIN_SESSION_SECRET"
+                />
+              </ul>
+              <p className="mt-2 leading-relaxed">
+                {!diagnostics.hasPassword
+                  ? "Set ADMIN_PASSWORD in Vercel and redeploy — sign-in cannot work without it."
+                  : !diagnostics.hasEmail
+                    ? "ADMIN_EMAIL is unset, so the recovery password works with any email address."
+                    : "Sign in with the email shown above and the ADMIN_PASSWORD set in Vercel. If that address is wrong, fix ADMIN_EMAIL in Vercel and redeploy."}
+              </p>
+            </div>
+          )}
+          <ul className="mt-2 list-disc space-y-1 pl-4 leading-relaxed">
+            <li>
+              The recovery email and password from the hosting environment
+              always work, even if a saved password was changed.
+            </li>
+            <li>
+              Or reset any password from a terminal with{" "}
+              <code>npm run admin reset your@email</code>.
+            </li>
+          </ul>
+        </details>
+      </div>
     </div>
+  );
+}
+
+/** One config row in the "Can't get in?" panel. Booleans only, no values. */
+function Check2({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <li className="flex items-center gap-2">
+      {ok ? (
+        <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+      ) : (
+        <X className="h-3.5 w-3.5 shrink-0 text-rose-400" />
+      )}
+      <code className={ok ? "text-emerald-200" : "text-rose-200"}>{label}</code>
+      <span>{ok ? "set" : "MISSING"}</span>
+    </li>
   );
 }

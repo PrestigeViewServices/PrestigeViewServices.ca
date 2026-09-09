@@ -1,51 +1,36 @@
 import { getDb } from "./db";
-import { hashPassword, verifyPassword } from "./customer-auth";
+import { hashPassword } from "./customer-auth";
 
 /**
- * The owner's /admin credential, stored in Postgres so it can be changed from
- * the dashboard instead of only through a Vercel env var.
+ * Dashboard sign-ins ("admins"), stored in Postgres so they can be created
+ * and changed from /admin/account instead of only through env vars.
  *
  * SAFETY MODEL — read this before changing anything here.
  *
  * `/admin` is the owner's front door on a live site, and deploys do NOT run
  * migrations (package.json `postinstall` is `prisma generate` only). So this
- * module treats "no credential row" as a completely normal state, not an
- * error, and every read is wrapped so a missing table or an unreachable
- * database degrades to env-var auth instead of a lockout.
+ * module treats "no rows at all" as a completely normal state, not an error,
+ * and every read is wrapped so a missing table or an unreachable database
+ * degrades to the env-var recovery login instead of a lockout.
  *
  * Precedence, implemented in lib/admin-session.ts:
- *   row present  -> authoritative; ADMIN_PASSWORD stops working, so a changed
- *                   password is genuinely changed and the old one dies.
- *   row absent   -> fall back to ADMIN_PASSWORD / ADMIN_EMAIL, i.e. exactly
- *                   the behaviour that shipped before this table existed.
+ *   email matches a row  -> that row's own password hash decides.
+ *   no row for that email -> ADMIN_EMAIL + ADMIN_PASSWORD (recovery login).
  *
- * ADMIN_PASSWORD should therefore stay set even after a DB password is
- * chosen: it is the break-glass that gets the owner back in if Postgres is
- * down, and `sessionSecret()` still falls back to it.
+ * The recovery login ALWAYS works, even once database rows exist. That is
+ * deliberate: an owner locked out of his own dashboard costs more than the
+ * marginal risk of an env var only he can read. Rotate ADMIN_PASSWORD in
+ * Vercel to revoke it.
+ *
+ * Every account here has the same full dashboard access — there is no admin
+ * hierarchy. Anyone you add can add, remove, and re-password anyone else.
  */
 
+/** Fixed id of the original owner row, kept for backwards compatibility. */
 export const ADMIN_CREDENTIAL_ID = "owner";
 
-/**
- * Additional dashboard sign-ins beyond the owner row. Each is provisioned
- * lazily (first time its email tries to log in, or the accounts page loads)
- * so no manual migration or seed run is needed on the live database.
- *
- * Only the scrypt HASH lives in the repo, never the plaintext. The password
- * can be changed afterward from /admin/account like any other account.
- */
-export const DEFAULT_ADMIN_ACCOUNTS: ReadonlyArray<{
-  id: string;
-  email: string;
-  passwordHash: string;
-}> = [
-  {
-    id: "contact",
-    email: "contact@prestigeviewservices.ca",
-    passwordHash:
-      "scrypt$3b7e32390fe6f257095867bfb06c9796$68279ffb73077f69bcd9a1f0b7d4ef7d4fbd9b8b7b09af445fce5ed57f443305b71e4e681c18569bcf641c85825d8b73dfafa12ec8591bbd749c8d2d73642c8a",
-  },
-];
+export const MIN_ADMIN_PASSWORD_LENGTH = 10;
+const MAX_ADMIN_PASSWORD_LENGTH = 200;
 
 export type AdminCredential = {
   email: string;
@@ -60,84 +45,29 @@ export type CredentialStatus =
   | "ok" // a row exists and is in use
   | "no-db" // DATABASE_URL unset
   | "no-table" // table not migrated yet
-  | "no-row" // migrated, but the owner hasn't set a password here
+  | "no-row" // migrated, but no owner row has been created here
   | "error"; // anything else (connection refused, timeout, ...)
 
-/**
- * Reads the credential row. NEVER throws — callers use the null to fall back
- * to env auth. `status` exists so the UI can explain the situation instead of
- * silently pretending the feature is unavailable.
- */
-export async function readAdminCredential(): Promise<{
-  credential: AdminCredential | null;
-  status: CredentialStatus;
-}> {
-  const db = getDb();
-  if (!db) return { credential: null, status: "no-db" };
-
-  try {
-    const row = await db.adminCredential.findUnique({
-      where: { id: ADMIN_CREDENTIAL_ID },
-      select: { email: true, passwordHash: true, updatedAt: true },
-    });
-    if (!row) return { credential: null, status: "no-row" };
-    return { credential: row, status: "ok" };
-  } catch (err) {
-    // P2021 = table does not exist. Expected on any environment where the
-    // migration hasn't been applied yet, so it is not worth logging loudly.
-    const code = (err as { code?: string })?.code;
-    if (code === "P2021") return { credential: null, status: "no-table" };
-    // eslint-disable-next-line no-console
-    console.error("[PVS admin-credentials] read failed", err);
-    return { credential: null, status: "error" };
-  }
+/** Maps a Prisma failure to the status the UI explains to the owner. */
+function statusForError(err: unknown): CredentialStatus {
+  // P2021 = table does not exist. Expected on any environment where the
+  // migration hasn't been applied yet, so it is not worth logging loudly.
+  const code = (err as { code?: string })?.code;
+  if (code === "P2021") return "no-table";
+  // eslint-disable-next-line no-console
+  console.error("[PVS admin-credentials] database call failed", err);
+  return "error";
 }
 
-/**
- * Ensures every DEFAULT_ADMIN_ACCOUNTS row exists. Safe to call often —
- * it only writes when a row is missing, and it never throws (an unreachable
- * database simply means the defaults wait for the next call).
- */
-export async function ensureDefaultAdminAccounts(): Promise<void> {
-  const db = getDb();
-  if (!db) return;
-  for (const acct of DEFAULT_ADMIN_ACCOUNTS) {
-    try {
-      const existing = await db.adminCredential.findUnique({
-        where: { id: acct.id },
-        select: { id: true },
-      });
-      if (!existing) {
-        await db.adminCredential.create({
-          data: {
-            id: acct.id,
-            email: acct.email.toLowerCase(),
-            passwordHash: acct.passwordHash,
-          },
-        });
-      }
-    } catch {
-      // Missing table / connection trouble — env auth still works, and the
-      // account will be provisioned on a later attempt.
-    }
-  }
-}
-
-/**
- * Finds the credential row whose email matches, provisioning the default
- * accounts first so contact@ works on its very first login. NEVER throws.
- */
+/** Finds the sign-in whose email matches, case-insensitively. NEVER throws. */
 export async function findAdminCredentialByEmail(
   email: string
 ): Promise<AdminCredentialRow | null> {
   const db = getDb();
   if (!db) return null;
-  const clean = email.trim().toLowerCase();
+  const clean = normalizeEmail(email);
   if (!clean) return null;
   try {
-    if (DEFAULT_ADMIN_ACCOUNTS.some((a) => a.email === clean)) {
-      await ensureDefaultAdminAccounts();
-    }
     const row = await db.adminCredential.findFirst({
       where: { email: { equals: clean, mode: "insensitive" } },
       select: { id: true, email: true, passwordHash: true, updatedAt: true },
@@ -148,48 +78,92 @@ export async function findAdminCredentialByEmail(
   }
 }
 
-/** Every dashboard sign-in on record, owner first. NEVER throws. */
-export async function listAdminCredentials(): Promise<AdminCredentialRow[]> {
+/** Every dashboard sign-in on record, owner first then A-Z. NEVER throws. */
+export async function listAdminCredentials(): Promise<{
+  accounts: AdminCredentialRow[];
+  status: CredentialStatus;
+}> {
   const db = getDb();
-  if (!db) return [];
+  if (!db) return { accounts: [], status: "no-db" };
   try {
-    await ensureDefaultAdminAccounts();
     const rows = await db.adminCredential.findMany({
       select: { id: true, email: true, passwordHash: true, updatedAt: true },
     });
-    return rows.sort((a, b) =>
-      a.id === ADMIN_CREDENTIAL_ID ? -1 : b.id === ADMIN_CREDENTIAL_ID ? 1 : 0
+    const accounts = rows.sort((a, b) => {
+      if (a.id === ADMIN_CREDENTIAL_ID) return -1;
+      if (b.id === ADMIN_CREDENTIAL_ID) return 1;
+      return a.email.localeCompare(b.email);
+    });
+    return { accounts, status: accounts.length ? "ok" : "no-row" };
+  } catch (err) {
+    return { accounts: [], status: statusForError(err) };
+  }
+}
+
+// ---- Writes ----------------------------------------------------------------
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/** Throws a readable message when the email is unusable. */
+function assertValidEmail(email: string): string {
+  const clean = normalizeEmail(email);
+  if (!clean) throw new Error("Enter an email address");
+  // Deliberately loose: one @, something either side, no spaces.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+    throw new Error(`"${email.trim()}" is not a valid email address`);
+  }
+  return clean;
+}
+
+/** Throws a readable message when the password is unusable. */
+function assertValidPassword(password: string): void {
+  if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
+    throw new Error(
+      `Password must be at least ${MIN_ADMIN_PASSWORD_LENGTH} characters`
     );
-  } catch {
-    return [];
+  }
+  if (password.length > MAX_ADMIN_PASSWORD_LENGTH) {
+    throw new Error("Password is too long");
   }
 }
 
-/** True when a DB credential is in force (env password no longer accepted). */
-export async function adminCredentialInUse(): Promise<boolean> {
-  const { status } = await readAdminCredential();
-  return status === "ok";
+/** Turns a Prisma failure into something the owner can act on. */
+function writeError(err: unknown): Error {
+  if (err instanceof Error && !(err as { code?: string }).code) return err;
+  const code = (err as { code?: string })?.code;
+  if (code === "P2021") {
+    return new Error(
+      "The admin sign-in table does not exist in this database yet. Run `npm run db:deploy`, then try again."
+    );
+  }
+  // eslint-disable-next-line no-console
+  console.error("[PVS admin-credentials] write failed", err);
+  return new Error(
+    "Could not reach the database. Check DATABASE_URL and try again."
+  );
 }
 
-/** Verifies a candidate password against the stored hash. */
-export async function verifyAdminCredentialPassword(
-  candidate: string
-): Promise<boolean> {
-  const { credential } = await readAdminCredential();
-  if (!credential) return false;
-  try {
-    return await verifyPassword(candidate, credential.passwordHash);
-  } catch {
-    return false;
+/** Rejects an email already used by a DIFFERENT sign-in. */
+async function assertEmailFree(email: string, exceptId: string | null) {
+  const db = getDb();
+  if (!db) return;
+  const clash = await db.adminCredential.findFirst({
+    where: {
+      email: { equals: email, mode: "insensitive" },
+      ...(exceptId ? { id: { not: exceptId } } : {}),
+    },
+    select: { id: true },
+  });
+  if (clash) {
+    throw new Error(`${email} is already a dashboard sign-in`);
   }
 }
-
-export const MIN_ADMIN_PASSWORD_LENGTH = 10;
 
 /**
- * Creates or replaces the credential row. Throws on validation failure so the
- * caller can surface the message; the caller is responsible for having
- * already verified the CURRENT password.
+ * Creates or replaces one sign-in by id. Throws on validation failure so the
+ * caller can surface the message. Callers are responsible for authorization.
  */
 export async function setAdminCredential(
   email: string,
@@ -197,37 +171,119 @@ export async function setAdminCredential(
   accountId: string = ADMIN_CREDENTIAL_ID
 ): Promise<void> {
   const db = getDb();
-  if (!db) throw new Error("Database is not configured");
+  if (!db) throw new Error("Database is not configured (DATABASE_URL is unset)");
 
-  const cleanEmail = email.trim().toLowerCase();
-  if (!cleanEmail || !cleanEmail.includes("@")) {
-    throw new Error("Enter a valid email address");
-  }
-  if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
-    throw new Error(
-      `Password must be at least ${MIN_ADMIN_PASSWORD_LENGTH} characters`
-    );
-  }
-  if (password.length > 200) {
-    throw new Error("Password is too long");
-  }
+  const cleanEmail = assertValidEmail(email);
+  assertValidPassword(password);
 
-  // Two sign-ins sharing one email would make login ambiguous.
-  const clash = await db.adminCredential.findFirst({
-    where: {
-      email: { equals: cleanEmail, mode: "insensitive" },
-      id: { not: accountId },
-    },
-    select: { id: true },
-  });
-  if (clash) {
-    throw new Error("Another dashboard sign-in already uses that email");
+  try {
+    await assertEmailFree(cleanEmail, accountId);
+    const passwordHash = await hashPassword(password);
+    await db.adminCredential.upsert({
+      where: { id: accountId },
+      create: { id: accountId, email: cleanEmail, passwordHash },
+      update: { email: cleanEmail, passwordHash },
+    });
+  } catch (err) {
+    throw writeError(err);
   }
+}
 
-  const passwordHash = await hashPassword(password);
-  await db.adminCredential.upsert({
-    where: { id: accountId },
-    create: { id: accountId, email: cleanEmail, passwordHash },
-    update: { email: cleanEmail, passwordHash },
-  });
+/**
+ * Adds a NEW dashboard sign-in. The very first account created becomes the
+ * owner row so that a fresh database ends up with the canonical `owner` id
+ * rather than a random one.
+ */
+export async function createAdminAccount(
+  email: string,
+  password: string
+): Promise<AdminCredentialRow> {
+  const db = getDb();
+  if (!db) throw new Error("Database is not configured (DATABASE_URL is unset)");
+
+  const cleanEmail = assertValidEmail(email);
+  assertValidPassword(password);
+
+  try {
+    await assertEmailFree(cleanEmail, null);
+    const ownerExists = await db.adminCredential.findUnique({
+      where: { id: ADMIN_CREDENTIAL_ID },
+      select: { id: true },
+    });
+    const id = ownerExists ? `adm_${randomId()}` : ADMIN_CREDENTIAL_ID;
+    const passwordHash = await hashPassword(password);
+    return await db.adminCredential.create({
+      data: { id, email: cleanEmail, passwordHash },
+      select: { id: true, email: true, passwordHash: true, updatedAt: true },
+    });
+  } catch (err) {
+    throw writeError(err);
+  }
+}
+
+/** Sets one account's password without needing the old one. */
+export async function setAdminAccountPassword(
+  accountId: string,
+  password: string
+): Promise<void> {
+  const db = getDb();
+  if (!db) throw new Error("Database is not configured (DATABASE_URL is unset)");
+  assertValidPassword(password);
+  try {
+    const passwordHash = await hashPassword(password);
+    await db.adminCredential.update({
+      where: { id: accountId },
+      data: { passwordHash },
+    });
+  } catch (err) {
+    throw writeError(err);
+  }
+}
+
+/** Changes one account's login email. */
+export async function setAdminAccountEmail(
+  accountId: string,
+  email: string
+): Promise<void> {
+  const db = getDb();
+  if (!db) throw new Error("Database is not configured (DATABASE_URL is unset)");
+  const cleanEmail = assertValidEmail(email);
+  try {
+    await assertEmailFree(cleanEmail, accountId);
+    await db.adminCredential.update({
+      where: { id: accountId },
+      data: { email: cleanEmail },
+    });
+  } catch (err) {
+    throw writeError(err);
+  }
+}
+
+/**
+ * Removes a sign-in. Refuses to delete the LAST one — an empty table would
+ * leave only the env recovery login, which is a support call waiting to
+ * happen.
+ */
+export async function deleteAdminAccount(accountId: string): Promise<void> {
+  const db = getDb();
+  if (!db) throw new Error("Database is not configured (DATABASE_URL is unset)");
+  try {
+    const total = await db.adminCredential.count();
+    if (total <= 1) {
+      throw new Error(
+        "This is the last dashboard sign-in. Add another one before removing it."
+      );
+    }
+    await db.adminCredential.delete({ where: { id: accountId } });
+  } catch (err) {
+    throw writeError(err);
+  }
+}
+
+/** URL-safe random suffix for generated account ids. */
+function randomId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(9));
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
