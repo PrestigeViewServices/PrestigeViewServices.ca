@@ -9,6 +9,7 @@ import { Footer } from "@/components/footer";
 import { OfferModal } from "@/components/offer-modal";
 import { StickyCta } from "@/components/sticky-cta";
 import { ScrollProgress } from "@/components/scroll-progress";
+import { SeasonAmbience } from "@/components/season-ambience";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { siteConfig } from "@/lib/site";
@@ -166,6 +167,8 @@ export default function RootLayout({
           Skip to content
         </a>
         <ScrollProgress />
+        {/* Fall & winter drift behind every public page (skips /admin) */}
+        <SeasonAmbience />
         <Header />
         <main id="main" className="flex-1">
           {children}

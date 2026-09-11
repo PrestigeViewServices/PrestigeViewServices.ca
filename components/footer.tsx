@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Facebook, Instagram } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Facebook,
+  Instagram,
+  Leaf,
+  Snowflake,
+} from "lucide-react";
 import { BrandLockup } from "@/components/brand-lockup";
 import { ReviewCta } from "@/components/review-cta";
 import { services } from "@/lib/content/services";
@@ -25,6 +34,7 @@ export function Footer() {
 
   return (
     <footer className="mt-12 border-t border-surface-border bg-background/60">
+      <div className="season-line" aria-hidden />
       <div className="container-max py-14">
         <div className="grid gap-10 md:grid-cols-12">
           <div className="md:col-span-4">
@@ -32,6 +42,16 @@ export function Footer() {
             <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
               {siteConfig.tagline}. Proudly serving {siteConfig.serviceArea}.
             </p>
+            <Link
+              href="/fall-winter"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-gradient-to-r from-amber-400/10 to-sky-400/10 px-3.5 py-1.5 text-xs font-semibold text-foreground/90 transition-colors hover:border-amber-400/50"
+            >
+              <Leaf className="h-3.5 w-3.5 text-amber-300" />
+              Fall cleanups now
+              <span className="text-muted-foreground">·</span>
+              <Snowflake className="h-3.5 w-3.5 text-sky-300" />
+              Snow passes for winter
+            </Link>
             <div className="mt-5 flex items-center gap-3">
               <a
                 href={siteConfig.social.facebook}

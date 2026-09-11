@@ -6,8 +6,8 @@ const SETUP_GUIDE_URL =
   "https://github.com/PrestigeViewServices/PrestigeViewServices.ca/blob/main/SETUP.md";
 
 /**
- * Rendered on /admin and /portal pages when Clerk or Postgres env vars
- * aren't set. Always points to SETUP.md as the foolproof step-by-step,
+ * Rendered on /admin and /portal pages when the Postgres env var isn't
+ * set. Always points to SETUP.md as the foolproof step-by-step,
  * and highlights exactly which env vars are missing so a non-developer
  * knows what to fix.
  */
@@ -18,13 +18,13 @@ export function NotConfigured({
   missing = [],
   docHref,
 }: {
-  service: "Clerk" | "Database";
+  service: "Database";
   reason: string;
   /** All env vars this surface needs. */
   envVars: string[];
   /** Subset of `envVars` that are NOT set. If omitted, all envVars are treated as missing. */
   missing?: string[];
-  /** Optional provider-specific doc link (e.g. Clerk quickstart). SETUP.md is shown regardless. */
+  /** Optional provider-specific doc link (e.g. Neon docs). SETUP.md is shown regardless. */
   docHref?: string;
 }) {
   const missingSet = new Set(missing.length > 0 ? missing : envVars);

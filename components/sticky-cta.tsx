@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
 const SENTINEL_ID = "sticky-cta-sentinel";
@@ -19,8 +20,14 @@ const SENTINEL_ID = "sticky-cta-sentinel";
  */
 export function StickyCta() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname() ?? "/";
+  // The dashboard has no hero sentinel, so this bar showed instantly and
+  // sat over the bottom of every admin page on a phone. Staff never need
+  // a "get a quote" button.
+  const isAdmin = pathname.startsWith("/admin");
 
   useEffect(() => {
+    if (isAdmin) return;
     const sentinel = document.getElementById(SENTINEL_ID);
     if (!sentinel) {
       setVisible(true);
@@ -36,7 +43,9 @@ export function StickyCta() {
     );
     obs.observe(sentinel);
     return () => obs.disconnect();
-  }, []);
+  }, [isAdmin]);
+
+  if (isAdmin) return null;
 
   return (
     <div

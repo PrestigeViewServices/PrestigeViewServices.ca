@@ -113,17 +113,23 @@ const groups: NavGroup[] = [
   },
 ];
 
-export function AdminSidebar({ unread = 0 }: { unread?: number }) {
-  const pathname = usePathname();
-
-  // Longest matching href wins, so /admin/club/tickets lights up "Club
-  // Requests" and not also "Members" (/admin/club).
-  const activeHref = groups
+/**
+ * The nav item that owns `pathname`. Longest matching href wins, so
+ * /admin/club/tickets lights up "Club Requests" and not also "Members"
+ * (/admin/club). Shared with the mobile bar so both agree on "where am I".
+ */
+export function activeAdminItem(pathname: string): NavItem | undefined {
+  return groups
     .flatMap((g) => g.items)
     .filter((i) =>
       i.href === "/admin" ? pathname === "/admin" : pathname.startsWith(i.href)
     )
-    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+    .sort((a, b) => b.href.length - a.href.length)[0];
+}
+
+export function AdminSidebar({ unread = 0 }: { unread?: number }) {
+  const pathname = usePathname();
+  const activeHref = activeAdminItem(pathname)?.href;
 
   return (
     <nav className="space-y-5">

@@ -59,9 +59,6 @@ const PLACEHOLDER_PATTERNS = [
   /change[\-_ ]?me/i,
   /your[\-_ ]?(api|key|email|host|password)/i,
   /paste/i,
-  /^pk_test_REPLACE/i,
-  /^sk_test_REPLACE/i,
-  /^whsec_REPLACE/i,
 ];
 
 function isPlaceholder(v) {
@@ -70,35 +67,33 @@ function isPlaceholder(v) {
 
 const REQUIRED = [
   {
-    key: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    expectedPrefix: ["pk_test_", "pk_live_"],
-    where: "Clerk Dashboard → API Keys → Publishable key",
-  },
-  {
-    key: "CLERK_SECRET_KEY",
-    expectedPrefix: ["sk_test_", "sk_live_"],
-    where: "Clerk Dashboard → API Keys → Secret key",
-  },
-  {
     key: "DATABASE_URL",
     expectedPrefix: ["postgresql://", "postgres://"],
     where: "Neon: console.neon.tech → Connect → Connection string (Pooled OFF)",
   },
   {
-    key: "ULTIMATE_ADMIN_EMAILS",
-    where:
-      "Comma-separated email(s) you'll sign in with — get full ultimate_admin",
+    key: "ADMIN_EMAIL",
+    where: "The email you sign in to /admin with (recovery login)",
+  },
+  {
+    key: "ADMIN_PASSWORD",
+    where: "The password for /admin — at least 10 characters (recovery login)",
   },
 ];
 
 const OPTIONAL = [
   {
-    key: "CLERK_WEBHOOK_SECRET",
-    expectedPrefix: ["whsec_"],
-    where: "Clerk → Webhooks → endpoint → Signing Secret (needed for user sync)",
+    key: "ADMIN_SESSION_SECRET",
+    where: "Long random string that signs the admin cookie (falls back to ADMIN_PASSWORD)",
   },
-  { key: "APPLICATION_NOTIFICATION_EMAIL" },
-  { key: "SUPPORT_NOTIFICATION_EMAIL" },
+  {
+    key: "RESEND_API_KEY",
+    expectedPrefix: ["re_"],
+    where: "resend.com → API Keys. Without it, no email alerts go out (dashboard still records everything)",
+  },
+  { key: "LEAD_FROM_EMAIL" },
+  { key: "OWNER_NOTIFY_EMAIL" },
+  { key: "CLOUDINARY_CLOUD_NAME", where: "Needed for photo uploads in /admin/site/photos" },
   { key: "NEXT_PUBLIC_GA_MEASUREMENT_ID" },
 ];
 

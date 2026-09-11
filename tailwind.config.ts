@@ -67,8 +67,11 @@ const config: Config = {
           "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
         "gradient-snowland":
           "linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%)",
+        // Fall & winter: amber leaf → ember → frost blue.
+        "gradient-season":
+          "linear-gradient(135deg, #F59E0B 0%, #FB923C 38%, #38BDF8 100%)",
         "hero-radial":
-          "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.18), transparent 60%)",
+          "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.16), transparent 60%), radial-gradient(ellipse 50% 50% at 0% 100%, rgba(245,158,11,0.10), transparent 60%), radial-gradient(ellipse 50% 50% at 100% 100%, rgba(56,189,248,0.10), transparent 60%)",
       },
       borderRadius: {
         lg: "16px",
@@ -85,6 +88,8 @@ const config: Config = {
           "0 0 0 1px rgba(34,197,94,0.4), 0 8px 32px -8px rgba(34,197,94,0.35)",
         "glow-snow":
           "0 0 0 1px rgba(56,189,248,0.4), 0 8px 32px -8px rgba(56,189,248,0.35)",
+        "glow-season":
+          "0 0 0 1px rgba(245,158,11,0.35), 0 8px 32px -8px rgba(56,189,248,0.4)",
         card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -12px rgba(0,0,0,0.6)",
       },
       keyframes: {

@@ -1,6 +1,16 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { Mail, Phone, MapPin, Inbox, BadgePercent, Gift } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Inbox,
+  BadgePercent,
+  Gift,
+  Download,
+  DatabaseBackup,
+  Upload,
+} from "lucide-react";
 import type { LeadStatus } from "@prisma/client";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
@@ -120,13 +130,42 @@ export default async function LeadsPage(props: {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Leads Inbox</h1>
-        <p className="mt-1.5 text-muted-foreground">
-          {items.length} shown of {totalCount} total · {newCount} waiting for a
-          first call · {week} new this week
-          {winRate !== null ? ` · ${winRate}% win rate all-time` : ""}
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Leads Inbox</h1>
+          <p className="mt-1.5 text-muted-foreground">
+            {items.length} shown of {totalCount} total · {newCount} waiting for a
+            first call · {week} new this week
+            {winRate !== null ? ` · ${winRate}% win rate all-time` : ""}
+          </p>
+        </div>
+        {/* Save + transfer: every lead can leave (CSV / full JSON backup)
+            and come in (Aurora exports, spreadsheets) without a developer. */}
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/admin/leads/export?format=csv"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+            title="Download every lead as a spreadsheet"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </a>
+          <a
+            href="/api/admin/leads/export?format=json"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+            title="Full backup of leads, reservations, support tickets and applications"
+          >
+            <DatabaseBackup className="h-4 w-4" />
+            Backup (JSON)
+          </a>
+          <Link
+            href="/admin/leads/import"
+            className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+          >
+            <Upload className="h-4 w-4" />
+            Import leads
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 text-sm items-center">
