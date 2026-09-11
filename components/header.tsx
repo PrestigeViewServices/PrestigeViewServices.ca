@@ -33,8 +33,23 @@ import { formatPhone } from "@/lib/utils";
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [
-  { href: "/fall-winter", label: "Fall & Winter", icon: Leaf },
-  { href: "/winter-packages", label: "Winter Packages", icon: Snowflake },
+  {
+    href: "/fall-winter",
+    label: "Fall & Winter",
+    icon: Leaf,
+    // Amber = fall, frost = winter. The two colours are the season theme.
+    cls: "text-amber-300 hover:bg-amber-400/10",
+    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
+    tileIcon: "bg-amber-400/20 text-amber-300",
+  },
+  {
+    href: "/winter-packages",
+    label: "Winter Packages",
+    icon: Snowflake,
+    cls: "text-sky-300 hover:bg-sky-400/10",
+    tile: "border-sky-400/30 bg-sky-400/10 hover:bg-sky-400/20",
+    tileIcon: "bg-sky-400/20 text-sky-300",
+  },
 ] as const;
 
 const exploreLinks = [
@@ -62,6 +77,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-surface-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      <div className="season-line" aria-hidden />
       <div className="container-max flex h-16 items-center justify-between gap-4">
         <BrandLockup />
 
@@ -80,7 +96,7 @@ export function Header() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${l.cls}`}
               >
                 <Icon className="h-4 w-4" />
                 {l.label}
@@ -164,9 +180,11 @@ export function Header() {
                       key={l.href}
                       href={l.href}
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/10 px-3 py-3 hover:bg-primary/20 transition-colors"
+                      className={`flex items-center gap-3 rounded-lg border px-3 py-3 transition-colors ${l.tile}`}
                     >
-                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/20 text-primary shrink-0">
+                      <span
+                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${l.tileIcon}`}
+                      >
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="font-semibold">{l.label}</span>

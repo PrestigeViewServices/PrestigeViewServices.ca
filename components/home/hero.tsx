@@ -3,7 +3,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { ArrowRight, Phone, ShieldCheck, MapPin, Star, Medal } from "lucide-react";
+import {
+  ArrowRight,
+  Phone,
+  ShieldCheck,
+  MapPin,
+  Star,
+  Medal,
+  Leaf,
+  Snowflake,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
 import { DEFAULT_HERO, type HeroContent } from "@/lib/site-content";
@@ -98,14 +107,21 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           }
           className="max-w-3xl text-center lg:text-left mx-auto lg:mx-0"
         >
-          <p className="eyebrow text-sky-300 mb-5 justify-center lg:justify-start">
+          <p className="eyebrow mb-5 justify-center text-sky-200 lg:justify-start">
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-300">
+              <Leaf className="h-3 w-3" />
+              Fall
+              <span className="text-amber-200/60">·</span>
+              <Snowflake className="h-3 w-3 text-sky-300" />
+              <span className="text-sky-300">Winter</span>
+            </span>
             <MapPin className="h-3.5 w-3.5" />
             Serving {siteConfig.serviceArea}
           </p>
 
           <h1 className="heading-display text-balance text-white">
             {content.headlineTop}{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
+            <span className="text-gradient-season">
               {content.headlineAccent}
             </span>
           </h1>

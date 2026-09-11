@@ -3,12 +3,14 @@
 Marketing + lead-gen site for **Prestige View Services (PVS)** — residential
 property care across Petawawa, Pembroke, and the Ottawa Valley.
 
-**Phase 1** now includes a role-gated admin portal (Clerk + Postgres),
-employee portal stub, customer support page, careers funnel with applications
-DB, and dual analytics (Vercel + Google Analytics 4).
+Includes the owner's **admin dashboard** at `/admin` (leads, winter
+reservations, support, hiring, Prestige Club, site content, notifications),
+the **Prestige Club** customer portal at `/account`, the careers funnel, and
+dual analytics (Vercel + Google Analytics 4). Auth is fully in-house — no
+third-party login service.
 
-Built on **Next.js 14 (App Router)**, **TypeScript**, **Tailwind**,
-**shadcn/ui**, **Clerk**, **Prisma + Postgres**, and **Framer Motion**.
+Built on **Next.js 15 (App Router)**, **TypeScript**, **Tailwind**,
+**shadcn/ui**, **Prisma + Postgres**, and **Framer Motion**.
 
 ---
 
@@ -17,16 +19,17 @@ Built on **Next.js 14 (App Router)**, **TypeScript**, **Tailwind**,
 ```bash
 npm install                 # also runs `prisma generate` via postinstall
 cp .env.example .env.local  # fill in values (see below)
-npm run db:migrate          # apply migrations once DATABASE_URL is set
-npm run db:seed             # optional — sample applications + users
+npm run db:deploy           # apply migrations once DATABASE_URL is set
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>, and <http://localhost:3000/admin> for the
+dashboard (sign in with `ADMIN_EMAIL` + `ADMIN_PASSWORD`).
 
-> The marketing pages boot cleanly even without Clerk / Postgres / GA4
-> configured — protected surfaces show a "Service not configured" notice
-> instead of crashing. Fill in env vars and refresh to light them up.
+> The marketing pages boot cleanly even without Postgres / GA4 configured —
+> protected surfaces show a "not configured" notice instead of crashing.
+> Fill in env vars and refresh to light them up. **SETUP.md** is the
+> click-by-click guide.
 
 ### Scripts
 
@@ -38,9 +41,14 @@ Open <http://localhost:3000>.
 | `npm run typecheck`  | TypeScript check, no emit                        |
 | `npm run lint`       | ESLint (Next.js config)                          |
 | `npm run db:generate`| Regenerate Prisma client                         |
-| `npm run db:migrate` | Apply Prisma migrations (dev)                    |
+| `npm run db:migrate` | Create + apply a new Prisma migration (dev)      |
+| `npm run db:deploy`  | Apply pending migrations (prod-safe, no prompts) |
 | `npm run db:push`    | Push schema without a migration (prototyping)    |
-| `npm run db:seed`    | Seed sample admin / employee / applications      |
+| `npm run db:seed`    | Seed sample applications / support requests      |
+| `npm run admin`      | List / add / reset / remove dashboard sign-ins   |
+| `npm run leads`      | Back up / restore every lead + intake table (JSON) |
+| `npm run setup:check`| Verify `.env.local` + database connectivity      |
+| `npm run vercel-build`| What Vercel runs: migrate deploy → next build   |
 
 ---
 
@@ -48,19 +56,23 @@ Open <http://localhost:3000>.
 
 | Var                                | Required for           | Purpose                                                                |
 | ---------------------------------- | ---------------------- | ---------------------------------------------------------------------- |
+| `DATABASE_URL`                     | **Admin dashboard**    | Postgres connection string (Neon or Supabase, direct/non-pooled)       |
+| `ADMIN_EMAIL`                      | **Admin dashboard**    | Recovery login email for `/admin`                                      |
+| `ADMIN_PASSWORD`                   | **Admin dashboard**    | Recovery login password for `/admin` (10+ chars). Always works.        |
+| `ADMIN_SESSION_SECRET`             | Recommended            | Signs the admin cookie (falls back to `ADMIN_PASSWORD`)                |
+| `CUSTOMER_SESSION_SECRET`          | Recommended            | Signs Prestige Club member cookies (falls back to the admin secret)    |
 | `NEXT_PUBLIC_SITE_URL`             | SEO / sitemap          | Canonical site origin                                                  |
 | `NEXT_PUBLIC_BUSINESS_PHONE`       | Header / contact / SEO | E.164 phone, e.g. `+1-613-334-5858`                                    |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`| Auth                   | Clerk publishable key                                                  |
-| `CLERK_SECRET_KEY`                 | Auth                   | Clerk secret key                                                       |
-| `CLERK_WEBHOOK_SECRET`             | User sync              | Svix signing secret from the Clerk webhook endpoint                    |
-| `ULTIMATE_ADMIN_EMAILS`            | Auth                   | Comma-separated emails that auto-receive the `ultimate_admin` role     |
-| `DATABASE_URL`                     | DB-backed surfaces     | Postgres connection string (Neon or Supabase)                          |
-| `APPLICATION_NOTIFICATION_EMAIL`   | Hiring                 | Where new careers applications get emailed                             |
-| `SUPPORT_NOTIFICATION_EMAIL`       | Support                | Where new /support submissions get emailed                             |
+| `RESEND_API_KEY`                   | Owner alerts           | Email every intake to the owner (`lib/notify.ts`)                      |
+| `LEAD_FROM_EMAIL`                  | Owner alerts           | Verified sender, e.g. `PVS Website <alerts@prestigeviewservices.ca>`   |
+| `OWNER_NOTIFY_EMAIL`               | Owner alerts           | Comma-separated recipients                                             |
+| `TWILIO_*` / `OWNER_SMS_GATEWAY`   | Owner alerts (SMS)     | Text alerts via Twilio or a carrier email-to-text gateway              |
+| `CLOUDINARY_*`                     | Photo uploads          | `/admin/site/photos`                                                   |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID`    | Analytics              | GA4 measurement ID (`G-XXXXXXX`)                                       |
+| `JOBBER_*`, `CRON_SECRET`          | Prestige Club sync     | Read-only Jobber sync for service history                              |
 
 Vercel Analytics turns on automatically when deployed to Vercel — no key
-required.
+required. `.env.example` documents every variable with where to get it.
 
 ---
 
@@ -69,89 +81,68 @@ required.
 | Path                          | Purpose                                                        |
 | ----------------------------- | -------------------------------------------------------------- |
 | `/`                           | Home (marketing)                                               |
-| `/divisions/{slug}`           | Division pages (LawnPros / ClearView / SnowLand)               |
-| `/services`                   | All services, tabbed by division                               |
-| `/reviews`                    | All customer reviews                                           |
-| `/quote`                      | Aurora Suite lead form (primary CTA)                           |
-| `/careers`                    | Recruiting funnel                                              |
-| `/careers/{slug}`             | Role detail + application form                                 |
-| `/contact`                    | Contact info + Aurora lead form                                |
+| `/fall-winter`                | Seasonal hub: fall cleanups + gutters now, snow pass for later |
+| `/winter-packages`            | Snow pass conversion page + reservation form                   |
+| `/services`, `/services/{slug}` | All services / service detail (+ `/{area}` city variants)    |
+| `/service-areas`              | Cities served                                                  |
+| `/quote`, `/contact`          | Aurora Suite lead form (primary CTA)                           |
+| `/reviews`, `/our-work`       | Social proof                                                   |
+| `/careers`, `/careers/{slug}` | Recruiting funnel + application                                |
 | `/support`                    | Customer support form (existing customers)                     |
-| `/about`                      | Trust / about page                                             |
-| `/sign-in`, `/sign-up`        | Clerk hosted UI (Google, Apple, email, phone)                  |
-| `/admin`                      | Role-gated dashboard (counts, by-status, recent activity)      |
-| `/admin/applications`         | Hiring applications + status updates (`New / Contacted / Hired / Rejected`) |
-| `/admin/support`              | Support requests + status updates                              |
-| `/admin/loyalty`              | Phase 2 placeholder — Stripe subscriptions / points TBD        |
-| `/admin/users`                | Role management (ultimate_admin writes; admin read-only)       |
-| `/admin/site`                 | **ultimate_admin only** — Site Modifications hub               |
-| `/admin/site/photos`          | **super_admin + ultimate_admin** — gallery photo manager       |
-| `/admin/reviews`              | Admin family — QR code + SMS/email templates for review asks   |
-| `/portal`                     | Employee portal stub (hours / commission placeholders)         |
-| `/account`                    | **customer only** — profile + their own support requests       |
-| `/post-sign-in`               | Internal role-router after Clerk sign-in                       |
-| `/api/apply`                  | POST → validate + write Application + email notify             |
-| `/api/support`                | POST → validate + write SupportRequest + email notify          |
-| `/api/clerk/webhook`          | Clerk → Postgres user sync (Svix-verified)                     |
+| `/account`                    | Prestige Club member portal (in-house login)                   |
+| `/refer`, `/r/{code}`         | Referral program + landing                                     |
+| `/admin`                      | **Command Center** — leads, open requests, traffic, activity   |
+| `/admin/leads`, `/admin/pipeline` | Leads inbox + job pipeline                                 |
+| `/admin/winter-reservations`  | Snow pass reservations                                         |
+| `/admin/support`, `/admin/applications` | Tickets + hiring                                     |
+| `/admin/club/*`               | Members, approvals, referrals, giveaways, metrics, settings    |
+| `/admin/notifications`        | In-app feed of everything the site captured                    |
+| `/admin/marketing`            | Marketing & SEO hub                                            |
+| `/admin/site`, `/admin/site/content`, `/admin/site/photos` | Owner-editable site content + photos |
+| `/admin/account`              | Dashboard sign-ins (add / reset / remove admins)               |
+| `/api/admin/login`            | POST → sets the signed admin cookie; DELETE → sign out         |
 | `/sitemap.xml`, `/robots.txt` | Auto-generated                                                 |
 
 ---
 
-## Role-gated portal (Phase 1)
+## Admin access
 
-### Roles
+- `/admin` is guarded by `app/admin/layout.tsx` → `lib/admin-session.ts`.
+  Signed-out visitors see the login form on any `/admin` URL.
+- Two ways in, both ours: a sign-in stored in Postgres (`AdminCredential`,
+  managed at `/admin/account` or `npm run admin`), or the **recovery login**
+  `ADMIN_EMAIL` + `ADMIN_PASSWORD` from the environment, which always works.
+- Every admin has the same full access. The signed session is an HMAC'd
+  cookie (30 days) signed with `ADMIN_SESSION_SECRET`.
+- Customer (`/account`) sessions are a separate system (`lib/customer-auth.ts`)
+  and can never grant admin access.
 
-| Role             | Can access                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------- |
-| `ultimate_admin` | Everything. Only role allowed to change roles, hit `/admin/site`, or touch billing surfaces |
-| `super_admin`    | **`/admin` overview + `/admin/applications` + `/admin/site/photos` only.** No role changes, no billing |
-| `admin`          | `/admin`, applications, support, loyalty. `/admin/users` read-only. No photos, no /site     |
-| `employee`       | `/portal` only                                                                              |
-| `customer`       | `/account` only                                                                             |
+`/sign-in`, `/sign-up`, `/post-sign-in` are legacy redirects kept so old
+links still land somewhere sensible.
 
-`ultimate_admin` is assigned by the env allowlist (`ULTIMATE_ADMIN_EMAILS`)
-on first sign-in. `super_admin` is granted by an `ultimate_admin` via
-`/admin/users`. The UI never lets a non-ultimate-admin assign these roles.
+### Saving and moving leads
 
-### Sign-in routing
+Leads reach the database two ways: the native form (`/request-service` →
+`/api/leads`) and referral flows. The **Get Quote** form on `/quote` and
+`/contact` is an Aurora Suite iframe, so those leads live in Aurora until
+they are imported.
 
-Clerk's "after sign-in" / "after sign-up" URLs both point at
-`/post-sign-in`. That page reads the user's role and server-side
-`redirect()`s them to the correct portal:
-
-- `customer` → `/account`
-- `employee` → `/portal`
-- `admin` / `super_admin` / `ultimate_admin` → `/admin`
-
-Users never pick which portal to enter — the role decides for them.
-URL-guessing the wrong portal bounces back through `/post-sign-in`.
-
-### Assigning `ultimate_admin`
-
-`ultimate_admin` is **never UI-assignable**. Put the email(s) of the
-person(s) who should hold it into `ULTIMATE_ADMIN_EMAILS` (comma-separated).
-The Clerk webhook auto-assigns the role on first sign-in. To revoke, remove
-the email from the env var **and** demote the user via the Users view.
-
-### Wiring Clerk
-
-1. Create a Clerk app at <https://clerk.com>
-2. Enable Google, Apple, email, and phone (SMS) sign-in methods in the
-   Clerk Dashboard → User & Authentication settings
-3. Copy the publishable + secret keys into `.env.local`
-4. **Webhook:**
-   - In Clerk Dashboard → Webhooks → "Add Endpoint"
-   - URL: `https://your-domain.com/api/clerk/webhook` (use ngrok in dev)
-   - Subscribe to: `user.created`, `user.updated`, `user.deleted`
-   - Copy the signing secret into `CLERK_WEBHOOK_SECRET`
+- **Leads inbox → Export CSV** — every lead as a spreadsheet.
+- **Leads inbox → Backup (JSON)** — every intake table (leads, quote
+  requests, winter reservations, support tickets, applications), restorable.
+- **Leads inbox → Import leads** (`/admin/leads/import`) — any CSV, Aurora
+  exports included; columns matched by header, duplicates skipped.
+- `npm run leads export [file]` / `npm run leads import <file> [--to <url>]`
+  — the same backup from a terminal, for moving to a new database.
 
 ### Wiring Postgres
 
 1. Provision a free Postgres on [Neon](https://neon.tech) or
    [Supabase](https://supabase.com)
 2. Paste the connection string into `DATABASE_URL`
-3. `npm run db:migrate` (creates the schema)
-4. Optional: `npm run db:seed` (sample admin/employee/applications/support)
+3. `npm run db:deploy` (creates the schema) — on Vercel this runs
+   automatically on every deploy via `scripts/vercel-build.mjs`
+4. Optional: `npm run db:seed` (sample applications / support)
 
 ---
 
@@ -219,7 +210,12 @@ Phase 1 scope:
 
 ## Design system
 
-- Background `#0A0E17`, surface `#111726`, text `#F5F7FA` / `#9AA7BD`
+- **Fall & winter theme (site-wide):** deep midnight-navy background
+  `#090D18` with a warm amber "fall" wash and an icy sky "winter" wash, a
+  drifting leaf + snowflake ambience layer (`components/season-ambience.tsx`,
+  hidden on `/admin` and on pages with their own ambience), and a
+  `bg-gradient-season` amber→frost accent gradient for headline highlights.
+- Surface `#111726`, text `#F5F7FA` / `#9AA7BD`
 - Primary / ClearView gradient `#3B82F6 → #2563EB`
 - LawnPros gradient `#22C55E → #16A34A`
 - SnowLand gradient `#38BDF8 → #0EA5E9`
@@ -233,7 +229,11 @@ Phase 1 scope:
 
 1. Push to GitHub.
 2. Import the repo into Vercel.
-3. Add **all** env vars from `.env.example`.
-4. Vercel auto-detects Next.js. The `postinstall` script runs `prisma
-   generate` automatically.
-5. After first deploy, set the Clerk webhook URL to your production domain.
+3. Add the env vars from `.env.example` — at minimum `DATABASE_URL`,
+   `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
+4. Vercel auto-detects Next.js and runs `npm run vercel-build`, which
+   applies pending Prisma migrations and then builds. `postinstall` runs
+   `prisma generate`.
+5. Any env var change needs **Deployments → Redeploy** to take effect.
+6. Keep `package-lock.json` in sync (`npm install` after editing
+   `package.json`) — Vercel uses `npm ci`, which fails on a stale lock.

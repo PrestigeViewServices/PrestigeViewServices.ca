@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowRight, Leaf, Phone, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -26,9 +26,16 @@ export function CtaBand({
         <div className="pointer-events-none absolute inset-0 bg-hero-radial" />
         <div className="relative">
           {eyebrow && (
-            <p className="eyebrow text-primary mb-3">{eyebrow}</p>
+            <p className="eyebrow mb-3 text-amber-300">{eyebrow}</p>
           )}
           <h2 className="heading-section text-balance">{title}</h2>
+          <p className="mx-auto mt-3 flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <Leaf className="h-3.5 w-3.5 text-amber-300" aria-hidden />
+            Fall cleanups
+            <span aria-hidden>·</span>
+            <Snowflake className="h-3.5 w-3.5 text-sky-300" aria-hidden />
+            Winter snow passes
+          </p>
           <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg text-muted-foreground text-balance">
             {description}
           </p>

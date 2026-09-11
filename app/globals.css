@@ -4,8 +4,11 @@
 
 @layer base {
   :root {
-    /* Brand tokens — dark by default */
-    --background: 220 35% 6%;            /* #0A0E17 */
+    /* Brand tokens — dark by default.
+       Fall & winter season: the base is a slightly deeper midnight navy so
+       the warm amber (fall) and icy sky (winter) washes below read on top
+       of it without muddying the surface cards. */
+    --background: 222 42% 6%;            /* #090D18 */
     --foreground: 214 20% 97%;           /* #F5F7FA */
 
     --surface: 222 32% 11%;              /* #111726 */
@@ -17,8 +20,10 @@
     --primary: 217 91% 60%;              /* #3B82F6 */
     --primary-foreground: 0 0% 100%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Seasonal accent: amber leaf. Used for eyebrow highlights and the
+       fall side of the season gradient; the primary blue stays the CTA. */
+    --accent: 38 92% 50%;                /* #F59E0B */
+    --accent-foreground: 222 42% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -40,10 +45,15 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    /* Fall & winter wash: a warm amber glow low on the left (leaves, late
+       sun) and a cold sky-blue glow high on the right (frost, snow light),
+       with the brand blue still anchoring the top centre. Fixed so the two
+       seasons hold their place while the page scrolls past. */
     background-image:
-      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(34, 197, 94, 0.08), transparent 55%),
-      radial-gradient(ellipse 60% 50% at 0% 30%, rgba(56, 189, 248, 0.06), transparent 60%);
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 100% 0%, rgba(56, 189, 248, 0.13), transparent 58%),
+      radial-gradient(ellipse 60% 50% at 0% 35%, rgba(245, 158, 11, 0.11), transparent 60%),
+      radial-gradient(ellipse 80% 40% at 50% 110%, rgba(186, 230, 253, 0.05), transparent 60%);
     background-attachment: fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -115,6 +125,17 @@
   /* Reusable gradient text — pairs with the brand primary gradient. */
   .text-gradient {
     @apply bg-gradient-primary bg-clip-text text-transparent;
+  }
+
+  /* Season gradient text: amber leaf into frost blue. The one accent that
+     says "fall now, winter next" without a single extra word. */
+  .text-gradient-season {
+    @apply bg-gradient-season bg-clip-text text-transparent;
+  }
+
+  /* Thin amber-to-frost rule used along the top of the header and footer. */
+  .season-line {
+    @apply h-0.5 w-full bg-gradient-season opacity-80;
   }
 }
 

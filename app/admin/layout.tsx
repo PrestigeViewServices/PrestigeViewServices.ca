@@ -1,4 +1,5 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
+import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { AdminLoginForm } from "@/components/admin/login-form";
 import {
   adminAuthDiagnostics,
@@ -53,10 +54,12 @@ export default async function AdminLayout({
 
   const unread = await unreadNotificationCount();
 
+  // Phones get a slim sticky bar + drawer; desktops keep the sticky sidebar.
   return (
-    <section className="container-max py-10 sm:py-12">
-      <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
-        <aside className="lg:sticky lg:top-24 lg:self-start surface-card p-4">
+    <section className="container-max py-5 sm:py-8 lg:py-12">
+      <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:gap-8">
+        <AdminMobileNav unread={unread} />
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start surface-card p-4">
           <AdminSidebar unread={unread} />
         </aside>
         <div className="min-w-0">{children}</div>
