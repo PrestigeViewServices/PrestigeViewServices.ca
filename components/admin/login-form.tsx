@@ -17,7 +17,10 @@ import { Label } from "@/components/ui/label";
  */
 export function AdminLoginForm({
   diagnostics,
+  initialEmail = null,
 }: {
+  /** Pre-filled when the visitor is signed in to the club as an admin. */
+  initialEmail?: string | null;
   diagnostics?: {
     hasPassword: boolean;
     hasEmail: boolean;
@@ -26,7 +29,7 @@ export function AdminLoginForm({
   };
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -61,7 +64,9 @@ export function AdminLoginForm({
           PVS Admin
         </h1>
         <p className="mt-1.5 text-center text-sm text-muted-foreground">
-          Staff access only. Sign in with your dashboard email and password.
+          {initialEmail
+            ? "Welcome back. Enter your dashboard password to continue."
+            : "Staff access only. Sign in with your dashboard email and password."}
         </p>
 
         <form onSubmit={onSubmit} className="mt-7 space-y-4">
@@ -73,7 +78,7 @@ export function AdminLoginForm({
               id="admin-email"
               type="email"
               required
-              autoFocus
+              autoFocus={!initialEmail}
               autoComplete="username"
               placeholder="you@example.com"
               value={email}
@@ -88,6 +93,7 @@ export function AdminLoginForm({
               id="admin-password"
               type="password"
               required
+              autoFocus={Boolean(initialEmail)}
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
