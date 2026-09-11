@@ -7,6 +7,8 @@ import {
   isAdminAuthConfigured,
 } from "@/lib/admin-session";
 import { unreadNotificationCount } from "@/lib/admin-notifications";
+import { getMember } from "@/lib/customer-auth";
+import { isAdminEmail } from "@/lib/admin-credentials";
 
 export const metadata = {
   title: "Admin",
@@ -45,9 +47,18 @@ export default async function AdminLayout({
 
   const signedIn = await hasAdminSession();
   if (!signedIn) {
+    // The owner usually arrives here already signed in to the club portal.
+    // When that member's email is a dashboard login, pre-fill it so the
+    // only thing left to type is the dashboard password.
+    const member = await getMember().catch(() => null);
+    const knownEmail =
+      member && (await isAdminEmail(member.email)) ? member.email : null;
     return (
       <section className="container-max flex min-h-[70vh] items-center py-16">
-        <AdminLoginForm diagnostics={adminAuthDiagnostics()} />
+        <AdminLoginForm
+          diagnostics={adminAuthDiagnostics()}
+          initialEmail={knownEmail}
+        />
       </section>
     );
   }

@@ -79,6 +79,21 @@ export async function findAdminCredentialByEmail(
 }
 
 /** Every dashboard sign-in on record, owner first then A-Z. NEVER throws. */
+/**
+ * Is this email allowed into the dashboard? True for ADMIN_EMAIL (the
+ * recovery login) and for any saved sign-in. Used to decide whether a
+ * signed-in club member gets the "Admin Dashboard" shortcut and a pre-filled
+ * login — it grants nothing by itself, the password still decides. NEVER
+ * throws.
+ */
+export async function isAdminEmail(email: string): Promise<boolean> {
+  const clean = normalizeEmail(email);
+  if (!clean) return false;
+  const recovery = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  if (recovery && clean === recovery) return true;
+  return Boolean(await findAdminCredentialByEmail(clean));
+}
+
 export async function listAdminCredentials(): Promise<{
   accounts: AdminCredentialRow[];
   status: CredentialStatus;

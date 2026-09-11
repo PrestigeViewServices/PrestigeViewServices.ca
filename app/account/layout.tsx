@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { getMember, isCustomerAuthConfigured } from "@/lib/customer-auth";
+import { isAdminEmail } from "@/lib/admin-credentials";
 import { AccountAuth } from "@/components/account/auth-form";
 import { AccountNav } from "@/components/account/nav";
 import { CLUB_NAME, CLUB_TAGLINE, formatCents } from "@/lib/loyalty";
@@ -99,10 +100,7 @@ export default async function AccountLayout({
             </p>
             <AccountNav
               firstName={member.firstName}
-              isOwner={
-                member.email.toLowerCase() ===
-                (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase()
-              }
+              isOwner={await isAdminEmail(member.email)}
             />
           </div>
         </aside>
