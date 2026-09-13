@@ -82,8 +82,15 @@ const nextConfig = {
   // Care Plans was retired 2026-08-23 at the owner's request. Old inbound
   // links and any lingering search results land on the services hub instead
   // of a 404. Permanent so the ranking signal transfers.
+  //
+  // The native /request-service form was retired 2026-09-13: the Aurora
+  // Suite form on /quote is the only quote intake. Query strings (referral
+  // ?ref= etc.) are carried across automatically.
   async redirects() {
-    return [{ source: "/care-plans", destination: "/services", permanent: true }];
+    return [
+      { source: "/care-plans", destination: "/services", permanent: true },
+      { source: "/request-service", destination: "/quote", permanent: true },
+    ];
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

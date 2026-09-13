@@ -21,7 +21,8 @@
     "db:seed:club": "dotenv -e .env.local -- tsx prisma/seed-club.ts",
     "db:deploy": "dotenv -e .env.local -- prisma migrate deploy",
     "vercel-build": "node scripts/vercel-build.mjs",
-    "leads": "dotenv -e .env.local -- node scripts/leads.mjs"
+    "leads": "dotenv -e .env.local -- node scripts/leads.mjs",
+    "leads:docx": "dotenv -e .env.local -- tsx scripts/leads-docx.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -43,6 +44,7 @@
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
+    "docx": "^9.7.1",
     "framer-motion": "^11.11.0",
     "lucide-react": "^0.456.0",
     "maplibre-gl": "^5.24.0",

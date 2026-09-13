@@ -85,7 +85,7 @@ required. `.env.example` documents every variable with where to get it.
 | `/winter-packages`            | Snow pass conversion page + reservation form                   |
 | `/services`, `/services/{slug}` | All services / service detail (+ `/{area}` city variants)    |
 | `/service-areas`              | Cities served                                                  |
-| `/quote`, `/contact`          | Aurora Suite lead form (primary CTA)                           |
+| `/quote`, `/contact`          | Aurora Suite lead form (the only quote intake)                 |
 | `/reviews`, `/our-work`       | Social proof                                                   |
 | `/careers`, `/careers/{slug}` | Recruiting funnel + application                                |
 | `/support`                    | Customer support form (existing customers)                     |
@@ -122,11 +122,15 @@ links still land somewhere sensible.
 
 ### Saving and moving leads
 
-Leads reach the database two ways: the native form (`/request-service` →
-`/api/leads`) and referral flows. The **Get Quote** form on `/quote` and
-`/contact` is an Aurora Suite iframe, so those leads live in Aurora until
-they are imported.
+Every quote request comes through the **Get Quote** form on `/quote` and
+`/contact`, which is an Aurora Suite iframe: those leads live in Aurora
+until they are imported. Nothing on the public site writes to the Lead
+table any more (the native `/request-service` form was retired on
+2026-09-13 and permanently redirects to `/quote`). What that form captured
+is still in the database and exports like everything else.
 
+- **Leads inbox → Export Word** — every lead's full details as a `.docx`,
+  one record per lead, ready to re-quote from.
 - **Leads inbox → Export CSV** — every lead as a spreadsheet.
 - **Leads inbox → Backup (JSON)** — every intake table (leads, quote
   requests, winter reservations, support tickets, applications), restorable.
@@ -134,6 +138,7 @@ they are imported.
   exports included; columns matched by header, duplicates skipped.
 - `npm run leads export [file]` / `npm run leads import <file> [--to <url>]`
   — the same backup from a terminal, for moving to a new database.
+- `npm run leads:docx [file]` — the Word export from a terminal.
 
 ### Wiring Postgres
 
@@ -164,13 +169,12 @@ To check attribution in GA4: **Reports → Acquisition → Traffic acquisition**
 
 The `<AuroraLeadForm />` component is the single source of truth for
 **sales lead capture** (separate from job applications and from customer
-support). It embeds the Aurora Suite signed iframe on `/quote`, each
-`/divisions/*` page, and `/contact`. The iframe URL is HMAC-signed — never
-append query params.
+support). It embeds the Aurora Suite signed iframe on `/quote` and
+`/contact`. The iframe URL is HMAC-signed — never append query params.
 
-`Get Quote` CTAs route to `/quote` (or anchor to `#quote-form` on division
-pages). Division-page CTAs scroll to the in-page form so the visitor never
-leaves.
+`Get Quote` / `Request a Quote` CTAs route to `/quote`. Referral links
+(`/r/{code}`) land there too, with a banner that shows the friend their
+code to mention in the form; the office applies the credit when quoting.
 
 ---
 

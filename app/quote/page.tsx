@@ -4,6 +4,7 @@ import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { SectionHeading } from "@/components/section-heading";
 import { ReviewCta } from "@/components/review-cta";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
+import { ReferralWelcomeBanner } from "@/components/referral-welcome-banner";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -26,7 +27,19 @@ const popularBundles = [
   "Lawn Mowing + Seasonal Snow Contract",
 ];
 
-export default async function QuotePage() {
+/**
+ * The quote page. The form is the Aurora Suite embed, the only lead intake
+ * on the site: submissions live in Aurora, not in this database.
+ *
+ * Referral links (/r/[code]) land here with ?ref=&from= so the friend sees
+ * the credit they were promised above the form.
+ */
+export default async function QuotePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string; from?: string }>;
+}) {
+  const { ref, from } = await searchParams;
   return (
     <section className="container-max pt-14 sm:pt-20 pb-20">
       <SectionHeading
@@ -38,6 +51,7 @@ export default async function QuotePage() {
       <div className="mt-12 grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7 space-y-6">
           <AccountSavingsBanner variant="strip" />
+          <ReferralWelcomeBanner code={ref} from={from} />
           <AuroraLeadForm />
 
           <aside

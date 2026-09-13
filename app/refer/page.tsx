@@ -117,7 +117,7 @@ export default async function ReferPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/request-service"
+            href="/quote"
             className="inline-flex items-center gap-2 rounded-full border border-surface-border px-6 py-3 text-sm font-semibold transition-colors hover:bg-white/5"
           >
             Someone referred me
@@ -207,8 +207,8 @@ export default async function ReferPage() {
         eyebrow="Referred by a friend?"
         title="Claim your first-service credit"
         description={`Send us your request through their link and we'll take ${friendCredit} off the first job. Free quote, one business day, no obligation.`}
-        primaryLabel="Request Service"
-        primaryHref="/request-service"
+        primaryLabel="Request a Quote"
+        primaryHref="/quote"
       />
     </>
   );

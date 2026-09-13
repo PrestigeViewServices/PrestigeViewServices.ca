@@ -9,6 +9,7 @@ import {
   Gift,
   Download,
   DatabaseBackup,
+  FileText,
   Upload,
 } from "lucide-react";
 import type { LeadStatus } from "@prisma/client";
@@ -33,8 +34,14 @@ const ADMIN_ROLES = ["ultimate_admin", "super_admin", "admin", "manager"] as con
 type SearchParams = { status?: string; q?: string };
 
 /**
- * Quote Requests — every lead the public quote form captures, newest first,
- * with inline status + notes so follow-up happens right here.
+ * Leads Inbox — the sales pipeline's front door, newest first, with inline
+ * status + notes so follow-up happens right here.
+ *
+ * The website no longer writes here: the only quote form is the Aurora
+ * Suite embed on /quote and /contact, and those requests live in Aurora.
+ * Leads arrive by importing an Aurora CSV export (/admin/leads/import),
+ * from the customer portal, or by hand. Everything the retired native form
+ * captured is still here and exports as CSV, JSON or a Word document.
  */
 export default async function LeadsPage(props: {
   searchParams: Promise<SearchParams>;
@@ -139,9 +146,18 @@ export default async function LeadsPage(props: {
             {winRate !== null ? ` · ${winRate}% win rate all-time` : ""}
           </p>
         </div>
-        {/* Save + transfer: every lead can leave (CSV / full JSON backup)
-            and come in (Aurora exports, spreadsheets) without a developer. */}
+        {/* Save + transfer: every lead can leave (Word / CSV / full JSON
+            backup) and come in (Aurora exports, spreadsheets) without a
+            developer. */}
         <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/admin/leads/export?format=docx"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
+            title="Every lead's details in a Word document, ready to re-quote from"
+          >
+            <FileText className="h-4 w-4" />
+            Export Word
+          </a>
           <a
             href="/api/admin/leads/export?format=csv"
             className="inline-flex items-center gap-1.5 rounded-full border border-surface-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-white/15 hover:text-foreground"
@@ -204,7 +220,11 @@ export default async function LeadsPage(props: {
       {items.length === 0 && (
         <div className="surface-card p-10 text-center text-muted-foreground">
           <Inbox className="mx-auto h-8 w-8 opacity-50" />
-          <p className="mt-3">No quote requests match these filters.</p>
+          <p className="mt-3">No leads match these filters.</p>
+          <p className="mt-1 text-xs">
+            New quote requests arrive in Aurora Suite. Export them there and
+            use Import leads to work them here.
+          </p>
         </div>
       )}
 
