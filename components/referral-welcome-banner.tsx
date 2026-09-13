@@ -9,6 +9,10 @@ import { normalizeCode } from "@/lib/referrals";
  * them and states the credit up front, so the promise on the link is the same
  * promise on the page.
  *
+ * The quote form is the Aurora Suite embed, which knows nothing about club
+ * codes, so the banner asks the friend to mention the code in their request
+ * and the office applies the credit when the quote goes out.
+ *
  * Renders nothing without a valid code — a bad or expired link just shows the
  * normal form rather than a broken offer.
  */
@@ -38,7 +42,7 @@ export async function ReferralWelcomeBanner({
   const name = (from || referrer.firstName || "").trim();
 
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+    <div className="mx-auto flex w-full max-w-[750px] items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
       <PartyPopper
         className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300"
         aria-hidden
@@ -48,8 +52,12 @@ export async function ReferralWelcomeBanner({
           {name ? `${name} sent you ${credit} off.` : `You've got ${credit} off.`}
         </p>
         <p className="mt-1 text-emerald-100/80">
-          Send this request and we&apos;ll take {credit} off your first service.
-          Nothing to enter, the credit is already attached to your quote.
+          Add referral code{" "}
+          <span className="font-mono font-semibold text-emerald-50">
+            {normalized}
+          </span>{" "}
+          to the notes in the form below and we&apos;ll take {credit} off your
+          first service.
         </p>
       </div>
     </div>

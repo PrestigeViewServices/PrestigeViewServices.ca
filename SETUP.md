@@ -303,13 +303,16 @@ Every lead the website captured lives in the database and is never touched
 by a deploy — migrations only add tables and columns. To keep your own copy
 or move to a new database:
 
+- **Leads inbox → Export Word** downloads every lead's full details as a
+  Word document, one record per lead, ready to send new quotes from.
 - **Leads inbox → Export CSV** downloads every lead as a spreadsheet.
 - **Leads inbox → Backup (JSON)** downloads every intake table (leads,
   quote requests, winter reservations, support tickets, applications).
   Keep one before any hosting change.
 - **Leads inbox → Import leads** brings a CSV in — including leads from
-  **Aurora Suite**, where the public Get Quote form sends them. Export
-  from Aurora as CSV, upload it, done. Re-importing never duplicates.
+  **Aurora Suite**, where the public Get Quote form sends them (it is the
+  only quote form on the site). Export from Aurora as CSV, upload it,
+  done. Re-importing never duplicates.
 - From a terminal: `npm run leads export` writes the backup file, and
   `npm run leads import pvs-intake-backup-YYYY-MM-DD.json --to "<new DATABASE_URL>"`
   restores it into another database.

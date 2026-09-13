@@ -9,9 +9,11 @@ export const runtime = "nodejs";
  * Referral landing: /r/JORDAN-4X2K
  *
  * Validates the code, drops the attribution cookie for the configured window,
- * and lands the friend on the NATIVE request form (/request-service). That
- * matters: /api/leads is what turns the cookie into a Referral, and only the
- * native form posts there — the Aurora iframe on /quote never would.
+ * and lands the friend on the quote page (/quote), where the Aurora Suite
+ * form lives. The welcome banner above the form shows the code so the
+ * friend can mention it in their request; the office applies the credit
+ * when the quote goes out. The cookie still attributes snow-pass
+ * reservations and new account sign-ups automatically.
  *
  * An unknown code still lands on the form. A referral link is a lead; it is
  * never a dead end.
@@ -32,14 +34,11 @@ export async function GET(
         })
       : null;
 
-  const dest = new URL("/request-service", req.nextUrl.origin);
+  const dest = new URL("/quote", req.nextUrl.origin);
   if (referrer) {
     dest.searchParams.set("ref", normalized);
     dest.searchParams.set("from", referrer.firstName);
   }
-  // Carry a service preselect through the link (/r/CODE?service=snow-removal).
-  const service = req.nextUrl.searchParams.get("service");
-  if (service) dest.searchParams.set("service", service);
 
   const res = NextResponse.redirect(dest);
 

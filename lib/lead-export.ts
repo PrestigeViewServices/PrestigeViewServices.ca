@@ -37,6 +37,7 @@ type LeadRow = {
   email: string;
   phone: string;
   propertyAddress: string | null;
+  division: string | null;
   serviceSlugs: unknown;
   message: string | null;
   status: string;

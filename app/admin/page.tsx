@@ -361,8 +361,8 @@ export default async function AdminHomePage() {
           <ul className="mt-4 divide-y divide-surface-border">
             {freshLeads.length === 0 && (
               <li className="py-6 text-sm text-muted-foreground">
-                Inbox zero. New quote requests land here the moment the form is
-                submitted.
+                Inbox zero. New quote requests arrive in Aurora Suite; import
+                them from the Leads inbox to work them here.
               </li>
             )}
             {freshLeads.map((l) => {

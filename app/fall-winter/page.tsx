@@ -108,7 +108,7 @@ export default function FallWinterPage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link href="/request-service">
+                <Link href="/quote">
                   Book fall services
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -275,7 +275,7 @@ export default function FallWinterPage() {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
-            <Link href="/request-service">
+            <Link href="/quote">
               Get my free quote
               <ArrowRight className="h-4 w-4" />
             </Link>

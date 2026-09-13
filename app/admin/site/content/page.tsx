@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 const EDIT_ROLES = ["ultimate_admin", "super_admin", "admin"] as const;
 
 /** Every public page that renders the edited content. */
-const CONTENT_PATHS = ["/", "/quote", "/request-service", "/refer"];
+const CONTENT_PATHS = ["/", "/quote", "/refer"];
 
 /**
  * Page Content — the owner's editor for the public site's marketing surfaces:

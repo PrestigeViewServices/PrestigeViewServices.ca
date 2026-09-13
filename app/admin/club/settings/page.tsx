@@ -262,7 +262,6 @@ async function saveSettings(formData: FormData) {
   revalidatePath("/account/rewards");
   revalidatePath("/account/referrals");
   revalidatePath("/refer");
-  revalidatePath("/request-service");
   revalidatePath("/quote");
 }
 
@@ -278,6 +277,5 @@ async function resetSettings() {
   revalidatePath("/account/rewards");
   revalidatePath("/account/referrals");
   revalidatePath("/refer");
-  revalidatePath("/request-service");
   revalidatePath("/quote");
 }

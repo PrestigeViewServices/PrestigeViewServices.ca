@@ -14,8 +14,9 @@ type SearchParams = { result?: string };
 
 /**
  * Bring every lead the business has ever received into the one inbox:
- * Aurora Suite exports (the /quote and /contact forms post there, not
- * here), an old spreadsheet, or a backup CSV from this dashboard. Rows
+ * Aurora Suite exports (the /quote and /contact forms post there, and
+ * nothing on the site posts here), an old spreadsheet, or a backup CSV
+ * from this dashboard. Rows
  * become pipeline leads; re-running never duplicates or edits anything.
  */
 export default async function LeadImportPage(props: {
