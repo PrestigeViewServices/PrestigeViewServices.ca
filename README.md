@@ -120,6 +120,15 @@ required. `.env.example` documents every variable with where to get it.
 `/sign-in`, `/sign-up`, `/post-sign-in` are legacy redirects kept so old
 links still land somewhere sensible.
 
+### SnowLand season launch
+
+The season name and launch date (currently **SnowLand Season 2, Nov 15**)
+live in `lib/content/snow-season.ts`. The home page section, hero badge,
+season banner default, sticky bar, `/winter-packages` countdown and the
+Command Center tracker all read from it. The home hero and season banner
+are also editable at `/admin/site/content`; a saved override there wins over
+the code copy, so use **Reset section** to pick up new defaults.
+
 ### Saving and moving leads
 
 Leads reach the database two ways: the native form (`/request-service` →

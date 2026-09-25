@@ -20,6 +20,8 @@ import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { SamImage } from "@/components/sam";
 import { OfferCountdown } from "@/components/winter/offer-countdown";
+import { SeasonCountdown } from "@/components/winter/season-countdown";
+import { SNOW_SEASON } from "@/lib/content/snow-season";
 import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
 import {
@@ -40,13 +42,13 @@ const STARTING_MONTHLY = formatMonthly(
 
 export const metadata: Metadata = {
   title:
-    "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
+    "SnowLand Season 2 Starts Nov 15 | Snow Removal Petawawa & Pembroke | Prestige View Services",
   description:
-    "Seasonal snow removal passes in Petawawa & Pembroke. Auto-dispatch when it storms, live tracking & photo proof in your customer portal. Bronze to Platinum. Military discount.",
+    "SnowLand Season 2 starts Nov 15. Seasonal snow removal passes in Petawawa & Pembroke. Auto-dispatch when it storms, live tracking & photo proof in your customer portal. Bronze to Platinum. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
-      "Seasonal Snow Passes in Petawawa & Pembroke | Prestige View Services",
+      "SnowLand Season 2: Snow Passes in Petawawa & Pembroke | Prestige View Services",
     description:
       "Storms trigger us automatically, you never make a call. Watch your plow live and get photo proof in your customer portal. Bronze to Platinum passes. Military discount.",
     url: "/winter-packages",
@@ -127,7 +129,7 @@ const ACTION_PHOTOS = [
 const WINTER_FAQS = [
   {
     q: "When does service start?",
-    a: "Passes run for the whole winter season. We stake driveway markers before freeze-up, usually through late October and November, and coverage begins with the first snowfall that hits your package's trigger depth. Reserve early: routes are capped and they fill before the first storm.",
+    a: `${SNOW_SEASON.name} starts ${SNOW_SEASON.launchDisplayLong} and runs through the whole winter. We stake driveway markers before then, through late October and early November, and from launch day on every snowfall that hits your package's trigger depth puts your driveway on the run. Reserve early: routes are capped and they fill before the first storm.`,
   },
   {
     q: "What counts as a storm, and what triggers a visit?",
@@ -270,7 +272,7 @@ export default function WinterPackagesPage() {
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Petawawa · New: Pembroke
+              {SNOW_SEASON.name} · Starts {SNOW_SEASON.launchDisplay} · Petawawa &amp; Pembroke
             </p>
 
             <h1 className="heading-section mt-5 text-balance">
@@ -283,7 +285,15 @@ export default function WinterPackagesPage() {
                 {STARTING_MONTHLY}/month
               </strong>
               . Storms trigger us automatically, so you never make a call.
+              Routes start running {SNOW_SEASON.launchDisplayLong}.
             </p>
+
+            <div className="mt-7">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-sky-300">
+                Season 2 starts in
+              </p>
+              <SeasonCountdown />
+            </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="xl">

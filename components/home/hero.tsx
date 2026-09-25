@@ -10,12 +10,12 @@ import {
   MapPin,
   Star,
   Medal,
-  Leaf,
   Snowflake,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
 import { DEFAULT_HERO, type HeroContent } from "@/lib/site-content";
+import { SNOW_SEASON } from "@/lib/content/snow-season";
 import { formatPhone } from "@/lib/utils";
 
 /**
@@ -108,12 +108,9 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           className="max-w-3xl text-center lg:text-left mx-auto lg:mx-0"
         >
           <p className="eyebrow mb-5 justify-center text-sky-200 lg:justify-start">
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-300">
-              <Leaf className="h-3 w-3" />
-              Fall
-              <span className="text-amber-200/60">·</span>
-              <Snowflake className="h-3 w-3 text-sky-300" />
-              <span className="text-sky-300">Winter</span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-0.5 text-sky-300">
+              <Snowflake className="h-3 w-3" />
+              {SNOW_SEASON.name} · {SNOW_SEASON.launchDisplay}
             </span>
             <MapPin className="h-3.5 w-3.5" />
             Serving {siteConfig.serviceArea}
@@ -133,11 +130,12 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
               <Link
-                href="/quote"
+                href="/winter-packages#packages"
                 className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-primary px-10 text-base font-semibold text-white shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 <span className="absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.35),transparent_50%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                Get a Free Quote
+                <Snowflake className="h-4 w-4" />
+                Reserve My Snow Pass
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </motion.div>
@@ -152,7 +150,14 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
             </motion.div>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-xs sm:text-sm text-sky-100/80">
+          <p className="mt-4 text-sm text-sky-100/75">
+            Need fall cleanups, gutters or windows?{" "}
+            <Link href="/quote" className="font-semibold text-white underline-offset-4 hover:underline">
+              Get a free quote
+            </Link>
+          </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-xs sm:text-sm text-sky-100/80">
             <span className="inline-flex items-center gap-1.5">
               <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
               Top-rated on Google

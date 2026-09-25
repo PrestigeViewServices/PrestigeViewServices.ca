@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Snowflake } from "lucide-react";
+import { SNOW_SEASON } from "@/lib/content/snow-season";
 
 const SENTINEL_ID = "sticky-cta-sentinel";
 
@@ -58,20 +59,31 @@ export function StickyCta() {
         <div className="container-max flex items-center justify-between gap-3 py-3">
           <div className="hidden sm:block">
             <p className="text-sm font-semibold leading-tight">
-              Ready for a free quote?
+              {SNOW_SEASON.name} starts {SNOW_SEASON.launchDisplay}
             </p>
             <p className="text-xs text-muted-foreground">
-              One business day · No obligation
+              Snow routes are capped · Free quotes in one business day
             </p>
           </div>
-          <Link
-            href="/quote"
-            tabIndex={visible ? 0 : -1}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-white"
-          >
-            Get a Free Quote
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex w-full gap-2 sm:w-auto">
+            <Link
+              href="/winter-packages#packages"
+              tabIndex={visible ? 0 : -1}
+              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-md bg-gradient-snowland px-4 py-3 text-sm font-semibold text-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              <Snowflake className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap sm:hidden">Snow Pass</span>
+              <span className="hidden whitespace-nowrap sm:inline">Reserve Snow Pass</span>
+            </Link>
+            <Link
+              href="/quote"
+              tabIndex={visible ? 0 : -1}
+              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-md border border-surface-border bg-surface px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface/80 focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              Free Quote
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -22,6 +22,18 @@ export const offers: Offer[] = [
   // early-bird and 15% exterior bundle were both retired 2026-08-23 at the
   // owner's request. These offers sell timing and bundling instead.
   {
+    id: "winter-reserve",
+    active: true,
+    eyebrow: "SnowLand Season 2 · Starts Nov 15",
+    headline: "Reserve Your Driveway for the Whole Winter",
+    body: "SnowLand Season 2 starts November 15. A seasonal pass means you never call, never negotiate, and never shovel. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    ctaLabel: "Reserve My Snow Pass",
+    ctaHref: "/winter-packages#packages",
+    accent: "snowland",
+    division: "snowland",
+    showInModal: true,
+  },
+  {
     id: "fall-cleanup",
     active: true,
     eyebrow: "Booking Now",
@@ -31,7 +43,6 @@ export const offers: Offer[] = [
     ctaHref: "/quote?offer=fall-cleanup&service=fall-cleanup",
     accent: "lawn",
     division: "lawnpros",
-    showInModal: true,
   },
   {
     id: "gutter-fall",
@@ -43,17 +54,6 @@ export const offers: Offer[] = [
     ctaHref: "/quote?offer=gutter-fall&service=gutter-cleaning",
     accent: "clearview",
     division: "clearview",
-  },
-  {
-    id: "winter-reserve",
-    active: true,
-    eyebrow: "Winter Routes Filling",
-    headline: "Reserve Your Driveway for the Whole Winter",
-    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Routes are capped so response times hold through a storm, and each one closes once it is full.",
-    ctaLabel: "Reserve My Spot",
-    ctaHref: "/quote?offer=winter-reserve&service=snow-removal",
-    accent: "snowland",
-    division: "snowland",
   },
 ];
 

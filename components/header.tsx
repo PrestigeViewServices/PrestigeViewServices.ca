@@ -34,6 +34,14 @@ import { formatPhone } from "@/lib/utils";
 // flow is more valuable than any informational page.
 const featuredLinks = [
   {
+    href: "/winter-packages",
+    label: "Snow Passes",
+    icon: Snowflake,
+    cls: "text-sky-300 hover:bg-sky-400/10",
+    tile: "border-sky-400/30 bg-sky-400/10 hover:bg-sky-400/20",
+    tileIcon: "bg-sky-400/20 text-sky-300",
+  },
+  {
     href: "/fall-winter",
     label: "Fall & Winter",
     icon: Leaf,
@@ -41,14 +49,6 @@ const featuredLinks = [
     cls: "text-amber-300 hover:bg-amber-400/10",
     tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
     tileIcon: "bg-amber-400/20 text-amber-300",
-  },
-  {
-    href: "/winter-packages",
-    label: "Winter Packages",
-    icon: Snowflake,
-    cls: "text-sky-300 hover:bg-sky-400/10",
-    tile: "border-sky-400/30 bg-sky-400/10 hover:bg-sky-400/20",
-    tileIcon: "bg-sky-400/20 text-sky-300",
   },
 ] as const;
 

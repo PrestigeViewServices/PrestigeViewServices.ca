@@ -5,6 +5,7 @@ import { VeteranCallout } from "@/components/home/veteran-callout";
 import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ServicesOverview } from "@/components/home/services-overview";
 import { FallWinterPromo } from "@/components/home/fall-winter-promo";
+import { SnowLandSeason } from "@/components/home/snowland-season";
 import { OffersBand } from "@/components/home/offers-band";
 import { TrustStrip } from "@/components/home/trust-strip";
 import { FreshFromField } from "@/components/home/fresh-from-field";
@@ -23,13 +24,13 @@ export const metadata: Metadata = {
   title:
     "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
   description:
-    "Fall cleanups, gutter cleaning & seasonal snow removal from one local, veteran-operated crew. Serving Petawawa, Pembroke, Deep River & the Ottawa Valley. Get a free quote.",
+    "SnowLand Season 2 starts Nov 15: seasonal snow removal passes in Petawawa & Pembroke, plus fall cleanups and gutter cleaning from one local, veteran-operated crew. Reserve your driveway.",
   alternates: { canonical: "/" },
   openGraph: {
     title:
-      "Get Your Property Winter-Ready | Prestige View Services",
+      "SnowLand Season 2 Starts Nov 15 | Prestige View Services",
     description:
-      "Fall cleanups, gutters & winter snow contracts from one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
+      "Seasonal snow passes for Petawawa & Pembroke from one local, veteran-operated crew. Routes are capped. Reserve your driveway before Nov 15.",
     url: "/",
     type: "website",
   },
@@ -46,11 +47,12 @@ export default async function HomePage() {
       <SeasonBanner />
       <Hero content={content.hero} />
       <TrustMarquee />
-      <Reveal>
-        <FallWinterPromo />
-      </Reveal>
+      <SnowLandSeason />
       <Reveal>
         <ServicesOverview />
+      </Reveal>
+      <Reveal>
+        <FallWinterPromo />
       </Reveal>
       <Reveal delay={60}>
         <VeteranCallout />
