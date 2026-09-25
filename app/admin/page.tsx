@@ -24,6 +24,7 @@ import { kindMeta } from "@/lib/admin-notifications";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { NotifyTestButton } from "@/components/admin/notify-test-button";
 import { getService } from "@/lib/content/services";
+import { SNOW_SEASON, snowSeasonLaunchMs } from "@/lib/content/snow-season";
 import {
   DRIVEWAY_SIZE_LABELS,
   getDrivewayTier,
@@ -274,6 +275,12 @@ export default async function AdminHomePage() {
     },
   ];
 
+  // SnowLand launch tracker: confirmed passes vs. the season start date.
+  const confirmedPasses = await db.winterReservation
+    .count({ where: { status: { in: ["CONFIRMED", "COMPLETED"] } } })
+    .catch(() => 0);
+  const daysToLaunch = Math.ceil((snowSeasonLaunchMs() - now.getTime()) / DAY_MS);
+
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -308,6 +315,39 @@ export default async function AdminHomePage() {
       </header>
 
       <NotifyStatusBanner />
+
+      {/* ---- SnowLand season launch ---- */}
+      <Link
+        href="/admin/winter-reservations"
+        className="surface-card surface-card-hover flex flex-wrap items-center justify-between gap-4 border-sky-400/30 bg-gradient-to-r from-blue-950/60 to-sky-950/40 p-5"
+      >
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-sky-500/15 text-sky-300">
+            <Snowflake className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="font-semibold">
+              {daysToLaunch > 0
+                ? `${SNOW_SEASON.name} starts in ${daysToLaunch} day${daysToLaunch === 1 ? "" : "s"}`
+                : `${SNOW_SEASON.name} is live`}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Launch {SNOW_SEASON.launchDisplayLong}. Every reservation still
+              open is a driveway not yet on a route.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-6 text-center">
+          <div>
+            <p className="text-2xl font-bold tabular-nums text-sky-200">{confirmedPasses}</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Confirmed</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold tabular-nums text-amber-200">{pendingReservations}</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">To call</p>
+          </div>
+        </div>
+      </Link>
 
       {/* ---- KPI strip ---- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

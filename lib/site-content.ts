@@ -57,17 +57,17 @@ export type SiteContentData = {
 
 export const DEFAULT_SEASON_BANNER: SeasonBannerContent = {
   enabled: true,
-  line1: "Now booking *fall cleanups* & *gutter cleaning*",
-  line2: "Winter snow routes fill right behind them",
-  ctaLabel: "Book My Cleanup",
-  ctaHref: "/quote?service=fall-cleanup",
+  line1: "*SnowLand Season 2* starts *Nov 15*",
+  line2: "Snow routes are capped. Reserve your driveway now",
+  ctaLabel: "Reserve My Snow Pass",
+  ctaHref: "/winter-packages#packages",
 };
 
 export const DEFAULT_HERO: HeroContent = {
-  headlineTop: "Winter Is Coming to the Ottawa Valley.",
-  headlineAccent: "Your Property Will Be Ready.",
+  headlineTop: "SnowLand Season 2 Starts Nov 15.",
+  headlineAccent: "Never Shovel Your Driveway Again.",
   subtext:
-    "One local, insured crew to close out the season and carry you through it: fall cleanups, gutter cleaning before the freeze, and seasonal snow removal that keeps your driveway clear all winter. Free quotes in one business day.",
+    "Seasonal snow passes for Petawawa and Pembroke. Storms trigger us automatically, so you never make a call, and one monthly payment covers the whole winter. Routes are capped, so reserve your driveway before they fill.",
 };
 
 export function defaultOffers(): OfferContent[] {
