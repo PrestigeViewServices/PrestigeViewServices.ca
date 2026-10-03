@@ -12,6 +12,7 @@ import {
   isSnowService,
 } from "@/lib/content/service-areas";
 import { getGalleryForService } from "@/lib/content/work-categories";
+import { snowTown } from "@/lib/content/snow-coverage";
 import { getLocalCopy } from "@/lib/content/local-copy";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
@@ -92,6 +93,7 @@ export default async function ServiceAreaCombinationPage(
   if (!serviceOfferedInArea(service.slug, area)) notFound();
 
   const snowExpanding = isSnowService(service.slug) && area.snowStatus === "expanding";
+  const snowLocal = isSnowService(service.slug) ? snowTown(area.slug) : undefined;
   const categoryLabel = CATEGORY_LABEL[service.division];
   const local = getLocalCopy(service.slug, area.slug);
   const isPetawawa = area.slug === "petawawa";
@@ -208,7 +210,7 @@ export default async function ServiceAreaCombinationPage(
           <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary shrink-0">
             <Icon className="h-7 w-7" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="eyebrow text-primary mb-2 inline-flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
               {area.name}, {area.region} · {categoryLabel}
@@ -228,7 +230,7 @@ export default async function ServiceAreaCombinationPage(
                 <Link
                   href={`/quote?service=${service.slug}&area=${area.slug}`}
                 >
-                  Get a Free {area.name} Quote
+                  Free {area.name} Quote
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -259,19 +261,43 @@ export default async function ServiceAreaCombinationPage(
         </section>
       )}
 
-      {snowExpanding && (
+      {snowLocal && (
         <section className="container-max pt-10">
-          <div className="flex items-start gap-3 rounded-2xl border border-sky-400/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 p-6">
-            <Snowflake className="mt-0.5 h-5 w-5 shrink-0 text-sky-300" aria-hidden />
-            <p className="text-sm sm:text-base leading-relaxed text-sky-50">
-              <span className="font-semibold text-white">
-                New this season: {service.name.toLowerCase()} is expanding into{" "}
-                {area.name}.
-              </span>{" "}
-              Our snow routes have been Petawawa-only until now. This winter
-              they reach {area.name}, and spots are limited while we build the
-              route. Reserve early to lock in your driveway.
-            </p>
+          <div className="grid overflow-hidden rounded-2xl border border-sky-400/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 sm:grid-cols-[2fr_3fr]">
+            <div className="relative aspect-[16/10] sm:aspect-auto">
+              <Image
+                src={snowLocal.img}
+                alt={snowLocal.alt}
+                fill
+                sizes="(max-width: 640px) 100vw, 40vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="p-6 sm:p-8">
+              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-sky-300">
+                <Snowflake className="h-4 w-4" aria-hidden />
+                {area.name} equipment: {snowLocal.equipment.toLowerCase()}
+              </p>
+              <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">
+                {snowLocal.headline}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-sky-50/85 sm:text-base">
+                {snowLocal.body}
+                {snowExpanding &&
+                  ` Spots on the ${area.name} route are limited, so reserve early to lock in your place.`}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link href="/winter-packages">
+                    See snow plans
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/commercial-snow-removal">Commercial snow removal</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       )}

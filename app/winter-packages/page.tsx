@@ -14,6 +14,8 @@ import {
   Save,
   Snowflake,
   Star,
+  Tractor,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
@@ -22,6 +24,11 @@ import { SamImage } from "@/components/sam";
 import { OfferCountdown } from "@/components/winter/offer-countdown";
 import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
+import {
+  CommercialSnowStrip,
+  EquipmentByTown,
+} from "@/components/winter/equipment-by-town";
+import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
 import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
@@ -42,13 +49,13 @@ export const metadata: Metadata = {
   title:
     "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
   description:
-    "Seasonal snow removal passes in Petawawa & Pembroke. Auto-dispatch when it storms, live tracking & photo proof in your customer portal. Bronze to Platinum. Military discount.",
+    "Seasonal snow removal in Pembroke (plow trucks) & Petawawa (tractors). Auto-dispatch every storm, monthly payments, live tracking in your portal. Commercial lots too. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
       "Seasonal Snow Passes in Petawawa & Pembroke | Prestige View Services",
     description:
-      "Storms trigger us automatically, you never make a call. Watch your plow live and get photo proof in your customer portal. Bronze to Platinum passes. Military discount.",
+      "Storms trigger us automatically, you never make a call. Pembroke runs plow trucks, Petawawa runs tractors. Track your route live in your customer portal. Bronze to Platinum passes. Military discount.",
     url: "/winter-packages",
     type: "website",
     images: [
@@ -83,29 +90,29 @@ const HOW_IT_WORKS = [
 const TRUST_STRIP = [
   { icon: Medal, label: "Military and veterans always save 10%" },
   { icon: Radar, label: "Auto-dispatch, no calling needed" },
-  { icon: Camera, label: "Live tracking & photo proof in your portal" },
-  { icon: Snowflake, label: "Limited spots per route" },
+  { icon: Camera, label: "Live tracking in your portal" },
+  { icon: Truck, label: "Pembroke: plow trucks" },
+  { icon: Tractor, label: "Petawawa: tractors only" },
 ];
 
-/** Placeholder testimonials. Swap the quotes for real customer words. */
-const TESTIMONIALS = [
+/**
+ * Why-us proof points. The page used to show three PLACEHOLDER testimonial
+ * cards with five stars and "Customer name"; fake-looking reviews cost more
+ * trust than they earn, so they are gone until real customer quotes exist.
+ * Real reviews live on Google, linked below.
+ */
+const PROOF = [
   {
-    quote:
-      "Placeholder: a sentence or two from a Petawawa customer about being cleared before the morning commute.",
-    name: "Customer name",
-    town: "Petawawa",
+    title: "Local and accountable",
+    body: "Owned and run out of Petawawa. The person who answers the phone is the person responsible for your route.",
   },
   {
-    quote:
-      "Placeholder: a sentence about never having to phone in, and the driveway just being done.",
-    name: "Customer name",
-    town: "Petawawa",
+    title: "Capped routes",
+    body: "We limit spots on every route so the machine is never far away mid-storm. When a route is full, it closes.",
   },
   {
-    quote:
-      "Placeholder: a sentence about the city ridge being cleared without having to ask.",
-    name: "Customer name",
-    town: "Pembroke",
+    title: "Fully insured",
+    body: "$2M commercial general liability on every property we touch, residential or commercial. Certificate on request.",
   },
 ];
 
@@ -159,7 +166,15 @@ const WINTER_FAQS = [
   },
   {
     q: "What areas exactly do you cover?",
-    a: "Snow routes run in Petawawa, our home base and densest coverage, and this season they are expanding into Pembroke for the first time. Pembroke spots are capped while we build the route. We do not offer snow service in other Valley towns yet, though our lawn and exterior services cover them year-round.",
+    a: "Snow routes run in Petawawa, our home base, and in Pembroke. Spots on each route are capped so response times hold through a storm. We do not offer snow service in other Valley towns yet, though our lawn and exterior services cover them year-round.",
+  },
+  {
+    q: "What equipment will clear my driveway?",
+    a: `It depends on your town. ${SNOW_EQUIPMENT_SUMMARY} Trucks cover Pembroke's longer distances between stops quickly; tractor-mounted blowers throw Petawawa snow clear of the driveway instead of banking it across your lawn.`,
+  },
+  {
+    q: "Do you do commercial snow removal?",
+    a: "Yes. We plow and salt parking lots, storefronts, plazas, offices, and multi-unit properties in Pembroke and Petawawa, on a seasonal contract or per event. Request a commercial quote at prestigeviewservices.ca/commercial-snow-removal and we will book a free site walk.",
   },
   {
     q: "How much does a seasonal pass cost?",
@@ -270,7 +285,7 @@ export default function WinterPackagesPage() {
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Petawawa · New: Pembroke
+              Pembroke · Petawawa · Commercial
             </p>
 
             <h1 className="heading-section mt-5 text-balance">
@@ -282,7 +297,11 @@ export default function WinterPackagesPage() {
               <strong className="font-semibold text-white">
                 {STARTING_MONTHLY}/month
               </strong>
-              . Storms trigger us automatically, so you never make a call.
+              . Storms trigger us automatically, so you never make a call.{" "}
+              <strong className="font-semibold text-white">Pembroke</strong>{" "}
+              driveways are cleared by plow truck,{" "}
+              <strong className="font-semibold text-white">Petawawa</strong>{" "}
+              driveways by tractor only.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -301,7 +320,7 @@ export default function WinterPackagesPage() {
             </div>
           </div>
 
-          <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {TRUST_STRIP.map((t) => (
               <li
                 key={t.label}
@@ -341,6 +360,9 @@ export default function WinterPackagesPage() {
         </ol>
       </section>
 
+      {/* ── Equipment by town + commercial ── */}
+      <EquipmentByTown />
+
       {/* ── Customer portal showcase ── */}
       <PortalShowcase />
 
@@ -360,27 +382,18 @@ export default function WinterPackagesPage() {
         </div>
 
         <div className="mt-9 grid gap-5 sm:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
-            <figure key={i} className="surface-card p-6">
-              <div className="flex gap-0.5" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-amber-400 text-amber-400"
-                    aria-hidden
-                  />
-                ))}
-              </div>
-              <blockquote className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {t.quote}
-              </blockquote>
-              <figcaption className="mt-4 text-sm font-semibold">
-                {t.name}
-                <span className="block text-xs font-normal text-muted-foreground">
-                  {t.town}
-                </span>
-              </figcaption>
-            </figure>
+          {PROOF.map((p) => (
+            <div key={p.title} className="surface-card p-6">
+              <Check
+                className="h-5 w-5 text-emerald-400"
+                strokeWidth={3}
+                aria-hidden
+              />
+              <h3 className="mt-3 font-semibold">{p.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                {p.body}
+              </p>
+            </div>
           ))}
         </div>
 
@@ -480,6 +493,8 @@ export default function WinterPackagesPage() {
             </Button>
           </div>
 
+          <CommercialSnowStrip className="mt-7" />
+
           <p className="mt-7 text-sm text-sky-100/70">
             Looking for the other seasons?{" "}
             <Link
@@ -509,7 +524,7 @@ export default function WinterPackagesPage() {
  */
 function ComparisonTable() {
   return (
-    <section id="compare" className="container-max scroll-mt-24 py-12">
+    <section id="compare" className="container-max scroll-mt-24 overflow-x-clip py-12">
       <div className="max-w-2xl">
         <p className="eyebrow text-primary">Side By Side</p>
         <h2 className="heading-section mt-2 text-balance">

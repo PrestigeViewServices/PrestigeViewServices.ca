@@ -3,9 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Phone } from "lucide-react";
+import { siteConfig } from "@/lib/site";
+import { formatPhone } from "@/lib/utils";
 
 const SENTINEL_ID = "sticky-cta-sentinel";
+
+const ON_PAGE_FORMS: Record<string, string> = {
+  "/": "#hero-quote",
+  "/commercial-snow-removal": "#commercial-quote",
+  "/request-service": "#quote-form",
+};
 
 /**
  * Slim persistent CTA that fades in once the user scrolls past the hero.
@@ -47,6 +55,10 @@ export function StickyCta() {
 
   if (isAdmin) return null;
 
+  // Pages with their own quote form get sent to it instead of off-page.
+  const quoteHref =
+    ON_PAGE_FORMS[pathname] ?? "/quote";
+
   return (
     <div
       aria-hidden={!visible}
@@ -58,20 +70,32 @@ export function StickyCta() {
         <div className="container-max flex items-center justify-between gap-3 py-3">
           <div className="hidden sm:block">
             <p className="text-sm font-semibold leading-tight">
-              Ready for a free quote?
+              Fall cleanups &amp; winter snow routes are filling
             </p>
             <p className="text-xs text-muted-foreground">
-              One business day · No obligation
+              Free quote in one business day · Homes &amp; businesses
             </p>
           </div>
-          <Link
-            href="/quote"
-            tabIndex={visible ? 0 : -1}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-white"
-          >
-            Get a Free Quote
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <a
+              href={`tel:${formatPhone(siteConfig.phone)}`}
+              tabIndex={visible ? 0 : -1}
+              aria-label={`Call ${siteConfig.phoneDisplay}`}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-surface-border px-4 py-3 text-sm font-semibold hover:bg-surface focus:outline-none focus:ring-2 focus:ring-white"
+            >
+              <Phone className="h-4 w-4" />
+              <span className="hidden md:inline">{siteConfig.phoneDisplay}</span>
+              <span className="md:hidden">Call</span>
+            </a>
+            <Link
+              href={quoteHref}
+              tabIndex={visible ? 0 : -1}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-white sm:flex-none"
+            >
+              Get a Free Quote
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

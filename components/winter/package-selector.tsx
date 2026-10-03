@@ -522,6 +522,13 @@ export function PackageSelector({
                   </Field>
                 )}
               </div>
+              {town !== "OTHER" && (
+                <p className="-mt-2 rounded-xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-sm text-sky-100">
+                  {town === "PEMBROKE"
+                    ? "Pembroke routes are cleared with our plow trucks."
+                    : "Petawawa routes are cleared with tractors only, snow is thrown clear instead of banked."}
+                </p>
+              )}
 
               <fieldset>
                 <legend className="text-sm font-medium">

@@ -454,7 +454,7 @@ export const workCategories: WorkCategory[] = [
       },
       {
         src: "/images/gallery/snow-removal/tractor-cleared-estate-driveway-winter.webp",
-        alt: "PVS tractor beside a freshly cleared estate driveway on a sunny winter day near Pembroke",
+        alt: "PVS tractor beside a freshly cleared estate driveway on a sunny winter day near Petawawa",
         caption: "Estate driveway · cleared & open",
         width: 1441,
         height: 1920,
@@ -475,7 +475,7 @@ export const workCategories: WorkCategory[] = [
       },
       {
         src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
-        alt: "John Deere tractor snow-blowing a driveway at night with headlights on in Pembroke",
+        alt: "John Deere tractor snow-blowing a driveway at night with headlights on in Petawawa",
         caption: "Night shift · storm response",
         width: 900,
         height: 1600,
@@ -503,7 +503,7 @@ export const workCategories: WorkCategory[] = [
       },
       {
         src: "/images/gallery/snow-removal/box-plow-townhouse-driveway.webp",
-        alt: "Tractor with box plow clearing a townhouse driveway after a snowfall in Pembroke",
+        alt: "Tractor with box plow clearing a townhouse driveway after a snowfall in Petawawa",
         caption: "Townhouse route · cleared",
         width: 1441,
         height: 1920,

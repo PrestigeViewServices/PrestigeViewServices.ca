@@ -85,6 +85,14 @@ export function Footer() {
               ))}
               <li>
                 <Link
+                  href="/commercial-snow-removal"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Commercial Snow Removal
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/services"
                   className="text-primary hover:text-foreground transition-colors"
                 >
