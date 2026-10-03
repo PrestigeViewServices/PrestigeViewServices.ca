@@ -339,6 +339,7 @@ function LeadCard({ lead }: { lead: LeadRow }) {
           current={lead.status}
           options={LEAD_OPTIONS}
           action={updateLeadStatus}
+          size="sm"
         />
       </div>
     </article>
@@ -429,6 +430,7 @@ function JobCard({ job }: { job: JobRow }) {
           current={job.status}
           options={JOB_OPTIONS}
           action={updateJobStatus}
+          size="sm"
         />
       </div>
     </article>
