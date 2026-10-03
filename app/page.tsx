@@ -13,8 +13,9 @@ import { BeforeAfterSection } from "@/components/home/before-after-section";
 import { ActionShots } from "@/components/home/action-shots";
 import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
-import { CtaBand } from "@/components/cta-band";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
+import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { QuickQuote } from "@/components/quick-quote";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
 import { getSiteContent } from "@/lib/site-content";
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   title:
     "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
   description:
-    "Fall cleanups, gutter cleaning & seasonal snow removal from one local, veteran-operated crew. Serving Petawawa, Pembroke, Deep River & the Ottawa Valley. Get a free quote.",
+    "Fall cleanups and seasonal snow removal for homes and businesses in Petawawa & Pembroke. Plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Free quote in one business day.",
   alternates: { canonical: "/" },
   openGraph: {
     title:
@@ -48,6 +49,14 @@ export default async function HomePage() {
       <TrustMarquee />
       <Reveal>
         <FallWinterPromo />
+      </Reveal>
+      <Reveal>
+        <EquipmentByTown
+          id="snow-equipment"
+          eyebrow="Snow removal, town by town"
+          title="Pembroke gets plow trucks. Petawawa gets tractors."
+          description="Every winter route runs on the machine that suits it best. Here is what clears your driveway or lot this season."
+        />
       </Reveal>
       <Reveal>
         <ServicesOverview />
@@ -90,7 +99,27 @@ export default async function HomePage() {
         />
       </Reveal>
       <Reveal>
-        <CtaBand />
+        <section className="container-max pb-20">
+          <div className="grid items-center gap-8 overflow-hidden rounded-3xl border border-sky-400/20 bg-gradient-to-br from-blue-950 via-slate-900 to-amber-950/40 p-6 sm:p-10 lg:grid-cols-2">
+            <div>
+              <p className="eyebrow text-amber-300">Last call before the snow</p>
+              <h2 className="heading-section mt-3 text-balance text-white">
+                Get your fall cleanup and winter plan locked in today
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-sky-100/80">
+                Routes are capped so response times hold through every storm.
+                Once a route is full it closes until next winter. Tell us
+                where you are and we will hold your spot while we quote.
+              </p>
+            </div>
+            <QuickQuote
+              origin="home-closing"
+              defaultService="snow-removal"
+              title="Hold my spot"
+              subtitle="Free quote, no payment today."
+            />
+          </div>
+        </section>
       </Reveal>
     </>
   );

@@ -17,6 +17,7 @@ import {
   leadSchema,
   LEAD_SERVICES,
   LEAD_SERVICE_VALUES,
+  LEAD_TOWNS,
   type LeadFormValues,
 } from "@/lib/lead-schema";
 import { siteConfig } from "@/lib/site";
@@ -65,6 +66,7 @@ function normalizeService(raw: string | null): LeadFormValues["service"] | undef
   if (!raw) return undefined;
   const aliases: Record<string, string> = {
     "seasonal-snow-contract": "snow-removal",
+    commercial: "commercial-snow-removal",
     "walkway-clearing": "snow-removal",
     "spring-cleanup": "lawn-mowing",
     aeration: "lawn-mowing",
@@ -110,6 +112,8 @@ function LeadFormInner({
       promoCode: "",
       referralCode: presetRef,
       propertyAddress: "",
+      town: "",
+      origin: "request-service",
       message: "",
       hp: "",
     },
@@ -271,17 +275,41 @@ function LeadFormInner({
             )}
           />
         </Field>
-        <Field
-          label="Property address (optional)"
-          error={errors.propertyAddress?.message}
-        >
-          <Input
-            autoComplete="street-address"
-            placeholder="123 Maple Street, Petawawa"
-            {...register("propertyAddress")}
+        <Field label="Town" error={errors.town?.message}>
+          <Controller
+            control={control}
+            name="town"
+            render={({ field }) => (
+              <Select
+                value={field.value || undefined}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Where is the property?" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEAD_TOWNS.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           />
         </Field>
       </div>
+
+      <Field
+        label="Property address (optional)"
+        error={errors.propertyAddress?.message}
+      >
+        <Input
+          autoComplete="street-address"
+          placeholder="123 Maple Street"
+          {...register("propertyAddress")}
+        />
+      </Field>
 
       <Field label="Anything else? (optional)" error={errors.message?.message}>
         <Textarea

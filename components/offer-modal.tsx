@@ -19,6 +19,17 @@ import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "pvs-offer-modal-dismissed-v1";
 
+/** Pages that already are a quote form; the modal would only get in the way. */
+const LEAD_PAGES = [
+  "/quote",
+  "/request-service",
+  "/contact",
+  "/winter-packages",
+  "/commercial-snow-removal",
+  "/refer",
+  "/r/",
+];
+
 const accentText = {
   lawn: "text-emerald-400",
   clearview: "text-blue-400",
@@ -64,9 +75,12 @@ export function OfferModal() {
   const [open, setOpen] = useState(false);
 
   // The promo popup is for visitors. Never interrupt the owner in the
-  // dashboard or a member in their portal.
+  // dashboard or a member in their portal, and never cover a page whose
+  // whole job is already to capture the lead.
   const suppressed =
-    pathname.startsWith("/admin") || pathname.startsWith("/account");
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/account") ||
+    LEAD_PAGES.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
     if (suppressed) return;
@@ -92,10 +106,29 @@ export function OfferModal() {
     };
   }, [suppressed]);
 
+  // Wait for real engagement: half the page scrolled, or 25 seconds on it.
+  // Popping at 1.2s covered the hero and the quote form on phones, and
+  // Google demotes mobile pages that open with an intrusive interstitial.
   useEffect(() => {
     if (!offer) return;
-    const timer = window.setTimeout(() => setOpen(true), 1200);
-    return () => window.clearTimeout(timer);
+    let fired = false;
+    const show = () => {
+      if (fired) return;
+      fired = true;
+      setOpen(true);
+      cleanup();
+    };
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 0 && window.scrollY / max >= 0.5) show();
+    };
+    const timer = window.setTimeout(show, 25000);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    function cleanup() {
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+    }
+    return cleanup;
   }, [offer]);
 
   function dismiss() {

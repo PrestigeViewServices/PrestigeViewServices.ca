@@ -5,6 +5,8 @@ import {
   leadSchema,
   divisionForService,
   LEAD_SERVICES,
+  LEAD_TOWNS,
+  SNOW_SERVICE_VALUES,
 } from "@/lib/lead-schema";
 import { sendLeadNotification } from "@/lib/send-lead-email";
 import { notifyOwner } from "@/lib/notify";
@@ -100,6 +102,29 @@ export async function POST(request: Request) {
     LEAD_SERVICES.find((s) => s.value === payload.service)?.label ??
     payload.service;
 
+  // Town, property type, and business name have no columns of their own;
+  // they ride on the address and the notes so the office sees them on the
+  // lead card and in the alert without a schema change.
+  const townLabel = payload.town
+    ? LEAD_TOWNS.find((t) => t.value === payload.town)?.label ?? null
+    : null;
+  const address = (() => {
+    const typed = (payload.propertyAddress ?? "").trim();
+    if (!townLabel || payload.town === "other") return typed || null;
+    if (typed.toLowerCase().includes(townLabel.toLowerCase())) return typed;
+    return typed ? `${typed}, ${townLabel}` : townLabel;
+  })();
+  const isSnow = SNOW_SERVICE_VALUES.includes(payload.service);
+  const contextLines = [
+    payload.propertyType === "commercial" || payload.service === "commercial-snow-removal"
+      ? `COMMERCIAL${payload.company ? `: ${payload.company}` : ""}`
+      : null,
+    townLabel ? `Town: ${townLabel}` : null,
+    isSnow && payload.town === "pembroke" ? "Snow equipment: plow truck route" : null,
+    isSnow && payload.town === "petawawa" ? "Snow equipment: tractor route" : null,
+    payload.origin ? `Came from: ${payload.origin}` : null,
+  ].filter((l): l is string => Boolean(l));
+
   // Notifications are best-effort and must never block or fail intake.
   // extraLines carries pricing context (member discount, referral credit)
   // discovered during the DB write, so the email tells the office exactly
@@ -112,7 +137,7 @@ export async function POST(request: Request) {
         phone: payload.phone,
         serviceLabel,
         promoCode: payload.promoCode || null,
-        propertyAddress: payload.propertyAddress || null,
+        propertyAddress: address,
         message: payload.message || null,
       }).then((r) => {
         if (!r.sent) {
@@ -128,7 +153,7 @@ export async function POST(request: Request) {
           `Phone: ${payload.phone}`,
           `Email: ${payload.email}`,
           `Service: ${serviceLabel}`,
-          payload.propertyAddress ? `Address: ${payload.propertyAddress}` : null,
+          address ? `Address: ${address}` : null,
           ...extraLines.map((l) => `>> ${l}`),
           payload.message ? `Message:\n${payload.message}` : null,
           ``,
@@ -136,7 +161,7 @@ export async function POST(request: Request) {
         ]
           .filter(Boolean)
           .join("\n"),
-        sms: `PVS lead: ${payload.name} · ${serviceLabel} · ${payload.phone}`,
+        sms: `PVS lead: ${payload.name} · ${serviceLabel}${townLabel ? ` · ${townLabel}` : ""} · ${payload.phone}`,
         replyTo: payload.email,
       }),
     ]);
@@ -149,13 +174,14 @@ export async function POST(request: Request) {
       receivedAt: new Date().toISOString(),
       ...payload,
     });
-    await notify();
+    await notify(contextLines);
     return NextResponse.json({ ok: true, id: null });
   }
 
   try {
     const memberNote = await memberDiscountNote(db, payload.email);
     const noteParts = [
+      ...contextLines,
       payload.promoCode ? `Promo: ${payload.promoCode}` : null,
       memberNote,
     ].filter((n): n is string => Boolean(n));
@@ -166,7 +192,7 @@ export async function POST(request: Request) {
         email: payload.email,
         phone: payload.phone,
         division: divisionForService(payload.service),
-        propertyAddress: payload.propertyAddress || null,
+        propertyAddress: address,
         message: payload.message || null,
         serviceSlugs: [payload.service],
         notes: noteParts.length ? noteParts.join(" · ") : null,

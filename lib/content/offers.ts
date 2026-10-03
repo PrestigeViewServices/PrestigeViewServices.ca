@@ -8,7 +8,8 @@ export type Offer = {
   headline: string;
   body: string;
   ctaLabel: string;
-  /** Pre-fills /quote?offer=<id>&service=<serviceSlug> */
+  /** Where the CTA goes. Use /request-service?service=<slug> (the native
+   *  form pre-selects the service; the Aurora iframe at /quote cannot). */
   ctaHref: string;
   accent: "lawn" | "clearview" | "snowland";
   /** Which division this offer belongs to, used for filtering on division pages */
@@ -28,7 +29,7 @@ export const offers: Offer[] = [
     headline: "Fall Cleanups Are Open Across the Ottawa Valley",
     body: "Every leaf and branch cleared, the lawn cut to winter height, and the beds tidied so your property goes into the snow looking sharp and comes out of it healthy. Book before the rush and pick your week.",
     ctaLabel: "Book My Fall Cleanup",
-    ctaHref: "/quote?offer=fall-cleanup&service=fall-cleanup",
+    ctaHref: "/request-service?service=fall-cleanup",
     accent: "lawn",
     division: "lawnpros",
     showInModal: true,
@@ -40,7 +41,7 @@ export const offers: Offer[] = [
     headline: "Gutter Cleaning Before the First Freeze",
     body: "Packed gutters freeze solid, back up under the shingles, and turn into ice dams by January. We clear the debris, flush the downspouts, and flag anything starting to fail while it is still a cheap fix.",
     ctaLabel: "Clear My Gutters",
-    ctaHref: "/quote?offer=gutter-fall&service=gutter-cleaning",
+    ctaHref: "/request-service?service=gutter-cleaning",
     accent: "clearview",
     division: "clearview",
   },
@@ -49,9 +50,9 @@ export const offers: Offer[] = [
     active: true,
     eyebrow: "Winter Routes Filling",
     headline: "Reserve Your Driveway for the Whole Winter",
-    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Plow trucks in Pembroke, tractors in Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
     ctaLabel: "Reserve My Spot",
-    ctaHref: "/quote?offer=winter-reserve&service=snow-removal",
+    ctaHref: "/winter-packages#packages",
     accent: "snowland",
     division: "snowland",
   },

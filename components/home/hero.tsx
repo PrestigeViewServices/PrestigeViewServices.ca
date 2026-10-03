@@ -12,11 +12,15 @@ import {
   Medal,
   Leaf,
   Snowflake,
+  Truck,
+  Tractor,
+  Building2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
 import { DEFAULT_HERO, type HeroContent } from "@/lib/site-content";
 import { formatPhone } from "@/lib/utils";
+import { QuickQuote } from "@/components/quick-quote";
 
 /**
  * Hero, full-width rotation of real job photos with a navy overlay. Copy +
@@ -26,27 +30,23 @@ import { formatPhone } from "@/lib/utils";
 const HERO_PHOTOS = [
   {
     src: "/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp",
-    alt: "PVS tractor snow-blowing a residential driveway at sunrise after an overnight storm",
+    alt: "PVS tractor snow-blowing a Petawawa driveway at sunrise after an overnight storm",
+  },
+  {
+    src: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
+    alt: "Ottawa Valley yard raked clear and trimmed after a PVS fall cleanup",
+  },
+  {
+    src: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
+    alt: "PVS plow truck clearing a Pembroke commercial lot during an overnight snowfall",
   },
   {
     src: "/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg",
     alt: "PVS crew on ladders clearing leaves out of a home's gutters before winter",
   },
   {
-    src: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
-    alt: "Driveway cleared wall to wall by a PVS tractor on a bright winter morning",
-  },
-  {
-    src: "/images/gallery/lawn-mowing/stand-on-mower-backyard-stripes.webp",
-    alt: "Stand-on mower laying fresh stripes across a backyard lawn in Petawawa",
-  },
-  {
     src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
     alt: "PVS tractor snow-blowing a driveway at night under its own headlights mid-storm",
-  },
-  {
-    src: "/images/gallery/landscaping/interlock-walkway-after-charcoal-border.webp",
-    alt: "New interlock front walkway with charcoal paver border built by PVS in Petawawa",
   },
 ];
 
@@ -100,26 +100,28 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </div>
 
-      <div className="container-max relative pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-32 lg:pb-36">
+      <div className="container-max relative grid items-center gap-10 pt-12 pb-16 sm:pt-20 sm:pb-24 lg:grid-cols-12 lg:gap-12 lg:pt-24 lg:pb-28">
         <motion.div
           style={
             prefersReducedMotion ? undefined : { y: copyY, opacity: copyOpacity }
           }
-          className="max-w-3xl text-center lg:text-left mx-auto lg:mx-0"
+          className="min-w-0 max-w-3xl text-center lg:col-span-7 lg:text-left mx-auto lg:mx-0"
         >
-          <p className="eyebrow mb-5 justify-center text-sky-200 lg:justify-start">
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-300">
+          <p className="eyebrow mb-5 flex-wrap justify-center gap-y-2 text-sky-200 lg:justify-start">
+            <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-300">
               <Leaf className="h-3 w-3" />
-              Fall
+              Fall cleanups
               <span className="text-amber-200/60">·</span>
               <Snowflake className="h-3 w-3 text-sky-300" />
-              <span className="text-sky-300">Winter</span>
+              <span className="text-sky-300">Snow removal</span>
             </span>
-            <MapPin className="h-3.5 w-3.5" />
-            Serving {siteConfig.serviceArea}
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+              <MapPin className="h-3.5 w-3.5" />
+              Petawawa · Pembroke
+            </span>
           </p>
 
-          <h1 className="heading-display text-balance text-white">
+          <h1 className="font-display text-[2.4rem] font-bold leading-[1.04] tracking-[-0.03em] text-balance text-white sm:text-5xl xl:text-[4rem]">
             {content.headlineTop}{" "}
             <span className="text-gradient-season">
               {content.headlineAccent}
@@ -133,18 +135,28 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
               <Link
-                href="/quote"
-                className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-primary px-10 text-base font-semibold text-white shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                href="/winter-packages"
+                className="group relative inline-flex h-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-primary px-8 text-base font-semibold text-white shadow-[0_10px_40px_-10px_rgba(59,130,246,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 <span className="absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.35),transparent_50%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                Get a Free Quote
+                <Snowflake className="h-4 w-4" />
+                Snow Removal Plans
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                href="/services/fall-cleanup"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-400/10 backdrop-blur px-8 text-base font-semibold text-amber-100 hover:border-amber-300/60 hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Leaf className="h-4 w-4" />
+                Fall Cleanups
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
               <a
                 href={`tel:${formatPhone(siteConfig.phone)}`}
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-10 text-base font-semibold text-white hover:border-white/40 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-6 text-base font-semibold text-white hover:border-white/40 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
               >
                 <Phone className="h-4 w-4" />
                 {siteConfig.phoneDisplay}
@@ -170,7 +182,29 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
             <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-sky-100/40" />
             <span>Locally owned &amp; veteran operated</span>
           </div>
+
+          <p className="mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-white/10 bg-black/30 px-4 py-2.5 text-xs text-sky-100/85 backdrop-blur sm:text-sm lg:justify-start">
+            <Truck className="h-4 w-4 text-sky-300" aria-hidden />
+            <span><strong className="text-white">Pembroke:</strong> plow trucks</span>
+            <span className="text-sky-100/40">|</span>
+            <Tractor className="h-4 w-4 text-sky-300" aria-hidden />
+            <span><strong className="text-white">Petawawa:</strong> tractors only</span>
+            <span className="text-sky-100/40">|</span>
+            <Link href="/commercial-snow-removal" className="inline-flex items-center gap-1 font-semibold text-sky-300 hover:underline">
+              <Building2 className="h-4 w-4" aria-hidden />
+              Commercial lots too
+            </Link>
+          </p>
         </motion.div>
+
+        <div id="hero-quote" className="mx-auto w-full min-w-0 max-w-md scroll-mt-24 lg:col-span-5 lg:max-w-none">
+          <QuickQuote
+            origin="home-hero"
+            tone="glass"
+            title="Get your free quote"
+            subtitle="Fall cleanup or a winter of clear driveways. Answer 3 quick questions."
+          />
+        </div>
       </div>
       {/* Observed by <StickyCta> */}
       <div id="sticky-cta-sentinel" aria-hidden className="h-px w-px" />

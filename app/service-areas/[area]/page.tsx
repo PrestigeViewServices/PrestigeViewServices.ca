@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { CtaBand } from "@/components/cta-band";
 import { siteConfig } from "@/lib/site";
+import { snowTown } from "@/lib/content/snow-coverage";
 
 /**
  * The core services every town hub links out to (service-in-town pages).
@@ -68,6 +69,7 @@ export default async function ServiceAreaPage(
   const params = await props.params;
   const area = getServiceArea(params.area);
   if (!area) notFound();
+  const snowLocal = area.snowStatus ? snowTown(area.slug) : undefined;
 
   const topServices = area.topServices
     .map((slug) => getService(slug))
@@ -220,26 +222,33 @@ export default async function ServiceAreaPage(
         </section>
       )}
 
-      {area.snowStatus === "expanding" && (
+      {snowLocal && (
         <section className="container-max pt-10">
           <div className="flex flex-col gap-4 rounded-2xl border border-sky-400/30 bg-gradient-to-r from-blue-950 via-blue-900 to-sky-900 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
             <div className="flex items-start gap-3">
               <Snowflake className="mt-0.5 h-5 w-5 shrink-0 text-sky-300" aria-hidden />
               <p className="text-sm sm:text-base leading-relaxed text-sky-50">
                 <span className="font-semibold text-white">
-                  New this season: snow removal comes to {area.name}.
+                  {snowLocal.headline}.
                 </span>{" "}
-                Our Petawawa snow routes are expanding into {area.name} this
-                winter. Seasonal passes are limited, reserve your driveway
-                before the routes fill.
+                {area.snowStatus === "expanding"
+                  ? `Our snow routes now reach ${area.name} and spots are limited while the route grows. `
+                  : "Routes are capped, so reserve before they fill. "}
+                Homes on seasonal plans, and businesses on commercial
+                contracts.
               </p>
             </div>
-            <Button asChild className="shrink-0">
-              <Link href="/winter-packages">
-                Reserve a snow pass
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button asChild>
+                <Link href="/winter-packages">
+                  Snow plans
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/commercial-snow-removal">Commercial</Link>
+              </Button>
+            </div>
           </div>
         </section>
       )}

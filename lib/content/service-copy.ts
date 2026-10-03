@@ -388,8 +388,8 @@ export const serviceCopy: Record<string, ServiceCopy> = {
 
   "snow-removal": {
     intro: [
-      "Valley winters do not negotiate. When 30 centimetres lands overnight, you either dig for an hour before work or you watch a PVS tractor clear the driveway from your kitchen window with a coffee in hand. We know which morning we would pick.",
-      "Our seasonal contracts cover your driveway, apron and walkways for the whole winter, paid in simple equal monthly payments: unlimited visits during qualifying snowfalls, priority routing for contract customers, and salt available for ice days. Tractor-mounted snowblowers mean clean, tight passes that do not bury your lawn or mailbox.",
+      "Valley winters do not negotiate. When 30 centimetres lands overnight, you either dig for an hour before work or you watch PVS clear the driveway from your kitchen window with a coffee in hand. We know which morning we would pick.",
+      "Our seasonal contracts cover your driveway, apron and walkways for the whole winter, paid in simple equal monthly payments: unlimited visits during qualifying snowfalls, priority routing for contract customers, and salt available for ice days. Equipment is set by town: Pembroke routes are cleared with plow trucks, and Petawawa routes are cleared with tractors only, whose blowers throw snow clear instead of burying your lawn or mailbox.",
       "Contracts are capped per route so the machine is never too far away mid-storm. Routes fill up before the first flake flies, so the earlier you reserve, the better your placement on the run.",
     ],
     benefits: [
@@ -402,8 +402,8 @@ export const serviceCopy: Record<string, ServiceCopy> = {
         body: "Routes run through the storm and after it, prioritized so driveways are open for the morning commute.",
       },
       {
-        title: "Tractor-blower precision",
-        body: "Snow gets thrown where it belongs, not piled into windrows across your lawn or the end of the drive.",
+        title: "The right machine for your town",
+        body: "Plow trucks in Pembroke for speed between stops and heavy river snow. Tractors only in Petawawa, throwing snow clear instead of piling it across your lawn.",
       },
       {
         title: "Walkways and salt available",
@@ -429,7 +429,7 @@ export const serviceCopy: Record<string, ServiceCopy> = {
       },
     ],
     crossSellNote:
-      "Customers also book: walkway clearing as an add-on, and summer lawn care on the same account.",
+      "Customers also book: walkway clearing as an add-on, and summer lawn care on the same account. Businesses: see commercial snow removal.",
   },
 };
 

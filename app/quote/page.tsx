@@ -20,10 +20,10 @@ export const metadata: Metadata = {
 // the form's service field, so this is text-only, mention add-ons in the
 // form's notes field and the team will price them together.
 const popularBundles = [
-  "Lawn Mowing + Window Cleaning",
-  "Spring Cleanup + Gutter Cleaning",
-  "Window Cleaning + Pressure Washing",
-  "Lawn Mowing + Seasonal Snow Contract",
+  "Fall Cleanup + Gutter Cleaning",
+  "Fall Cleanup + Seasonal Snow Plan",
+  "Snow Plan + Walkway Shovelling",
+  "Commercial Snow + Salting",
 ];
 
 export default async function QuotePage() {

@@ -33,7 +33,8 @@ export const LEAD_SERVICES = [
   { value: "hedge-trimming", label: "Hedge Trimming & Shrub Care", division: "LAWNPROS" },
   { value: "landscaping-services", label: "Landscaping Project", division: "LAWNPROS" },
   { value: "fall-cleanup", label: "Fall Cleanup", division: "LAWNPROS" },
-  { value: "snow-removal", label: "Snow Removal (Seasonal Contract)", division: "SNOWLAND" },
+  { value: "snow-removal", label: "Residential Snow Removal (Seasonal)", division: "SNOWLAND" },
+  { value: "commercial-snow-removal", label: "Commercial Snow Removal", division: "SNOWLAND" },
   { value: "other", label: "Something else / not sure", division: "CLEARVIEW" },
 ] as const;
 
@@ -48,7 +49,30 @@ export function divisionForService(service: string): LeadDivision {
   );
 }
 
-export const SNOW_SERVICE_VALUES = ["snow-removal"];
+export const SNOW_SERVICE_VALUES = ["snow-removal", "commercial-snow-removal"];
+
+/**
+ * Where the property is. Snow equipment is assigned by town (Pembroke runs
+ * plow trucks, Petawawa runs tractors), so the office needs this up front
+ * to route the quote. Stored on the lead as a prefix of the address/notes,
+ * no schema change.
+ */
+export const LEAD_TOWNS = [
+  { value: "petawawa", label: "Petawawa" },
+  { value: "pembroke", label: "Pembroke" },
+  { value: "other", label: "Elsewhere in the Valley" },
+] as const;
+
+export const LEAD_TOWN_VALUES = LEAD_TOWNS.map((t) => t.value) as [
+  "petawawa",
+  "pembroke",
+  "other",
+];
+
+export const PROPERTY_TYPES = [
+  { value: "residential", label: "Home" },
+  { value: "commercial", label: "Business / commercial" },
+] as const;
 
 export const leadSchema = z.object({
   name: z
@@ -71,6 +95,15 @@ export const leadSchema = z.object({
    * hand ("a friend gave me their code"). Validated server-side. */
   referralCode: z.string().max(30).optional().or(z.literal("")),
   propertyAddress: z.string().max(200).optional().or(z.literal("")),
+  town: z.enum(LEAD_TOWN_VALUES).optional().or(z.literal("")),
+  propertyType: z
+    .enum(["residential", "commercial"])
+    .optional()
+    .or(z.literal("")),
+  /** Business name, commercial requests only. */
+  company: z.string().max(120).optional().or(z.literal("")),
+  /** Which page/CTA the lead came from, e.g. "home-hero". Internal only. */
+  origin: z.string().max(60).optional().or(z.literal("")),
   message: z
     .string()
     .max(2000, "Keep it under 2000 characters")

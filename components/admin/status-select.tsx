@@ -18,12 +18,15 @@ export function StatusSelect({
   current,
   options,
   action,
+  size = "md",
 }: {
   rowId: string;
   current: string;
   options: { value: string; label: string }[];
   /** Server action that updates the row. Throws on failure. */
   action: (id: string, status: string) => Promise<void>;
+  /** "sm" is the dense variant for admin data tables. */
+  size?: "sm" | "md";
 }) {
   const [value, setValue] = useState(current);
   const [isPending, startTransition] = useTransition();
@@ -42,7 +45,13 @@ export function StatusSelect({
 
   return (
     <Select value={value} onValueChange={onChange} disabled={isPending}>
-      <SelectTrigger className="h-9 w-44 text-sm">
+      <SelectTrigger
+        className={
+          size === "sm"
+            ? "h-8 w-[108px] rounded-sm px-2.5 text-[12.5px]"
+            : "h-9 w-44 text-sm"
+        }
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

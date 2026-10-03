@@ -11,13 +11,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SamTip } from "@/components/sam";
+import { QuickQuote } from "@/components/quick-quote";
+import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Fall Cleanups & Winter Snow Removal in Petawawa & Pembroke",
+  title: "Fall Cleanups & Snow Removal in Petawawa & Pembroke",
   description:
-    "One local crew for the whole cold season: fall cleanups, gutter cleaning, pre-winter window cleaning, and seasonal snow passes in Petawawa, Pembroke & the Ottawa Valley. Book before the routes fill.",
+    "Fall cleanups and gutter cleaning before the freeze, then seasonal snow removal all winter: plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Book before the routes fill.",
   alternates: { canonical: "/fall-winter" },
   openGraph: {
     title: "Get Your Property Ready for Fall & Winter | Prestige View Services",
@@ -98,18 +100,18 @@ export default function FallWinterPage() {
               Booking now for fall &amp; winter
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-              One crew gets your property through{" "}
-              <span className="text-primary">fall and winter</span>
+              Fall cleanup now.{" "}
+              <span className="text-gradient-season">Snow removal all winter.</span>
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-              Fall cleanup and gutters before freeze-up. A seasonal snow pass
-              for everything after. Local, fully insured, veteran operated,
-              serving Petawawa, Pembroke, and the Ottawa Valley.
+              Leaves, beds, and gutters handled before freeze-up, then your
+              driveway or lot cleared every storm until spring. Plow trucks in
+              Pembroke, tractors in Petawawa, and commercial properties too.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link href="/request-service">
-                  Book fall services
+                <Link href="/services/fall-cleanup">
+                  Fall cleanup details
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -136,11 +138,11 @@ export default function FallWinterPage() {
             </ul>
           </div>
           <div className="lg:col-span-5">
-            <SamTip pose="gutter" eyebrow="Sam says">
-              Book the fall cleanup and the snow pass together. One visit sets
-              up your yard, one contract covers every storm, and you never
-              think about it again until spring.
-            </SamTip>
+            <QuickQuote
+              origin="fall-winter-hero"
+              title="Quote my fall & winter"
+              subtitle="Pick a service and your town. We call back within one business day."
+            />
           </div>
         </div>
       </section>
@@ -203,8 +205,8 @@ export default function FallWinterPage() {
             <p className="mt-3 text-muted-foreground">
               Your driveway and walkway cleared every storm, with monthly
               payment options and priority routes for Gold and Platinum
-              passes. Petawawa routes fill first; reserving now locks your
-              spot before the snow flies.
+              passes. Routes are capped in both towns; reserving now locks
+              your spot before the snow flies.
             </p>
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
@@ -217,7 +219,11 @@ export default function FallWinterPage() {
               </li>
               <li className="flex items-center gap-2">
                 <ArrowRight className="h-4 w-4 text-primary" />
-                Track your service in the customer portal
+                Pembroke cleared by plow truck, Petawawa by tractor only
+              </li>
+              <li className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4 text-primary" />
+                Commercial lots, storefronts &amp; multi-unit properties too
               </li>
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -264,26 +270,32 @@ export default function FallWinterPage() {
         </div>
       </section>
 
+      <EquipmentByTown />
+
       {/* ---- Closing CTA ---- */}
-      <section className="container-max py-16 text-center">
-        <h2 className="text-3xl font-bold tracking-tight">
-          Lock in the whole season in one call
-        </h2>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          Tell us about your property once. We quote the fall work and the
-          winter pass together, and you go into the season covered.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/request-service">
-              Get my free quote
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
+      <section className="container-max grid items-center gap-10 py-16 lg:grid-cols-2">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Lock in the whole season in one call
+          </h2>
+          <p className="mt-3 max-w-xl text-muted-foreground">
+            Tell us about your property once. We quote the fall work and the
+            winter plan together, and you go into the season covered.
+          </p>
+          <SamTip pose="gutter" eyebrow="Sam says" className="mt-6">
+            Book the fall cleanup and the snow plan together. One visit sets
+            up your yard, one contract covers every storm, and you never
+            think about it again until spring.
+          </SamTip>
+          <Button asChild size="lg" variant="outline" className="mt-6">
             <a href={phoneHref}>Call {siteConfig.phoneDisplay}</a>
           </Button>
         </div>
+        <QuickQuote
+          origin="fall-winter-closing"
+          defaultService="snow-removal"
+          title="Get my free quote"
+        />
       </section>
     </>
   );

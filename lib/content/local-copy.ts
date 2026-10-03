@@ -547,9 +547,13 @@ export const localCopy: Record<string, LocalCopy> = {
   "snow-removal/petawawa": {
     intro: [
       "Petawawa mornings do not wait for shovelling, and neither do parade timings. Our snow routes are built around this town, cleared through the storm so driveways are open when the base traffic starts moving. Routes are capped and they fill before the first storm, so reserve your spot early.",
-      "We stake driveways in the fall, run tractor-mounted blowers that throw snow clear instead of banking it, and cap each route so the machine is never far away mid-storm.",
+      "Every Petawawa route runs on tractors only, never trucks. We stake driveways in the fall, run tractor-mounted blowers that throw snow clear instead of banking it, and cap each route so the machine is never far away mid-storm.",
     ],
     faqs: [
+      {
+        q: "What equipment clears Petawawa driveways?",
+        a: "Tractors only. Petawawa routes never use plow trucks; tractor-mounted snowblowers throw the snow clear of your driveway so it does not bank up across your lawn. Pembroke routes run on plow trucks.",
+      },
       {
         q: "Will my driveway be cleared in time for early parade timings?",
         a: "Petawawa routes are timed for base schedules. Contract driveways get priority passes through the storm and a final clean-up pass after, so early departures are covered.",
@@ -565,13 +569,17 @@ export const localCopy: Record<string, LocalCopy> = {
   // combo pages are not generated (see serviceOfferedInArea).
   "snow-removal/pembroke": {
     intro: [
-      "New for this season: our snow routes are expanding into Pembroke. Pembroke snow has a habit of arriving wet and heavy off the river, the kind that wrecks backs and burns out little snowblowers. Our tractors do not care. Seasonal passes cover the driveway and apron at one flat rate, with walkway shovelling pass packs available for the older homes whose front steps face the street.",
+      "Our snow routes now cover Pembroke, and every Pembroke route runs on plow trucks. Pembroke snow has a habit of arriving wet and heavy off the river, the kind that wrecks backs and burns out little snowblowers. Our plow trucks do not care. Seasonal passes cover the driveway and apron at one flat rate, with walkway shovelling pass packs available for the older homes whose front steps face the street.",
       "Because this is the first Pembroke winter on our routes, spots are capped while we build the run. Reserve early and the city plow's windrow across your driveway mouth is included in every pass, that alone sells most seasonal passes.",
     ],
     faqs: [
       {
         q: "Is PVS snow removal really available in Pembroke now?",
         a: "Yes, this is the first season our Petawawa snow routes reach Pembroke. Route spots are limited while we build the run, so early reservations get priority placement.",
+      },
+      {
+        q: "What equipment clears Pembroke driveways?",
+        a: "Plow trucks. Every Pembroke route, residential and commercial, is cleared with our truck-mounted plows. Petawawa routes run on tractors only.",
       },
       {
         q: "Do you clear the plow windrow at the end of my Pembroke driveway?",

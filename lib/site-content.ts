@@ -57,17 +57,17 @@ export type SiteContentData = {
 
 export const DEFAULT_SEASON_BANNER: SeasonBannerContent = {
   enabled: true,
-  line1: "Now booking *fall cleanups* & *gutter cleaning*",
-  line2: "Winter snow routes fill right behind them",
-  ctaLabel: "Book My Cleanup",
-  ctaHref: "/quote?service=fall-cleanup",
+  line1: "Booking now: *fall cleanups* and *winter snow routes*",
+  line2: "Pembroke plow trucks · Petawawa tractors · Commercial lots",
+  ctaLabel: "Get My Quote",
+  ctaHref: "/#hero-quote",
 };
 
 export const DEFAULT_HERO: HeroContent = {
-  headlineTop: "Winter Is Coming to the Ottawa Valley.",
-  headlineAccent: "Your Property Will Be Ready.",
+  headlineTop: "Leaves Out This Fall.",
+  headlineAccent: "Snow Gone All Winter.",
   subtext:
-    "One local, insured crew to close out the season and carry you through it: fall cleanups, gutter cleaning before the freeze, and seasonal snow removal that keeps your driveway clear all winter. Free quotes in one business day.",
+    "Fall cleanups before the freeze, then seasonal snow removal that clears your driveway every storm without a phone call. Homes and businesses across Petawawa and Pembroke. Free quotes in one business day.",
 };
 
 export function defaultOffers(): OfferContent[] {
