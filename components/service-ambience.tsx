@@ -138,6 +138,7 @@ export function ambienceForService(slug: string): Theme | null {
     return "water";
   }
   if (
+    slug === "fall-cleanup" ||
     slug === "gutter-cleaning" ||
     slug === "property-cleanouts" ||
     slug === "junk-removal"

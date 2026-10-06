@@ -2,31 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertCircle,
   ArrowRight,
   Check,
-  Download,
   FileText,
   Loader2,
   MessageSquare,
   Share2,
   Shovel,
-  Snowflake,
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   ADD_ON_DEFS,
-  DRIVEWAY_SIZES,
-  DRIVEWAY_SIZE_HINTS,
-  DRIVEWAY_SIZE_LABELS,
   DRIVEWAY_TIER_DEFS,
   SHOVELING_TIER_DEFS,
-  WINTER_TOWNS,
-  WINTER_TOWN_LABELS,
   addOnIsIncluded,
   formatCents,
   formatMonthly,
@@ -41,7 +30,6 @@ import {
   type DrivewaySize,
   type DrivewayTier,
   type ShovelingTier,
-  type WinterTown,
 } from "@/lib/content/winter-packages";
 import {
   cardFileName,
@@ -51,16 +39,13 @@ import {
   type PackageCardData,
 } from "@/components/winter/package-card-image";
 import { siteConfig } from "@/lib/site";
+import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuotePhoto } from "@/components/quote-photo";
 
 /** Walkway packs offered on this page. The 15-pack stays sellable by phone. */
 const OFFERED_PACKS: ShovelingTier[] = ["PASS_10", "PASS_25", "PASS_50"];
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
-
-type SubmitState =
-  | { kind: "idle" }
-  | { kind: "submitting" }
-  | { kind: "error"; message: string };
 
 type CardState =
   | { kind: "idle" }
@@ -83,25 +68,12 @@ export function PackageSelector({
   const [pack, setPack] = useState<ShovelingTier>("NONE");
   const [addOns, setAddOns] = useState<AddOnKey[]>([]);
 
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [town, setTown] = useState<WinterTown>("PETAWAWA");
-  const [otherTown, setOtherTown] = useState("");
-  const [size, setSize] = useState<DrivewaySize>("TWO_CAR");
-  // The size field has a sensible default so the form is submittable, but the
-  // shareable card should not claim a size the customer never actually chose.
-  const [sizeTouched, setSizeTouched] = useState(false);
-  const [notes, setNotes] = useState("");
-  const [hp, setHp] = useState("");
-
-  const [submit, setSubmit] = useState<SubmitState>({ kind: "idle" });
-  const [sent, setSent] = useState(false);
+  // Starting prices on this page are quoted for a single-car driveway; the
+  // exact size is captured in the Aurora quote form.
+  const size: DrivewaySize = "ONE_CAR";
   const [card, setCard] = useState<CardState>({ kind: "idle" });
 
   const formRef = useRef<HTMLDivElement>(null);
-  const confirmRef = useRef<HTMLDivElement>(null);
 
   const selection = useMemo(
     () =>
@@ -127,7 +99,7 @@ export function PackageSelector({
       accent: getDrivewayTier(tier).accent,
       lines: selectionLines({
         ...selection,
-        drivewaySize: sizeTouched ? size : null,
+        drivewaySize: null,
       }),
       dateLabel: new Date().toLocaleDateString("en-CA", {
         day: "numeric",
@@ -137,7 +109,7 @@ export function PackageSelector({
       phone: siteConfig.phoneDisplay,
       siteLabel: "prestigeviewservices.ca/winter-packages",
     };
-  }, [selection, tier, size, sizeTouched]);
+  }, [selection, tier]);
 
   const toggleAddOn = useCallback((key: AddOnKey) => {
     setAddOns((prev) =>
@@ -154,17 +126,14 @@ export function PackageSelector({
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // Pre-filled text message, used by the sticky bar and the confirmation
-  // screen. "?&body=" is the spelling both iOS and Android accept.
+  // Pre-filled text message for the sticky bar. "?&body=" is the spelling
+  // both iOS and Android accept.
   const smsHref = useMemo(() => {
     const body = selection
-      ? `Hi PVS, I'd like a quote for: ${summary}.` +
-        `${name ? ` Name: ${name}.` : ""}` +
-        `${streetAddress ? ` Address: ${streetAddress}, ${townLabel(town, otherTown)}.` : ""}` +
-        ` Driveway: ${DRIVEWAY_SIZE_LABELS[size]}.`
+      ? `Hi PVS, I'd like a quote for: ${summary}.`
       : "Hi PVS, I'd like a quote for a seasonal snow pass.";
     return `sms:${TEL}?&body=${encodeURIComponent(body)}`;
-  }, [selection, summary, name, streetAddress, town, otherTown, size]);
+  }, [selection, summary]);
 
   async function onSaveCard(kind: "share" | "pdf") {
     if (!cardData) return;
@@ -195,56 +164,6 @@ export function PackageSelector({
     }
   }
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!tier) return;
-    setSubmit({ kind: "submitting" });
-
-    const res = await fetch("/api/winter-reservations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        streetAddress,
-        town,
-        city: townLabel(town, otherTown),
-        region: "ON",
-        drivewayTier: tier,
-        drivewaySize: size,
-        shovelingTier: pack,
-        addOns,
-        customerNotes: notes,
-        hp,
-      }),
-    }).catch(() => null);
-
-    if (res?.ok) {
-      setSent(true);
-      setSubmit({ kind: "idle" });
-      // Move focus and view to the confirmation so screen readers announce it.
-      requestAnimationFrame(() => {
-        confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-        confirmRef.current?.focus();
-      });
-      return;
-    }
-
-    const body = (await res?.json().catch(() => null)) as {
-      error?: string;
-      issues?: { message: string }[];
-    } | null;
-    setSubmit({
-      kind: "error",
-      message:
-        body?.issues?.[0]?.message ??
-        body?.error ??
-        "Something went wrong. Please call or text us at " +
-          siteConfig.phoneDisplay +
-          ".",
-    });
-  }
 
   return (
     <>
@@ -422,10 +341,10 @@ export function PackageSelector({
       <section
         id="quote"
         ref={formRef}
-        className="container-max scroll-mt-24 py-12"
+        className="container-max grid scroll-mt-24 gap-10 py-12 lg:grid-cols-12"
       >
-        <div className="mx-auto max-w-3xl">
-          <div className="max-w-2xl">
+        <div className="lg:col-span-5">
+          <div>
             {/* The save-card step only exists once something is selected, so
                 this step renumbers itself rather than skipping a number. */}
             <p className="eyebrow text-primary">Step {cardData ? 4 : 3}</p>
@@ -433,226 +352,56 @@ export function PackageSelector({
               Get your free quote
             </h2>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-              Your selection is already filled in below. We confirm your route
-              spot within 24 hours. No payment today.
+              Tell us about your property below. We confirm your route spot
+              within 24 hours. No payment today.
             </p>
           </div>
 
-          {sent ? (
-            <Confirmation
-              ref={confirmRef}
-              name={name}
-              summary={summary}
-              smsHref={smsHref}
-              onSaveCard={() => onSaveCard("share")}
-              cardBusy={card.kind === "working"}
-              cardState={card}
-            />
-          ) : (
-            <form onSubmit={onSubmit} className="surface-card mt-8 space-y-7 p-6 sm:p-8">
-              <input
-                type="text"
-                name="company"
-                value={hp}
-                onChange={(e) => setHp(e.target.value)}
-                autoComplete="off"
-                tabIndex={-1}
-                aria-hidden="true"
-                className="hidden"
-              />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Full name" required>
-                  <Input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    autoComplete="name"
-                  />
-                </Field>
-                <Field label="Phone" required>
-                  <Input
-                    required
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    autoComplete="tel"
-                    placeholder="(613) 555-0199"
-                  />
-                </Field>
-                <Field label="Email" required className="sm:col-span-2">
-                  <Input
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                  />
-                </Field>
-                <Field label="Property address" required className="sm:col-span-2">
-                  <Input
-                    required
-                    value={streetAddress}
-                    onChange={(e) => setStreetAddress(e.target.value)}
-                    autoComplete="street-address"
-                  />
-                </Field>
-                <Field label="Town" required>
-                  <select
-                    required
-                    value={town}
-                    onChange={(e) => setTown(e.target.value as WinterTown)}
-                    className="h-11 w-full rounded-xl border border-surface-border bg-background px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-                  >
-                    {WINTER_TOWNS.map((t) => (
-                      <option key={t} value={t}>
-                        {WINTER_TOWN_LABELS[t]}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                {town === "OTHER" && (
-                  <Field label="Which town?" required>
-                    <Input
-                      required
-                      value={otherTown}
-                      onChange={(e) => setOtherTown(e.target.value)}
-                      placeholder="Laurentian Valley"
-                    />
-                  </Field>
-                )}
-              </div>
-              {town !== "OTHER" && (
-                <p className="-mt-2 rounded-xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-sm text-sky-100">
-                  {town === "PEMBROKE"
-                    ? "Pembroke routes are cleared with our plow trucks."
-                    : "Petawawa routes are cleared with tractors only, snow is thrown clear instead of banked."}
+          {tier && (
+            <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/10 p-5">
+              <p className="eyebrow text-primary">Your selection</p>
+              <p className="mt-2 text-lg font-bold tracking-tight">{summary}</p>
+              {monthlyFrom !== null && (
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  Driveway pass from{" "}
+                  <strong className="text-foreground">
+                    {formatMonthly(monthlyFrom)}/month
+                  </strong>{" "}
+                  for a single-car driveway. Mention this package in the form
+                  so we quote the right thing.
                 </p>
               )}
-
-              <fieldset>
-                <legend className="text-sm font-medium">
-                  Driveway size <span className="text-primary">*</span>
-                </legend>
-                <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-                  {DRIVEWAY_SIZES.map((s) => (
-                    <SizeOption
-                      key={s}
-                      size={s}
-                      selected={size === s}
-                      onSelect={() => {
-                        setSize(s);
-                        setSizeTouched(true);
-                      }}
-                    />
-                  ))}
-                </div>
-              </fieldset>
-
-              <div className="rounded-2xl border border-primary/30 bg-primary/10 p-5">
-                <p className="eyebrow text-primary">Your selection</p>
-                {tier ? (
-                  <>
-                    <p className="mt-2 text-lg font-bold tracking-tight">
-                      {summary}
-                    </p>
-                    {monthlyFrom !== null && (
-                      <p className="mt-1.5 text-sm text-muted-foreground">
-                        Driveway pass from{" "}
-                        <strong className="text-foreground">
-                          {formatMonthly(monthlyFrom)}/month
-                        </strong>{" "}
-                        for a {DRIVEWAY_SIZE_LABELS[size].toLowerCase()}{" "}
-                        driveway. Walkway packs and add-ons are priced in your
-                        free quote.
-                      </p>
-                    )}
-                    <p className="mt-1.5 text-xs text-muted-foreground">
-                      Not right?{" "}
-                      <a href="#packages" className="text-primary hover:underline">
-                        Change your package
-                      </a>{" "}
-                      or{" "}
-                      <a href="#add-ons" className="text-primary hover:underline">
-                        your add-ons
-                      </a>
-                      .
-                    </p>
-                  </>
-                ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    No package picked yet.{" "}
-                    <a href="#packages" className="text-primary hover:underline">
-                      Choose one above
-                    </a>{" "}
-                    so we can quote the right thing.
-                  </p>
-                )}
-              </div>
-
-              <Field label="Anything we should know? (gate code, dogs, parking)">
-                <Textarea
-                  rows={3}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  maxLength={1500}
-                />
-              </Field>
-
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-surface-border p-4 transition-colors hover:border-white/15">
-                <input
-                  type="checkbox"
-                  checked={addOns.includes("VETERAN")}
-                  onChange={() => toggleAddOn("VETERAN")}
-                  aria-label="I am a serving member, veteran, or military family"
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-surface-border accent-sky-400"
-                />
-                <span className="text-sm">
-                  I am a serving member, veteran, or military family.
-                  <span className="block text-xs text-muted-foreground">
-                    Applies the standing 10% discount to your quote.
-                  </span>
-                </span>
-              </label>
-
-              {submit.kind === "error" && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-100"
-                >
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                  <span>{submit.message}</span>
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                size="xl"
-                className="w-full"
-                disabled={submit.kind === "submitting" || !tier}
-              >
-                {submit.kind === "submitting" ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    Sending…
-                  </>
-                ) : (
-                  <>
-                    Get my free quote
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </>
-                )}
-              </Button>
-              <p className="text-center text-xs text-muted-foreground">
-                We reply within 24 hours. No payment is collected today.
-              </p>
-            </form>
+            </div>
           )}
+
+          <ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
+            {[
+              "Route spot confirmed within 24 hours",
+              "No payment today, billed monthly once confirmed",
+              "Storms trigger your clearing automatically",
+            ].map((p) => (
+              <li key={p} className="flex items-start gap-2.5">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden />
+                {p}
+              </li>
+            ))}
+          </ul>
+
+          <QuotePhoto
+            src="/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp"
+            alt="Driveway cleared by a PVS tractor on a bright winter morning"
+            caption="Cleared before you head out the door."
+            className="mt-8 hidden lg:block"
+          />
+        </div>
+
+        <div className="lg:col-span-7">
+          <AuroraLeadForm id="quote-form" />
         </div>
       </section>
 
       {/* ── Sticky selection bar ── */}
-      {tier && !sent && (
+      {tier && (
         <StickyBar
           summary={summary}
           priceLabel={
@@ -668,11 +417,6 @@ export function PackageSelector({
   );
 }
 
-/** Renders the town the customer actually typed when they pick "Other". */
-function townLabel(town: WinterTown, other: string): string {
-  if (town === "OTHER") return other.trim() || "Other Ottawa Valley";
-  return WINTER_TOWN_LABELS[town];
-}
 
 // ---------------------------------------------------------------------------
 
@@ -855,87 +599,6 @@ function AddOnChip({
   );
 }
 
-/** Small illustrative driveway icons, one per size. */
-function SizeIcon({ size }: { size: DrivewaySize }) {
-  const bays =
-    size === "ONE_CAR" ? 1 : size === "TWO_CAR" ? 2 : size === "THREE_PLUS_CAR" ? 3 : 1;
-  const long = size === "LONG_RURAL";
-  return (
-    <svg viewBox="0 0 48 32" className="h-8 w-12" aria-hidden focusable="false">
-      <rect
-        x="1"
-        y={long ? 4 : 8}
-        width="46"
-        height={long ? 24 : 16}
-        rx="3"
-        fill="currentColor"
-        opacity="0.10"
-      />
-      {long ? (
-        <path
-          d="M6 26 L24 6 L42 26"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.85"
-        />
-      ) : (
-        Array.from({ length: bays }, (_, i) => (
-          <rect
-            key={i}
-            x={4 + i * (40 / bays)}
-            y="11"
-            width={40 / bays - 4}
-            height="10"
-            rx="2"
-            fill="currentColor"
-            opacity="0.85"
-          />
-        ))
-      )}
-    </svg>
-  );
-}
-
-function SizeOption({
-  size,
-  selected,
-  onSelect,
-}: {
-  size: DrivewaySize;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <label
-      className={`flex cursor-pointer flex-col items-start gap-2 rounded-2xl border p-4 transition-colors ${
-        selected
-          ? "border-primary bg-primary/15"
-          : "border-surface-border hover:border-white/20"
-      }`}
-    >
-      <input
-        type="radio"
-        name="drivewaySize"
-        checked={selected}
-        onChange={onSelect}
-        aria-label={`${DRIVEWAY_SIZE_LABELS[size]}, ${DRIVEWAY_SIZE_HINTS[size]}`}
-        className="sr-only"
-      />
-      <span className={selected ? "text-primary" : "text-muted-foreground"}>
-        <SizeIcon size={size} />
-      </span>
-      <span className="text-sm font-medium">{DRIVEWAY_SIZE_LABELS[size]}</span>
-      <span className="text-xs leading-snug text-muted-foreground">
-        {DRIVEWAY_SIZE_HINTS[size]}
-      </span>
-    </label>
-  );
-}
-
-/** A miniature of the shareable card so people know what they will get. */
 function CardPreview({
   tierName,
   accent,
@@ -1047,95 +710,4 @@ function StickyBar({
   );
 }
 
-function Confirmation({
-  ref,
-  name,
-  summary,
-  smsHref,
-  onSaveCard,
-  cardBusy,
-  cardState,
-}: {
-  ref: React.Ref<HTMLDivElement>;
-  name: string;
-  summary: string;
-  smsHref: string;
-  onSaveCard: () => void;
-  cardBusy: boolean;
-  cardState: CardState;
-}) {
-  return (
-    <div
-      ref={ref}
-      tabIndex={-1}
-      role="status"
-      aria-live="polite"
-      className="surface-card mt-8 p-8 text-center focus:outline-none"
-    >
-      <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-500/15 text-emerald-300">
-        <Check className="h-7 w-7" strokeWidth={3} aria-hidden />
-      </div>
-      <h3 className="mt-5 text-2xl font-bold tracking-tight">Request sent</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-        Thanks{name ? `, ${name.split(" ")[0]}` : ""}. We will confirm your
-        route spot within 24 hours. Your request:{" "}
-        <strong className="text-foreground">{summary}</strong>.
-      </p>
 
-      <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-        <Button asChild variant="outline" size="lg">
-          <a href={smsHref}>
-            <MessageSquare className="h-4 w-4" aria-hidden />
-            Text it instead
-          </a>
-        </Button>
-        <Button type="button" size="lg" onClick={onSaveCard} disabled={cardBusy}>
-          {cardBusy ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          ) : (
-            <Download className="h-4 w-4" aria-hidden />
-          )}
-          Save my package card
-        </Button>
-      </div>
-
-      {(cardState.kind === "done" || cardState.kind === "error") && (
-        <p
-          className={`mt-3 text-sm ${
-            cardState.kind === "error" ? "text-rose-300" : "text-emerald-300"
-          }`}
-        >
-          {cardState.message}
-        </p>
-      )}
-
-      <p className="mt-6 text-xs text-muted-foreground">
-        <Snowflake className="mr-1 inline h-3 w-3" aria-hidden />
-        Storms trigger us automatically once your spot is confirmed. You never
-        make a call.
-      </p>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-  className,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <Label className="mb-1.5 block text-sm">
-        {label}
-        {required && <span className="text-primary"> *</span>}
-      </Label>
-      {children}
-    </div>
-  );
-}

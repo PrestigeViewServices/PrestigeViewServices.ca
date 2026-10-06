@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuotePhoto } from "@/components/quote-photo";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -53,6 +54,11 @@ export default function ContactPage() {
               label="Hours"
               value={siteConfig.hours}
               sub={siteConfig.hoursNote}
+            />
+            <QuotePhoto
+              src="/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg"
+              alt="PVS crew on ladders clearing leaves out of a home's gutters"
+              className="hidden lg:block"
             />
           </div>
 

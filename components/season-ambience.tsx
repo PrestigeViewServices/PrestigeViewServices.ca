@@ -21,6 +21,9 @@ import { cn } from "@/lib/utils";
  */
 const SKIP_PREFIXES = ["/admin", "/services/", "/winter-packages"];
 
+/** Fall cleanup pages show falling leaves only, no snow. */
+const LEAVES_ONLY_PREFIXES = ["/fall-winter"];
+
 // Deterministic spread so SSR + hydrate match. Even indexes are snow, odd
 // are leaves, so the two seasons interleave across the viewport.
 const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
@@ -37,6 +40,7 @@ const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
 export function SeasonAmbience() {
   const pathname = usePathname() ?? "/";
   if (SKIP_PREFIXES.some((p) => pathname.startsWith(p))) return null;
+  const leavesOnly = LEAVES_ONLY_PREFIXES.some((p) => pathname.startsWith(p));
 
   return (
     <div
@@ -44,13 +48,14 @@ export function SeasonAmbience() {
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden motion-reduce:hidden"
     >
       {PARTICLES.map((p, i) => {
-        const Icon = p.kind === "snow" ? Snowflake : Leaf;
+        const kind = leavesOnly ? "leaf" : p.kind;
+        const Icon = kind === "snow" ? Snowflake : Leaf;
         return (
           <span
             key={i}
             className={cn(
               "absolute top-0 will-change-transform",
-              p.kind === "snow"
+              kind === "snow"
                 ? "text-sky-200 animate-ambience-fall"
                 : "text-amber-400 animate-ambience-fall-tumble"
             )}

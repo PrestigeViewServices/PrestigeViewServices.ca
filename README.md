@@ -122,10 +122,9 @@ links still land somewhere sensible.
 
 ### Saving and moving leads
 
-Leads reach the database two ways: the native form (`/request-service` →
-`/api/leads`) and referral flows. The **Get Quote** form on `/quote` and
-`/contact` is an Aurora Suite iframe, so those leads live in Aurora until
-they are imported.
+Every public quote form on the site is the Aurora Suite iframe, so new
+leads live in Aurora until they are imported here (or entered by hand in
+**Leads → New lead**).
 
 - **Leads inbox → Export CSV** — every lead as a spreadsheet.
 - **Leads inbox → Backup (JSON)** — every intake table (leads, quote

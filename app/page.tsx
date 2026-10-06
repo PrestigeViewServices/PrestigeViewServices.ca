@@ -15,7 +15,7 @@ import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
-import { QuickQuote } from "@/components/quick-quote";
+import { QuoteCtaCard } from "@/components/home/quote-cta-card";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
 import { getSiteContent } from "@/lib/site-content";
@@ -112,9 +112,8 @@ export default async function HomePage() {
                 where you are and we will hold your spot while we quote.
               </p>
             </div>
-            <QuickQuote
-              origin="home-closing"
-              defaultService="snow-removal"
+            <QuoteCtaCard
+              id="home-quote"
               title="Hold my spot"
               subtitle="Free quote, no payment today."
             />

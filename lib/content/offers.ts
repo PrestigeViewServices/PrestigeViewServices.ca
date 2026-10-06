@@ -8,8 +8,7 @@ export type Offer = {
   headline: string;
   body: string;
   ctaLabel: string;
-  /** Where the CTA goes. Use /request-service?service=<slug> (the native
-   *  form pre-selects the service; the Aurora iframe at /quote cannot). */
+  /** Where the CTA goes, e.g. /request-service or /quote (both Aurora). */
   ctaHref: string;
   accent: "lawn" | "clearview" | "snowland";
   /** Which division this offer belongs to, used for filtering on division pages */

@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SamTip } from "@/components/sam";
-import { QuickQuote } from "@/components/quick-quote";
+import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuoteCtaCard } from "@/components/home/quote-cta-card";
+import { QuotePhoto } from "@/components/quote-photo";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -138,10 +140,11 @@ export default function FallWinterPage() {
             </ul>
           </div>
           <div className="lg:col-span-5">
-            <QuickQuote
-              origin="fall-winter-hero"
+            <QuoteCtaCard
+              id="quote-form"
+              href="#closing-quote"
               title="Quote my fall & winter"
-              subtitle="Pick a service and your town. We call back within one business day."
+              subtitle="Fall cleanup, gutters and a snow plan, quoted together."
             />
           </div>
         </div>
@@ -273,8 +276,8 @@ export default function FallWinterPage() {
       <EquipmentByTown />
 
       {/* ---- Closing CTA ---- */}
-      <section className="container-max grid items-center gap-10 py-16 lg:grid-cols-2">
-        <div>
+      <section className="container-max grid gap-10 py-16 lg:grid-cols-12">
+        <div className="lg:col-span-5">
           <h2 className="text-3xl font-bold tracking-tight">
             Lock in the whole season in one call
           </h2>
@@ -290,12 +293,16 @@ export default function FallWinterPage() {
           <Button asChild size="lg" variant="outline" className="mt-6">
             <a href={phoneHref}>Call {siteConfig.phoneDisplay}</a>
           </Button>
+          <QuotePhoto
+            src="/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp"
+            alt="Ottawa Valley yard raked clear and trimmed after a PVS fall cleanup"
+            caption="Raked, trimmed and hauled away in one visit."
+            className="mt-8 hidden lg:block"
+          />
         </div>
-        <QuickQuote
-          origin="fall-winter-closing"
-          defaultService="snow-removal"
-          title="Get my free quote"
-        />
+        <div className="lg:col-span-7">
+          <AuroraLeadForm id="closing-quote" />
+        </div>
       </section>
     </>
   );
