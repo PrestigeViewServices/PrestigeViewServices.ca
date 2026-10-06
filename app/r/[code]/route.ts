@@ -9,9 +9,9 @@ export const runtime = "nodejs";
  * Referral landing: /r/JORDAN-4X2K
  *
  * Validates the code, drops the attribution cookie for the configured window,
- * and lands the friend on the NATIVE request form (/request-service). That
- * matters: /api/leads is what turns the cookie into a Referral, and only the
- * native form posts there — the Aurora iframe on /quote never would.
+ * and lands the friend on /request-service with the welcome banner. The form
+ * there is the Aurora iframe, which does not post to /api/leads, so the
+ * cookie alone no longer creates a Referral; the office attributes it.
  *
  * An unknown code still lands on the form. A referral link is a lead; it is
  * never a dead end.

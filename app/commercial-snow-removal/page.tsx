@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
-import { CommercialQuoteForm } from "@/components/winter/commercial-quote-form";
+import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -318,7 +318,7 @@ export default function CommercialSnowPage() {
           </p>
         </div>
         <div className="lg:col-span-7">
-          <CommercialQuoteForm />
+          <AuroraLeadForm id="commercial-quote" />
         </div>
       </section>
 

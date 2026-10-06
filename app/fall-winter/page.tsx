@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SamTip } from "@/components/sam";
-import { QuickQuote } from "@/components/quick-quote";
+import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -138,11 +138,7 @@ export default function FallWinterPage() {
             </ul>
           </div>
           <div className="lg:col-span-5">
-            <QuickQuote
-              origin="fall-winter-hero"
-              title="Quote my fall & winter"
-              subtitle="Pick a service and your town. We call back within one business day."
-            />
+            <AuroraLeadForm id="quote-form" eager />
           </div>
         </div>
       </section>
@@ -291,11 +287,7 @@ export default function FallWinterPage() {
             <a href={phoneHref}>Call {siteConfig.phoneDisplay}</a>
           </Button>
         </div>
-        <QuickQuote
-          origin="fall-winter-closing"
-          defaultService="snow-removal"
-          title="Get my free quote"
-        />
+        <AuroraLeadForm id="closing-quote" />
       </section>
     </>
   );
