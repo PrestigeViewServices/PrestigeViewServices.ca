@@ -62,7 +62,7 @@ export function AuroraLeadForm({
         loading={eager ? "eager" : "lazy"}
         referrerPolicy="strict-origin-when-cross-origin"
         allow="clipboard-write; autoplay; encrypted-media"
-        className="block w-full border-0 bg-transparent rounded-xl max-md:rounded-[10px] max-md:px-4 transition-[height] duration-300 ease-in-out"
+        className="block w-full border-0 bg-transparent rounded-xl max-md:rounded-[10px] transition-[height] duration-300 ease-in-out"
         style={{ height: 600 }}
       />
     </div>

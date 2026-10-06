@@ -25,6 +25,7 @@ import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuotePhoto } from "@/components/quote-photo";
 import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -316,6 +317,12 @@ export default function CommercialSnowPage() {
             </Link>
             .
           </p>
+          <QuotePhoto
+            src="/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp"
+            alt="PVS plow truck clearing a Pembroke commercial lot during an overnight snowfall"
+            caption="Lots cleared overnight, before your doors open."
+            className="mt-8 hidden lg:block"
+          />
         </div>
         <div className="lg:col-span-7">
           <AuroraLeadForm id="commercial-quote" />

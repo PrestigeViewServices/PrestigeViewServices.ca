@@ -10,7 +10,6 @@ import { formatPhone } from "@/lib/utils";
 const SENTINEL_ID = "sticky-cta-sentinel";
 
 const ON_PAGE_FORMS: Record<string, string> = {
-  "/": "#hero-quote",
   "/commercial-snow-removal": "#commercial-quote",
   "/request-service": "#quote-form",
 };

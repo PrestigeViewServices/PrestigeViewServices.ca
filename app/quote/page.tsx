@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Phone, Mail, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuotePhoto } from "@/components/quote-photo";
 import { SectionHeading } from "@/components/section-heading";
 import { ReviewCta } from "@/components/review-cta";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
@@ -82,6 +83,12 @@ export default async function QuotePage() {
         </div>
 
         <aside className="lg:col-span-5 space-y-5">
+          <QuotePhoto
+            src="/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp"
+            alt="Driveway cleared by a PVS tractor on a bright winter morning"
+            caption="Real PVS work, Petawawa & Pembroke."
+            className="hidden lg:block"
+          />
           <div className="surface-card p-6">
             <h2 className="text-lg font-semibold">Prefer to talk?</h2>
             <p className="mt-1.5 text-sm text-muted-foreground">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Phone, Mail, Clock, ShieldCheck } from "lucide-react";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuotePhoto } from "@/components/quote-photo";
 import { SamTip } from "@/components/sam";
 import { SectionHeading } from "@/components/section-heading";
 import { ReferralWelcomeBanner } from "@/components/referral-welcome-banner";
@@ -42,6 +43,12 @@ export default async function RequestServicePage({
         </div>
 
         <aside className="lg:col-span-5 space-y-5">
+          <QuotePhoto
+            src="/images/gallery/snow-removal/tractor-snowblowing-sunrise-residential.webp"
+            alt="PVS tractor snow-blowing a Petawawa driveway at sunrise"
+            caption="Local crews, fully insured."
+            className="hidden lg:block"
+          />
           <SamTip pose="hero" eyebrow="Sam's booking tip">
             Bundling saves you money. Add gutter cleaning or a snow pass to
             your request and we price everything together in one quote.

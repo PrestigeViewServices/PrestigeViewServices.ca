@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
 import { DEFAULT_HERO, type HeroContent } from "@/lib/site-content";
 import { formatPhone } from "@/lib/utils";
-import { AuroraLeadForm } from "@/components/AuroraLeadForm";
+import { QuoteCtaCard } from "@/components/home/quote-cta-card";
 
 /**
  * Hero, full-width rotation of real job photos with a navy overlay. Copy +
@@ -198,7 +198,7 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
         </motion.div>
 
         <div className="mx-auto w-full min-w-0 max-w-md lg:col-span-5 lg:max-w-none">
-          <AuroraLeadForm id="hero-quote" eager />
+          <QuoteCtaCard id="hero-quote" tone="glass" />
         </div>
       </div>
       {/* Observed by <StickyCta> */}
