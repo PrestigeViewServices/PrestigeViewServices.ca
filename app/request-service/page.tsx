@@ -19,8 +19,8 @@ export const metadata: Metadata = {
  * Lead-capture page using the Aurora Suite form, same as /quote.
  *
  * /r/[code] referral links still land here and show the welcome banner,
- * but Aurora submissions do not post to /api/leads, so the referral is
- * not auto-attributed. The office matches it by the friend's name.
+ * but the Aurora form cannot read the referral cookie, so the office
+ * matches the referral by the friend's name.
  */
 export default async function RequestServicePage({
   searchParams,

@@ -10,8 +10,9 @@ export const runtime = "nodejs";
  *
  * Validates the code, drops the attribution cookie for the configured window,
  * and lands the friend on /request-service with the welcome banner. The form
- * there is the Aurora iframe, which does not post to /api/leads, so the
- * cookie alone no longer creates a Referral; the office attributes it.
+ * there is the Aurora iframe, so a quote request alone does not create a
+ * Referral; the office attributes it. The cookie still credits the friend
+ * if they create an account.
  *
  * An unknown code still lands on the form. A referral link is a lead; it is
  * never a dead end.

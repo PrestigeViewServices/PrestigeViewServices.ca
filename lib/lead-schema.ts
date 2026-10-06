@@ -1,9 +1,7 @@
-import { z } from "zod";
-
 /**
- * Native "request service" lead form → /api/leads → Lead (pipeline NEW).
- * Replaces nothing: the external Aurora iframe on /quote stays; this is the
- * internal-pipeline intake path (brief: "public form → Lead automatically").
+ * Lead services and their pipeline divisions. Used by the CSV lead import
+ * (lib/lead-import.ts) to map Aurora exports onto the admin pipeline. All
+ * public lead capture runs through the Aurora Suite form.
  */
 
 export const LEAD_DIVISIONS = [
@@ -21,7 +19,7 @@ export const LEAD_DIVISION_VALUES = LEAD_DIVISIONS.map((d) => d.value) as [
 export type LeadDivision = (typeof LEAD_DIVISION_VALUES)[number];
 
 /**
- * The public form's service dropdown: the 8 core services plus a catch-all.
+ * The 8 core services plus a catch-all.
  * Each maps to the internal pipeline division for the admin dashboard.
  */
 export const LEAD_SERVICES = [
@@ -48,69 +46,3 @@ export function divisionForService(service: string): LeadDivision {
     LEAD_SERVICES.find((s) => s.value === service)?.division ?? "CLEARVIEW"
   );
 }
-
-export const SNOW_SERVICE_VALUES = ["snow-removal", "commercial-snow-removal"];
-
-/**
- * Where the property is. Snow equipment is assigned by town (Pembroke runs
- * plow trucks, Petawawa runs tractors), so the office needs this up front
- * to route the quote. Stored on the lead as a prefix of the address/notes,
- * no schema change.
- */
-export const LEAD_TOWNS = [
-  { value: "petawawa", label: "Petawawa" },
-  { value: "pembroke", label: "Pembroke" },
-  { value: "other", label: "Elsewhere in the Valley" },
-] as const;
-
-export const LEAD_TOWN_VALUES = LEAD_TOWNS.map((t) => t.value) as [
-  "petawawa",
-  "pembroke",
-  "other",
-];
-
-export const PROPERTY_TYPES = [
-  { value: "residential", label: "Home" },
-  { value: "commercial", label: "Business / commercial" },
-] as const;
-
-export const leadSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Please enter your full name")
-    .max(80, "Name is too long"),
-  phone: z
-    .string()
-    .min(7, "Please enter a valid phone number")
-    .max(25)
-    .regex(/^[0-9 +()\-.]+$/, "Use digits and ( ) + - only"),
-  email: z.string().email("Please enter a valid email"),
-  service: z.enum(LEAD_SERVICE_VALUES, {
-    errorMap: () => ({ message: "Pick the service you need" }),
-  }),
-  /** Optional promo code typed in by the customer. No promo is advertised
-   * today; kept so a future campaign can use it without a schema change. */
-  promoCode: z.string().max(30).optional().or(z.literal("")),
-  /** Prestige Club referral code, prefilled from /r/[code] or typed in by
-   * hand ("a friend gave me their code"). Validated server-side. */
-  referralCode: z.string().max(30).optional().or(z.literal("")),
-  propertyAddress: z.string().max(200).optional().or(z.literal("")),
-  town: z.enum(LEAD_TOWN_VALUES).optional().or(z.literal("")),
-  propertyType: z
-    .enum(["residential", "commercial"])
-    .optional()
-    .or(z.literal("")),
-  /** Business name, commercial requests only. */
-  company: z.string().max(120).optional().or(z.literal("")),
-  /** Which page/CTA the lead came from, e.g. "home-hero". Internal only. */
-  origin: z.string().max(60).optional().or(z.literal("")),
-  message: z
-    .string()
-    .max(2000, "Keep it under 2000 characters")
-    .optional()
-    .or(z.literal("")),
-  /** Anti-spam honeypot — must be empty. */
-  hp: z.string().max(0).optional(),
-});
-
-export type LeadFormValues = z.infer<typeof leadSchema>;
