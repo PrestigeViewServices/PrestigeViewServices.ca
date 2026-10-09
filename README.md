@@ -120,6 +120,12 @@ required. `.env.example` documents every variable with where to get it.
 `/sign-in`, `/sign-up`, `/post-sign-in` are legacy redirects kept so old
 links still land somewhere sensible.
 
+### SnowLand season launch
+
+The season name and launch date (currently **SnowLand Season 2, Nov 15**)
+live in `lib/content/snow-season.ts`. The home page countdown section and the
+`/winter-packages` badge, countdown and start-date FAQ read from it.
+
 ### Saving and moving leads
 
 Every public quote form on the site is the Aurora Suite iframe, so new

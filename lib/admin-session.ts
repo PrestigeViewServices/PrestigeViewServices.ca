@@ -70,6 +70,8 @@ export type AdminAuthDiagnostics = {
   hasPassword: boolean;
   hasEmail: boolean;
   hasSessionSecret: boolean;
+  /** DATABASE_URL is set — saved sign-ins (Admin → Accounts) need it. */
+  hasDatabase: boolean;
   /** e.g. "g***@o***.com" — enough to recognise, not enough to target. */
   maskedEmail: string | null;
 };
@@ -80,6 +82,7 @@ export function adminAuthDiagnostics(): AdminAuthDiagnostics {
     hasPassword: Boolean(envTrimmed("ADMIN_PASSWORD")),
     hasEmail: Boolean(email),
     hasSessionSecret: Boolean(envTrimmed("ADMIN_SESSION_SECRET")),
+    hasDatabase: Boolean(envTrimmed("DATABASE_URL")),
     maskedEmail: email ? maskEmail(email) : null,
   };
 }
