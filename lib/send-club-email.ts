@@ -2,7 +2,7 @@ import { siteConfig } from "@/lib/site";
 
 /**
  * Prestige Club transactional email, same best-effort Resend pattern as
- * lib/send-lead-email.ts: never throws, self-disables without an API key.
+ * the original lead email helper: never throws, self-disables without an API key.
  */
 export async function sendClubEmail(opts: {
   to: string;

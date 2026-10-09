@@ -140,7 +140,7 @@ export default function AboutPvsPage() {
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           Home base is Petawawa, with routes across Pembroke, Deep River, and
           the wider Ottawa Valley. Snow removal runs in Petawawa and is
-          expanding into Pembroke this season, lawn and exterior services
+          now running in Pembroke too (plow trucks in Pembroke, tractors in Petawawa), lawn and exterior services
           cover the whole Valley year-round.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

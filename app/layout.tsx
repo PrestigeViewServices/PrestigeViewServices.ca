@@ -12,6 +12,7 @@ import { ScrollProgress } from "@/components/scroll-progress";
 import { SeasonAmbience } from "@/components/season-ambience";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
+import { HideOnAdmin } from "@/components/site-chrome";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
@@ -166,16 +167,22 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <ScrollProgress />
-        {/* Fall & winter drift behind every public page (skips /admin) */}
-        <SeasonAmbience />
-        <Header />
+        {/* Public marketing chrome. /admin is a standalone app with its own
+            shell (app/admin/layout.tsx), so all of this is skipped there. */}
+        <HideOnAdmin>
+          <ScrollProgress />
+          {/* Fall & winter drift behind every public page */}
+          <SeasonAmbience />
+          <Header />
+        </HideOnAdmin>
         <main id="main" className="flex-1">
           {children}
         </main>
-        <Footer />
-        <OfferModal />
-        <StickyCta />
+        <HideOnAdmin>
+          <Footer />
+          <OfferModal />
+          <StickyCta />
+        </HideOnAdmin>
 
         {/* Analytics, providers self-disable when their env vars are unset */}
         <VercelAnalytics />

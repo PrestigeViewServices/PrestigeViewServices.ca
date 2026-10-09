@@ -123,18 +123,14 @@ links still land somewhere sensible.
 ### SnowLand season launch
 
 The season name and launch date (currently **SnowLand Season 2, Nov 15**)
-live in `lib/content/snow-season.ts`. The home page section, hero badge,
-season banner default, sticky bar, `/winter-packages` countdown and the
-Command Center tracker all read from it. The home hero and season banner
-are also editable at `/admin/site/content`; a saved override there wins over
-the code copy, so use **Reset section** to pick up new defaults.
+live in `lib/content/snow-season.ts`. The home page countdown section and the
+`/winter-packages` badge, countdown and start-date FAQ read from it.
 
 ### Saving and moving leads
 
-Leads reach the database two ways: the native form (`/request-service` →
-`/api/leads`) and referral flows. The **Get Quote** form on `/quote` and
-`/contact` is an Aurora Suite iframe, so those leads live in Aurora until
-they are imported.
+Every public quote form on the site is the Aurora Suite iframe, so new
+leads live in Aurora until they are imported here (or entered by hand in
+**Leads → New lead**).
 
 - **Leads inbox → Export CSV** — every lead as a spreadsheet.
 - **Leads inbox → Backup (JSON)** — every intake table (leads, quote

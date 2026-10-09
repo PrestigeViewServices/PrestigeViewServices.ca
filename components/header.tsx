@@ -6,9 +6,9 @@ import {
   ChevronDown,
   Menu,
   Phone,
-  LifeBuoy,
   Snowflake,
   Leaf,
+  Building2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -34,21 +34,29 @@ import { formatPhone } from "@/lib/utils";
 // flow is more valuable than any informational page.
 const featuredLinks = [
   {
+    href: "/fall-winter",
+    label: "Fall Cleanup",
+    icon: Leaf,
+    // Amber = fall, frost = winter. The two colours are the season theme.
+    cls: "text-amber-300 hover:bg-amber-400/10",
+    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
+    tileIcon: "bg-amber-400/20 text-amber-300",
+  },
+  {
     href: "/winter-packages",
-    label: "Snow Passes",
+    label: "Snow Removal",
     icon: Snowflake,
     cls: "text-sky-300 hover:bg-sky-400/10",
     tile: "border-sky-400/30 bg-sky-400/10 hover:bg-sky-400/20",
     tileIcon: "bg-sky-400/20 text-sky-300",
   },
   {
-    href: "/fall-winter",
-    label: "Fall & Winter",
-    icon: Leaf,
-    // Amber = fall, frost = winter. The two colours are the season theme.
-    cls: "text-amber-300 hover:bg-amber-400/10",
-    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
-    tileIcon: "bg-amber-400/20 text-amber-300",
+    href: "/commercial-snow-removal",
+    label: "Commercial",
+    icon: Building2,
+    cls: "text-cyan-200 hover:bg-cyan-400/10",
+    tile: "border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20",
+    tileIcon: "bg-cyan-400/20 text-cyan-200",
   },
 ] as const;
 
@@ -57,6 +65,8 @@ const exploreLinks = [
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
   { href: "/services/fall-cleanup", label: "Fall Cleanups" },
+  { href: "/winter-packages", label: "Residential Snow Plans" },
+  { href: "/commercial-snow-removal", label: "Commercial Snow Removal" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
   { href: "/guides", label: "Tips & Guides" },
@@ -85,7 +95,7 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-1">
           <Link
             href="/services"
-            className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+            className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors xl:px-4"
           >
             Services
           </Link>
@@ -96,7 +106,7 @@ export function Header() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${l.cls}`}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold transition-colors xl:px-4 ${l.cls}`}
               >
                 <Icon className="h-4 w-4" />
                 {l.label}
@@ -105,7 +115,7 @@ export function Header() {
           })}
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
+            <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-full px-3 py-2 xl:px-4 text-sm font-medium text-foreground/90 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
               Explore
               <ChevronDown className="h-4 w-4 opacity-70" />
             </DropdownMenuTrigger>
@@ -121,25 +131,19 @@ export function Header() {
 
         {/* Right actions (desktop) */}
         <div className="hidden lg:flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <a href={phoneHref} className="flex items-center gap-1.5">
-              <Phone className="h-4 w-4" />
-              Call
-            </a>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/contact" className="flex items-center gap-1.5">
-              <LifeBuoy className="h-4 w-4" />
-              Support
-            </Link>
-          </Button>
+          <a
+            href={phoneHref}
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-foreground hover:bg-surface"
+          >
+            <Phone className="h-4 w-4 text-primary" />
+            {siteConfig.phoneDisplay}
+          </a>
           <Button asChild size="md">
-            <Link href="/quote">Get Quote</Link>
+            <Link href="/quote">Free Quote</Link>
           </Button>
-          <Button asChild variant="ghost" size="md" aria-label="My Account">
+          <Button asChild variant="ghost" size="icon" aria-label="My Account" title="My Account">
             <Link href="/account">
               <UserRound className="h-4 w-4" />
-              My Account
             </Link>
           </Button>
         </div>

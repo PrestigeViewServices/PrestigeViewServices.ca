@@ -8,7 +8,7 @@ export type Offer = {
   headline: string;
   body: string;
   ctaLabel: string;
-  /** Pre-fills /quote?offer=<id>&service=<serviceSlug> */
+  /** Where the CTA goes, e.g. /request-service or /quote (both Aurora). */
   ctaHref: string;
   accent: "lawn" | "clearview" | "snowland";
   /** Which division this offer belongs to, used for filtering on division pages */
@@ -22,27 +22,16 @@ export const offers: Offer[] = [
   // early-bird and 15% exterior bundle were both retired 2026-08-23 at the
   // owner's request. These offers sell timing and bundling instead.
   {
-    id: "winter-reserve",
-    active: true,
-    eyebrow: "SnowLand Season 2 · Starts Nov 15",
-    headline: "Reserve Your Driveway for the Whole Winter",
-    body: "SnowLand Season 2 starts November 15. A seasonal pass means you never call, never negotiate, and never shovel. Routes are capped so response times hold through a storm, and each one closes once it is full.",
-    ctaLabel: "Reserve My Snow Pass",
-    ctaHref: "/winter-packages#packages",
-    accent: "snowland",
-    division: "snowland",
-    showInModal: true,
-  },
-  {
     id: "fall-cleanup",
     active: true,
     eyebrow: "Booking Now",
     headline: "Fall Cleanups Are Open Across the Ottawa Valley",
     body: "Every leaf and branch cleared, the lawn cut to winter height, and the beds tidied so your property goes into the snow looking sharp and comes out of it healthy. Book before the rush and pick your week.",
     ctaLabel: "Book My Fall Cleanup",
-    ctaHref: "/quote?offer=fall-cleanup&service=fall-cleanup",
+    ctaHref: "/request-service?service=fall-cleanup",
     accent: "lawn",
     division: "lawnpros",
+    showInModal: true,
   },
   {
     id: "gutter-fall",
@@ -51,9 +40,20 @@ export const offers: Offer[] = [
     headline: "Gutter Cleaning Before the First Freeze",
     body: "Packed gutters freeze solid, back up under the shingles, and turn into ice dams by January. We clear the debris, flush the downspouts, and flag anything starting to fail while it is still a cheap fix.",
     ctaLabel: "Clear My Gutters",
-    ctaHref: "/quote?offer=gutter-fall&service=gutter-cleaning",
+    ctaHref: "/request-service?service=gutter-cleaning",
     accent: "clearview",
     division: "clearview",
+  },
+  {
+    id: "winter-reserve",
+    active: true,
+    eyebrow: "Winter Routes Filling",
+    headline: "Reserve Your Driveway for the Whole Winter",
+    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Plow trucks in Pembroke, tractors in Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    ctaLabel: "Reserve My Spot",
+    ctaHref: "/winter-packages#packages",
+    accent: "snowland",
+    division: "snowland",
   },
 ];
 

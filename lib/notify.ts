@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site";
  * ticket, winter reservation).
  *
  * Channels:
- *  - Email: Resend HTTP API (same pattern as lib/send-lead-email.ts).
+ *  - Email: Resend HTTP API (never throws, self-disables without a key).
  *    Self-disables when RESEND_API_KEY is unset.
  *  - SMS, first configured provider wins:
  *      1. Twilio  (TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM_NUMBER)

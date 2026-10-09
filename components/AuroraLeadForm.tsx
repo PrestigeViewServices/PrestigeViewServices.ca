@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 const AURORA_ORIGIN = "https://aurorasuite.ca";
 const AURORA_SRC = `${AURORA_ORIGIN}/lead-form/114?signature=c4498657b1ef01bfdc9b5533b8570c45125c92fd8273b7d0ec1cc3555cbbb835`;
@@ -20,7 +21,16 @@ const AURORA_SRC = `${AURORA_ORIGIN}/lead-form/114?signature=c4498657b1ef01bfdc9
  *   restrict to https://aurorasuite.ca so a malicious iframe elsewhere on
  *   the page can't spoof AS_FORM_HEIGHT and resize this iframe.
  */
-export function AuroraLeadForm({ id = "quote-form" }: { id?: string }) {
+export function AuroraLeadForm({
+  id = "quote-form",
+  eager = false,
+  className,
+}: {
+  id?: string;
+  /** Load immediately. Use for above-the-fold placements like the hero. */
+  eager?: boolean;
+  className?: string;
+}) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -40,16 +50,19 @@ export function AuroraLeadForm({ id = "quote-form" }: { id?: string }) {
   return (
     <div
       id={id}
-      className="relative mx-auto w-full max-w-[750px] min-h-[500px] scroll-mt-24"
+      className={cn(
+        "relative mx-auto w-full max-w-[750px] min-h-[500px] scroll-mt-24",
+        className
+      )}
     >
       <iframe
         ref={iframeRef}
         src={AURORA_SRC}
         title="Request a Quote, Prestige View Services"
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
         referrerPolicy="strict-origin-when-cross-origin"
         allow="clipboard-write; autoplay; encrypted-media"
-        className="block w-full border-0 bg-transparent rounded-xl max-md:rounded-[10px] max-md:px-4 transition-[height] duration-300 ease-in-out"
+        className="block w-full border-0 bg-transparent rounded-xl max-md:rounded-[10px] transition-[height] duration-300 ease-in-out"
         style={{ height: 600 }}
       />
     </div>

@@ -64,7 +64,7 @@ export function PortalShowcase() {
               <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
                 Every Silver, Gold, and Platinum pass now includes a private
                 customer portal, powered by Aurora — the same dispatch system
-                that routes our tractors.{" "}
+                that routes our trucks and tractors.{" "}
                 <strong className="text-foreground">
                   Gold and Platinum unlock the full experience
                 </strong>

@@ -2,8 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function AdminLogoutButton() {
+/**
+ * Ends the owner session. `compact` renders an icon-only button for the
+ * top bar; the default is a full-width row for the sidebar footer.
+ */
+export function AdminLogoutButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" });
@@ -13,10 +18,17 @@ export function AdminLogoutButton() {
     <button
       type="button"
       onClick={logout}
-      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+      title="Sign out"
+      aria-label={compact ? "Sign out" : undefined}
+      className={cn(
+        "flex items-center gap-2.5 text-slate-400 transition-colors hover:text-white",
+        compact
+          ? "h-9 w-9 justify-center rounded-sm border border-white/[0.08] hover:bg-white/[0.06]"
+          : "w-full rounded-sm px-3 py-2 text-[13px] font-medium hover:bg-white/[0.04]",
+      )}
     >
       <LogOut className="h-4 w-4" />
-      Sign out
+      {!compact && "Sign out"}
     </button>
   );
 }

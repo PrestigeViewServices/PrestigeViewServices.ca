@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, Snowflake } from "lucide-react";
-import { SNOW_SEASON } from "@/lib/content/snow-season";
+import { ArrowRight, Phone } from "lucide-react";
+import { siteConfig } from "@/lib/site";
+import { formatPhone } from "@/lib/utils";
 
 const SENTINEL_ID = "sticky-cta-sentinel";
+
+const ON_PAGE_FORMS: Record<string, string> = {
+  "/commercial-snow-removal": "#commercial-quote",
+  "/request-service": "#quote-form",
+};
 
 /**
  * Slim persistent CTA that fades in once the user scrolls past the hero.
@@ -48,6 +54,10 @@ export function StickyCta() {
 
   if (isAdmin) return null;
 
+  // Pages with their own quote form get sent to it instead of off-page.
+  const quoteHref =
+    ON_PAGE_FORMS[pathname] ?? "/quote";
+
   return (
     <div
       aria-hidden={!visible}
@@ -59,28 +69,29 @@ export function StickyCta() {
         <div className="container-max flex items-center justify-between gap-3 py-3">
           <div className="hidden sm:block">
             <p className="text-sm font-semibold leading-tight">
-              {SNOW_SEASON.name} starts {SNOW_SEASON.launchDisplay}
+              Fall cleanups &amp; winter snow routes are filling
             </p>
             <p className="text-xs text-muted-foreground">
-              Snow routes are capped · Free quotes in one business day
+              Free quote in one business day · Homes &amp; businesses
             </p>
           </div>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <Link
-              href="/winter-packages#packages"
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <a
+              href={`tel:${formatPhone(siteConfig.phone)}`}
               tabIndex={visible ? 0 : -1}
-              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-md bg-gradient-snowland px-4 py-3 text-sm font-semibold text-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label={`Call ${siteConfig.phoneDisplay}`}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-surface-border px-4 py-3 text-sm font-semibold hover:bg-surface focus:outline-none focus:ring-2 focus:ring-white"
             >
-              <Snowflake className="h-4 w-4 shrink-0" />
-              <span className="whitespace-nowrap sm:hidden">Snow Pass</span>
-              <span className="hidden whitespace-nowrap sm:inline">Reserve Snow Pass</span>
-            </Link>
+              <Phone className="h-4 w-4" />
+              <span className="hidden md:inline">{siteConfig.phoneDisplay}</span>
+              <span className="md:hidden">Call</span>
+            </a>
             <Link
-              href="/quote"
+              href={quoteHref}
               tabIndex={visible ? 0 : -1}
-              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-md border border-surface-border bg-surface px-4 py-3 text-sm font-semibold text-foreground hover:bg-surface/80 focus:outline-none focus:ring-2 focus:ring-white"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-gradient-primary px-5 py-3 text-sm font-semibold text-white shadow-glow hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-white sm:flex-none"
             >
-              Free Quote
+              Get a Free Quote
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

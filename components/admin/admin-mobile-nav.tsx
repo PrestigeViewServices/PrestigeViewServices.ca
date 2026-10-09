@@ -10,18 +10,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { AdminSidebar, activeAdminItem } from "@/components/admin/sidebar";
+import { AdminSidebar } from "@/components/admin/sidebar";
+import { AdminLogoutButton } from "@/components/admin/logout-button";
 
 /**
- * Phone-sized admin navigation. Below the `lg` breakpoint the layout used to
- * stack the full 25-link sidebar ABOVE the page, so the owner scrolled past
- * every link on every page before reaching a single lead. Now a slim bar
- * shows where you are and opens the same sidebar in a drawer.
+ * Phone/tablet navigation (below `lg`). The top bar shows a hamburger that
+ * opens the same nav list as the desktop sidebar in a left drawer, so the
+ * owner never scrolls past 25 links to reach a lead. `brand` is the server-
+ * rendered wordmark, passed in so the drawer header matches the sidebar.
  */
-export function AdminMobileNav({ unread = 0 }: { unread?: number }) {
+export function AdminMobileNav({
+  unread = 0,
+  brand,
+}: {
+  unread?: number;
+  brand?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const current = activeAdminItem(pathname);
 
   // Navigating inside the drawer closes it.
   useEffect(() => {
@@ -29,38 +35,34 @@ export function AdminMobileNav({ unread = 0 }: { unread?: number }) {
   }, [pathname]);
 
   return (
-    <div className="sticky top-[4.25rem] z-30 flex items-center justify-between gap-3 rounded-2xl border border-surface-border bg-surface/85 px-3 py-2 backdrop-blur-md lg:hidden">
-      <div className="flex min-w-0 items-center gap-2">
-        {current && <current.icon className="h-4 w-4 shrink-0 text-primary" />}
-        <span className="truncate text-sm font-semibold">
-          {current?.label ?? "PVS Admin"}
-        </span>
-      </div>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <button
-            type="button"
-            className="relative inline-flex shrink-0 items-center gap-1.5 rounded-full border border-surface-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-white/15 hover:bg-white/5"
-            aria-label="Open admin menu"
-          >
-            <Menu className="h-4 w-4" />
-            Menu
-            {unread > 0 && (
-              <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] font-bold text-white">
-                {unread > 99 ? "99+" : unread}
-              </span>
-            )}
-          </button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[85vw] max-w-xs overflow-y-auto p-0">
-          <SheetHeader className="border-b border-surface-border py-4">
-            <SheetTitle className="text-base">PVS Admin</SheetTitle>
-          </SheetHeader>
-          <div className="p-4">
-            <AdminSidebar unread={unread} />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button
+          type="button"
+          className="relative grid h-9 w-9 shrink-0 place-items-center rounded-sm border border-white/[0.08] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+          aria-label="Open admin menu"
+        >
+          <Menu className="h-[18px] w-[18px]" />
+          {unread > 0 && (
+            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-[#0A0E18] bg-primary" />
+          )}
+        </button>
+      </SheetTrigger>
+      <SheetContent
+        side="left"
+        className="flex w-[85vw] max-w-[288px] flex-col gap-0 border-r border-white/[0.06] bg-[#070A12] p-0"
+      >
+        <SheetHeader className="space-y-0 border-b border-white/[0.06] px-4 py-3.5 text-left">
+          <SheetTitle className="sr-only">PVS Operations menu</SheetTitle>
+          {brand}
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-2 py-4">
+          <AdminSidebar unread={unread} />
+        </div>
+        <div className="border-t border-white/[0.06] p-2">
+          <AdminLogoutButton />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -19,6 +19,7 @@ import {
   ambienceForService,
 } from "@/components/service-ambience";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
+import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -37,11 +38,11 @@ export async function generateMetadata(
   if (!service) return {};
   const title =
     service.division === "snowland"
-      ? `${service.name} in Petawawa · Expanding to Pembroke`
+      ? `${service.name} in Pembroke & Petawawa`
       : `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
   const description =
     service.division === "snowland"
-      ? `${service.shortDescription} Petawawa snow routes, expanding into Pembroke this season. Free custom quote within one business day.`
+      ? `${service.shortDescription} Plow trucks in Pembroke, tractors in Petawawa. Commercial lots too. Free custom quote within one business day.`
       : `${service.shortDescription} Trusted by Petawawa & Pembroke homeowners, free quote within one business day.`;
   return {
     title,
@@ -210,19 +211,19 @@ export default async function ServiceDetailPage(
         </Link>
 
         <div className="mt-6 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <div className="flex items-start gap-5">
+          <div className="flex min-w-0 items-start gap-5">
             <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/15 text-primary shrink-0">
               <Icon className="h-7 w-7" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="eyebrow text-primary mb-2">
                 {service.division === "snowland"
-                  ? `${categoryLabel} · Petawawa, now expanding to Pembroke`
+                  ? `${categoryLabel} · Pembroke plow trucks · Petawawa tractors`
                   : `${categoryLabel} · Petawawa & Pembroke`}
               </p>
               <h1 className="heading-section text-balance">
                 {service.division === "snowland"
-                  ? `${service.name} in Petawawa`
+                  ? `${service.name} in Pembroke & Petawawa`
                   : `${service.name} in the Ottawa Valley`}
               </h1>
               <p className="mt-4 max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -259,29 +260,11 @@ export default async function ServiceDetailPage(
       </section>
 
       {service.division === "snowland" && (
-        <section className="container-max pt-8 pb-2">
-          <div className="flex flex-col gap-4 rounded-2xl border border-surface-border bg-surface/50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <p className="text-sm sm:text-base leading-relaxed">
-                <span className="font-semibold">Winter coverage:</span>{" "}
-                snow routes run in <span className="font-semibold">Petawawa</span>{" "}
-                (our home base) and are{" "}
-                <span className="font-semibold">
-                  expanding into Pembroke this season
-                </span>
-                , Pembroke spots are limited while the route is built. Other
-                Valley towns aren&apos;t on snow routes yet.
-              </p>
-            </div>
-            <Button asChild className="shrink-0">
-              <Link href="/winter-packages">
-                See the seasonal passes
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+        <EquipmentByTown
+          id="snow-equipment"
+          className="pb-2"
+          description="Snow routes run in Pembroke and Petawawa, and the machine is set by town. Other Valley towns are not on snow routes yet."
+        />
       )}
 
       {showSnowPromo && snowOffer && (

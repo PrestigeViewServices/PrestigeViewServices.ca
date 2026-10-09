@@ -1,5 +1,7 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
-import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { AdminTopbar } from "@/components/admin/topbar";
+import { AdminBrand } from "@/components/admin/brand";
+import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { AdminLoginForm } from "@/components/admin/login-form";
 import {
   adminAuthDiagnostics,
@@ -28,20 +30,23 @@ export default async function AdminLayout({
 }) {
   if (!isAdminAuthConfigured()) {
     return (
-      <section className="container-max py-16">
-        <div className="mx-auto max-w-lg surface-card p-8 text-center">
+      <AuthScreen>
+        <div className="w-full max-w-lg rounded-xl border border-white/[0.08] bg-[#0E1322] p-8 text-center">
           <h1 className="text-xl font-bold">Admin password not set</h1>
           <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
             The dashboard is locked until an owner password exists. Add{" "}
             <code className="rounded bg-surface px-1.5 py-0.5 text-xs">
               ADMIN_PASSWORD=your-strong-password
             </code>{" "}
-            to <code className="rounded bg-surface px-1.5 py-0.5 text-xs">.env.local</code>{" "}
-            (and to the Vercel project&apos;s environment variables for the
-            live site), then reload this page.
+            to{" "}
+            <code className="rounded bg-surface px-1.5 py-0.5 text-xs">
+              .env.local
+            </code>{" "}
+            (and to the Vercel project&apos;s environment variables for the live
+            site), then reload this page.
           </p>
         </div>
-      </section>
+      </AuthScreen>
     );
   }
 
@@ -54,27 +59,66 @@ export default async function AdminLayout({
     const knownEmail =
       member && (await isAdminEmail(member.email)) ? member.email : null;
     return (
-      <section className="container-max flex min-h-[70vh] items-center py-16">
+      <AuthScreen>
         <AdminLoginForm
           diagnostics={adminAuthDiagnostics()}
           initialEmail={knownEmail}
         />
-      </section>
+      </AuthScreen>
     );
   }
 
   const unread = await unreadNotificationCount();
 
-  // Phones get a slim sticky bar + drawer; desktops keep the sticky sidebar.
+  // Standalone app shell (the public header/footer are hidden on /admin by
+  // components/site-chrome.tsx). Desktop: fixed 256px sidebar + sticky top
+  // bar. Below `lg`: top bar with a hamburger that opens the nav drawer.
   return (
-    <section className="container-max py-5 sm:py-8 lg:py-12">
-      <div className="grid gap-5 lg:grid-cols-[230px_1fr] lg:gap-8">
-        <AdminMobileNav unread={unread} />
-        <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start surface-card p-4">
+    <div className="relative isolate min-h-screen bg-[#0A0E18] text-slate-200">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-white/[0.06] bg-[#070A12] lg:flex">
+        <div className="flex h-14 shrink-0 items-center border-b border-white/[0.06] px-4">
+          <AdminBrand />
+        </div>
+        <div className="flex-1 overflow-y-auto px-2 py-4 [scrollbar-width:thin]">
           <AdminSidebar unread={unread} />
-        </aside>
-        <div className="min-w-0">{children}</div>
+        </div>
+        <div className="shrink-0 border-t border-white/[0.06] p-2">
+          <div className="flex items-center gap-2.5 px-3 py-2">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/20 text-[11px] font-bold text-primary">
+              PV
+            </span>
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate text-[12.5px] font-medium text-slate-200">
+                Owner
+              </span>
+              <span className="block text-[11px] text-slate-500">
+                Full access
+              </span>
+            </span>
+          </div>
+          <AdminLogoutButton />
+        </div>
+      </aside>
+
+      <div className="flex min-h-screen flex-col lg:pl-64">
+        <AdminTopbar unread={unread} brand={<AdminBrand />} />
+        <div className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+          {children}
+        </div>
       </div>
-    </section>
+    </div>
+  );
+}
+
+/** Full-screen centered frame for the login + "not configured" screens. */
+function AuthScreen({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative isolate flex min-h-screen flex-col items-center justify-center gap-8 bg-[#0A0E18] px-4 py-16">
+      <AdminBrand />
+      {children}
+      <p className="text-[11px] text-slate-600">
+        Internal system. Authorized Prestige View Services staff only.
+      </p>
+    </div>
   );
 }
