@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarCheck,
+  Droplets,
   Leaf,
   ShieldCheck,
   Snowflake,
@@ -19,7 +20,7 @@ import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Fall Cleanups & Snow Removal in Petawawa & Pembroke",
+  title: "Fall Cleanups, Gutter Cleaning & Snow Removal in Petawawa & Pembroke",
   description:
     "Fall cleanups and gutter cleaning before the freeze, then seasonal snow removal all winter: plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Book before the routes fill.",
   alternates: { canonical: "/fall-winter" },
@@ -102,7 +103,7 @@ export default function FallWinterPage() {
               Booking now for fall &amp; winter
             </p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-              Fall cleanup now.{" "}
+              Fall cleanup &amp; gutters now.{" "}
               <span className="text-gradient-season">Snow removal all winter.</span>
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -115,6 +116,12 @@ export default function FallWinterPage() {
                 <Link href="/services/fall-cleanup">
                   Fall cleanup details
                   <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/services/gutter-cleaning">
+                  <Droplets className="h-4 w-4" />
+                  Gutter cleaning
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -157,7 +164,7 @@ export default function FallWinterPage() {
           Before the freeze
         </p>
         <h2 className="mt-2 text-3xl font-bold tracking-tight">
-          Fall services, done in one visit
+          Fall cleanup, gutters &amp; more, done in one visit
         </h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Everything below can be bundled into a single stop. Bundling saves
@@ -232,7 +239,7 @@ export default function FallWinterPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link href="/winter-packages">
-                  See passes &amp; pricing
+                  See snow passes
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>

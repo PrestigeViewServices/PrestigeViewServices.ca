@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   title:
     "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
   description:
-    "Fall cleanups and seasonal snow removal for homes and businesses in Petawawa & Pembroke. Plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Free quote in one business day.",
+    "Fall cleanups, gutter cleaning and seasonal snow removal for homes and businesses in Petawawa & Pembroke. Plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Free quote in one business day.",
   alternates: { canonical: "/" },
   openGraph: {
     title:

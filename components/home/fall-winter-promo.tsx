@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Building2,
   Check,
+  Droplets,
   Leaf,
   Snowflake,
   Tractor,
@@ -11,9 +12,9 @@ import {
 } from "lucide-react";
 
 /**
- * The seasonal push on the home page. Three doors, one per thing we are
- * selling hardest right now: fall cleanups, residential snow, commercial
- * snow. Each card states the outcome, three proof points, and one CTA.
+ * The seasonal push on the home page. Four doors, one per thing we are
+ * selling hardest right now: fall cleanups, gutter cleaning, residential
+ * snow, commercial snow. Each card states the outcome, three proof points, and one CTA.
  */
 const CARDS = [
   {
@@ -23,10 +24,10 @@ const CARDS = [
     eyebrowCls: "text-amber-300",
     title: "Fall Cleanup",
     pitch:
-      "Leaves hauled, beds cut back, gutters cleared, final cut at winter height. Your yard goes under the snow clean and comes out healthy.",
+      "Leaves hauled, beds cut back, final cut at winter height. Your yard goes under the snow clean and comes out healthy.",
     points: [
       "Leaves mulched or hauled away",
-      "Gutters cleared before ice dams form",
+      "Beds and perennials cut back",
       "One visit, property winter-ready",
     ],
     img: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
@@ -35,6 +36,26 @@ const CARDS = [
     cta: "Book my fall cleanup",
     ring: "hover:border-amber-300/50",
     btn: "bg-amber-400 text-slate-950 hover:bg-amber-300",
+  },
+  {
+    key: "gutters",
+    eyebrow: "Before the first freeze",
+    eyebrowIcon: Droplets,
+    eyebrowCls: "text-teal-300",
+    title: "Gutter Cleaning",
+    pitch:
+      "Packed gutters are what cause ice dams and fascia damage in January. We clear every run and flush the downspouts after the leaves drop.",
+    points: [
+      "Every run cleared by hand",
+      "Downspouts flushed and tested",
+      "Debris bagged and hauled away",
+    ],
+    img: "/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg",
+    alt: "PVS crew on ladders clearing leaves out of a home's gutters",
+    href: "/services/gutter-cleaning",
+    cta: "Book gutter cleaning",
+    ring: "hover:border-teal-300/50",
+    btn: "bg-teal-400 text-slate-950 hover:bg-teal-300",
   },
   {
     key: "snow",
@@ -52,7 +73,7 @@ const CARDS = [
     img: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
     alt: "Driveway cleared edge to edge by a PVS tractor after a snowfall",
     href: "/winter-packages",
-    cta: "See snow plans & pricing",
+    cta: "See snow plans",
     ring: "hover:border-sky-300/50",
     btn: "bg-gradient-primary text-white hover:brightness-110",
   },
@@ -88,15 +109,16 @@ export function FallWinterPromo() {
           <Snowflake className="h-3.5 w-3.5 text-sky-300" aria-hidden />
         </p>
         <h2 className="heading-section mt-3 text-balance">
-          Fall cleanup now. <span className="text-gradient-season">Snow handled all winter.</span>
+          Fall cleanup &amp; gutters now. <span className="text-gradient-season">Snow handled all winter.</span>
         </h2>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Pick what you need. Book the cleanup and a snow plan together and
-          your property is covered from the last leaf to the spring thaw.
+          Pick what you need. Book the cleanup, the gutters, and a snow plan
+          together and your property is covered from the last leaf to the
+          spring thaw.
         </p>
       </div>
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-3">
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {CARDS.map((c) => (
           <article
             key={c.key}
@@ -107,7 +129,7 @@ export function FallWinterPromo() {
                 src={c.img}
                 alt=""
                 fill
-                sizes="(max-width: 1024px) 100vw, 33vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

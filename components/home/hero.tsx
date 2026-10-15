@@ -11,6 +11,7 @@ import {
   Star,
   Medal,
   Leaf,
+  Droplets,
   Snowflake,
   Truck,
   Tractor,
@@ -112,6 +113,9 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
               <Leaf className="h-3 w-3" />
               Fall cleanups
               <span className="text-amber-200/60">·</span>
+              <Droplets className="h-3 w-3 text-teal-300" />
+              <span className="text-teal-300">Gutters</span>
+              <span className="text-amber-200/60">·</span>
               <Snowflake className="h-3 w-3 text-sky-300" />
               <span className="text-sky-300">Snow removal</span>
             </span>
@@ -163,6 +167,17 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
               </a>
             </motion.div>
           </div>
+
+          <p className="mt-4 text-center text-sm text-sky-100/80 lg:text-left">
+            Gutters packed with leaves?{" "}
+            <Link
+              href="/services/gutter-cleaning"
+              className="inline-flex items-center gap-1 font-semibold text-teal-300 hover:underline"
+            >
+              <Droplets className="h-4 w-4" aria-hidden />
+              Book gutter cleaning before freeze-up
+            </Link>
+          </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-xs sm:text-sm text-sky-100/80">
             <span className="inline-flex items-center gap-1.5">

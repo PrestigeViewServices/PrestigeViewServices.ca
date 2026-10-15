@@ -8,10 +8,9 @@
  * Everything (UI, estimator, admin view, reservation form) reads from this
  * file, so updating prices here updates the whole site.
  *
- * The site displays each tier's price as a MONTHLY payment: the single-car
- * seasonal price divided into MONTHLY_INSTALLMENTS equal payments, rounded to
- * a .99 price point (see monthlyCents). Editing a tier's `priceCents` is
- * therefore all it takes to change the advertised monthly number.
+ * Prices are NOT shown on the public site (owner decision, Oct 2026): every
+ * pass is quoted to the property. They are kept here for the admin estimator
+ * and reservation views only.
  *
  * Money is stored as integer cents to keep arithmetic exact.
  */
@@ -475,17 +474,13 @@ export function tierMonthlyFromCents(tier: DrivewayTierDef): number {
 // COMPARISON TABLE
 // =============================================================================
 // Row order is the reading order in the table. `render` pulls the value off
-// the tier def so the table, the cards, and the price display share one
-// source.
+// the tier def so the table and the cards share one source. Prices are not
+// shown publicly: every pass is quoted to the property.
 
 export const COMPARISON_ROWS: {
   label: string;
   render: (t: DrivewayTierDef) => boolean | string;
 }[] = [
-  {
-    label: "Monthly price (from)",
-    render: (t) => `${formatMonthly(tierMonthlyFromCents(t))}/mo`,
-  },
   { label: "Trigger depth", render: (t) => t.compare.triggerDepth },
   { label: "Response time", render: (t) => t.compare.responseTime },
   { label: "Passes per storm", render: (t) => t.compare.passesPerStorm },

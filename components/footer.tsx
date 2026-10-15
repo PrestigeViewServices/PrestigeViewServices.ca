@@ -47,7 +47,7 @@ export function Footer() {
               className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-gradient-to-r from-amber-400/10 to-sky-400/10 px-3.5 py-1.5 text-xs font-semibold text-foreground/90 transition-colors hover:border-amber-400/50"
             >
               <Leaf className="h-3.5 w-3.5 text-amber-300" />
-              Fall cleanups now
+              Fall cleanups &amp; gutters now
               <span className="text-muted-foreground">·</span>
               <Snowflake className="h-3.5 w-3.5 text-sky-300" />
               Snow passes for winter
