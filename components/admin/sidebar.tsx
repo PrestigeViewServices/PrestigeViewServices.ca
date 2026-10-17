@@ -28,6 +28,7 @@ import {
   UserPlus,
   Upload,
   ClipboardList,
+  CalendarDays,
   Radio,
   Trophy,
   Camera,
@@ -120,12 +121,13 @@ const groups: NavGroup[] = [
     title: "Crew App",
     items: [
       { href: "/admin/game-plan", label: "Game Plan", icon: ClipboardList },
+      { href: "/admin/game-plan/week", label: "Week", icon: CalendarDays },
       { href: "/admin/game-plan/live", label: "Live Board", icon: Radio },
       { href: "/admin/game-plan/points", label: "Points", icon: Trophy },
       { href: "/admin/game-plan/photos", label: "Job Photos", icon: Camera },
       { href: "/admin/game-plan/leads", label: "Field Leads", icon: Sparkles },
       { href: "/admin/game-plan/issues", label: "Issues", icon: AlertTriangle },
-      { href: "/admin/game-plan/team", label: "Team & PINs", icon: Users },
+      { href: "/admin/game-plan/team", label: "Team", icon: Users },
     ],
   },
   {

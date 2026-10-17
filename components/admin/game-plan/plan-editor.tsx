@@ -2,34 +2,62 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, Check, Copy, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Copy, Plus, Trash2, X } from "lucide-react";
 import { savePlan, deletePlan, copyPreviousPlan, type PlanInput } from "@/app/admin/game-plan/actions";
 
-type StopDraft = { id?: string; address: string; service: string; note: string; status?: string; photos?: number };
+type Vis = "ALL" | "LEADS" | "NONE";
+type StopDraft = {
+  id?: string; time: string; address: string; service: string; note: string; upsell: string;
+  customerName: string; customerPhone: string; phoneVisibility: Vis; status?: string; photos?: number;
+};
+const VIS_LABEL: Record<Vis, string> = { ALL: "Whole crew", LEADS: "Crew leads +", NONE: "Office only" };
+const emptyStop = (): StopDraft => ({ time: "", address: "", service: "", note: "", upsell: "", customerName: "", customerPhone: "", phoneVisibility: "LEADS" });
+
+type Member = { id: string; name: string; rank: string };
 type Props = {
-  crews: { id: string; name: string; truck: string | null }[];
+  crews: { id: string; name: string; truck: string | null; members: Member[] }[];
   crewId: string;
   date: string;
+  defaults: { gear: string[]; quality: string[]; endOfDay: string[]; mission: string; contact: string; tomorrowDrop: string };
+  rules: { label: string; points: number }[];
   plan: {
-    id: string;
-    truck: string | null;
-    startTime: string | null;
-    brief: string | null;
-    published: boolean;
-    updatedAt: string;
-    stops: { id: string; address: string; service: string | null; note: string | null; status: string; photoUrls: string[] }[];
+    id: string; headline: string | null; truck: string | null; trailer: boolean; startTime: string | null;
+    weather: string | null; mission: string | null; brief: string | null; headsUp: string | null;
+    contact: string | null; tomorrowDrop: string | null; leadId: string | null;
+    gear: string[]; endOfDay: string[]; published: boolean; updatedAt: string;
+    stops: { id: string; time: string | null; address: string; service: string | null; note: string | null; upsell: string | null; customerName: string | null; customerPhone: string | null; phoneVisibility: Vis; status: string; photoUrls: string[] }[];
   } | null;
 };
 
-export function PlanEditor({ crews, crewId, date, plan }: Props) {
+const input = "h-9 w-full rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white outline-none focus:border-primary";
+const label = "flex flex-col gap-1 text-[12px] font-medium text-slate-400";
+
+/**
+ * The standard PVS daily game plan. Everything that can be prefilled is:
+ * lead, team, truck, gear list, quality standard, end-of-day list, points,
+ * contact. You type weather, mission, stops and any heads-up, then post.
+ */
+export function PlanEditor({ crews, crewId, date, defaults, rules, plan }: Props) {
   const router = useRouter();
   const crew = crews.find((c) => c.id === crewId);
-  const [truck, setTruck] = useState(plan?.truck ?? "");
-  const [startTime, setStartTime] = useState(plan?.startTime ?? "");
-  const [brief, setBrief] = useState(plan?.brief ?? "");
+  const members = crew?.members ?? [];
+  const defaultLead = members.find((m) => m.rank === "CREW_LEAD")?.id ?? members.find((m) => m.rank === "FIELD_SUPERVISOR")?.id ?? "";
+
+  const [headline, setHeadline] = useState(plan?.headline ?? "");
+  const [weather, setWeather] = useState(plan?.weather ?? "");
+  const [mission, setMission] = useState(plan?.mission ?? (plan ? "" : defaults.mission));
+  const [leadId, setLeadId] = useState(plan?.leadId ?? defaultLead);
+  const [truck, setTruck] = useState(plan?.truck ?? crew?.truck ?? "");
+  const [trailer, setTrailer] = useState(plan?.trailer ?? false);
+  const [startTime, setStartTime] = useState(plan?.startTime ?? "7:00 AM");
+  const [gear, setGear] = useState<string[]>(plan?.gear.length ? plan.gear : defaults.gear);
+  const [headsUp, setHeadsUp] = useState(plan?.headsUp ?? plan?.brief ?? "");
+  const [endOfDay, setEndOfDay] = useState<string[]>(plan?.endOfDay.length ? plan.endOfDay : defaults.endOfDay);
+  const [contact, setContact] = useState(plan?.contact ?? defaults.contact);
+  const [tomorrowDrop, setTomorrowDrop] = useState(plan?.tomorrowDrop ?? defaults.tomorrowDrop);
   const [published, setPublished] = useState(plan?.published ?? true);
   const [stops, setStops] = useState<StopDraft[]>(
-    plan?.stops.map((s) => ({ id: s.id, address: s.address, service: s.service ?? "", note: s.note ?? "", status: s.status, photos: s.photoUrls.length })) ?? []
+    plan?.stops.map((s) => ({ id: s.id, time: s.time ?? "", address: s.address, service: s.service ?? "", note: s.note ?? "", upsell: s.upsell ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility, status: s.status, photos: s.photoUrls.length })) ?? [emptyStop(), emptyStop()]
   );
   const [bulk, setBulk] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -39,7 +67,6 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
     const p = new URLSearchParams({ crew: next.crewId ?? crewId, date: next.date ?? date });
     router.push(`/admin/game-plan?${p}`);
   }
-
   function update(i: number, patch: Partial<StopDraft>) {
     setStops((s) => s.map((x, j) => (j === i ? { ...x, ...patch } : x)));
   }
@@ -56,11 +83,13 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
     const lines = bulk.split("\n").map((l) => l.trim()).filter(Boolean);
     if (!lines.length) return;
     setStops((s) => [
-      ...s,
+      ...s.filter((x) => x.address.trim() || x.id),
       ...lines.map((l) => {
-        // "123 Main St | mow + trim | gate code 4411"
-        const [address = "", service = "", note = ""] = l.split("|").map((x) => x.trim());
-        return { address, service, note };
+        // "7:30 | 123 Main St | mow + trim | gate 4411 | Jane Carter | 613-555-0142 | mention gutters"
+        const parts = l.split("|").map((x) => x.trim());
+        const hasTime = /^\d{1,2}(:\d{2})?\s*(am|pm)?$/i.test(parts[0] ?? "");
+        const [time, address = "", service = "", note = "", customerName = "", customerPhone = "", upsell = ""] = hasTime ? parts : ["", ...parts];
+        return { ...emptyStop(), time, address, service, note, customerName, customerPhone, upsell };
       }),
     ]);
     setBulk("");
@@ -69,8 +98,9 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
   function submit(publish: boolean) {
     setMsg(null);
     const input: PlanInput = {
-      crewId, date, truck, startTime, brief, published: publish,
-      stops: stops.filter((s) => s.address.trim()).map(({ id, address, service, note }) => ({ id, address, service, note })),
+      crewId, date, headline, truck, trailer, startTime, weather, mission, brief: "", headsUp, contact, tomorrowDrop, leadId,
+      gear: gear.filter(Boolean), endOfDay: endOfDay.filter(Boolean), published: publish,
+      stops: stops.filter((s) => s.address.trim()).map(({ id, time, address, service, note, upsell, customerName, customerPhone, phoneVisibility }) => ({ id, time, address, service, note, upsell, customerName, customerPhone, phoneVisibility })),
     };
     start(async () => {
       try {
@@ -85,63 +115,81 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
   }
 
   const doneCount = stops.filter((s) => s.status && s.status !== "PENDING").length;
+  const team = members.filter((m) => m.id !== leadId).map((m) => m.name);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="flex flex-col gap-4">
-        {/* Header controls */}
-        <div className="flex flex-wrap items-end gap-3 rounded-xl border border-white/[0.07] bg-[#0E1322] p-4">
-          <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Crew
-            <select id="plan-crew" value={crewId} onChange={(e) => go({ crewId: e.target.value })} className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white">
-              {crews.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Date
-            <input id="plan-date" type="date" value={date} onChange={(e) => e.target.value && go({ date: e.target.value })} className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
-          </label>
-          <div className="flex gap-1">
-            <button type="button" onClick={() => go({ date: shift(date, -1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Prev</button>
-            <button type="button" onClick={() => go({ date: shift(date, 1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Next</button>
+    <div className="flex flex-col gap-4">
+        {/* Who / when */}
+        <Section title="PVS Game Plan" right={plan ? <span className="text-[12px] text-slate-500"><span className={published ? "text-emerald-300" : "text-amber-300"}>{published ? "Posted" : "Draft"}</span> · {doneCount}/{stops.filter((s) => s.id).length} done</span> : <span className="text-[12px] text-slate-500">Not posted yet</span>}>
+          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_1fr_1fr]">
+            <label className={label}>Crew
+              <select id="plan-crew" value={crewId} onChange={(e) => go({ crewId: e.target.value })} className={input}>
+                {crews.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </label>
+            <label className={label}>Date<input id="plan-date" type="date" value={date} onChange={(e) => e.target.value && go({ date: e.target.value })} className={input} /></label>
+            <div className="flex items-end gap-1">
+              <button type="button" onClick={() => go({ date: shift(date, -1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Prev</button>
+              <button type="button" onClick={() => go({ date: shift(date, 1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Next</button>
+            </div>
+            <label className={label}>Weather<input id="plan-weather" value={weather} onChange={(e) => setWeather(e.target.value)} placeholder="Sunny, 14°C, wind pm" className={input} /></label>
+            <label className={label}>Week headline<input id="plan-headline" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Lawns Pembroke" className={input} /></label>
           </div>
-          <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Truck
-            <input id="plan-truck" value={truck} onChange={(e) => setTruck(e.target.value)} placeholder={crew?.truck ?? "Truck 2"} className="h-9 w-28 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
+          <label className={`${label} mt-3`}>Today&apos;s mission
+            <input id="plan-mission" value={mission} onChange={(e) => setMission(e.target.value)} placeholder={defaults.mission} className={`${input} h-11 text-[15px] font-semibold`} />
           </label>
-          <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Start
-            <input id="plan-start" value={startTime} onChange={(e) => setStartTime(e.target.value)} placeholder="7:00 AM" className="h-9 w-24 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
-          </label>
-          <div className="ml-auto text-right text-[12px] text-slate-500">
-            {plan ? (
-              <>
-                <span className={published ? "text-emerald-300" : "text-amber-300"}>{published ? "Posted" : "Draft"}</span>
-                <span> · {doneCount}/{stops.length} done</span>
-              </>
-            ) : "Not posted yet"}
+        </Section>
+
+        {/* Crew */}
+        <Section title="Crew">
+          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_1fr]">
+            <label className={label}>Lead
+              <select id="plan-lead" value={leadId} onChange={(e) => setLeadId(e.target.value)} className={input}>
+                <option value="">—</option>
+                {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
+            </label>
+            <label className={label}>Truck<input id="plan-truck" value={truck} onChange={(e) => setTruck(e.target.value)} placeholder="Truck 2" className={input} /></label>
+            <label className="flex h-9 items-center gap-2 self-end text-[13px] text-slate-300"><input id="plan-trailer" type="checkbox" checked={trailer} onChange={(e) => setTrailer(e.target.checked)} /> Trailer</label>
+            <label className={label}>Start<input id="plan-start" value={startTime} onChange={(e) => setStartTime(e.target.value)} placeholder="7:00 AM" className={input} /></label>
           </div>
-        </div>
+          <p className="mt-2 text-[12px] text-slate-500">Team: {team.length ? team.join(", ") : "nobody else active on this crew"} <span className="text-slate-600">(edit under Team)</span></p>
+        </Section>
 
-        <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Morning brief (2 or 3 lines; shows at the top of the crew's screen)
-          <textarea id="plan-brief" value={brief} onChange={(e) => setBrief(e.target.value)} rows={3} placeholder="Rain until 10, start with gutters. Mrs. Lalonde at stop 3 has a dog, close the gate behind you." className="rounded-xl border border-white/10 bg-[#0E1322] px-3 py-2 text-sm text-white" />
-        </label>
+        {/* Gear */}
+        <Section title="Gear check" subtitle="Crew ticks these before leaving. Prefilled from Team > Daily plan defaults.">
+          <ListEditor items={gear} onChange={setGear} placeholder="Add gear item" />
+        </Section>
 
-        {/* Stops */}
-        <div className="rounded-xl border border-white/[0.07] bg-[#0E1322]">
-          <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
-            <h2 className="text-[13px] font-semibold text-slate-100">Stops in order</h2>
+        {/* Route */}
+        <Section
+          title="Route (in order)"
+          right={
             <div className="flex gap-2">
               <button type="button" disabled={pending} onClick={() => start(async () => { const r = await copyPreviousPlan(crewId, date); setMsg(r.ok ? "Copied last plan as a draft. Edit, then post." : r.error); router.refresh(); })} className="inline-flex h-8 items-center gap-1 rounded-sm border border-white/[0.09] px-2.5 text-xs text-slate-300 hover:bg-white/[0.05]"><Copy className="h-3.5 w-3.5" /> Copy last plan</button>
-              <button type="button" onClick={() => setStops((s) => [...s, { address: "", service: "", note: "" }])} className="inline-flex h-8 items-center gap-1 rounded-sm bg-primary px-2.5 text-xs font-semibold text-white"><Plus className="h-3.5 w-3.5" /> Stop</button>
+              <button type="button" onClick={() => setStops((s) => [...s, emptyStop()])} className="inline-flex h-8 items-center gap-1 rounded-sm bg-primary px-2.5 text-xs font-semibold text-white"><Plus className="h-3.5 w-3.5" /> Stop</button>
             </div>
-          </div>
+          }
+          bodyClass="p-0"
+        >
           <div className="flex flex-col divide-y divide-white/[0.05]">
-            {stops.length === 0 && <p className="p-6 text-center text-sm text-slate-500">No stops yet. Add one, paste a list below, or copy the last plan.</p>}
             {stops.map((s, i) => (
               <div key={s.id ?? `new-${i}`} className="grid grid-cols-[28px_1fr_auto] gap-2 p-3">
                 <div className={`mt-2 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${s.status === "DONE" ? "bg-emerald-500 text-white" : s.status === "SKIPPED" ? "bg-amber-500 text-black" : "bg-white/[0.06] text-sky-300"}`}>{s.status === "DONE" ? <Check className="h-3 w-3" /> : i + 1}</div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <input id={`stop-addr-${i}`} value={s.address} onChange={(e) => update(i, { address: e.target.value })} placeholder="Address" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
-                  <input id={`stop-svc-${i}`} value={s.service} onChange={(e) => update(i, { service: e.target.value })} placeholder="Service (mow + trim, gutters, windows...)" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
-                  <input id={`stop-note-${i}`} value={s.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="Note for the crew (gate code, dog, customer home)" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white sm:col-span-2" />
-                  {s.photos ? <p className="text-[11px] text-slate-500 sm:col-span-2">{s.photos} photo{s.photos > 1 ? "s" : ""} uploaded</p> : null}
+                <div className="grid gap-2 sm:grid-cols-[88px_1fr_1.4fr]">
+                  <input id={`stop-time-${i}`} value={s.time} onChange={(e) => update(i, { time: e.target.value })} placeholder="7:30" className={input} />
+                  <input id={`stop-cname-${i}`} value={s.customerName} onChange={(e) => update(i, { customerName: e.target.value })} placeholder="Customer" className={input} />
+                  <input id={`stop-addr-${i}`} value={s.address} onChange={(e) => update(i, { address: e.target.value })} placeholder="Address" className={input} />
+                  <input id={`stop-svc-${i}`} value={s.service} onChange={(e) => update(i, { service: e.target.value })} placeholder="Service: what" className={`${input} sm:col-span-3`} />
+                  <input id={`stop-note-${i}`} value={s.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="Notes: gate code, dog, where to dump, customer home?" className={`${input} sm:col-span-3`} />
+                  <input id={`stop-upsell-${i}`} value={s.upsell} onChange={(e) => update(i, { upsell: e.target.value })} placeholder="Upsell: what to mention" className={`${input} sm:col-span-2`} />
+                  <div className="grid grid-cols-[1fr_auto] gap-2">
+                    <input id={`stop-cphone-${i}`} value={s.customerPhone} onChange={(e) => update(i, { customerPhone: e.target.value })} placeholder="Phone" inputMode="tel" className={input} />
+                    <select id={`stop-vis-${i}`} value={s.phoneVisibility} onChange={(e) => update(i, { phoneVisibility: e.target.value as Vis })} title="Who can see the phone number" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-1 text-[11px] text-slate-300">
+                      {(Object.keys(VIS_LABEL) as Vis[]).map((v) => <option key={v} value={v}>{VIS_LABEL[v]}</option>)}
+                    </select>
+                  </div>
+                  {s.photos ? <p className="text-[11px] text-slate-500 sm:col-span-3">{s.photos} photo{s.photos > 1 ? "s" : ""} uploaded</p> : null}
                 </div>
                 <div className="flex flex-col gap-1">
                   <button type="button" aria-label="Move up" onClick={() => move(i, -1)} className="rounded p-1 text-slate-400 hover:bg-white/[0.06]"><ArrowUp className="h-3.5 w-3.5" /></button>
@@ -152,12 +200,36 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
             ))}
           </div>
           <div className="border-t border-white/[0.06] p-3">
-            <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Paste a list (one stop per line; use | to add service and note)
-              <textarea id="plan-bulk" value={bulk} onChange={(e) => setBulk(e.target.value)} rows={3} placeholder={"12 Hilda St | mow + trim | dog in yard\n48 Festubert Blvd | gutters"} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 font-mono text-xs text-white" />
+            <label className={label}>Paste a list (one stop per line: time | address | service | notes | customer | phone | upsell)
+              <textarea id="plan-bulk" value={bulk} onChange={(e) => setBulk(e.target.value)} rows={3} placeholder={"7:30 | 12 Hilda St | Mow + trim | Dog in yard | Jane Carter | 613-555-0142 | Mention gutters\n9:00 | 48 Festubert Blvd | Gutters"} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 font-mono text-xs text-white" />
             </label>
             <button type="button" onClick={addBulk} disabled={!bulk.trim()} className="mt-2 h-8 rounded-sm border border-white/[0.09] px-3 text-xs text-slate-300 disabled:opacity-40">Add these stops</button>
           </div>
+        </Section>
+
+        {/* Quality + points (read only, from defaults) */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Section title="Quality standard" subtitle="Shown on every stop. Edit under Team.">
+            <ul className="flex flex-col gap-1 text-[13px] text-slate-300">{defaults.quality.map((q) => <li key={q}>☐ {q}</li>)}</ul>
+          </Section>
+          <Section title="Points on the board" subtitle="Active rules. Edit under Team.">
+            <ul className="flex flex-col gap-1 text-[13px]">{rules.map((r) => <li key={r.label} className="flex justify-between gap-2"><span className="text-slate-300">{r.label}</span><span className={`tabular-nums font-semibold ${r.points < 0 ? "text-red-300" : "text-amber-300"}`}>{r.points > 0 ? "+" : ""}{r.points}</span></li>)}</ul>
+          </Section>
         </div>
+
+        {/* Heads up */}
+        <Section title="Heads up" subtitle="Anything out of the ordinary: new customer, picky client, road closure, equipment issue.">
+          <textarea id="plan-headsup" value={headsUp} onChange={(e) => setHeadsUp(e.target.value)} rows={3} placeholder="Paquette Rd closed at the bridge, go around by Murphy. Mrs. Lalonde is new, introduce yourself." className="w-full rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 text-sm text-white outline-none focus:border-primary" />
+        </Section>
+
+        {/* End of day */}
+        <Section title="End of day">
+          <ListEditor items={endOfDay} onChange={setEndOfDay} placeholder="Add end-of-day item" />
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className={label}>Tomorrow&apos;s plan drops at<input id="plan-drop" value={tomorrowDrop} onChange={(e) => setTomorrowDrop(e.target.value)} placeholder="8 PM" className={input} /></label>
+            <label className={label}>Questions<input id="plan-contact" value={contact} onChange={(e) => setContact(e.target.value)} placeholder="AG 613-555-0100 / Luke 613-555-0101" className={input} /></label>
+          </div>
+        </Section>
 
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-2">
@@ -166,31 +238,43 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
           </button>
           <button type="button" disabled={pending} onClick={() => submit(false)} className="h-10 rounded-sm border border-white/[0.09] px-4 text-sm text-slate-300 hover:bg-white/[0.05] disabled:opacity-50">Save draft</button>
           {plan && (
-            <button type="button" disabled={pending} onClick={() => start(async () => { await deletePlan(plan.id); router.refresh(); setStops([]); setBrief(""); setMsg("Plan deleted."); })} className="ml-auto h-10 rounded-sm border border-red-500/30 px-3 text-sm text-red-300 hover:bg-red-500/10">Delete plan</button>
+            <button type="button" disabled={pending} onClick={() => start(async () => { await deletePlan(plan.id); router.refresh(); setStops([emptyStop()]); setMsg("Plan deleted."); })} className="ml-auto h-10 rounded-sm border border-red-500/30 px-3 text-sm text-red-300 hover:bg-red-500/10">Delete plan</button>
           )}
           {msg && <span className="basis-full text-[13px] text-slate-300">{msg}</span>}
         </div>
-      </div>
+    </div>
+  );
+}
 
-      {/* Phone preview */}
-      <aside className="hidden lg:block">
-        <div className="sticky top-20 rounded-[28px] border border-white/10 bg-[#090D18] p-4 shadow-2xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-sky-300">{crew?.name ?? "Crew"}</p>
-          <p className="font-display mt-1 text-lg font-bold">{pretty(date)}</p>
-          <p className="mt-1 text-[12px] text-slate-400">{[truck || crew?.truck ? (/^truck/i.test(truck || crew?.truck || "") ? (truck || crew?.truck) : `Truck ${truck || crew?.truck}`) : null, startTime ? `Start ${startTime}` : null].filter(Boolean).join(" · ") || "Truck and start time appear here"}</p>
-          {brief && <p className="mt-3 whitespace-pre-wrap rounded-lg border-l-4 border-primary bg-white/[0.03] px-2 py-1.5 text-[12px]">{brief}</p>}
-          <ol className="mt-3 flex flex-col gap-1.5">
-            {stops.filter((s) => s.address).slice(0, 12).map((s, i) => (
-              <li key={i} className="flex gap-2 rounded-lg bg-white/[0.03] px-2 py-1.5 text-[12px]">
-                <span className="font-bold text-sky-300">{i + 1}</span>
-                <span className="min-w-0"><span className="block truncate font-semibold">{s.address}</span>{s.service && <span className="block truncate text-slate-400">{s.service}</span>}</span>
-              </li>
-            ))}
-            {stops.filter((s) => s.address).length > 12 && <li className="text-center text-[11px] text-slate-500">+{stops.filter((s) => s.address).length - 12} more</li>}
-          </ol>
-          <p className="mt-3 text-center text-[10px] text-slate-600">What the crew sees</p>
-        </div>
-      </aside>
+function Section({ title, subtitle, right, children, bodyClass }: { title: string; subtitle?: string; right?: React.ReactNode; children: React.ReactNode; bodyClass?: string }) {
+  return (
+    <section className="rounded-xl border border-white/[0.07] bg-[#0E1322]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-2.5">
+        <div><h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-sky-300">{title}</h2>{subtitle && <p className="text-[11.5px] text-slate-500">{subtitle}</p>}</div>
+        {right}
+      </div>
+      <div className={bodyClass ?? "p-4"}>{children}</div>
+    </section>
+  );
+}
+
+function ListEditor({ items, onChange, placeholder }: { items: string[]; onChange: (v: string[]) => void; placeholder: string }) {
+  const [draft, setDraft] = useState("");
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {items.map((it, i) => (
+        <span key={`${it}-${i}`} className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-3 pr-1 text-[13px] text-slate-200">
+          {it}
+          <button type="button" aria-label={`Remove ${it}`} onClick={() => onChange(items.filter((_, j) => j !== i))} className="rounded-full p-0.5 text-slate-500 hover:bg-white/10 hover:text-white"><X className="h-3 w-3" /></button>
+        </span>
+      ))}
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" && draft.trim()) { e.preventDefault(); onChange([...items, draft.trim()]); setDraft(""); } }}
+        placeholder={placeholder}
+        className="h-8 min-w-[160px] flex-1 rounded-full border border-dashed border-white/15 bg-transparent px-3 text-[13px] text-white outline-none focus:border-primary"
+      />
     </div>
   );
 }
@@ -198,8 +282,4 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
 function shift(date: string, n: number) {
   const [y, m, d] = date.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
-}
-function pretty(date: string) {
-  const [y, m, d] = date.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-CA", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" });
 }

@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import {
+  canSeePhone,
   crewVisiblePlans,
+  crewWeek,
   getCrewSession,
+  planDefaults,
   prettyDate,
+  toCheckItems,
+  touchMember,
   standings,
   weekStart,
   ymd,
@@ -22,10 +27,14 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "signed-out" }, { status: 401 });
   const db = getDb();
   if (!db) return NextResponse.json({ error: "db" }, { status: 503 });
+  void touchMember(session.memberId, session.lastSeenAt);
 
-  const [plans, board, recent] = await Promise.all([
+  const [plans, board, week, defaults, rules, recent] = await Promise.all([
     crewVisiblePlans(session.crewId),
     standings(),
+    crewWeek(session.crewId),
+    planDefaults(),
+    db.pointRule.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, select: { label: true, points: true } }),
     db.pointEntry.findMany({
       where: { member: { crewId: session.crewId } },
       orderBy: { createdAt: "desc" },
@@ -34,6 +43,22 @@ export async function GET() {
     }),
   ]);
 
+  // Customer phone numbers are filtered per viewer: a stop marked "leads
+  // only" shows the number to Crew Lead and above; "none" hides it for all.
+  type P = NonNullable<typeof plans.today>;
+  const redact = (p: P | null) => {
+    if (!p) return null;
+    return {
+      ...p,
+      gear: toCheckItems(p.gear),
+      endOfDay: toCheckItems(p.endOfDay),
+      stops: p.stops.map(({ phoneVisibility, customerPhone, ...s }) => ({
+        ...s,
+        customerPhone: canSeePhone(phoneVisibility, session.rank) ? customerPhone : null,
+      })),
+    };
+  };
+
   const me = board.find((s) => s.memberId === session.memberId) ?? null;
   const rank = me ? board.findIndex((s) => s.memberId === me.memberId) + 1 : null;
 
@@ -41,6 +66,7 @@ export async function GET() {
     me: {
       memberId: session.memberId,
       name: session.memberName,
+      position: session.rank,
       crewId: session.crewId,
       crew: session.crewName,
       week: me?.week ?? 0,
@@ -51,15 +77,20 @@ export async function GET() {
     date: plans.date,
     dateLabel: prettyDate(plans.date),
     weekOf: weekStart(ymd()),
-    today: plans.today,
-    tomorrow: plans.tomorrow,
+    today: redact(plans.today),
+    tomorrow: redact(plans.tomorrow),
+    week,
+    quality: defaults.quality,
+    contactDefault: defaults.contact,
+    tomorrowDropDefault: defaults.tomorrowDrop,
+    rules,
     board: board.slice(0, 12),
     recent: recent.map((r) => ({
       id: r.id,
       name: r.member.name,
       points: r.points,
       reason: r.reason,
-      note: r.note,
+      note: r.note && r.note.startsWith("lead:") ? null : r.note,
       date: r.date,
     })),
   });

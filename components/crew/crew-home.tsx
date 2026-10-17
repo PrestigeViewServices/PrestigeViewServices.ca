@@ -5,6 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  CalendarDays,
+  CloudSun,
+  Phone,
+  User,
   Camera,
   Check,
   ChevronDown,
@@ -17,12 +21,17 @@ import {
 } from "lucide-react";
 import { shrinkImage } from "./photo-utils";
 
+type Check = { label: string; done: boolean; byId?: string | null };
 type Stop = {
   id: string;
   sortOrder: number;
+  time: string | null;
+  upsell: string | null;
   address: string;
   service: string | null;
   note: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
   status: "PENDING" | "DONE" | "SKIPPED";
   doneAt: string | null;
   doneBy: { id: string; name: string } | null;
@@ -33,22 +42,38 @@ type Plan = {
   id: string;
   date: string;
   truck: string | null;
+  trailer: boolean;
   startTime: string | null;
+  weather: string | null;
+  mission: string | null;
   brief: string | null;
-  crew: { id: string; name: string; truck: string | null; members: { id: string; name: string }[] };
+  headsUp: string | null;
+  contact: string | null;
+  tomorrowDrop: string | null;
+  lead: { id: string; name: string } | null;
+  gear: Check[];
+  endOfDay: Check[];
+  crew: { id: string; name: string; truck: string | null; members: { id: string; name: string; rank: string }[] };
   stops: Stop[];
 };
+type WeekDay = { date: string; headline: string | null; truck: string | null; startTime: string | null; stopCount: number; doneCount: number; hasDetail: boolean };
 type Payload = {
-  me: { memberId: string; name: string; crew: string; week: number; season: number; rank: number | null; of: number };
+  me: { memberId: string; name: string; position: string; crew: string; week: number; season: number; rank: number | null; of: number };
   date: string;
   dateLabel: string;
   today: Plan | null;
   tomorrow: Plan | null;
+  week: WeekDay[];
+  quality: string[];
+  contactDefault: string;
+  tomorrowDropDefault: string;
+  rules: { label: string; points: number }[];
   board: { memberId: string; name: string; crewName: string; week: number; season: number }[];
   recent: { id: string; name: string; points: number; reason: string; note: string | null; date: string }[];
 };
 
 const POLL_MS = 20_000;
+const RANK_SHORT: Record<string, string> = { FIELD_SUPERVISOR: "Supervisor", CREW_LEAD: "Crew Lead", SENIOR_TECH: "Sr. Tech", TECHNICIAN: "Tech", TRAINEE: "Trainee" };
 
 export function CrewHome() {
   const router = useRouter();
@@ -90,6 +115,16 @@ export function CrewHome() {
     };
   }, [load]);
 
+  async function toggleCheck(planId: string, kind: "gear" | "endOfDay", index: number, done: boolean) {
+    setData((d) => {
+      if (!d?.today || d.today.id !== planId) return d;
+      const list = d.today[kind].map((it, i) => (i === index ? { ...it, done } : it));
+      return { ...d, today: { ...d.today, [kind]: list } };
+    });
+    const res = await fetch("/api/crew/checklist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ planId, kind, index, done }) });
+    if (!res.ok) { say("Didn't save. Try again."); load(); }
+  }
+
   async function logout() {
     await fetch("/api/crew/logout", { method: "POST" });
     router.refresh();
@@ -126,22 +161,20 @@ export function CrewHome() {
 
       {err && <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{err}</p>}
 
-      {/* Today card */}
+      {/* Header: crew, date, weather */}
       <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-300">{data.me.crew}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-300">PVS Game Plan · {data.me.crew}</p>
         <h1 className="font-display mt-1 text-[28px] font-bold leading-tight">{data.dateLabel}</h1>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-300">
-          <span>Hey <b className="text-white">{data.me.name}</b></span>
-          {truck && <span>{/^truck/i.test(truck) ? "" : "Truck "}<b className="text-white">{truck}</b></span>}
+          <span>Hey <b className="text-white">{data.me.name}</b> <span className="text-slate-500">· {RANK_SHORT[data.me.position] ?? data.me.position}</span></span>
+          {plan?.weather && <span><CloudSun className="mr-1 inline h-4 w-4 text-amber-300" />{plan.weather}</span>}
           {plan?.startTime && <span>Start <b className="text-white">{plan.startTime}</b></span>}
-          {plan && plan.crew.members.length > 1 && (
-            <span className="text-slate-400">with {plan.crew.members.filter((m) => m.id !== data.me.memberId).map((m) => m.name).join(", ")}</span>
-          )}
         </div>
-        {plan?.brief && (
-          <p className="mt-4 whitespace-pre-wrap rounded-xl border-l-4 border-primary bg-white/[0.03] px-3 py-2 text-[15px] leading-relaxed">
-            {plan.brief}
-          </p>
+        {plan?.mission && (
+          <div className="mt-4 rounded-xl border-l-4 border-amber-400 bg-amber-400/[0.06] px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300">Today&apos;s mission</p>
+            <p className="mt-0.5 text-[16px] font-semibold leading-snug text-white">{plan.mission}</p>
+          </div>
         )}
         {stops.length > 0 && (
           <div className="mt-4">
@@ -155,6 +188,25 @@ export function CrewHome() {
           </div>
         )}
       </section>
+
+      {plan && (
+        <>
+          {/* Crew */}
+          <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+            <SectionTitle>Crew</SectionTitle>
+            <dl className="mt-2 grid grid-cols-[72px_1fr] gap-x-3 gap-y-1 text-[14px]">
+              <dt className="text-slate-500">Lead</dt><dd className="font-semibold text-white">{plan.lead?.name ?? plan.crew.members.find((m) => m.rank === "CREW_LEAD" || m.rank === "FIELD_SUPERVISOR")?.name ?? "—"}</dd>
+              <dt className="text-slate-500">Team</dt><dd className="text-slate-200">{plan.crew.members.filter((m) => m.id !== (plan.lead?.id ?? "")).map((m) => m.name).join(", ") || "—"}</dd>
+              <dt className="text-slate-500">Truck</dt><dd className="text-slate-200">{truck ? (/^truck/i.test(truck) ? truck : `Truck ${truck}`) : "—"} <span className="text-slate-500">| Trailer: {plan.trailer ? "Y" : "N"}</span></dd>
+            </dl>
+          </section>
+
+          {/* Gear check */}
+          {plan.gear.length > 0 && (
+            <Checklist title="Gear check" subtitle="before you leave" items={plan.gear} onToggle={(i, v) => toggleCheck(plan.id, "gear", i, v)} />
+          )}
+        </>
+      )}
 
       {/* Route */}
       <section>
@@ -192,6 +244,58 @@ export function CrewHome() {
         )}
       </section>
 
+      {plan && (
+        <>
+          {/* Quality standard */}
+          {data.quality.length > 0 && (
+            <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+              <SectionTitle>Quality standard</SectionTitle>
+              <p className="text-[12px] text-slate-500">Before you leave every stop</p>
+              <ul className="mt-2 flex flex-col gap-1.5 text-[14px] text-slate-200">
+                {data.quality.map((q) => <li key={q} className="flex gap-2"><span className="text-emerald-400">✓</span>{q}</li>)}
+              </ul>
+            </section>
+          )}
+
+          {/* Points on the board */}
+          {data.rules.length > 0 && (
+            <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+              <SectionTitle>Points on the board today</SectionTitle>
+              <ul className="mt-2 flex flex-col gap-1 text-[14px]">
+                {data.rules.map((r) => (
+                  <li key={r.label} className="flex items-center justify-between gap-3">
+                    <span className="text-slate-200">{r.label}</span>
+                    <span className={`shrink-0 font-bold tabular-nums ${r.points < 0 ? "text-red-300" : "text-amber-300"}`}>{r.points > 0 ? "+" : ""}{r.points}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Heads up */}
+          {(plan.headsUp || plan.brief) && (
+            <section className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-4">
+              <SectionTitle>Heads up</SectionTitle>
+              <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-amber-50">{plan.headsUp || plan.brief}</p>
+            </section>
+          )}
+
+          {/* End of day */}
+          {(plan.endOfDay.length > 0 || plan.tomorrowDrop || data.tomorrowDropDefault) && (
+            <Checklist
+              title="End of day"
+              items={plan.endOfDay}
+              onToggle={(i, v) => toggleCheck(plan.id, "endOfDay", i, v)}
+              footer={`Tomorrow's plan drops at ${plan.tomorrowDrop || data.tomorrowDropDefault || "tonight"}`}
+            />
+          )}
+
+          {(plan.contact || data.contactDefault) && (
+            <p className="px-1 text-[13px] text-slate-400">Questions: <span className="text-slate-200">{plan.contact || data.contactDefault}</span></p>
+          )}
+        </>
+      )}
+
       {/* Tomorrow preview */}
       {data.tomorrow && (
         <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
@@ -204,6 +308,9 @@ export function CrewHome() {
           {data.tomorrow.brief && <p className="mt-2 text-sm text-slate-300 whitespace-pre-wrap">{data.tomorrow.brief}</p>}
         </section>
       )}
+
+      {/* Week */}
+      <WeekView week={data.week} today={data.date} />
 
       {/* Points */}
       <section>
@@ -261,6 +368,92 @@ export function CrewHome() {
         </div>
       )}
     </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-sky-300">{children}</h2>;
+}
+
+function Checklist({ title, subtitle, items, onToggle, footer }: { title: string; subtitle?: string; items: Check[]; onToggle: (i: number, v: boolean) => void; footer?: string }) {
+  const doneCount = items.filter((i) => i.done).length;
+  return (
+    <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+      <div className="flex items-center justify-between">
+        <div><SectionTitle>{title}</SectionTitle>{subtitle && <p className="text-[12px] text-slate-500">{subtitle}</p>}</div>
+        {items.length > 0 && <span className={`text-[12px] tabular-nums ${doneCount === items.length ? "text-emerald-300" : "text-slate-500"}`}>{doneCount}/{items.length}</span>}
+      </div>
+      <ul className="mt-2 flex flex-col gap-1">
+        {items.map((it, i) => (
+          <li key={i}>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 active:bg-white/[0.04]">
+              <input type="checkbox" checked={it.done} onChange={(e) => onToggle(i, e.target.checked)} className="h-5 w-5 rounded border-white/20 bg-transparent accent-emerald-500" />
+              <span className={`text-[15px] ${it.done ? "text-slate-500 line-through" : "text-slate-100"}`}>{it.label}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+      {footer && <p className="mt-2 text-[12px] text-slate-500">{footer}</p>}
+    </section>
+  );
+}
+
+const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+function dayNum(d: string) { return Number(d.slice(8, 10)); }
+function monthShort(d: string) { return new Date(Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, 1)).toLocaleDateString("en-CA", { month: "short", timeZone: "UTC" }); }
+
+function WeekView({ week, today }: { week: WeekDay[]; today: string }) {
+  const [showNext, setShowNext] = useState(false);
+  if (!week?.length) return null;
+  const thisWeek = week.slice(0, 7);
+  const nextWeek = week.slice(7, 14);
+  const todayIdx = thisWeek.findIndex((d) => d.date === today);
+  // On Sat/Sun, open next week by default: that's what people are asking about.
+  const defaultNext = todayIdx >= 5;
+  const open = showNext || defaultNext;
+  const Row = ({ d, i, dim }: { d: WeekDay; i: number; dim?: boolean }) => {
+    const isToday = d.date === today;
+    const past = d.date < today;
+    const empty = !d.headline && !d.hasDetail;
+    return (
+      <li className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 px-3 py-2.5 ${isToday ? "bg-primary/10" : ""} ${past || dim ? "opacity-60" : ""}`}>
+        <span className="text-center leading-tight">
+          <span className={`block text-[10px] font-semibold uppercase tracking-[0.08em] ${isToday ? "text-sky-300" : "text-slate-500"}`}>{DOW[i]}</span>
+          <span className={`font-display block text-lg font-bold ${isToday ? "text-white" : "text-slate-300"}`}>{dayNum(d.date)}</span>
+        </span>
+        <span className="min-w-0">
+          <span className={`block truncate text-[15px] ${empty ? "text-slate-500" : "font-semibold text-white"}`}>
+            {d.headline || (d.hasDetail ? `${d.stopCount} stops` : "Not planned yet")}
+          </span>
+          <span className="block text-[12px] text-slate-400">
+            {[d.startTime ? `Start ${d.startTime}` : null, d.truck ? (/^truck/i.test(d.truck) ? d.truck : `Truck ${d.truck}`) : null].filter(Boolean).join(" · ")}
+          </span>
+        </span>
+        <span className="text-right text-[12px] tabular-nums text-slate-400">
+          {d.hasDetail ? (past || isToday ? `${d.doneCount}/${d.stopCount}` : `${d.stopCount} stops`) : ""}
+        </span>
+      </li>
+    );
+  };
+  return (
+    <section>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="font-display flex items-center gap-2 text-lg font-semibold"><CalendarDays className="h-4 w-4 text-sky-300" /> This week</h2>
+        <span className="text-xs text-slate-500">{monthShort(thisWeek[0].date)} {dayNum(thisWeek[0].date)} to {monthShort(thisWeek[6].date)} {dayNum(thisWeek[6].date)}</span>
+      </div>
+      <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0E1322]">
+        {thisWeek.map((d, i) => <Row key={d.date} d={d} i={i} />)}
+      </ul>
+      <button type="button" onClick={() => setShowNext((v) => !v)} className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/[0.06] px-3 py-2 text-sm text-slate-300">
+        <span>Next week</span>
+        <ChevronDown className={`h-4 w-4 text-slate-500 transition ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="mt-2 divide-y divide-white/[0.05] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0E1322]">
+          {nextWeek.map((d, i) => <Row key={d.date} d={d} i={i} />)}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -322,9 +515,10 @@ function StopRow({
           {isDone ? <Check className="h-4 w-4" /> : index + 1}
         </span>
         <span className="min-w-0">
-          <span className={`block text-[16px] font-semibold leading-snug ${isDone ? "text-slate-300 line-through decoration-emerald-400/60" : "text-white"}`}>{stop.address}</span>
-          {stop.service && <span className="block text-[13px] text-slate-400">{stop.service}</span>}
+          <span className={`block text-[16px] font-semibold leading-snug ${isDone ? "text-slate-300 line-through decoration-emerald-400/60" : "text-white"}`}>{stop.time && <span className="mr-1.5 text-sky-300">{stop.time}</span>}{stop.address}</span>
+          {(stop.service || stop.customerName) && <span className="block text-[13px] text-slate-400">{[stop.customerName, stop.service].filter(Boolean).join(" · ")}</span>}
           {stop.note && <span className="mt-1 inline-block rounded-md bg-amber-400/15 px-2 py-0.5 text-[13px] text-amber-100">{stop.note}</span>}
+          {stop.upsell && <span className="mt-1 ml-1 inline-block rounded-md bg-emerald-400/15 px-2 py-0.5 text-[13px] text-emerald-100">Upsell: {stop.upsell}</span>}
           {(isDone || isSkipped) && stop.doneBy && (
             <span className="mt-1 block text-[12px] text-slate-500">
               {isDone ? "Done" : "Skipped"} by {stop.doneBy.name}{stop.doneAt ? ` at ${new Date(stop.doneAt).toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", timeZone: "America/Toronto" })}` : ""}
@@ -340,6 +534,13 @@ function StopRow({
             <a href={mapsHref(stop.address)} target="_blank" rel="noopener" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 px-3 text-xs font-semibold text-slate-200">
               <Navigation className="h-3.5 w-3.5" /> Directions
             </a>
+            {stop.customerPhone ? (
+              <a href={`tel:${stop.customerPhone.replace(/[^\d+]/g, "")}`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 text-xs font-semibold text-sky-100">
+                <Phone className="h-3.5 w-3.5" /> {stop.customerName ? `Call ${stop.customerName.split(" ")[0]}` : "Call customer"}
+              </a>
+            ) : stop.customerName ? (
+              <span className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 px-3 text-xs text-slate-400"><User className="h-3.5 w-3.5" /> {stop.customerName}</span>
+            ) : null}
             <button type="button" onClick={onLead} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-emerald-400/30 px-3 text-xs font-semibold text-emerald-200"><Sparkles className="h-3.5 w-3.5" /> Flag lead</button>
             <button type="button" onClick={onIssue} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-400/30 px-3 text-xs font-semibold text-red-200"><AlertTriangle className="h-3.5 w-3.5" /> Issue</button>
           </div>

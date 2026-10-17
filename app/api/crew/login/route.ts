@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
-import { findCrewByPin, isCrewAuthConfigured, setCrewCookie } from "@/lib/crew-app";
+import { findMemberByPin, isCrewAuthConfigured, setCrewCookie, touchMember } from "@/lib/crew-app";
 import { clientIp, rateLimit, tooMany } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-/**
- * Two-step crew sign-in.
- *   POST { pin }            → { crew: { id, name, members[] } }  (pick a name next)
- *   POST { pin, memberId }  → sets the crew cookie, { ok: true }
- */
+/** POST { pin } with a personal PIN → sets the crew cookie. One step. */
 export async function POST(req: Request) {
   if (!isCrewAuthConfigured()) {
     return NextResponse.json(
@@ -20,29 +16,19 @@ export async function POST(req: Request) {
   const limit = await rateLimit("crew-login-ip", ip, 20, 900);
   if (!limit.ok) return tooMany("Too many tries. Wait 15 minutes.");
 
-  const body = (await req.json().catch(() => null)) as
-    | { pin?: string; memberId?: string }
-    | null;
+  const body = (await req.json().catch(() => null)) as { pin?: string } | null;
   const pin = (body?.pin ?? "").replace(/\D/g, "").slice(0, 6);
   if (pin.length < 4) {
-    return NextResponse.json({ error: "Enter your crew PIN." }, { status: 400 });
+    return NextResponse.json({ error: "Enter your PIN." }, { status: 400 });
   }
-  const crew = await findCrewByPin(pin);
-  if (!crew) {
+  const member = await findMemberByPin(pin);
+  if (!member) {
     return NextResponse.json(
-      { error: "That PIN doesn't match a crew. Ask your supervisor." },
+      { error: "That PIN doesn't match anyone. Ask your supervisor." },
       { status: 401 }
     );
   }
-  if (!body?.memberId) {
-    return NextResponse.json({
-      crew: { id: crew.id, name: crew.name, members: crew.members },
-    });
-  }
-  const member = crew.members.find((m) => m.id === body.memberId);
-  if (!member) {
-    return NextResponse.json({ error: "Pick your name." }, { status: 400 });
-  }
-  await setCrewCookie(crew.id, member.id);
-  return NextResponse.json({ ok: true, name: member.name, crew: crew.name });
+  await setCrewCookie(member.crew.id, member.id);
+  await touchMember(member.id, null);
+  return NextResponse.json({ ok: true, name: member.name, crew: member.crew.name });
 }

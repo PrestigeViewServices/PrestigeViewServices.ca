@@ -573,12 +573,20 @@ model CrewMember {
   name      String
   title     String?
   active    Boolean  @default(true)
+  /// Personal crew-app PIN (scrypt hash). Each person signs in with their own.
+  pinHash   String?
+  phone     String?
+  /// Position on the crew. Crew Lead and above can see customer phone
+  /// numbers marked "leads only".
+  rank      CrewRank @default(TECHNICIAN)
+  lastSeenAt DateTime?
   createdAt DateTime @default(now())
 
   points     PointEntry[]
   doneStops  GamePlanStop[]
   fieldLeads FieldLead[]
   issues     FieldIssue[]
+  leadPlans  GamePlan[]     @relation("PlanLead")
 
   @@index([crewId])
   @@index([userId])
@@ -1301,6 +1309,22 @@ enum StopStatus {
   SKIPPED
 }
 
+/// Crew positions, most senior first.
+enum CrewRank {
+  FIELD_SUPERVISOR
+  CREW_LEAD
+  SENIOR_TECH
+  TECHNICIAN
+  TRAINEE
+}
+
+/// Who on the crew may see a stop's customer phone number.
+enum PhoneVisibility {
+  ALL
+  LEADS
+  NONE
+}
+
 enum FieldLeadStatus {
   NEW
   QUOTED
@@ -1327,9 +1351,27 @@ model GamePlan {
   crew      Crew     @relation(fields: [crewId], references: [id], onDelete: Cascade)
   /// Calendar day (stored at 00:00 UTC; compared by YYYY-MM-DD string).
   date      String
+  /// One-line summary for the week view ("Pembroke lawns", "Off", "Gutters day").
+  headline  String?
   truck     String?
+  trailer   Boolean  @default(false)
   startTime String?
+  weather   String?
+  /// Today's mission, one or two lines.
+  mission   String?
+  /// Legacy free-text brief; kept for older plans, shown under Heads up.
   brief     String?
+  headsUp   String?
+  /// Who to call with questions, e.g. "AG 613-555-0100 / Luke 613-555-0101".
+  contact   String?
+  /// When tomorrow's plan drops, e.g. "8 PM".
+  tomorrowDrop String?
+  leadId    String?
+  lead      CrewMember? @relation("PlanLead", fields: [leadId], references: [id])
+  /// Gear check items: [{ label, done, byId }]. Crew ticks these before leaving.
+  gear      Json?
+  /// End-of-day items: [{ label, done, byId }].
+  endOfDay  Json?
   /// Unpublished plans are drafts: crews don't see them.
   published Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -1346,9 +1388,14 @@ model GamePlanStop {
   planId     String
   plan       GamePlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
   sortOrder  Int
+  time       String?
   address    String
   service    String?
   note       String?
+  upsell     String?
+  customerName  String?
+  customerPhone String?
+  phoneVisibility PhoneVisibility @default(LEADS)
   status     StopStatus  @default(PENDING)
   doneAt     DateTime?
   doneById   String?

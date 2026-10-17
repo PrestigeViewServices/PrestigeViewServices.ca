@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { getDb } from "./db";
 import { hashPassword, verifyPassword } from "./customer-auth";
 
@@ -89,6 +90,8 @@ export async function getCrewSession(): Promise<
   | (CrewSession & {
       crewName: string;
       memberName: string;
+      rank: CrewRank;
+      lastSeenAt: Date | null;
     })
   | null
 > {
@@ -100,11 +103,13 @@ export async function getCrewSession(): Promise<
   const db = getDb();
   if (!db) return null;
   const member = await db.crewMember.findFirst({
-    where: { id: s.memberId, crewId: s.crewId, active: true },
-    include: { crew: { select: { name: true, active: true } } },
+    where: { id: s.memberId, active: true },
+    include: { crew: { select: { id: true, name: true, active: true } } },
   });
   if (!member || !member.crew.active) return null;
-  return { ...s, crewName: member.crew.name, memberName: member.name };
+  // A member moved to another crew keeps their session; the crew comes from
+  // the database, not the cookie.
+  return { ...s, crewId: member.crew.id, crewName: member.crew.name, memberName: member.name, rank: member.rank as CrewRank, lastSeenAt: member.lastSeenAt };
 }
 
 export async function setCrewCookie(crewId: string, memberId: string) {
@@ -124,6 +129,38 @@ export async function clearCrewCookie() {
   store.set(CREW_COOKIE, "", { path: "/", maxAge: 0 });
 }
 
+// ---- Ranks -------------------------------------------------------------------
+
+export const RANKS = ["FIELD_SUPERVISOR", "CREW_LEAD", "SENIOR_TECH", "TECHNICIAN", "TRAINEE"] as const;
+export type CrewRank = (typeof RANKS)[number];
+export const RANK_LABEL: Record<CrewRank, string> = {
+  FIELD_SUPERVISOR: "Field Supervisor",
+  CREW_LEAD: "Crew Lead",
+  SENIOR_TECH: "Senior Technician",
+  TECHNICIAN: "Technician",
+  TRAINEE: "Trainee",
+};
+export const RANK_SHORT: Record<CrewRank, string> = {
+  FIELD_SUPERVISOR: "Supervisor",
+  CREW_LEAD: "Lead",
+  SENIOR_TECH: "Sr. Tech",
+  TECHNICIAN: "Tech",
+  TRAINEE: "Trainee",
+};
+/** Lower = more senior. */
+export function rankOrder(r: CrewRank): number {
+  return RANKS.indexOf(r);
+}
+export function isLeadOrAbove(r: CrewRank): boolean {
+  return rankOrder(r) <= rankOrder("CREW_LEAD");
+}
+export type PhoneVisibility = "ALL" | "LEADS" | "NONE";
+export function canSeePhone(vis: PhoneVisibility, rank: CrewRank): boolean {
+  if (vis === "ALL") return true;
+  if (vis === "LEADS") return isLeadOrAbove(rank);
+  return false;
+}
+
 // ---- PINs ------------------------------------------------------------------
 
 export const PIN_RE = /^\d{4,6}$/;
@@ -132,27 +169,37 @@ export async function hashPin(pin: string): Promise<string> {
   return hashPassword(pin);
 }
 
-/** Finds the first active crew whose PIN matches. PINs should be unique per
- * crew; if two crews share one, the first by name wins, so the Team page
- * warns about duplicates. */
-export async function findCrewByPin(pin: string) {
+/**
+ * Finds the active crew member whose personal PIN matches. PINs are kept
+ * unique across members (enforced when set), so the first match is the one.
+ * A dozen scrypt checks per sign-in is fine; sign-in happens once per phone.
+ */
+export async function findMemberByPin(pin: string) {
   const db = getDb();
   if (!db || !PIN_RE.test(pin)) return null;
-  const crews = await db.crew.findMany({
-    where: { active: true, pinHash: { not: null } },
+  const members = await db.crewMember.findMany({
+    where: { active: true, pinHash: { not: null }, crew: { active: true } },
     orderBy: { name: "asc" },
-    include: {
-      members: {
-        where: { active: true },
-        orderBy: { name: "asc" },
-        select: { id: true, name: true },
-      },
-    },
+    include: { crew: { select: { id: true, name: true } } },
   });
-  for (const c of crews) {
-    if (c.pinHash && (await verifyPassword(pin, c.pinHash))) return c;
+  for (const m of members) {
+    if (m.pinHash && (await verifyPassword(pin, m.pinHash))) return m;
   }
   return null;
+}
+
+/** True if another active member already uses this PIN. */
+export async function pinInUse(pin: string, exceptMemberId?: string) {
+  const m = await findMemberByPin(pin);
+  return !!m && m.id !== exceptMemberId;
+}
+
+/** Stamps lastSeenAt at most every 10 minutes so polling doesn't hammer writes. */
+export async function touchMember(memberId: string, lastSeenAt: Date | null) {
+  const db = getDb();
+  if (!db) return;
+  if (lastSeenAt && Date.now() - lastSeenAt.getTime() < 10 * 60 * 1000) return;
+  await db.crewMember.update({ where: { id: memberId }, data: { lastSeenAt: new Date() } }).catch(() => null);
 }
 
 // ---- Dates (business timezone) --------------------------------------------
@@ -227,11 +274,61 @@ export async function seasonStart(): Promise<string> {
   return getCrewSetting("seasonStart", `${y}-01-01`);
 }
 
+// ---- Daily plan defaults -----------------------------------------------------
+
+export type CheckItem = { label: string; done: boolean; byId?: string | null };
+
+export const PLAN_DEFAULTS = {
+  gear: ["Mowers + trimmers", "Blower", "Fuel + 2-stroke mix", "Trip ticket signed out"],
+  quality: [
+    "Before/after photos uploaded",
+    "Walkway + driveway blown clean",
+    "Gate closed, tools counted",
+    "Door hanger left (if customer not home)",
+  ],
+  endOfDay: ["Truck fueled + cleaned", "Trip ticket signed in", "Issues reported in the app"],
+  mission: "Every stop done right, zero callbacks, truck back by 5.",
+  contact: "",
+  tomorrowDrop: "8 PM",
+};
+
+export type PlanDefaults = typeof PLAN_DEFAULTS;
+
+const lines = (v: string) => v.split("\n").map((l) => l.trim()).filter(Boolean);
+
+/** Company-wide defaults for new plans, editable under Team. */
+export async function planDefaults(): Promise<PlanDefaults> {
+  const db = getDb();
+  if (!db) return PLAN_DEFAULTS;
+  const rows = await db.crewSetting.findMany({ where: { key: { in: ["gearDefault", "qualityStandard", "endOfDayDefault", "missionDefault", "contactDefault", "tomorrowDrop"] } } });
+  const get = (k: string) => rows.find((r) => r.key === k)?.value;
+  return {
+    gear: get("gearDefault") !== undefined ? lines(get("gearDefault")!) : PLAN_DEFAULTS.gear,
+    quality: get("qualityStandard") !== undefined ? lines(get("qualityStandard")!) : PLAN_DEFAULTS.quality,
+    endOfDay: get("endOfDayDefault") !== undefined ? lines(get("endOfDayDefault")!) : PLAN_DEFAULTS.endOfDay,
+    mission: get("missionDefault") ?? PLAN_DEFAULTS.mission,
+    contact: get("contactDefault") ?? PLAN_DEFAULTS.contact,
+    tomorrowDrop: get("tomorrowDrop") ?? PLAN_DEFAULTS.tomorrowDrop,
+  };
+}
+
+export function toCheckItems(v: unknown): CheckItem[] {
+  if (!Array.isArray(v)) return [];
+  const out: CheckItem[] = [];
+  for (const x of v) {
+    if (x && typeof x === "object" && typeof (x as CheckItem).label === "string") {
+      out.push({ label: (x as CheckItem).label, done: !!(x as CheckItem).done, byId: (x as CheckItem).byId ?? null });
+    }
+  }
+  return out;
+}
+
 // ---- Points ------------------------------------------------------------------
 
 export type Standing = {
   memberId: string;
   name: string;
+  rank: CrewRank;
   crewId: string;
   crewName: string;
   week: number;
@@ -259,6 +356,7 @@ export async function standings(): Promise<Standing[]> {
     map.set(m.id, {
       memberId: m.id,
       name: m.name,
+      rank: m.rank as CrewRank,
       crewId: m.crewId,
       crewName: m.crew.name,
       week: 0,
@@ -302,6 +400,7 @@ export async function awardAuto(
 // ---- Plan shaping ------------------------------------------------------------
 
 export const planInclude = {
+  lead: { select: { id: true, name: true } },
   crew: {
     select: {
       id: true,
@@ -309,16 +408,16 @@ export const planInclude = {
       truck: true,
       members: {
         where: { active: true },
-        orderBy: { name: "asc" as const },
-        select: { id: true, name: true },
+        orderBy: [{ rank: "asc" }, { name: "asc" }],
+        select: { id: true, name: true, rank: true },
       },
     },
   },
   stops: {
-    orderBy: { sortOrder: "asc" as const },
+    orderBy: { sortOrder: "asc" },
     include: { doneBy: { select: { id: true, name: true } } },
   },
-} as const;
+} satisfies Prisma.GamePlanInclude;
 
 /** The plan a crew sees: today's, plus tomorrow's after 5pm. */
 export async function crewVisiblePlans(crewId: string) {
@@ -338,4 +437,50 @@ export async function crewVisiblePlans(crewId: string) {
       ? plans.find((p) => p.date === addDays(today, 1)) ?? null
       : null,
   };
+}
+
+// ---- Week view ---------------------------------------------------------------
+
+export type WeekDay = {
+  date: string;
+  headline: string | null;
+  truck: string | null;
+  startTime: string | null;
+  stopCount: number;
+  doneCount: number;
+  hasDetail: boolean;
+};
+
+/**
+ * 14 days from this week's Monday for one crew: the headline you typed in
+ * the Week grid, plus stop counts where a detailed plan exists. Drafts are
+ * hidden. Headlines are always visible (that's the point of the week view);
+ * the stop list itself still follows the today / tomorrow-after-5pm rule.
+ */
+export async function crewWeek(crewId: string): Promise<WeekDay[]> {
+  const db = getDb();
+  const today = ymd();
+  const start = weekStart(today);
+  const dates = Array.from({ length: 14 }, (_, i) => addDays(start, i));
+  if (!db) return dates.map((date) => ({ date, headline: null, truck: null, startTime: null, stopCount: 0, doneCount: 0, hasDetail: false }));
+  const plans = await db.gamePlan.findMany({
+    where: { crewId, published: true, date: { in: dates } },
+    select: {
+      date: true, headline: true, truck: true, startTime: true,
+      stops: { select: { status: true } },
+    },
+  });
+  const byDate = new Map(plans.map((p) => [p.date, p]));
+  return dates.map((date) => {
+    const p = byDate.get(date);
+    return {
+      date,
+      headline: p?.headline ?? null,
+      truck: p?.truck ?? null,
+      startTime: p?.startTime ?? null,
+      stopCount: p?.stops.length ?? 0,
+      doneCount: p?.stops.filter((s) => s.status !== "PENDING").length ?? 0,
+      hasDetail: (p?.stops.length ?? 0) > 0,
+    };
+  });
 }

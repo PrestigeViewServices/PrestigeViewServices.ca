@@ -6,8 +6,12 @@ import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import {
   PIN_RE,
+  RANKS,
+  toCheckItems,
+  type CrewRank,
   awardAuto,
   hashPin,
+  pinInUse,
   setCrewSetting,
   ymd,
 } from "@/lib/crew-app";
@@ -28,23 +32,39 @@ function revalidateAll() {
   revalidatePath("/admin/game-plan/leads");
   revalidatePath("/admin/game-plan/issues");
   revalidatePath("/admin/game-plan/team");
+  revalidatePath("/admin/game-plan/week");
 }
 
 // ---- Plans -------------------------------------------------------------------
 
 const stopSchema = z.object({
   id: z.string().optional(),
+  time: z.string().trim().max(20).optional().default(""),
+  upsell: z.string().trim().max(200).optional().default(""),
   address: z.string().trim().min(1).max(200),
   service: z.string().trim().max(120).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
+  customerName: z.string().trim().max(80).optional().default(""),
+  customerPhone: z.string().trim().max(30).optional().default(""),
+  phoneVisibility: z.enum(["ALL", "LEADS", "NONE"]).optional().default("LEADS"),
 });
 
 const planSchema = z.object({
   crewId: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  headline: z.string().trim().max(80).optional().default(""),
   truck: z.string().trim().max(40).optional().default(""),
+  trailer: z.boolean().optional().default(false),
   startTime: z.string().trim().max(20).optional().default(""),
+  weather: z.string().trim().max(120).optional().default(""),
+  mission: z.string().trim().max(300).optional().default(""),
   brief: z.string().trim().max(1500).optional().default(""),
+  headsUp: z.string().trim().max(1500).optional().default(""),
+  contact: z.string().trim().max(160).optional().default(""),
+  tomorrowDrop: z.string().trim().max(20).optional().default(""),
+  leadId: z.string().optional().default(""),
+  gear: z.array(z.string().trim().max(80)).max(30).optional().default([]),
+  endOfDay: z.array(z.string().trim().max(80)).max(30).optional().default([]),
   published: z.boolean().default(true),
   stops: z.array(stopSchema).max(60),
 });
@@ -61,22 +81,36 @@ export async function savePlan(input: PlanInput) {
   const d = planSchema.parse(input);
   const prisma = db();
 
+  // Checklist labels come from the editor; keep "done" ticks the crew already
+  // made on items whose label didn't change.
+  const existing = await prisma.gamePlan.findUnique({
+    where: { crewId_date: { crewId: d.crewId, date: d.date } },
+    select: { gear: true, endOfDay: true },
+  });
+  const merge = (labels: string[], prev: unknown) => {
+    const old = toCheckItems(prev);
+    return labels.filter(Boolean).map((label) => old.find((o) => o.label === label) ?? { label, done: false, byId: null });
+  };
+  const common = {
+    headline: d.headline || null,
+    truck: d.truck || null,
+    trailer: d.trailer,
+    startTime: d.startTime || null,
+    weather: d.weather || null,
+    mission: d.mission || null,
+    brief: d.brief || null,
+    headsUp: d.headsUp || null,
+    contact: d.contact || null,
+    tomorrowDrop: d.tomorrowDrop || null,
+    leadId: d.leadId || null,
+    gear: merge(d.gear, existing?.gear),
+    endOfDay: merge(d.endOfDay, existing?.endOfDay),
+    published: d.published,
+  };
   const plan = await prisma.gamePlan.upsert({
     where: { crewId_date: { crewId: d.crewId, date: d.date } },
-    create: {
-      crewId: d.crewId,
-      date: d.date,
-      truck: d.truck || null,
-      startTime: d.startTime || null,
-      brief: d.brief || null,
-      published: d.published,
-    },
-    update: {
-      truck: d.truck || null,
-      startTime: d.startTime || null,
-      brief: d.brief || null,
-      published: d.published,
-    },
+    create: { crewId: d.crewId, date: d.date, ...common },
+    update: common,
     include: { stops: { select: { id: true } } },
   });
 
@@ -91,10 +125,10 @@ export async function savePlan(input: PlanInput) {
       s.id
         ? prisma.gamePlanStop.update({
             where: { id: s.id },
-            data: { sortOrder: i, address: s.address, service: s.service || null, note: s.note || null },
+            data: { sortOrder: i, time: s.time || null, upsell: s.upsell || null, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
         : prisma.gamePlanStop.create({
-            data: { planId: plan.id, sortOrder: i, address: s.address, service: s.service || null, note: s.note || null },
+            data: { planId: plan.id, sortOrder: i, time: s.time || null, upsell: s.upsell || null, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
     ),
   ]);
@@ -122,12 +156,67 @@ export async function copyPreviousPlan(crewId: string, date: string) {
   return savePlan({
     crewId,
     date,
+    headline: prev.headline ?? "",
     truck: prev.truck ?? "",
+    trailer: prev.trailer,
     startTime: prev.startTime ?? "",
+    weather: "",
+    mission: prev.mission ?? "",
     brief: "",
+    headsUp: "",
+    contact: prev.contact ?? "",
+    tomorrowDrop: prev.tomorrowDrop ?? "",
+    leadId: prev.leadId ?? "",
+    gear: toCheckItems(prev.gear).map((g) => g.label),
+    endOfDay: toCheckItems(prev.endOfDay).map((g) => g.label),
     published: false,
-    stops: prev.stops.map((s) => ({ address: s.address, service: s.service ?? "", note: s.note ?? "" })),
+    stops: prev.stops.map((s) => ({ time: s.time ?? "", upsell: s.upsell ?? "", address: s.address, service: s.service ?? "", note: s.note ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility })),
   });
+}
+
+const weekSchema = z.object({
+  crewId: z.string().min(1),
+  days: z.array(z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    headline: z.string().trim().max(80),
+    startTime: z.string().trim().max(20).optional().default(""),
+    truck: z.string().trim().max(40).optional().default(""),
+  })).max(14),
+});
+export type WeekInput = z.input<typeof weekSchema>;
+
+/**
+ * Save the week grid for one crew. Each day becomes (or updates) a
+ * published GamePlan with a headline; stops and briefs already on that
+ * day are left alone. A day cleared to blank with no stops is deleted so
+ * the crew sees "not planned yet" rather than an empty plan.
+ */
+export async function saveWeek(input: WeekInput) {
+  await requireRole([...ROLES]);
+  const d = weekSchema.parse(input);
+  const prisma = db();
+  for (const day of d.days) {
+    const existing = await prisma.gamePlan.findUnique({
+      where: { crewId_date: { crewId: d.crewId, date: day.date } },
+      include: { _count: { select: { stops: true } } },
+    });
+    const blank = !day.headline && !day.startTime && !day.truck;
+    if (!existing) {
+      if (blank) continue;
+      await prisma.gamePlan.create({
+        data: { crewId: d.crewId, date: day.date, headline: day.headline || null, startTime: day.startTime || null, truck: day.truck || null, published: true },
+      });
+    } else if (blank && existing._count.stops === 0 && !existing.brief) {
+      await prisma.gamePlan.delete({ where: { id: existing.id } });
+    } else {
+      await prisma.gamePlan.update({
+        where: { id: existing.id },
+        data: { headline: day.headline || null, startTime: day.startTime || null, truck: day.truck || null, published: existing.published || !!day.headline },
+      });
+    }
+  }
+  revalidateAll();
+  return { ok: true as const };
 }
 
 /** Admin override: mark a stop pending/done/skipped without photos. */
@@ -250,16 +339,17 @@ export async function updateCrew(formData: FormData) {
   revalidateAll();
 }
 
-export async function setCrewPin(formData: FormData) {
+export async function setMemberPin(formData: FormData) {
   await requireRole([...ROLES]);
   const id = String(formData.get("id") ?? "");
   const pin = String(formData.get("pin") ?? "").replace(/\D/g, "");
   if (!id) return;
   if (pin === "") {
-    await db().crew.update({ where: { id }, data: { pinHash: null } });
+    await db().crewMember.update({ where: { id }, data: { pinHash: null } });
   } else {
     if (!PIN_RE.test(pin)) throw new Error("PIN must be 4 to 6 digits");
-    await db().crew.update({ where: { id }, data: { pinHash: await hashPin(pin) } });
+    if (await pinInUse(pin, id)) throw new Error("Someone else already has that PIN. Pick another.");
+    await db().crewMember.update({ where: { id }, data: { pinHash: await hashPin(pin) } });
   }
   revalidateAll();
 }
@@ -269,8 +359,17 @@ export async function addMember(formData: FormData) {
   const crewId = String(formData.get("crewId") ?? "");
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
   const title = String(formData.get("title") ?? "").trim().slice(0, 60);
+  const pin = String(formData.get("pin") ?? "").replace(/\D/g, "");
+  const rank = String(formData.get("rank") ?? "TECHNICIAN");
   if (!crewId || !name) return;
-  await db().crewMember.create({ data: { crewId, name, title: title || null } });
+  if (!(RANKS as readonly string[]).includes(rank)) return;
+  let pinHash: string | null = null;
+  if (pin) {
+    if (!PIN_RE.test(pin)) throw new Error("PIN must be 4 to 6 digits");
+    if (await pinInUse(pin)) throw new Error("Someone else already has that PIN. Pick another.");
+    pinHash = await hashPin(pin);
+  }
+  await db().crewMember.create({ data: { crewId, name, title: title || null, pinHash, rank: rank as CrewRank } });
   revalidateAll();
 }
 
@@ -279,10 +378,15 @@ export async function updateMember(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const crewId = String(formData.get("crewId") ?? "");
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
+  const title = String(formData.get("title") ?? "").trim().slice(0, 60);
+  const phone = String(formData.get("phone") ?? "").trim().slice(0, 30);
+  const rank = String(formData.get("rank") ?? "TECHNICIAN");
   const active = formData.get("active") === "on";
   if (!id || !name || !crewId) return;
-  await db().crewMember.update({ where: { id }, data: { name, crewId, active } });
+  if (!(RANKS as readonly string[]).includes(rank)) return;
+  await db().crewMember.update({ where: { id }, data: { name, crewId, active, title: title || null, phone: phone || null, rank: rank as CrewRank } });
   revalidateAll();
+  revalidatePath(`/admin/game-plan/team/${id}`);
 }
 
 export async function saveRule(formData: FormData) {
@@ -309,6 +413,23 @@ export async function deleteRule(formData: FormData) {
   const rule = await db().pointRule.findUnique({ where: { id } });
   if (!rule || rule.autoKey) return; // auto rules can be deactivated, not deleted
   await db().pointRule.delete({ where: { id } });
+  revalidateAll();
+}
+
+export async function savePlanDefaults(formData: FormData) {
+  await requireRole([...ROLES]);
+  const map: Record<string, string> = {
+    gearDefault: "gear",
+    qualityStandard: "quality",
+    endOfDayDefault: "endOfDay",
+    missionDefault: "mission",
+    contactDefault: "contact",
+    tomorrowDrop: "tomorrowDrop",
+  };
+  for (const [key, field] of Object.entries(map)) {
+    const v = String(formData.get(field) ?? "").trim().slice(0, 2000);
+    await setCrewSetting(key, v);
+  }
   revalidateAll();
 }
 
