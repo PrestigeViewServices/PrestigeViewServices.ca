@@ -77,7 +77,7 @@ export default async function GamePlanPage(props: {
     <div className="space-y-5">
       <PageHeader
         title="Game Plan"
-        description="Every crew for the day on one page. Type weather, mission and heads-up once, add each crew's stops, Post all."
+        description="Day tab: weather, mission, heads-up. Crew tabs: the route. Post all."
         actions={<Link href="/crew" target="_blank" className={adminBtn.secondary}>Open crew app</Link>}
       />
       <GamePlanTabs />
