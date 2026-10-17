@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   CalendarDays,
+  CloudSun,
   Phone,
   User,
   Camera,
@@ -20,9 +21,12 @@ import {
 } from "lucide-react";
 import { shrinkImage } from "./photo-utils";
 
+type Check = { label: string; done: boolean; byId?: string | null };
 type Stop = {
   id: string;
   sortOrder: number;
+  time: string | null;
+  upsell: string | null;
   address: string;
   service: string | null;
   note: string | null;
@@ -38,8 +42,17 @@ type Plan = {
   id: string;
   date: string;
   truck: string | null;
+  trailer: boolean;
   startTime: string | null;
+  weather: string | null;
+  mission: string | null;
   brief: string | null;
+  headsUp: string | null;
+  contact: string | null;
+  tomorrowDrop: string | null;
+  lead: { id: string; name: string } | null;
+  gear: Check[];
+  endOfDay: Check[];
   crew: { id: string; name: string; truck: string | null; members: { id: string; name: string; rank: string }[] };
   stops: Stop[];
 };
@@ -51,6 +64,10 @@ type Payload = {
   today: Plan | null;
   tomorrow: Plan | null;
   week: WeekDay[];
+  quality: string[];
+  contactDefault: string;
+  tomorrowDropDefault: string;
+  rules: { label: string; points: number }[];
   board: { memberId: string; name: string; crewName: string; week: number; season: number }[];
   recent: { id: string; name: string; points: number; reason: string; note: string | null; date: string }[];
 };
@@ -98,6 +115,16 @@ export function CrewHome() {
     };
   }, [load]);
 
+  async function toggleCheck(planId: string, kind: "gear" | "endOfDay", index: number, done: boolean) {
+    setData((d) => {
+      if (!d?.today || d.today.id !== planId) return d;
+      const list = d.today[kind].map((it, i) => (i === index ? { ...it, done } : it));
+      return { ...d, today: { ...d.today, [kind]: list } };
+    });
+    const res = await fetch("/api/crew/checklist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ planId, kind, index, done }) });
+    if (!res.ok) { say("Didn't save. Try again."); load(); }
+  }
+
   async function logout() {
     await fetch("/api/crew/logout", { method: "POST" });
     router.refresh();
@@ -134,22 +161,20 @@ export function CrewHome() {
 
       {err && <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{err}</p>}
 
-      {/* Today card */}
+      {/* Header: crew, date, weather */}
       <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-300">{data.me.crew}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-300">PVS Game Plan · {data.me.crew}</p>
         <h1 className="font-display mt-1 text-[28px] font-bold leading-tight">{data.dateLabel}</h1>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-300">
           <span>Hey <b className="text-white">{data.me.name}</b> <span className="text-slate-500">· {RANK_SHORT[data.me.position] ?? data.me.position}</span></span>
-          {truck && <span>{/^truck/i.test(truck) ? "" : "Truck "}<b className="text-white">{truck}</b></span>}
+          {plan?.weather && <span><CloudSun className="mr-1 inline h-4 w-4 text-amber-300" />{plan.weather}</span>}
           {plan?.startTime && <span>Start <b className="text-white">{plan.startTime}</b></span>}
-          {plan && plan.crew.members.length > 1 && (
-            <span className="text-slate-400">with {plan.crew.members.filter((m) => m.id !== data.me.memberId).map((m) => m.name).join(", ")}</span>
-          )}
         </div>
-        {plan?.brief && (
-          <p className="mt-4 whitespace-pre-wrap rounded-xl border-l-4 border-primary bg-white/[0.03] px-3 py-2 text-[15px] leading-relaxed">
-            {plan.brief}
-          </p>
+        {plan?.mission && (
+          <div className="mt-4 rounded-xl border-l-4 border-amber-400 bg-amber-400/[0.06] px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300">Today&apos;s mission</p>
+            <p className="mt-0.5 text-[16px] font-semibold leading-snug text-white">{plan.mission}</p>
+          </div>
         )}
         {stops.length > 0 && (
           <div className="mt-4">
@@ -163,6 +188,25 @@ export function CrewHome() {
           </div>
         )}
       </section>
+
+      {plan && (
+        <>
+          {/* Crew */}
+          <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+            <SectionTitle>Crew</SectionTitle>
+            <dl className="mt-2 grid grid-cols-[72px_1fr] gap-x-3 gap-y-1 text-[14px]">
+              <dt className="text-slate-500">Lead</dt><dd className="font-semibold text-white">{plan.lead?.name ?? plan.crew.members.find((m) => m.rank === "CREW_LEAD" || m.rank === "FIELD_SUPERVISOR")?.name ?? "—"}</dd>
+              <dt className="text-slate-500">Team</dt><dd className="text-slate-200">{plan.crew.members.filter((m) => m.id !== (plan.lead?.id ?? "")).map((m) => m.name).join(", ") || "—"}</dd>
+              <dt className="text-slate-500">Truck</dt><dd className="text-slate-200">{truck ? (/^truck/i.test(truck) ? truck : `Truck ${truck}`) : "—"} <span className="text-slate-500">| Trailer: {plan.trailer ? "Y" : "N"}</span></dd>
+            </dl>
+          </section>
+
+          {/* Gear check */}
+          {plan.gear.length > 0 && (
+            <Checklist title="Gear check" subtitle="before you leave" items={plan.gear} onToggle={(i, v) => toggleCheck(plan.id, "gear", i, v)} />
+          )}
+        </>
+      )}
 
       {/* Route */}
       <section>
@@ -199,6 +243,58 @@ export function CrewHome() {
           </ol>
         )}
       </section>
+
+      {plan && (
+        <>
+          {/* Quality standard */}
+          {data.quality.length > 0 && (
+            <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+              <SectionTitle>Quality standard</SectionTitle>
+              <p className="text-[12px] text-slate-500">Before you leave every stop</p>
+              <ul className="mt-2 flex flex-col gap-1.5 text-[14px] text-slate-200">
+                {data.quality.map((q) => <li key={q} className="flex gap-2"><span className="text-emerald-400">✓</span>{q}</li>)}
+              </ul>
+            </section>
+          )}
+
+          {/* Points on the board */}
+          {data.rules.length > 0 && (
+            <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+              <SectionTitle>Points on the board today</SectionTitle>
+              <ul className="mt-2 flex flex-col gap-1 text-[14px]">
+                {data.rules.map((r) => (
+                  <li key={r.label} className="flex items-center justify-between gap-3">
+                    <span className="text-slate-200">{r.label}</span>
+                    <span className={`shrink-0 font-bold tabular-nums ${r.points < 0 ? "text-red-300" : "text-amber-300"}`}>{r.points > 0 ? "+" : ""}{r.points}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Heads up */}
+          {(plan.headsUp || plan.brief) && (
+            <section className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-4">
+              <SectionTitle>Heads up</SectionTitle>
+              <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-amber-50">{plan.headsUp || plan.brief}</p>
+            </section>
+          )}
+
+          {/* End of day */}
+          {(plan.endOfDay.length > 0 || plan.tomorrowDrop || data.tomorrowDropDefault) && (
+            <Checklist
+              title="End of day"
+              items={plan.endOfDay}
+              onToggle={(i, v) => toggleCheck(plan.id, "endOfDay", i, v)}
+              footer={`Tomorrow's plan drops at ${plan.tomorrowDrop || data.tomorrowDropDefault || "tonight"}`}
+            />
+          )}
+
+          {(plan.contact || data.contactDefault) && (
+            <p className="px-1 text-[13px] text-slate-400">Questions: <span className="text-slate-200">{plan.contact || data.contactDefault}</span></p>
+          )}
+        </>
+      )}
 
       {/* Tomorrow preview */}
       {data.tomorrow && (
@@ -272,6 +368,33 @@ export function CrewHome() {
         </div>
       )}
     </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-sky-300">{children}</h2>;
+}
+
+function Checklist({ title, subtitle, items, onToggle, footer }: { title: string; subtitle?: string; items: Check[]; onToggle: (i: number, v: boolean) => void; footer?: string }) {
+  const doneCount = items.filter((i) => i.done).length;
+  return (
+    <section className="rounded-2xl border border-white/[0.08] bg-[#0E1322] p-4">
+      <div className="flex items-center justify-between">
+        <div><SectionTitle>{title}</SectionTitle>{subtitle && <p className="text-[12px] text-slate-500">{subtitle}</p>}</div>
+        {items.length > 0 && <span className={`text-[12px] tabular-nums ${doneCount === items.length ? "text-emerald-300" : "text-slate-500"}`}>{doneCount}/{items.length}</span>}
+      </div>
+      <ul className="mt-2 flex flex-col gap-1">
+        {items.map((it, i) => (
+          <li key={i}>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 active:bg-white/[0.04]">
+              <input type="checkbox" checked={it.done} onChange={(e) => onToggle(i, e.target.checked)} className="h-5 w-5 rounded border-white/20 bg-transparent accent-emerald-500" />
+              <span className={`text-[15px] ${it.done ? "text-slate-500 line-through" : "text-slate-100"}`}>{it.label}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+      {footer && <p className="mt-2 text-[12px] text-slate-500">{footer}</p>}
+    </section>
   );
 }
 
@@ -392,9 +515,10 @@ function StopRow({
           {isDone ? <Check className="h-4 w-4" /> : index + 1}
         </span>
         <span className="min-w-0">
-          <span className={`block text-[16px] font-semibold leading-snug ${isDone ? "text-slate-300 line-through decoration-emerald-400/60" : "text-white"}`}>{stop.address}</span>
+          <span className={`block text-[16px] font-semibold leading-snug ${isDone ? "text-slate-300 line-through decoration-emerald-400/60" : "text-white"}`}>{stop.time && <span className="mr-1.5 text-sky-300">{stop.time}</span>}{stop.address}</span>
           {(stop.service || stop.customerName) && <span className="block text-[13px] text-slate-400">{[stop.customerName, stop.service].filter(Boolean).join(" · ")}</span>}
           {stop.note && <span className="mt-1 inline-block rounded-md bg-amber-400/15 px-2 py-0.5 text-[13px] text-amber-100">{stop.note}</span>}
+          {stop.upsell && <span className="mt-1 ml-1 inline-block rounded-md bg-emerald-400/15 px-2 py-0.5 text-[13px] text-emerald-100">Upsell: {stop.upsell}</span>}
           {(isDone || isSkipped) && stop.doneBy && (
             <span className="mt-1 block text-[12px] text-slate-500">
               {isDone ? "Done" : "Skipped"} by {stop.doneBy.name}{stop.doneAt ? ` at ${new Date(stop.doneAt).toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit", timeZone: "America/Toronto" })}` : ""}

@@ -5,7 +5,9 @@ import {
   crewVisiblePlans,
   crewWeek,
   getCrewSession,
+  planDefaults,
   prettyDate,
+  toCheckItems,
   touchMember,
   standings,
   weekStart,
@@ -27,10 +29,12 @@ export async function GET() {
   if (!db) return NextResponse.json({ error: "db" }, { status: 503 });
   void touchMember(session.memberId, session.lastSeenAt);
 
-  const [plans, board, week, recent] = await Promise.all([
+  const [plans, board, week, defaults, rules, recent] = await Promise.all([
     crewVisiblePlans(session.crewId),
     standings(),
     crewWeek(session.crewId),
+    planDefaults(),
+    db.pointRule.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, select: { label: true, points: true } }),
     db.pointEntry.findMany({
       where: { member: { crewId: session.crewId } },
       orderBy: { createdAt: "desc" },
@@ -46,6 +50,8 @@ export async function GET() {
     if (!p) return null;
     return {
       ...p,
+      gear: toCheckItems(p.gear),
+      endOfDay: toCheckItems(p.endOfDay),
       stops: p.stops.map(({ phoneVisibility, customerPhone, ...s }) => ({
         ...s,
         customerPhone: canSeePhone(phoneVisibility, session.rank) ? customerPhone : null,
@@ -74,6 +80,10 @@ export async function GET() {
     today: redact(plans.today),
     tomorrow: redact(plans.tomorrow),
     week,
+    quality: defaults.quality,
+    contactDefault: defaults.contact,
+    tomorrowDropDefault: defaults.tomorrowDrop,
+    rules,
     board: board.slice(0, 12),
     recent: recent.map((r) => ({
       id: r.id,

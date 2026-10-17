@@ -291,10 +291,14 @@ admin dashboard under **Crew App**.
    last sign-in. These are the same crews Dispatch uses.
 2. **Week** (`/admin/game-plan/week`): one line per crew per day ("Lawns
    Pembroke", "Off"). Crews see the whole week on their phone.
-3. **Day plan** (`/admin/game-plan`): pick crew and date, type the brief and
-   stops, click **Post to crew**. Each stop can carry the customer's name and
-   phone, with a per-stop choice of who sees the number: whole crew, Crew
-   Lead and above, or office only. The crew's phone updates within 20 seconds.
+3. **Day plan** (`/admin/game-plan`): the standard PVS Game Plan. Lead,
+   team, truck, gear check, quality standard, points and contact are
+   prefilled from **Team > Daily plan defaults**; you type weather, today's
+   mission, the stops (time, customer, address, service, notes, upsell) and
+   any heads-up, then **Post to crew**. Each stop can carry the customer's
+   phone with a per-stop choice of who sees it: whole crew, Crew Lead and
+   above, or office only. Crews tick the gear and end-of-day boxes on their
+   phone. Empty sections don't show to crews. Updates land within 20 seconds.
 4. **Live Board**: watch stops get checked off with photos during the day.
 5. **Points**: one-tap awards and deductions. Marking a stop done with a photo
    awards points automatically; marking a field lead **Won** pays the upsell

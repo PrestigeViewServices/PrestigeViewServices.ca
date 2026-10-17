@@ -586,6 +586,7 @@ model CrewMember {
   doneStops  GamePlanStop[]
   fieldLeads FieldLead[]
   issues     FieldIssue[]
+  leadPlans  GamePlan[]     @relation("PlanLead")
 
   @@index([crewId])
   @@index([userId])
@@ -1353,8 +1354,24 @@ model GamePlan {
   /// One-line summary for the week view ("Pembroke lawns", "Off", "Gutters day").
   headline  String?
   truck     String?
+  trailer   Boolean  @default(false)
   startTime String?
+  weather   String?
+  /// Today's mission, one or two lines.
+  mission   String?
+  /// Legacy free-text brief; kept for older plans, shown under Heads up.
   brief     String?
+  headsUp   String?
+  /// Who to call with questions, e.g. "AG 613-555-0100 / Luke 613-555-0101".
+  contact   String?
+  /// When tomorrow's plan drops, e.g. "8 PM".
+  tomorrowDrop String?
+  leadId    String?
+  lead      CrewMember? @relation("PlanLead", fields: [leadId], references: [id])
+  /// Gear check items: [{ label, done, byId }]. Crew ticks these before leaving.
+  gear      Json?
+  /// End-of-day items: [{ label, done, byId }].
+  endOfDay  Json?
   /// Unpublished plans are drafts: crews don't see them.
   published Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -1371,9 +1388,11 @@ model GamePlanStop {
   planId     String
   plan       GamePlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
   sortOrder  Int
+  time       String?
   address    String
   service    String?
   note       String?
+  upsell     String?
   customerName  String?
   customerPhone String?
   phoneVisibility PhoneVisibility @default(LEADS)

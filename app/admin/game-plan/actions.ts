@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth";
 import {
   PIN_RE,
   RANKS,
+  toCheckItems,
   type CrewRank,
   awardAuto,
   hashPin,
@@ -38,6 +39,8 @@ function revalidateAll() {
 
 const stopSchema = z.object({
   id: z.string().optional(),
+  time: z.string().trim().max(20).optional().default(""),
+  upsell: z.string().trim().max(200).optional().default(""),
   address: z.string().trim().min(1).max(200),
   service: z.string().trim().max(120).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
@@ -51,8 +54,17 @@ const planSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   headline: z.string().trim().max(80).optional().default(""),
   truck: z.string().trim().max(40).optional().default(""),
+  trailer: z.boolean().optional().default(false),
   startTime: z.string().trim().max(20).optional().default(""),
+  weather: z.string().trim().max(120).optional().default(""),
+  mission: z.string().trim().max(300).optional().default(""),
   brief: z.string().trim().max(1500).optional().default(""),
+  headsUp: z.string().trim().max(1500).optional().default(""),
+  contact: z.string().trim().max(160).optional().default(""),
+  tomorrowDrop: z.string().trim().max(20).optional().default(""),
+  leadId: z.string().optional().default(""),
+  gear: z.array(z.string().trim().max(80)).max(30).optional().default([]),
+  endOfDay: z.array(z.string().trim().max(80)).max(30).optional().default([]),
   published: z.boolean().default(true),
   stops: z.array(stopSchema).max(60),
 });
@@ -69,24 +81,36 @@ export async function savePlan(input: PlanInput) {
   const d = planSchema.parse(input);
   const prisma = db();
 
+  // Checklist labels come from the editor; keep "done" ticks the crew already
+  // made on items whose label didn't change.
+  const existing = await prisma.gamePlan.findUnique({
+    where: { crewId_date: { crewId: d.crewId, date: d.date } },
+    select: { gear: true, endOfDay: true },
+  });
+  const merge = (labels: string[], prev: unknown) => {
+    const old = toCheckItems(prev);
+    return labels.filter(Boolean).map((label) => old.find((o) => o.label === label) ?? { label, done: false, byId: null });
+  };
+  const common = {
+    headline: d.headline || null,
+    truck: d.truck || null,
+    trailer: d.trailer,
+    startTime: d.startTime || null,
+    weather: d.weather || null,
+    mission: d.mission || null,
+    brief: d.brief || null,
+    headsUp: d.headsUp || null,
+    contact: d.contact || null,
+    tomorrowDrop: d.tomorrowDrop || null,
+    leadId: d.leadId || null,
+    gear: merge(d.gear, existing?.gear),
+    endOfDay: merge(d.endOfDay, existing?.endOfDay),
+    published: d.published,
+  };
   const plan = await prisma.gamePlan.upsert({
     where: { crewId_date: { crewId: d.crewId, date: d.date } },
-    create: {
-      crewId: d.crewId,
-      date: d.date,
-      headline: d.headline || null,
-      truck: d.truck || null,
-      startTime: d.startTime || null,
-      brief: d.brief || null,
-      published: d.published,
-    },
-    update: {
-      headline: d.headline || null,
-      truck: d.truck || null,
-      startTime: d.startTime || null,
-      brief: d.brief || null,
-      published: d.published,
-    },
+    create: { crewId: d.crewId, date: d.date, ...common },
+    update: common,
     include: { stops: { select: { id: true } } },
   });
 
@@ -101,10 +125,10 @@ export async function savePlan(input: PlanInput) {
       s.id
         ? prisma.gamePlanStop.update({
             where: { id: s.id },
-            data: { sortOrder: i, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
+            data: { sortOrder: i, time: s.time || null, upsell: s.upsell || null, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
         : prisma.gamePlanStop.create({
-            data: { planId: plan.id, sortOrder: i, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
+            data: { planId: plan.id, sortOrder: i, time: s.time || null, upsell: s.upsell || null, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
     ),
   ]);
@@ -134,10 +158,19 @@ export async function copyPreviousPlan(crewId: string, date: string) {
     date,
     headline: prev.headline ?? "",
     truck: prev.truck ?? "",
+    trailer: prev.trailer,
     startTime: prev.startTime ?? "",
+    weather: "",
+    mission: prev.mission ?? "",
     brief: "",
+    headsUp: "",
+    contact: prev.contact ?? "",
+    tomorrowDrop: prev.tomorrowDrop ?? "",
+    leadId: prev.leadId ?? "",
+    gear: toCheckItems(prev.gear).map((g) => g.label),
+    endOfDay: toCheckItems(prev.endOfDay).map((g) => g.label),
     published: false,
-    stops: prev.stops.map((s) => ({ address: s.address, service: s.service ?? "", note: s.note ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility })),
+    stops: prev.stops.map((s) => ({ time: s.time ?? "", upsell: s.upsell ?? "", address: s.address, service: s.service ?? "", note: s.note ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility })),
   });
 }
 
@@ -380,6 +413,23 @@ export async function deleteRule(formData: FormData) {
   const rule = await db().pointRule.findUnique({ where: { id } });
   if (!rule || rule.autoKey) return; // auto rules can be deactivated, not deleted
   await db().pointRule.delete({ where: { id } });
+  revalidateAll();
+}
+
+export async function savePlanDefaults(formData: FormData) {
+  await requireRole([...ROLES]);
+  const map: Record<string, string> = {
+    gearDefault: "gear",
+    qualityStandard: "quality",
+    endOfDayDefault: "endOfDay",
+    missionDefault: "mission",
+    contactDefault: "contact",
+    tomorrowDrop: "tomorrowDrop",
+  };
+  for (const [key, field] of Object.entries(map)) {
+    const v = String(formData.get(field) ?? "").trim().slice(0, 2000);
+    await setCrewSetting(key, v);
+  }
   revalidateAll();
 }
 

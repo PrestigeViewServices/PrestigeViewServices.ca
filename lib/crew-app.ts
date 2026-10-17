@@ -274,6 +274,55 @@ export async function seasonStart(): Promise<string> {
   return getCrewSetting("seasonStart", `${y}-01-01`);
 }
 
+// ---- Daily plan defaults -----------------------------------------------------
+
+export type CheckItem = { label: string; done: boolean; byId?: string | null };
+
+export const PLAN_DEFAULTS = {
+  gear: ["Mowers + trimmers", "Blower", "Fuel + 2-stroke mix", "Trip ticket signed out"],
+  quality: [
+    "Before/after photos uploaded",
+    "Walkway + driveway blown clean",
+    "Gate closed, tools counted",
+    "Door hanger left (if customer not home)",
+  ],
+  endOfDay: ["Truck fueled + cleaned", "Trip ticket signed in", "Issues reported in the app"],
+  mission: "Every stop done right, zero callbacks, truck back by 5.",
+  contact: "",
+  tomorrowDrop: "8 PM",
+};
+
+export type PlanDefaults = typeof PLAN_DEFAULTS;
+
+const lines = (v: string) => v.split("\n").map((l) => l.trim()).filter(Boolean);
+
+/** Company-wide defaults for new plans, editable under Team. */
+export async function planDefaults(): Promise<PlanDefaults> {
+  const db = getDb();
+  if (!db) return PLAN_DEFAULTS;
+  const rows = await db.crewSetting.findMany({ where: { key: { in: ["gearDefault", "qualityStandard", "endOfDayDefault", "missionDefault", "contactDefault", "tomorrowDrop"] } } });
+  const get = (k: string) => rows.find((r) => r.key === k)?.value;
+  return {
+    gear: get("gearDefault") !== undefined ? lines(get("gearDefault")!) : PLAN_DEFAULTS.gear,
+    quality: get("qualityStandard") !== undefined ? lines(get("qualityStandard")!) : PLAN_DEFAULTS.quality,
+    endOfDay: get("endOfDayDefault") !== undefined ? lines(get("endOfDayDefault")!) : PLAN_DEFAULTS.endOfDay,
+    mission: get("missionDefault") ?? PLAN_DEFAULTS.mission,
+    contact: get("contactDefault") ?? PLAN_DEFAULTS.contact,
+    tomorrowDrop: get("tomorrowDrop") ?? PLAN_DEFAULTS.tomorrowDrop,
+  };
+}
+
+export function toCheckItems(v: unknown): CheckItem[] {
+  if (!Array.isArray(v)) return [];
+  const out: CheckItem[] = [];
+  for (const x of v) {
+    if (x && typeof x === "object" && typeof (x as CheckItem).label === "string") {
+      out.push({ label: (x as CheckItem).label, done: !!(x as CheckItem).done, byId: (x as CheckItem).byId ?? null });
+    }
+  }
+  return out;
+}
+
 // ---- Points ------------------------------------------------------------------
 
 export type Standing = {
@@ -351,6 +400,7 @@ export async function awardAuto(
 // ---- Plan shaping ------------------------------------------------------------
 
 export const planInclude = {
+  lead: { select: { id: true, name: true } },
   crew: {
     select: {
       id: true,

@@ -2,13 +2,13 @@ import Link from "next/link";
 import { KeyRound } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
-import { RANKS, RANK_LABEL, seasonStart, standings } from "@/lib/crew-app";
+import { RANKS, RANK_LABEL, planDefaults, seasonStart, standings } from "@/lib/crew-app";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { PageHeader, Panel, Badge } from "@/components/admin/page-header";
 import { GamePlanTabs } from "@/components/admin/game-plan/tabs";
 import { MemberPinForm } from "@/components/admin/game-plan/member-pin-form";
 import {
-  addMember, createCrew, deleteRule, saveRule, saveSeasonStart, updateCrew, updateMember,
+  addMember, createCrew, deleteRule, savePlanDefaults, saveRule, saveSeasonStart, updateCrew, updateMember,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -33,11 +33,12 @@ export default async function TeamPage() {
     return <NotConfigured service="Database" reason="Crews live in Postgres." envVars={["DATABASE_URL"]} missing={missingDbEnvVars()} />;
   }
   const db = getDb()!;
-  const [crews, rules, season, board] = await Promise.all([
+  const [crews, rules, season, board, defaults] = await Promise.all([
     db.crew.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }], include: { members: { orderBy: [{ active: "desc" }, { rank: "asc" }, { name: "asc" }] } } }),
     db.pointRule.findMany({ orderBy: { sortOrder: "asc" } }),
     seasonStart(),
     standings(),
+    planDefaults(),
   ]);
   const pts = new Map(board.map((b) => [b.memberId, b]));
   const noPin = crews.flatMap((c) => c.members).filter((m) => m.active && !m.pinHash);
@@ -125,6 +126,32 @@ export default async function TeamPage() {
           </form>
         </Panel>
       </div>
+
+      <Panel title="Daily plan defaults" subtitle="What every new game plan starts with. One item per line. You can still edit per day.">
+        <form action={savePlanDefaults} className="grid gap-4 lg:grid-cols-3">
+          <label className="flex flex-col gap-1 text-[12px] text-slate-400">Gear check (before you leave)
+            <textarea id="def-gear" name="gear" rows={5} defaultValue={defaults.gear.join("\n")} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 text-sm text-white" />
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-slate-400">Quality standard (before you leave every stop)
+            <textarea id="def-quality" name="quality" rows={5} defaultValue={defaults.quality.join("\n")} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 text-sm text-white" />
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-slate-400">End of day
+            <textarea id="def-eod" name="endOfDay" rows={5} defaultValue={defaults.endOfDay.join("\n")} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 text-sm text-white" />
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-slate-400">Default mission
+            <input id="def-mission" name="mission" defaultValue={defaults.mission} className={input} />
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-slate-400">Questions contact (shown at the bottom of every plan)
+            <input id="def-contact" name="contact" defaultValue={defaults.contact} placeholder="AG 613-555-0100 / Luke 613-555-0101" className={input} />
+          </label>
+          <div className="flex items-end gap-2">
+            <label className="flex flex-1 flex-col gap-1 text-[12px] text-slate-400">Tomorrow&apos;s plan drops at
+              <input id="def-drop" name="tomorrowDrop" defaultValue={defaults.tomorrowDrop} placeholder="8 PM" className={input} />
+            </label>
+            <button className={btnP}>Save defaults</button>
+          </div>
+        </form>
+      </Panel>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <Panel title="Point rules" subtitle="One-tap reasons on the Points page. Rules with an auto trigger fire on their own; you can change the amount or turn them off, not delete them.">
