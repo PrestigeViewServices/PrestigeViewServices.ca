@@ -279,6 +279,29 @@ Web). Vercel Analytics is on automatically with no key.
 
 ---
 
+## Crew app (`/crew`) and Game Plan
+
+The crew app lives at **prestigeviewservices.ca/crew**. Crews sign in with a
+4 to 6 digit PIN plus their name, no accounts. You run it from the admin
+dashboard under **Crew App**.
+
+1. **Team & PINs** (`/admin/game-plan/team`): add crews, set each crew's PIN,
+   add names. These are the same crews Dispatch uses.
+2. **Game Plan** (`/admin/game-plan`): pick crew and date, type the brief and
+   stops, click **Post to crew**. The crew's phone updates within 20 seconds.
+3. **Live Board**: watch stops get checked off with photos during the day.
+4. **Points**: one-tap awards and deductions. Marking a stop done with a photo
+   awards points automatically; marking a field lead **Won** pays the upsell
+   bonus. Edit the amounts under Team.
+5. **Job Photos**, **Field Leads**, **Issues**: what the crews sent in.
+
+Photos use the same Cloudinary account as the gallery (see Photos above);
+without it, crews can still skip stops and report issues, but can't mark a
+stop done. Rotate a crew's PIN under Team when someone leaves.
+
+Tell crews to open `/crew` in Safari or Chrome and **Add to Home Screen** so it
+opens like an app.
+
 ## Adding more admins
 
 Every admin has the same full access, so only add people you'd trust with

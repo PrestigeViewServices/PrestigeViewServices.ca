@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/db";
+import {
+  crewVisiblePlans,
+  getCrewSession,
+  prettyDate,
+  standings,
+  weekStart,
+  ymd,
+} from "@/lib/crew-app";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/**
+ * GET /api/crew/plan — everything the crew screen shows, in one call.
+ * The phone polls this every 20 s, so a plan posted from the admin page
+ * shows up without a refresh. Response is small (one crew's day).
+ */
+export async function GET() {
+  const session = await getCrewSession();
+  if (!session) return NextResponse.json({ error: "signed-out" }, { status: 401 });
+  const db = getDb();
+  if (!db) return NextResponse.json({ error: "db" }, { status: 503 });
+
+  const [plans, board, recent] = await Promise.all([
+    crewVisiblePlans(session.crewId),
+    standings(),
+    db.pointEntry.findMany({
+      where: { member: { crewId: session.crewId } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: { member: { select: { name: true } } },
+    }),
+  ]);
+
+  const me = board.find((s) => s.memberId === session.memberId) ?? null;
+  const rank = me ? board.findIndex((s) => s.memberId === me.memberId) + 1 : null;
+
+  return NextResponse.json({
+    me: {
+      memberId: session.memberId,
+      name: session.memberName,
+      crewId: session.crewId,
+      crew: session.crewName,
+      week: me?.week ?? 0,
+      season: me?.season ?? 0,
+      rank,
+      of: board.length,
+    },
+    date: plans.date,
+    dateLabel: prettyDate(plans.date),
+    weekOf: weekStart(ymd()),
+    today: plans.today,
+    tomorrow: plans.tomorrow,
+    board: board.slice(0, 12),
+    recent: recent.map((r) => ({
+      id: r.id,
+      name: r.member.name,
+      points: r.points,
+      reason: r.reason,
+      note: r.note,
+      date: r.date,
+    })),
+  });
+}

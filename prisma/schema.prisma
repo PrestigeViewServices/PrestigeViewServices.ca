@@ -548,10 +548,17 @@ model Crew {
   name      String
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+  /// Crew app sign-in PIN (scrypt hash). Null = crew can't sign in yet.
+  pinHash   String?
+  /// Default truck shown on the game plan when a plan doesn't set one.
+  truck     String?
 
-  members CrewMember[]
-  jobs    Job[]
-  routes  Route[]
+  members    CrewMember[]
+  jobs       Job[]
+  routes     Route[]
+  gamePlans  GamePlan[]
+  fieldLeads FieldLead[]
+  issues     FieldIssue[]
 
   @@index([active])
 }
@@ -565,7 +572,13 @@ model CrewMember {
   user      User?    @relation("CrewMemberUser", fields: [userId], references: [id])
   name      String
   title     String?
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  points     PointEntry[]
+  doneStops  GamePlanStop[]
+  fieldLeads FieldLead[]
+  issues     FieldIssue[]
 
   @@index([crewId])
   @@index([userId])
@@ -1275,5 +1288,156 @@ model AdminNotification {
 model SiteContent {
   key       String   @id
   value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// Crew app (/crew) — daily game plan, stop completion with photos, points.
+// Admin posts a GamePlan per crew per day; crews see it live on their phones.
+// -----------------------------------------------------------------------------
+enum StopStatus {
+  PENDING
+  DONE
+  SKIPPED
+}
+
+enum FieldLeadStatus {
+  NEW
+  QUOTED
+  WON
+  LOST
+}
+
+enum FieldIssueKind {
+  DAMAGE
+  EQUIPMENT
+  SAFETY
+  CUSTOMER
+  OTHER
+}
+
+enum FieldIssueStatus {
+  OPEN
+  RESOLVED
+}
+
+model GamePlan {
+  id        String   @id @default(cuid())
+  crewId    String
+  crew      Crew     @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  /// Calendar day (stored at 00:00 UTC; compared by YYYY-MM-DD string).
+  date      String
+  truck     String?
+  startTime String?
+  brief     String?
+  /// Unpublished plans are drafts: crews don't see them.
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stops GamePlanStop[]
+
+  @@unique([crewId, date])
+  @@index([date])
+}
+
+model GamePlanStop {
+  id         String      @id @default(cuid())
+  planId     String
+  plan       GamePlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  sortOrder  Int
+  address    String
+  service    String?
+  note       String?
+  status     StopStatus  @default(PENDING)
+  doneAt     DateTime?
+  doneById   String?
+  doneBy     CrewMember? @relation(fields: [doneById], references: [id])
+  /// Cloudinary URLs: after photos required, before photos optional.
+  photoUrls  String[]
+  crewNote   String?
+  createdAt  DateTime    @default(now())
+
+  fieldLeads FieldLead[]
+  issues     FieldIssue[]
+  points     PointEntry[]
+
+  @@index([planId, sortOrder])
+}
+
+/// A rule is a one-tap reason when awarding points. `autoKey` rules fire
+/// automatically (e.g. "stop_photo" when a crew marks a stop done with photos).
+model PointRule {
+  id        String   @id @default(cuid())
+  label     String
+  points    Int
+  autoKey   String?  @unique
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  entries PointEntry[]
+}
+
+model PointEntry {
+  id        String        @id @default(cuid())
+  memberId  String
+  member    CrewMember    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  points    Int
+  reason    String
+  note      String?
+  /// YYYY-MM-DD the points count toward.
+  date      String
+  ruleId    String?
+  rule      PointRule?    @relation(fields: [ruleId], references: [id])
+  stopId    String?
+  stop      GamePlanStop? @relation(fields: [stopId], references: [id])
+  createdAt DateTime      @default(now())
+
+  @@index([memberId, date])
+  @@index([date])
+}
+
+/// Upsell lead flagged from the field ("customer asked about gutters").
+model FieldLead {
+  id        String          @id @default(cuid())
+  crewId    String
+  crew      Crew            @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  memberId  String?
+  member    CrewMember?     @relation(fields: [memberId], references: [id])
+  stopId    String?
+  stop      GamePlanStop?   @relation(fields: [stopId], references: [id])
+  address   String
+  service   String
+  note      String?
+  status    FieldLeadStatus @default(NEW)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model FieldIssue {
+  id        String           @id @default(cuid())
+  crewId    String
+  crew      Crew             @relation(fields: [crewId], references: [id], onDelete: Cascade)
+  memberId  String?
+  member    CrewMember?      @relation(fields: [memberId], references: [id])
+  stopId    String?
+  stop      GamePlanStop?    @relation(fields: [stopId], references: [id])
+  kind      FieldIssueKind
+  note      String
+  photoUrls String[]
+  status    FieldIssueStatus @default(OPEN)
+  createdAt DateTime         @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+/// Small key/value settings for the crew app (season start date, etc.).
+model CrewSetting {
+  key       String   @id
+  value     String
   updatedAt DateTime @updatedAt
 }
