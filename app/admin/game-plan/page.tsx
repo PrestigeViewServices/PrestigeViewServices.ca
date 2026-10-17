@@ -5,7 +5,7 @@ import { planDefaults, toCheckItems, ymd } from "@/lib/crew-app";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { PageHeader, adminBtn } from "@/components/admin/page-header";
 import { GamePlanTabs } from "@/components/admin/game-plan/tabs";
-import { PlanEditor } from "@/components/admin/game-plan/plan-editor";
+import { DayEditor } from "@/components/admin/game-plan/day-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +37,39 @@ export default async function GamePlanPage(props: {
     planDefaults(),
     db.pointRule.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, select: { label: true, points: true } }),
   ]);
-  const crewId = crews.find((c) => c.id === sp.crew)?.id ?? crews[0]?.id ?? "";
-  const plan = crewId
-    ? await db.gamePlan.findUnique({
-        where: { crewId_date: { crewId, date } },
-        include: { stops: { orderBy: { sortOrder: "asc" } } },
-      })
-    : null;
+  const plans = await db.gamePlan.findMany({
+    where: { date, crewId: { in: crews.map((c) => c.id) } },
+    include: { stops: { orderBy: { sortOrder: "asc" } } },
+  });
+  // ?crew= from the Week grid: put that crew first so it opens at the top.
+  const ordered = sp.crew ? [...crews.filter((c) => c.id === sp.crew), ...crews.filter((c) => c.id !== sp.crew)] : crews;
+  const blocks = ordered.map((c) => {
+    const plan = plans.find((p) => p.crewId === c.id) ?? null;
+    return {
+      crew: { id: c.id, name: c.name, truck: c.truck, members: c.members.map((m) => ({ id: m.id, name: m.name, rank: m.rank })) },
+      plan: plan
+        ? {
+            id: plan.id,
+            headline: plan.headline,
+            truck: plan.truck,
+            trailer: plan.trailer,
+            startTime: plan.startTime,
+            weather: plan.weather,
+            mission: plan.mission,
+            brief: plan.brief,
+            headsUp: plan.headsUp,
+            contact: plan.contact,
+            tomorrowDrop: plan.tomorrowDrop,
+            leadId: plan.leadId,
+            gear: toCheckItems(plan.gear).map((g) => g.label),
+            endOfDay: toCheckItems(plan.endOfDay).map((g) => g.label),
+            published: plan.published,
+            updatedAt: plan.updatedAt.toISOString(),
+            stops: plan.stops.map((s) => ({ id: s.id, time: s.time, address: s.address, service: s.service, note: s.note, upsell: s.upsell, customerName: s.customerName, customerPhone: s.customerPhone, phoneVisibility: s.phoneVisibility, status: s.status, photoUrls: s.photoUrls })),
+          }
+        : null,
+    };
+  });
 
   const needsPin = crews.flatMap((c) => c.members.filter((m) => !m.pinHash).map((m) => m.name));
 
@@ -51,7 +77,7 @@ export default async function GamePlanPage(props: {
     <div className="space-y-5">
       <PageHeader
         title="Game Plan"
-        description="The standard daily game plan. Lead, truck, gear, quality standard, points and contact are prefilled; type weather, mission, stops and any heads-up, then post."
+        description="Every crew for the day on one page. Type weather, mission and heads-up once, add each crew's stops, Post all."
         actions={<Link href="/crew" target="_blank" className={adminBtn.secondary}>Open crew app</Link>}
       />
       <GamePlanTabs />
@@ -69,37 +95,7 @@ export default async function GamePlanPage(props: {
               <Link href="/admin/game-plan/team" className="underline underline-offset-2">Set PINs</Link>
             </p>
           )}
-          <PlanEditor
-            key={`${crewId}-${date}`}
-            crews={crews.map(({ id, name, truck, members }) => ({ id, name, truck, members: members.map((m) => ({ id: m.id, name: m.name, rank: m.rank })) }))}
-            crewId={crewId}
-            date={date}
-            defaults={defaults}
-            rules={rules}
-            plan={
-              plan
-                ? {
-                    id: plan.id,
-                    headline: plan.headline,
-                    truck: plan.truck,
-                    trailer: plan.trailer,
-                    startTime: plan.startTime,
-                    weather: plan.weather,
-                    mission: plan.mission,
-                    brief: plan.brief,
-                    headsUp: plan.headsUp,
-                    contact: plan.contact,
-                    tomorrowDrop: plan.tomorrowDrop,
-                    leadId: plan.leadId,
-                    gear: toCheckItems(plan.gear).map((g) => g.label),
-                    endOfDay: toCheckItems(plan.endOfDay).map((g) => g.label),
-                    published: plan.published,
-                    updatedAt: plan.updatedAt.toISOString(),
-                    stops: plan.stops.map((s) => ({ id: s.id, time: s.time, address: s.address, service: s.service, note: s.note, upsell: s.upsell, customerName: s.customerName, customerPhone: s.customerPhone, phoneVisibility: s.phoneVisibility, status: s.status, photoUrls: s.photoUrls })),
-                  }
-                : null
-            }
-          />
+          <DayEditor key={date} date={date} blocks={blocks} defaults={defaults} rules={rules} />
         </>
       )}
     </div>
