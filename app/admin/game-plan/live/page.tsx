@@ -101,7 +101,7 @@ export default async function LivePage(props: { searchParams: Promise<{ date?: s
                     <div className="min-w-0 flex-1">
                       <p className={`text-[13px] font-medium ${s.status === "DONE" ? "text-slate-400 line-through" : "text-slate-100"}`}>{s.address}</p>
                       <p className="text-[12px] text-slate-500">
-                        {s.service}
+                        {[s.customerName, s.service].filter(Boolean).join(" · ")}
                         {s.doneBy && s.doneAt ? ` · ${s.status === "DONE" ? "done" : "skipped"} by ${s.doneBy.name} ${fmtTime(s.doneAt)}` : ""}
                         {s.crewNote ? ` · "${s.crewNote}"` : ""}
                       </p>

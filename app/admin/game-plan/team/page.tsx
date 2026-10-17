@@ -2,7 +2,7 @@ import Link from "next/link";
 import { KeyRound } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
-import { seasonStart, standings } from "@/lib/crew-app";
+import { RANKS, RANK_LABEL, seasonStart, standings } from "@/lib/crew-app";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { PageHeader, Panel, Badge } from "@/components/admin/page-header";
 import { GamePlanTabs } from "@/components/admin/game-plan/tabs";
@@ -34,7 +34,7 @@ export default async function TeamPage() {
   }
   const db = getDb()!;
   const [crews, rules, season, board] = await Promise.all([
-    db.crew.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }], include: { members: { orderBy: [{ active: "desc" }, { name: "asc" }] } } }),
+    db.crew.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }], include: { members: { orderBy: [{ active: "desc" }, { rank: "asc" }, { name: "asc" }] } } }),
     db.pointRule.findMany({ orderBy: { sortOrder: "asc" } }),
     seasonStart(),
     standings(),
@@ -46,7 +46,7 @@ export default async function TeamPage() {
     <div className="space-y-5">
       <PageHeader
         title="Team"
-        description="Each person signs in to /crew with their own PIN. Tap a name to see their points, photos, leads and issues."
+        description="Each person signs in to /crew with their own PIN. Crew Lead and above see customer phone numbers marked leads-only. Tap a name for their profile."
         meta={noPin.length ? <Badge cls="border-amber-500/30 bg-amber-500/10 text-amber-200">{noPin.length} without a PIN</Badge> : <Badge cls="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">everyone has a PIN</Badge>}
       />
       <GamePlanTabs />
@@ -70,7 +70,9 @@ export default async function TeamPage() {
                     <li key={m.id} className={`flex flex-col gap-2 p-3 ${m.active ? "" : "opacity-60"}`}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <Link href={`/admin/game-plan/team/${m.id}`} className="text-[14px] font-semibold text-white hover:text-sky-300">
-                          {m.name}{m.title ? <span className="ml-1.5 text-[12px] font-normal text-slate-500">{m.title}</span> : null}
+                          {m.name}
+                          <span className={`ml-2 rounded px-1.5 py-px text-[11px] font-medium ${m.rank === "FIELD_SUPERVISOR" ? "bg-amber-400/15 text-amber-200" : m.rank === "CREW_LEAD" ? "bg-sky-400/15 text-sky-200" : "bg-white/[0.06] text-slate-300"}`}>{RANK_LABEL[m.rank]}</span>
+                          {m.title ? <span className="ml-1.5 text-[12px] font-normal text-slate-500">{m.title}</span> : null}
                         </Link>
                         <div className="flex items-center gap-2 text-[12px] text-slate-400">
                           {m.pinHash ? <Badge cls="border-emerald-500/30 bg-emerald-500/10 text-emerald-200"><KeyRound className="h-3 w-3" /> PIN set</Badge> : <Badge cls="border-amber-500/30 bg-amber-500/10 text-amber-200">no PIN</Badge>}
@@ -82,7 +84,10 @@ export default async function TeamPage() {
                         <form action={updateMember} className="flex flex-wrap items-center gap-2">
                           <input type="hidden" name="id" value={m.id} />
                           <input id={`m-name-${m.id}`} name="name" defaultValue={m.name} className={`${input} w-36`} />
-                          <input id={`m-title-${m.id}`} name="title" defaultValue={m.title ?? ""} placeholder="Title" className={`${input} w-28`} />
+                          <select id={`m-rank-${m.id}`} name="rank" defaultValue={m.rank} className={input}>
+                            {RANKS.map((r) => <option key={r} value={r}>{RANK_LABEL[r]}</option>)}
+                          </select>
+                          <input id={`m-title-${m.id}`} name="title" defaultValue={m.title ?? ""} placeholder="Note (e.g. snow certified)" className={`${input} w-36`} />
                           <input id={`m-phone-${m.id}`} name="phone" defaultValue={m.phone ?? ""} placeholder="Phone" className={`${input} w-32`} />
                           <select id={`m-crew-${m.id}`} name="crewId" defaultValue={m.crewId} className={input}>
                             {crews.filter((x) => x.active || x.id === m.crewId).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
@@ -101,7 +106,11 @@ export default async function TeamPage() {
               <form action={addMember} className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-white/10 p-3">
                 <input type="hidden" name="crewId" value={c.id} />
                 <label className="flex flex-col gap-1 text-[12px] text-slate-400">Add a person<input id={`add-m-${c.id}`} name="name" placeholder="Name" className={`${input} w-36`} required /></label>
-                <label className="flex flex-col gap-1 text-[12px] text-slate-400">Title<input id={`add-t-${c.id}`} name="title" placeholder="Crew lead" className={`${input} w-28`} /></label>
+                <label className="flex flex-col gap-1 text-[12px] text-slate-400">Position
+                  <select id={`add-r-${c.id}`} name="rank" defaultValue="TECHNICIAN" className={input}>
+                    {RANKS.map((r) => <option key={r} value={r}>{RANK_LABEL[r]}</option>)}
+                  </select>
+                </label>
                 <label className="flex flex-col gap-1 text-[12px] text-slate-400">PIN<input id={`add-p-${c.id}`} name="pin" inputMode="numeric" pattern="[0-9]{4,6}" maxLength={6} placeholder="4 to 6 digits" className={`${input} w-28 tracking-[0.2em]`} /></label>
                 <button className={btnP}>Add</button>
               </form>

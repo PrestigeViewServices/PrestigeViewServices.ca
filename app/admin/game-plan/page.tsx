@@ -76,7 +76,7 @@ export default async function GamePlanPage(props: {
                     brief: plan.brief,
                     published: plan.published,
                     updatedAt: plan.updatedAt.toISOString(),
-                    stops: plan.stops.map((s) => ({ id: s.id, address: s.address, service: s.service, note: s.note, status: s.status, photoUrls: s.photoUrls })),
+                    stops: plan.stops.map((s) => ({ id: s.id, address: s.address, service: s.service, note: s.note, customerName: s.customerName, customerPhone: s.customerPhone, phoneVisibility: s.phoneVisibility, status: s.status, photoUrls: s.photoUrls })),
                   }
                 : null
             }

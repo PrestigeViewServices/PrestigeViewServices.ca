@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   CalendarDays,
+  Phone,
+  User,
   Camera,
   Check,
   ChevronDown,
@@ -24,6 +26,8 @@ type Stop = {
   address: string;
   service: string | null;
   note: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
   status: "PENDING" | "DONE" | "SKIPPED";
   doneAt: string | null;
   doneBy: { id: string; name: string } | null;
@@ -36,12 +40,12 @@ type Plan = {
   truck: string | null;
   startTime: string | null;
   brief: string | null;
-  crew: { id: string; name: string; truck: string | null; members: { id: string; name: string }[] };
+  crew: { id: string; name: string; truck: string | null; members: { id: string; name: string; rank: string }[] };
   stops: Stop[];
 };
 type WeekDay = { date: string; headline: string | null; truck: string | null; startTime: string | null; stopCount: number; doneCount: number; hasDetail: boolean };
 type Payload = {
-  me: { memberId: string; name: string; crew: string; week: number; season: number; rank: number | null; of: number };
+  me: { memberId: string; name: string; position: string; crew: string; week: number; season: number; rank: number | null; of: number };
   date: string;
   dateLabel: string;
   today: Plan | null;
@@ -52,6 +56,7 @@ type Payload = {
 };
 
 const POLL_MS = 20_000;
+const RANK_SHORT: Record<string, string> = { FIELD_SUPERVISOR: "Supervisor", CREW_LEAD: "Crew Lead", SENIOR_TECH: "Sr. Tech", TECHNICIAN: "Tech", TRAINEE: "Trainee" };
 
 export function CrewHome() {
   const router = useRouter();
@@ -134,7 +139,7 @@ export function CrewHome() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-300">{data.me.crew}</p>
         <h1 className="font-display mt-1 text-[28px] font-bold leading-tight">{data.dateLabel}</h1>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-300">
-          <span>Hey <b className="text-white">{data.me.name}</b></span>
+          <span>Hey <b className="text-white">{data.me.name}</b> <span className="text-slate-500">· {RANK_SHORT[data.me.position] ?? data.me.position}</span></span>
           {truck && <span>{/^truck/i.test(truck) ? "" : "Truck "}<b className="text-white">{truck}</b></span>}
           {plan?.startTime && <span>Start <b className="text-white">{plan.startTime}</b></span>}
           {plan && plan.crew.members.length > 1 && (
@@ -388,7 +393,7 @@ function StopRow({
         </span>
         <span className="min-w-0">
           <span className={`block text-[16px] font-semibold leading-snug ${isDone ? "text-slate-300 line-through decoration-emerald-400/60" : "text-white"}`}>{stop.address}</span>
-          {stop.service && <span className="block text-[13px] text-slate-400">{stop.service}</span>}
+          {(stop.service || stop.customerName) && <span className="block text-[13px] text-slate-400">{[stop.customerName, stop.service].filter(Boolean).join(" · ")}</span>}
           {stop.note && <span className="mt-1 inline-block rounded-md bg-amber-400/15 px-2 py-0.5 text-[13px] text-amber-100">{stop.note}</span>}
           {(isDone || isSkipped) && stop.doneBy && (
             <span className="mt-1 block text-[12px] text-slate-500">
@@ -405,6 +410,13 @@ function StopRow({
             <a href={mapsHref(stop.address)} target="_blank" rel="noopener" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 px-3 text-xs font-semibold text-slate-200">
               <Navigation className="h-3.5 w-3.5" /> Directions
             </a>
+            {stop.customerPhone ? (
+              <a href={`tel:${stop.customerPhone.replace(/[^\d+]/g, "")}`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 text-xs font-semibold text-sky-100">
+                <Phone className="h-3.5 w-3.5" /> {stop.customerName ? `Call ${stop.customerName.split(" ")[0]}` : "Call customer"}
+              </a>
+            ) : stop.customerName ? (
+              <span className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 px-3 text-xs text-slate-400"><User className="h-3.5 w-3.5" /> {stop.customerName}</span>
+            ) : null}
             <button type="button" onClick={onLead} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-emerald-400/30 px-3 text-xs font-semibold text-emerald-200"><Sparkles className="h-3.5 w-3.5" /> Flag lead</button>
             <button type="button" onClick={onIssue} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-400/30 px-3 text-xs font-semibold text-red-200"><AlertTriangle className="h-3.5 w-3.5" /> Issue</button>
           </div>

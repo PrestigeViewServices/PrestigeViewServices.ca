@@ -6,6 +6,8 @@ import { getDb } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import {
   PIN_RE,
+  RANKS,
+  type CrewRank,
   awardAuto,
   hashPin,
   pinInUse,
@@ -39,6 +41,9 @@ const stopSchema = z.object({
   address: z.string().trim().min(1).max(200),
   service: z.string().trim().max(120).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
+  customerName: z.string().trim().max(80).optional().default(""),
+  customerPhone: z.string().trim().max(30).optional().default(""),
+  phoneVisibility: z.enum(["ALL", "LEADS", "NONE"]).optional().default("LEADS"),
 });
 
 const planSchema = z.object({
@@ -96,10 +101,10 @@ export async function savePlan(input: PlanInput) {
       s.id
         ? prisma.gamePlanStop.update({
             where: { id: s.id },
-            data: { sortOrder: i, address: s.address, service: s.service || null, note: s.note || null },
+            data: { sortOrder: i, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
         : prisma.gamePlanStop.create({
-            data: { planId: plan.id, sortOrder: i, address: s.address, service: s.service || null, note: s.note || null },
+            data: { planId: plan.id, sortOrder: i, address: s.address, service: s.service || null, note: s.note || null, customerName: s.customerName || null, customerPhone: s.customerPhone || null, phoneVisibility: s.phoneVisibility },
           })
     ),
   ]);
@@ -132,7 +137,7 @@ export async function copyPreviousPlan(crewId: string, date: string) {
     startTime: prev.startTime ?? "",
     brief: "",
     published: false,
-    stops: prev.stops.map((s) => ({ address: s.address, service: s.service ?? "", note: s.note ?? "" })),
+    stops: prev.stops.map((s) => ({ address: s.address, service: s.service ?? "", note: s.note ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility })),
   });
 }
 
@@ -322,14 +327,16 @@ export async function addMember(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
   const title = String(formData.get("title") ?? "").trim().slice(0, 60);
   const pin = String(formData.get("pin") ?? "").replace(/\D/g, "");
+  const rank = String(formData.get("rank") ?? "TECHNICIAN");
   if (!crewId || !name) return;
+  if (!(RANKS as readonly string[]).includes(rank)) return;
   let pinHash: string | null = null;
   if (pin) {
     if (!PIN_RE.test(pin)) throw new Error("PIN must be 4 to 6 digits");
     if (await pinInUse(pin)) throw new Error("Someone else already has that PIN. Pick another.");
     pinHash = await hashPin(pin);
   }
-  await db().crewMember.create({ data: { crewId, name, title: title || null, pinHash } });
+  await db().crewMember.create({ data: { crewId, name, title: title || null, pinHash, rank: rank as CrewRank } });
   revalidateAll();
 }
 
@@ -340,9 +347,11 @@ export async function updateMember(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
   const title = String(formData.get("title") ?? "").trim().slice(0, 60);
   const phone = String(formData.get("phone") ?? "").trim().slice(0, 30);
+  const rank = String(formData.get("rank") ?? "TECHNICIAN");
   const active = formData.get("active") === "on";
   if (!id || !name || !crewId) return;
-  await db().crewMember.update({ where: { id }, data: { name, crewId, active, title: title || null, phone: phone || null } });
+  if (!(RANKS as readonly string[]).includes(rank)) return;
+  await db().crewMember.update({ where: { id }, data: { name, crewId, active, title: title || null, phone: phone || null, rank: rank as CrewRank } });
   revalidateAll();
   revalidatePath(`/admin/game-plan/team/${id}`);
 }

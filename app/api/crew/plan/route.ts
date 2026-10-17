@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import {
+  canSeePhone,
   crewVisiblePlans,
   crewWeek,
   getCrewSession,
@@ -38,6 +39,20 @@ export async function GET() {
     }),
   ]);
 
+  // Customer phone numbers are filtered per viewer: a stop marked "leads
+  // only" shows the number to Crew Lead and above; "none" hides it for all.
+  type P = NonNullable<typeof plans.today>;
+  const redact = (p: P | null) => {
+    if (!p) return null;
+    return {
+      ...p,
+      stops: p.stops.map(({ phoneVisibility, customerPhone, ...s }) => ({
+        ...s,
+        customerPhone: canSeePhone(phoneVisibility, session.rank) ? customerPhone : null,
+      })),
+    };
+  };
+
   const me = board.find((s) => s.memberId === session.memberId) ?? null;
   const rank = me ? board.findIndex((s) => s.memberId === me.memberId) + 1 : null;
 
@@ -45,6 +60,7 @@ export async function GET() {
     me: {
       memberId: session.memberId,
       name: session.memberName,
+      position: session.rank,
       crewId: session.crewId,
       crew: session.crewName,
       week: me?.week ?? 0,
@@ -55,8 +71,8 @@ export async function GET() {
     date: plans.date,
     dateLabel: prettyDate(plans.date),
     weekOf: weekStart(ymd()),
-    today: plans.today,
-    tomorrow: plans.tomorrow,
+    today: redact(plans.today),
+    tomorrow: redact(plans.tomorrow),
     week,
     board: board.slice(0, 12),
     recent: recent.map((r) => ({

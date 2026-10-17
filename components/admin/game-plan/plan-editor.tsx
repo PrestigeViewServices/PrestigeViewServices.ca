@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, Check, Copy, Plus, Trash2 } from "lucide-react";
 import { savePlan, deletePlan, copyPreviousPlan, type PlanInput } from "@/app/admin/game-plan/actions";
 
-type StopDraft = { id?: string; address: string; service: string; note: string; status?: string; photos?: number };
+type Vis = "ALL" | "LEADS" | "NONE";
+type StopDraft = { id?: string; address: string; service: string; note: string; customerName: string; customerPhone: string; phoneVisibility: Vis; status?: string; photos?: number };
+const VIS_LABEL: Record<Vis, string> = { ALL: "Whole crew", LEADS: "Crew leads +", NONE: "Office only" };
 type Props = {
   crews: { id: string; name: string; truck: string | null }[];
   crewId: string;
@@ -18,7 +20,7 @@ type Props = {
     brief: string | null;
     published: boolean;
     updatedAt: string;
-    stops: { id: string; address: string; service: string | null; note: string | null; status: string; photoUrls: string[] }[];
+    stops: { id: string; address: string; service: string | null; note: string | null; customerName: string | null; customerPhone: string | null; phoneVisibility: Vis; status: string; photoUrls: string[] }[];
   } | null;
 };
 
@@ -31,7 +33,7 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
   const [brief, setBrief] = useState(plan?.brief ?? "");
   const [published, setPublished] = useState(plan?.published ?? true);
   const [stops, setStops] = useState<StopDraft[]>(
-    plan?.stops.map((s) => ({ id: s.id, address: s.address, service: s.service ?? "", note: s.note ?? "", status: s.status, photos: s.photoUrls.length })) ?? []
+    plan?.stops.map((s) => ({ id: s.id, address: s.address, service: s.service ?? "", note: s.note ?? "", customerName: s.customerName ?? "", customerPhone: s.customerPhone ?? "", phoneVisibility: s.phoneVisibility, status: s.status, photos: s.photoUrls.length })) ?? []
   );
   const [bulk, setBulk] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
@@ -60,9 +62,9 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
     setStops((s) => [
       ...s,
       ...lines.map((l) => {
-        // "123 Main St | mow + trim | gate code 4411"
-        const [address = "", service = "", note = ""] = l.split("|").map((x) => x.trim());
-        return { address, service, note };
+        // "123 Main St | mow + trim | gate code 4411 | Jane Carter | 613-555-0142"
+        const [address = "", service = "", note = "", customerName = "", customerPhone = ""] = l.split("|").map((x) => x.trim());
+        return { address, service, note, customerName, customerPhone, phoneVisibility: "LEADS" as Vis };
       }),
     ]);
     setBulk("");
@@ -72,7 +74,7 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
     setMsg(null);
     const input: PlanInput = {
       crewId, date, headline, truck, startTime, brief, published: publish,
-      stops: stops.filter((s) => s.address.trim()).map(({ id, address, service, note }) => ({ id, address, service, note })),
+      stops: stops.filter((s) => s.address.trim()).map(({ id, address, service, note, customerName, customerPhone, phoneVisibility }) => ({ id, address, service, note, customerName, customerPhone, phoneVisibility })),
     };
     start(async () => {
       try {
@@ -134,7 +136,7 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
             <h2 className="text-[13px] font-semibold text-slate-100">Stops in order</h2>
             <div className="flex gap-2">
               <button type="button" disabled={pending} onClick={() => start(async () => { const r = await copyPreviousPlan(crewId, date); setMsg(r.ok ? "Copied last plan as a draft. Edit, then post." : r.error); router.refresh(); })} className="inline-flex h-8 items-center gap-1 rounded-sm border border-white/[0.09] px-2.5 text-xs text-slate-300 hover:bg-white/[0.05]"><Copy className="h-3.5 w-3.5" /> Copy last plan</button>
-              <button type="button" onClick={() => setStops((s) => [...s, { address: "", service: "", note: "" }])} className="inline-flex h-8 items-center gap-1 rounded-sm bg-primary px-2.5 text-xs font-semibold text-white"><Plus className="h-3.5 w-3.5" /> Stop</button>
+              <button type="button" onClick={() => setStops((s) => [...s, { address: "", service: "", note: "", customerName: "", customerPhone: "", phoneVisibility: "LEADS" }])} className="inline-flex h-8 items-center gap-1 rounded-sm bg-primary px-2.5 text-xs font-semibold text-white"><Plus className="h-3.5 w-3.5" /> Stop</button>
             </div>
           </div>
           <div className="flex flex-col divide-y divide-white/[0.05]">
@@ -146,6 +148,13 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
                   <input id={`stop-addr-${i}`} value={s.address} onChange={(e) => update(i, { address: e.target.value })} placeholder="Address" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
                   <input id={`stop-svc-${i}`} value={s.service} onChange={(e) => update(i, { service: e.target.value })} placeholder="Service (mow + trim, gutters, windows...)" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
                   <input id={`stop-note-${i}`} value={s.note} onChange={(e) => update(i, { note: e.target.value })} placeholder="Note for the crew (gate code, dog, customer home)" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white sm:col-span-2" />
+                  <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:col-span-2">
+                    <input id={`stop-cname-${i}`} value={s.customerName} onChange={(e) => update(i, { customerName: e.target.value })} placeholder="Customer name" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
+                    <input id={`stop-cphone-${i}`} value={s.customerPhone} onChange={(e) => update(i, { customerPhone: e.target.value })} placeholder="Phone" inputMode="tel" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
+                    <select id={`stop-vis-${i}`} value={s.phoneVisibility} onChange={(e) => update(i, { phoneVisibility: e.target.value as Vis })} title="Who can see the phone number" className="h-9 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-[12px] text-slate-300">
+                      {(Object.keys(VIS_LABEL) as Vis[]).map((v) => <option key={v} value={v}>Phone: {VIS_LABEL[v]}</option>)}
+                    </select>
+                  </div>
                   {s.photos ? <p className="text-[11px] text-slate-500 sm:col-span-2">{s.photos} photo{s.photos > 1 ? "s" : ""} uploaded</p> : null}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -157,8 +166,8 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
             ))}
           </div>
           <div className="border-t border-white/[0.06] p-3">
-            <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Paste a list (one stop per line; use | to add service and note)
-              <textarea id="plan-bulk" value={bulk} onChange={(e) => setBulk(e.target.value)} rows={3} placeholder={"12 Hilda St | mow + trim | dog in yard\n48 Festubert Blvd | gutters"} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 font-mono text-xs text-white" />
+            <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Paste a list (one stop per line: address | service | note | customer name | phone)
+              <textarea id="plan-bulk" value={bulk} onChange={(e) => setBulk(e.target.value)} rows={3} placeholder={"12 Hilda St | mow + trim | dog in yard | Jane Carter | 613-555-0142\n48 Festubert Blvd | gutters"} className="rounded-md border border-white/10 bg-[#0A0E18] px-2 py-1.5 font-mono text-xs text-white" />
             </label>
             <button type="button" onClick={addBulk} disabled={!bulk.trim()} className="mt-2 h-8 rounded-sm border border-white/[0.09] px-3 text-xs text-slate-300 disabled:opacity-40">Add these stops</button>
           </div>

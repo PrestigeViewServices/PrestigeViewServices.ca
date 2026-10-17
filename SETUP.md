@@ -286,12 +286,15 @@ with their own 4 to 6 digit PIN, no accounts or passwords. You run it from the
 admin dashboard under **Crew App**.
 
 1. **Team** (`/admin/game-plan/team`): add crews and people, give each person
-   a PIN. Tap a name to see their points, photos, leads and last sign-in.
-   These are the same crews Dispatch uses.
+   a PIN and a position (Field Supervisor, Crew Lead, Senior Technician,
+   Technician, Trainee). Tap a name to see their points, photos, leads and
+   last sign-in. These are the same crews Dispatch uses.
 2. **Week** (`/admin/game-plan/week`): one line per crew per day ("Lawns
    Pembroke", "Off"). Crews see the whole week on their phone.
 3. **Day plan** (`/admin/game-plan`): pick crew and date, type the brief and
-   stops, click **Post to crew**. The crew's phone updates within 20 seconds.
+   stops, click **Post to crew**. Each stop can carry the customer's name and
+   phone, with a per-stop choice of who sees the number: whole crew, Crew
+   Lead and above, or office only. The crew's phone updates within 20 seconds.
 4. **Live Board**: watch stops get checked off with photos during the day.
 5. **Points**: one-tap awards and deductions. Marking a stop done with a photo
    awards points automatically; marking a field lead **Won** pays the upsell

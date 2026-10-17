@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { getDb } from "./db";
 import { hashPassword, verifyPassword } from "./customer-auth";
 
@@ -89,6 +90,7 @@ export async function getCrewSession(): Promise<
   | (CrewSession & {
       crewName: string;
       memberName: string;
+      rank: CrewRank;
       lastSeenAt: Date | null;
     })
   | null
@@ -107,7 +109,7 @@ export async function getCrewSession(): Promise<
   if (!member || !member.crew.active) return null;
   // A member moved to another crew keeps their session; the crew comes from
   // the database, not the cookie.
-  return { ...s, crewId: member.crew.id, crewName: member.crew.name, memberName: member.name, lastSeenAt: member.lastSeenAt };
+  return { ...s, crewId: member.crew.id, crewName: member.crew.name, memberName: member.name, rank: member.rank as CrewRank, lastSeenAt: member.lastSeenAt };
 }
 
 export async function setCrewCookie(crewId: string, memberId: string) {
@@ -125,6 +127,38 @@ export async function setCrewCookie(crewId: string, memberId: string) {
 export async function clearCrewCookie() {
   const store = await cookies();
   store.set(CREW_COOKIE, "", { path: "/", maxAge: 0 });
+}
+
+// ---- Ranks -------------------------------------------------------------------
+
+export const RANKS = ["FIELD_SUPERVISOR", "CREW_LEAD", "SENIOR_TECH", "TECHNICIAN", "TRAINEE"] as const;
+export type CrewRank = (typeof RANKS)[number];
+export const RANK_LABEL: Record<CrewRank, string> = {
+  FIELD_SUPERVISOR: "Field Supervisor",
+  CREW_LEAD: "Crew Lead",
+  SENIOR_TECH: "Senior Technician",
+  TECHNICIAN: "Technician",
+  TRAINEE: "Trainee",
+};
+export const RANK_SHORT: Record<CrewRank, string> = {
+  FIELD_SUPERVISOR: "Supervisor",
+  CREW_LEAD: "Lead",
+  SENIOR_TECH: "Sr. Tech",
+  TECHNICIAN: "Tech",
+  TRAINEE: "Trainee",
+};
+/** Lower = more senior. */
+export function rankOrder(r: CrewRank): number {
+  return RANKS.indexOf(r);
+}
+export function isLeadOrAbove(r: CrewRank): boolean {
+  return rankOrder(r) <= rankOrder("CREW_LEAD");
+}
+export type PhoneVisibility = "ALL" | "LEADS" | "NONE";
+export function canSeePhone(vis: PhoneVisibility, rank: CrewRank): boolean {
+  if (vis === "ALL") return true;
+  if (vis === "LEADS") return isLeadOrAbove(rank);
+  return false;
 }
 
 // ---- PINs ------------------------------------------------------------------
@@ -245,6 +279,7 @@ export async function seasonStart(): Promise<string> {
 export type Standing = {
   memberId: string;
   name: string;
+  rank: CrewRank;
   crewId: string;
   crewName: string;
   week: number;
@@ -272,6 +307,7 @@ export async function standings(): Promise<Standing[]> {
     map.set(m.id, {
       memberId: m.id,
       name: m.name,
+      rank: m.rank as CrewRank,
       crewId: m.crewId,
       crewName: m.crew.name,
       week: 0,
@@ -322,16 +358,16 @@ export const planInclude = {
       truck: true,
       members: {
         where: { active: true },
-        orderBy: { name: "asc" as const },
-        select: { id: true, name: true },
+        orderBy: [{ rank: "asc" }, { name: "asc" }],
+        select: { id: true, name: true, rank: true },
       },
     },
   },
   stops: {
-    orderBy: { sortOrder: "asc" as const },
+    orderBy: { sortOrder: "asc" },
     include: { doneBy: { select: { id: true, name: true } } },
   },
-} as const;
+} satisfies Prisma.GamePlanInclude;
 
 /** The plan a crew sees: today's, plus tomorrow's after 5pm. */
 export async function crewVisiblePlans(crewId: string) {

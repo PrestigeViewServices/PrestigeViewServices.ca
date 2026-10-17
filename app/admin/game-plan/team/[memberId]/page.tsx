@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
-import { seasonStart, weekStart, ymd } from "@/lib/crew-app";
+import { RANK_LABEL, seasonStart, weekStart, ymd } from "@/lib/crew-app";
 import { NotConfigured } from "@/components/admin/not-configured";
 import { PageHeader, Panel, Badge, adminBtn } from "@/components/admin/page-header";
 import { GamePlanTabs } from "@/components/admin/game-plan/tabs";
@@ -43,7 +43,7 @@ export default async function MemberPage(props: { params: Promise<{ memberId: st
     <div className="space-y-5">
       <PageHeader
         title={m.name}
-        description={[m.title, m.crew.name, m.phone].filter(Boolean).join(" · ")}
+        description={[RANK_LABEL[m.rank], m.crew.name, m.title, m.phone].filter(Boolean).join(" · ")}
         meta={<>
           {!m.active && <Badge>inactive</Badge>}
           {m.pinHash ? <Badge cls="border-emerald-500/30 bg-emerald-500/10 text-emerald-200">PIN set</Badge> : <Badge cls="border-amber-500/30 bg-amber-500/10 text-amber-200">no PIN</Badge>}

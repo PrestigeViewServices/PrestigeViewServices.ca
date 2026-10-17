@@ -576,6 +576,9 @@ model CrewMember {
   /// Personal crew-app PIN (scrypt hash). Each person signs in with their own.
   pinHash   String?
   phone     String?
+  /// Position on the crew. Crew Lead and above can see customer phone
+  /// numbers marked "leads only".
+  rank      CrewRank @default(TECHNICIAN)
   lastSeenAt DateTime?
   createdAt DateTime @default(now())
 
@@ -1305,6 +1308,22 @@ enum StopStatus {
   SKIPPED
 }
 
+/// Crew positions, most senior first.
+enum CrewRank {
+  FIELD_SUPERVISOR
+  CREW_LEAD
+  SENIOR_TECH
+  TECHNICIAN
+  TRAINEE
+}
+
+/// Who on the crew may see a stop's customer phone number.
+enum PhoneVisibility {
+  ALL
+  LEADS
+  NONE
+}
+
 enum FieldLeadStatus {
   NEW
   QUOTED
@@ -1355,6 +1374,9 @@ model GamePlanStop {
   address    String
   service    String?
   note       String?
+  customerName  String?
+  customerPhone String?
+  phoneVisibility PhoneVisibility @default(LEADS)
   status     StopStatus  @default(PENDING)
   doneAt     DateTime?
   doneById   String?
