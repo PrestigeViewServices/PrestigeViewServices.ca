@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  CalendarDays,
   Camera,
   Check,
   ChevronDown,
@@ -38,12 +39,14 @@ type Plan = {
   crew: { id: string; name: string; truck: string | null; members: { id: string; name: string }[] };
   stops: Stop[];
 };
+type WeekDay = { date: string; headline: string | null; truck: string | null; startTime: string | null; stopCount: number; doneCount: number; hasDetail: boolean };
 type Payload = {
   me: { memberId: string; name: string; crew: string; week: number; season: number; rank: number | null; of: number };
   date: string;
   dateLabel: string;
   today: Plan | null;
   tomorrow: Plan | null;
+  week: WeekDay[];
   board: { memberId: string; name: string; crewName: string; week: number; season: number }[];
   recent: { id: string; name: string; points: number; reason: string; note: string | null; date: string }[];
 };
@@ -205,6 +208,9 @@ export function CrewHome() {
         </section>
       )}
 
+      {/* Week */}
+      <WeekView week={data.week} today={data.date} />
+
       {/* Points */}
       <section>
         <div className="mb-2 flex items-center justify-between">
@@ -261,6 +267,65 @@ export function CrewHome() {
         </div>
       )}
     </div>
+  );
+}
+
+const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+function dayNum(d: string) { return Number(d.slice(8, 10)); }
+function monthShort(d: string) { return new Date(Date.UTC(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, 1)).toLocaleDateString("en-CA", { month: "short", timeZone: "UTC" }); }
+
+function WeekView({ week, today }: { week: WeekDay[]; today: string }) {
+  const [showNext, setShowNext] = useState(false);
+  if (!week?.length) return null;
+  const thisWeek = week.slice(0, 7);
+  const nextWeek = week.slice(7, 14);
+  const todayIdx = thisWeek.findIndex((d) => d.date === today);
+  // On Sat/Sun, open next week by default: that's what people are asking about.
+  const defaultNext = todayIdx >= 5;
+  const open = showNext || defaultNext;
+  const Row = ({ d, i, dim }: { d: WeekDay; i: number; dim?: boolean }) => {
+    const isToday = d.date === today;
+    const past = d.date < today;
+    const empty = !d.headline && !d.hasDetail;
+    return (
+      <li className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 px-3 py-2.5 ${isToday ? "bg-primary/10" : ""} ${past || dim ? "opacity-60" : ""}`}>
+        <span className="text-center leading-tight">
+          <span className={`block text-[10px] font-semibold uppercase tracking-[0.08em] ${isToday ? "text-sky-300" : "text-slate-500"}`}>{DOW[i]}</span>
+          <span className={`font-display block text-lg font-bold ${isToday ? "text-white" : "text-slate-300"}`}>{dayNum(d.date)}</span>
+        </span>
+        <span className="min-w-0">
+          <span className={`block truncate text-[15px] ${empty ? "text-slate-500" : "font-semibold text-white"}`}>
+            {d.headline || (d.hasDetail ? `${d.stopCount} stops` : "Not planned yet")}
+          </span>
+          <span className="block text-[12px] text-slate-400">
+            {[d.startTime ? `Start ${d.startTime}` : null, d.truck ? (/^truck/i.test(d.truck) ? d.truck : `Truck ${d.truck}`) : null].filter(Boolean).join(" · ")}
+          </span>
+        </span>
+        <span className="text-right text-[12px] tabular-nums text-slate-400">
+          {d.hasDetail ? (past || isToday ? `${d.doneCount}/${d.stopCount}` : `${d.stopCount} stops`) : ""}
+        </span>
+      </li>
+    );
+  };
+  return (
+    <section>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="font-display flex items-center gap-2 text-lg font-semibold"><CalendarDays className="h-4 w-4 text-sky-300" /> This week</h2>
+        <span className="text-xs text-slate-500">{monthShort(thisWeek[0].date)} {dayNum(thisWeek[0].date)} to {monthShort(thisWeek[6].date)} {dayNum(thisWeek[6].date)}</span>
+      </div>
+      <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0E1322]">
+        {thisWeek.map((d, i) => <Row key={d.date} d={d} i={i} />)}
+      </ul>
+      <button type="button" onClick={() => setShowNext((v) => !v)} className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/[0.06] px-3 py-2 text-sm text-slate-300">
+        <span>Next week</span>
+        <ChevronDown className={`h-4 w-4 text-slate-500 transition ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="mt-2 divide-y divide-white/[0.05] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0E1322]">
+          {nextWeek.map((d, i) => <Row key={d.date} d={d} i={i} />)}
+        </ul>
+      )}
+    </section>
   );
 }
 

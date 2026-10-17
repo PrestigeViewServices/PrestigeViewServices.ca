@@ -12,6 +12,7 @@ type Props = {
   date: string;
   plan: {
     id: string;
+    headline: string | null;
     truck: string | null;
     startTime: string | null;
     brief: string | null;
@@ -24,6 +25,7 @@ type Props = {
 export function PlanEditor({ crews, crewId, date, plan }: Props) {
   const router = useRouter();
   const crew = crews.find((c) => c.id === crewId);
+  const [headline, setHeadline] = useState(plan?.headline ?? "");
   const [truck, setTruck] = useState(plan?.truck ?? "");
   const [startTime, setStartTime] = useState(plan?.startTime ?? "");
   const [brief, setBrief] = useState(plan?.brief ?? "");
@@ -69,7 +71,7 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
   function submit(publish: boolean) {
     setMsg(null);
     const input: PlanInput = {
-      crewId, date, truck, startTime, brief, published: publish,
+      crewId, date, headline, truck, startTime, brief, published: publish,
       stops: stops.filter((s) => s.address.trim()).map(({ id, address, service, note }) => ({ id, address, service, note })),
     };
     start(async () => {
@@ -103,6 +105,9 @@ export function PlanEditor({ crews, crewId, date, plan }: Props) {
             <button type="button" onClick={() => go({ date: shift(date, -1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Prev</button>
             <button type="button" onClick={() => go({ date: shift(date, 1) })} className="h-9 rounded-md border border-white/10 px-2 text-xs text-slate-300">Next</button>
           </div>
+          <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Day headline (week view)
+            <input id="plan-headline" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Lawns Pembroke" className="h-9 w-40 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
+          </label>
           <label className="flex flex-col gap-1 text-[12px] font-medium text-slate-400">Truck
             <input id="plan-truck" value={truck} onChange={(e) => setTruck(e.target.value)} placeholder={crew?.truck ?? "Truck 2"} className="h-9 w-28 rounded-md border border-white/10 bg-[#0A0E18] px-2 text-sm text-white" />
           </label>

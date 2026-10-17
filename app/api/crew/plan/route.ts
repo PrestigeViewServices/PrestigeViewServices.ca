@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import {
   crewVisiblePlans,
+  crewWeek,
   getCrewSession,
   prettyDate,
+  touchMember,
   standings,
   weekStart,
   ymd,
@@ -22,10 +24,12 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "signed-out" }, { status: 401 });
   const db = getDb();
   if (!db) return NextResponse.json({ error: "db" }, { status: 503 });
+  void touchMember(session.memberId, session.lastSeenAt);
 
-  const [plans, board, recent] = await Promise.all([
+  const [plans, board, week, recent] = await Promise.all([
     crewVisiblePlans(session.crewId),
     standings(),
+    crewWeek(session.crewId),
     db.pointEntry.findMany({
       where: { member: { crewId: session.crewId } },
       orderBy: { createdAt: "desc" },
@@ -53,13 +57,14 @@ export async function GET() {
     weekOf: weekStart(ymd()),
     today: plans.today,
     tomorrow: plans.tomorrow,
+    week,
     board: board.slice(0, 12),
     recent: recent.map((r) => ({
       id: r.id,
       name: r.member.name,
       points: r.points,
       reason: r.reason,
-      note: r.note,
+      note: r.note && r.note.startsWith("lead:") ? null : r.note,
       date: r.date,
     })),
   });

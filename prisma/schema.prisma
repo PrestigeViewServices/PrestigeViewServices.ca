@@ -573,6 +573,10 @@ model CrewMember {
   name      String
   title     String?
   active    Boolean  @default(true)
+  /// Personal crew-app PIN (scrypt hash). Each person signs in with their own.
+  pinHash   String?
+  phone     String?
+  lastSeenAt DateTime?
   createdAt DateTime @default(now())
 
   points     PointEntry[]
@@ -1327,6 +1331,8 @@ model GamePlan {
   crew      Crew     @relation(fields: [crewId], references: [id], onDelete: Cascade)
   /// Calendar day (stored at 00:00 UTC; compared by YYYY-MM-DD string).
   date      String
+  /// One-line summary for the week view ("Pembroke lawns", "Off", "Gutters day").
+  headline  String?
   truck     String?
   startTime String?
   brief     String?

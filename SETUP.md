@@ -281,23 +281,26 @@ Web). Vercel Analytics is on automatically with no key.
 
 ## Crew app (`/crew`) and Game Plan
 
-The crew app lives at **prestigeviewservices.ca/crew**. Crews sign in with a
-4 to 6 digit PIN plus their name, no accounts. You run it from the admin
-dashboard under **Crew App**.
+The crew app lives at **prestigeviewservices.ca/crew**. Each person signs in
+with their own 4 to 6 digit PIN, no accounts or passwords. You run it from the
+admin dashboard under **Crew App**.
 
-1. **Team & PINs** (`/admin/game-plan/team`): add crews, set each crew's PIN,
-   add names. These are the same crews Dispatch uses.
-2. **Game Plan** (`/admin/game-plan`): pick crew and date, type the brief and
+1. **Team** (`/admin/game-plan/team`): add crews and people, give each person
+   a PIN. Tap a name to see their points, photos, leads and last sign-in.
+   These are the same crews Dispatch uses.
+2. **Week** (`/admin/game-plan/week`): one line per crew per day ("Lawns
+   Pembroke", "Off"). Crews see the whole week on their phone.
+3. **Day plan** (`/admin/game-plan`): pick crew and date, type the brief and
    stops, click **Post to crew**. The crew's phone updates within 20 seconds.
-3. **Live Board**: watch stops get checked off with photos during the day.
-4. **Points**: one-tap awards and deductions. Marking a stop done with a photo
+4. **Live Board**: watch stops get checked off with photos during the day.
+5. **Points**: one-tap awards and deductions. Marking a stop done with a photo
    awards points automatically; marking a field lead **Won** pays the upsell
    bonus. Edit the amounts under Team.
-5. **Job Photos**, **Field Leads**, **Issues**: what the crews sent in.
+6. **Job Photos**, **Field Leads**, **Issues**: what the crews sent in.
 
 Photos use the same Cloudinary account as the gallery (see Photos above);
 without it, crews can still skip stops and report issues, but can't mark a
-stop done. Rotate a crew's PIN under Team when someone leaves.
+stop done. Remove a person's PIN under Team when they leave.
 
 Tell crews to open `/crew` in Safari or Chrome and **Add to Home Screen** so it
 opens like an app.

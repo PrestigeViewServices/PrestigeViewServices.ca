@@ -28,7 +28,7 @@ export default async function GamePlanPage(props: {
   const crews = await db.crew.findMany({
     where: { active: true },
     orderBy: { name: "asc" },
-    select: { id: true, name: true, truck: true, pinHash: true },
+    select: { id: true, name: true, truck: true, members: { where: { active: true, pinHash: null }, select: { name: true } } },
   });
   const crewId = crews.find((c) => c.id === sp.crew)?.id ?? crews[0]?.id ?? "";
   const plan = crewId
@@ -38,7 +38,7 @@ export default async function GamePlanPage(props: {
       })
     : null;
 
-  const needsPin = crews.filter((c) => !c.pinHash);
+  const needsPin = crews.flatMap((c) => c.members.map((m) => m.name));
 
   return (
     <div className="space-y-5">
@@ -58,7 +58,7 @@ export default async function GamePlanPage(props: {
         <>
           {needsPin.length > 0 && (
             <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[13px] text-amber-200">
-              {needsPin.map((c) => c.name).join(", ")} {needsPin.length === 1 ? "has" : "have"} no PIN yet, so that crew can&apos;t sign in.{" "}
+              {needsPin.join(", ")} {needsPin.length === 1 ? "has" : "have"} no PIN yet and can&apos;t sign in.{" "}
               <Link href="/admin/game-plan/team" className="underline underline-offset-2">Set PINs</Link>
             </p>
           )}
@@ -70,6 +70,7 @@ export default async function GamePlanPage(props: {
               plan
                 ? {
                     id: plan.id,
+                    headline: plan.headline,
                     truck: plan.truck,
                     startTime: plan.startTime,
                     brief: plan.brief,

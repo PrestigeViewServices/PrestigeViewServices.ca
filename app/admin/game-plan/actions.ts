@@ -8,6 +8,7 @@ import {
   PIN_RE,
   awardAuto,
   hashPin,
+  pinInUse,
   setCrewSetting,
   ymd,
 } from "@/lib/crew-app";
@@ -28,6 +29,7 @@ function revalidateAll() {
   revalidatePath("/admin/game-plan/leads");
   revalidatePath("/admin/game-plan/issues");
   revalidatePath("/admin/game-plan/team");
+  revalidatePath("/admin/game-plan/week");
 }
 
 // ---- Plans -------------------------------------------------------------------
@@ -42,6 +44,7 @@ const stopSchema = z.object({
 const planSchema = z.object({
   crewId: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  headline: z.string().trim().max(80).optional().default(""),
   truck: z.string().trim().max(40).optional().default(""),
   startTime: z.string().trim().max(20).optional().default(""),
   brief: z.string().trim().max(1500).optional().default(""),
@@ -66,12 +69,14 @@ export async function savePlan(input: PlanInput) {
     create: {
       crewId: d.crewId,
       date: d.date,
+      headline: d.headline || null,
       truck: d.truck || null,
       startTime: d.startTime || null,
       brief: d.brief || null,
       published: d.published,
     },
     update: {
+      headline: d.headline || null,
       truck: d.truck || null,
       startTime: d.startTime || null,
       brief: d.brief || null,
@@ -122,12 +127,58 @@ export async function copyPreviousPlan(crewId: string, date: string) {
   return savePlan({
     crewId,
     date,
+    headline: prev.headline ?? "",
     truck: prev.truck ?? "",
     startTime: prev.startTime ?? "",
     brief: "",
     published: false,
     stops: prev.stops.map((s) => ({ address: s.address, service: s.service ?? "", note: s.note ?? "" })),
   });
+}
+
+const weekSchema = z.object({
+  crewId: z.string().min(1),
+  days: z.array(z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    headline: z.string().trim().max(80),
+    startTime: z.string().trim().max(20).optional().default(""),
+    truck: z.string().trim().max(40).optional().default(""),
+  })).max(14),
+});
+export type WeekInput = z.input<typeof weekSchema>;
+
+/**
+ * Save the week grid for one crew. Each day becomes (or updates) a
+ * published GamePlan with a headline; stops and briefs already on that
+ * day are left alone. A day cleared to blank with no stops is deleted so
+ * the crew sees "not planned yet" rather than an empty plan.
+ */
+export async function saveWeek(input: WeekInput) {
+  await requireRole([...ROLES]);
+  const d = weekSchema.parse(input);
+  const prisma = db();
+  for (const day of d.days) {
+    const existing = await prisma.gamePlan.findUnique({
+      where: { crewId_date: { crewId: d.crewId, date: day.date } },
+      include: { _count: { select: { stops: true } } },
+    });
+    const blank = !day.headline && !day.startTime && !day.truck;
+    if (!existing) {
+      if (blank) continue;
+      await prisma.gamePlan.create({
+        data: { crewId: d.crewId, date: day.date, headline: day.headline || null, startTime: day.startTime || null, truck: day.truck || null, published: true },
+      });
+    } else if (blank && existing._count.stops === 0 && !existing.brief) {
+      await prisma.gamePlan.delete({ where: { id: existing.id } });
+    } else {
+      await prisma.gamePlan.update({
+        where: { id: existing.id },
+        data: { headline: day.headline || null, startTime: day.startTime || null, truck: day.truck || null, published: existing.published || !!day.headline },
+      });
+    }
+  }
+  revalidateAll();
+  return { ok: true as const };
 }
 
 /** Admin override: mark a stop pending/done/skipped without photos. */
@@ -250,16 +301,17 @@ export async function updateCrew(formData: FormData) {
   revalidateAll();
 }
 
-export async function setCrewPin(formData: FormData) {
+export async function setMemberPin(formData: FormData) {
   await requireRole([...ROLES]);
   const id = String(formData.get("id") ?? "");
   const pin = String(formData.get("pin") ?? "").replace(/\D/g, "");
   if (!id) return;
   if (pin === "") {
-    await db().crew.update({ where: { id }, data: { pinHash: null } });
+    await db().crewMember.update({ where: { id }, data: { pinHash: null } });
   } else {
     if (!PIN_RE.test(pin)) throw new Error("PIN must be 4 to 6 digits");
-    await db().crew.update({ where: { id }, data: { pinHash: await hashPin(pin) } });
+    if (await pinInUse(pin, id)) throw new Error("Someone else already has that PIN. Pick another.");
+    await db().crewMember.update({ where: { id }, data: { pinHash: await hashPin(pin) } });
   }
   revalidateAll();
 }
@@ -269,8 +321,15 @@ export async function addMember(formData: FormData) {
   const crewId = String(formData.get("crewId") ?? "");
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
   const title = String(formData.get("title") ?? "").trim().slice(0, 60);
+  const pin = String(formData.get("pin") ?? "").replace(/\D/g, "");
   if (!crewId || !name) return;
-  await db().crewMember.create({ data: { crewId, name, title: title || null } });
+  let pinHash: string | null = null;
+  if (pin) {
+    if (!PIN_RE.test(pin)) throw new Error("PIN must be 4 to 6 digits");
+    if (await pinInUse(pin)) throw new Error("Someone else already has that PIN. Pick another.");
+    pinHash = await hashPin(pin);
+  }
+  await db().crewMember.create({ data: { crewId, name, title: title || null, pinHash } });
   revalidateAll();
 }
 
@@ -279,10 +338,13 @@ export async function updateMember(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const crewId = String(formData.get("crewId") ?? "");
   const name = String(formData.get("name") ?? "").trim().slice(0, 60);
+  const title = String(formData.get("title") ?? "").trim().slice(0, 60);
+  const phone = String(formData.get("phone") ?? "").trim().slice(0, 30);
   const active = formData.get("active") === "on";
   if (!id || !name || !crewId) return;
-  await db().crewMember.update({ where: { id }, data: { name, crewId, active } });
+  await db().crewMember.update({ where: { id }, data: { name, crewId, active, title: title || null, phone: phone || null } });
   revalidateAll();
+  revalidatePath(`/admin/game-plan/team/${id}`);
 }
 
 export async function saveRule(formData: FormData) {

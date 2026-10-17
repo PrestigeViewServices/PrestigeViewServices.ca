@@ -89,6 +89,7 @@ export async function getCrewSession(): Promise<
   | (CrewSession & {
       crewName: string;
       memberName: string;
+      lastSeenAt: Date | null;
     })
   | null
 > {
@@ -100,11 +101,13 @@ export async function getCrewSession(): Promise<
   const db = getDb();
   if (!db) return null;
   const member = await db.crewMember.findFirst({
-    where: { id: s.memberId, crewId: s.crewId, active: true },
-    include: { crew: { select: { name: true, active: true } } },
+    where: { id: s.memberId, active: true },
+    include: { crew: { select: { id: true, name: true, active: true } } },
   });
   if (!member || !member.crew.active) return null;
-  return { ...s, crewName: member.crew.name, memberName: member.name };
+  // A member moved to another crew keeps their session; the crew comes from
+  // the database, not the cookie.
+  return { ...s, crewId: member.crew.id, crewName: member.crew.name, memberName: member.name, lastSeenAt: member.lastSeenAt };
 }
 
 export async function setCrewCookie(crewId: string, memberId: string) {
@@ -132,27 +135,37 @@ export async function hashPin(pin: string): Promise<string> {
   return hashPassword(pin);
 }
 
-/** Finds the first active crew whose PIN matches. PINs should be unique per
- * crew; if two crews share one, the first by name wins, so the Team page
- * warns about duplicates. */
-export async function findCrewByPin(pin: string) {
+/**
+ * Finds the active crew member whose personal PIN matches. PINs are kept
+ * unique across members (enforced when set), so the first match is the one.
+ * A dozen scrypt checks per sign-in is fine; sign-in happens once per phone.
+ */
+export async function findMemberByPin(pin: string) {
   const db = getDb();
   if (!db || !PIN_RE.test(pin)) return null;
-  const crews = await db.crew.findMany({
-    where: { active: true, pinHash: { not: null } },
+  const members = await db.crewMember.findMany({
+    where: { active: true, pinHash: { not: null }, crew: { active: true } },
     orderBy: { name: "asc" },
-    include: {
-      members: {
-        where: { active: true },
-        orderBy: { name: "asc" },
-        select: { id: true, name: true },
-      },
-    },
+    include: { crew: { select: { id: true, name: true } } },
   });
-  for (const c of crews) {
-    if (c.pinHash && (await verifyPassword(pin, c.pinHash))) return c;
+  for (const m of members) {
+    if (m.pinHash && (await verifyPassword(pin, m.pinHash))) return m;
   }
   return null;
+}
+
+/** True if another active member already uses this PIN. */
+export async function pinInUse(pin: string, exceptMemberId?: string) {
+  const m = await findMemberByPin(pin);
+  return !!m && m.id !== exceptMemberId;
+}
+
+/** Stamps lastSeenAt at most every 10 minutes so polling doesn't hammer writes. */
+export async function touchMember(memberId: string, lastSeenAt: Date | null) {
+  const db = getDb();
+  if (!db) return;
+  if (lastSeenAt && Date.now() - lastSeenAt.getTime() < 10 * 60 * 1000) return;
+  await db.crewMember.update({ where: { id: memberId }, data: { lastSeenAt: new Date() } }).catch(() => null);
 }
 
 // ---- Dates (business timezone) --------------------------------------------
@@ -338,4 +351,50 @@ export async function crewVisiblePlans(crewId: string) {
       ? plans.find((p) => p.date === addDays(today, 1)) ?? null
       : null,
   };
+}
+
+// ---- Week view ---------------------------------------------------------------
+
+export type WeekDay = {
+  date: string;
+  headline: string | null;
+  truck: string | null;
+  startTime: string | null;
+  stopCount: number;
+  doneCount: number;
+  hasDetail: boolean;
+};
+
+/**
+ * 14 days from this week's Monday for one crew: the headline you typed in
+ * the Week grid, plus stop counts where a detailed plan exists. Drafts are
+ * hidden. Headlines are always visible (that's the point of the week view);
+ * the stop list itself still follows the today / tomorrow-after-5pm rule.
+ */
+export async function crewWeek(crewId: string): Promise<WeekDay[]> {
+  const db = getDb();
+  const today = ymd();
+  const start = weekStart(today);
+  const dates = Array.from({ length: 14 }, (_, i) => addDays(start, i));
+  if (!db) return dates.map((date) => ({ date, headline: null, truck: null, startTime: null, stopCount: 0, doneCount: 0, hasDetail: false }));
+  const plans = await db.gamePlan.findMany({
+    where: { crewId, published: true, date: { in: dates } },
+    select: {
+      date: true, headline: true, truck: true, startTime: true,
+      stops: { select: { status: true } },
+    },
+  });
+  const byDate = new Map(plans.map((p) => [p.date, p]));
+  return dates.map((date) => {
+    const p = byDate.get(date);
+    return {
+      date,
+      headline: p?.headline ?? null,
+      truck: p?.truck ?? null,
+      startTime: p?.startTime ?? null,
+      stopCount: p?.stops.length ?? 0,
+      doneCount: p?.stops.filter((s) => s.status !== "PENDING").length ?? 0,
+      hasDetail: (p?.stops.length ?? 0) > 0,
+    };
+  });
 }
