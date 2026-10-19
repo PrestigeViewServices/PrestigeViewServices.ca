@@ -1,0 +1,42 @@
+# Builds the PVS Dispatch Windows installer on a Windows runner and uploads
+# it as a downloadable artifact. Run it from the Actions tab (workflow_dispatch)
+# or by pushing a dispatch-v* tag.
+name: Build PVS Dispatch installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['dispatch-v*']
+    branches: ['claude/pvs-dispatch-app-m4k2jd']
+    paths:
+      - 'pvs-dispatch/**'
+      - '.github/workflows/pvs-dispatch-installer.yml'
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: pvs-dispatch
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pvs-dispatch/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package (NSIS installer)
+        run: npm run package
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: PVS-Dispatch-Windows-Setup
+          path: pvs-dispatch/release/*.exe
+          if-no-files-found: error
+          retention-days: 30

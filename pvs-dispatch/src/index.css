@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 240 10% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 10%;
+  --muted: 240 5% 94%;
+  --muted-foreground: 240 4% 42%;
+  --border: 240 6% 88%;
+  --primary: 240 6% 12%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 240 5% 92%;
+  --accent-foreground: 240 6% 12%;
+  --destructive: 0 72% 48%;
+  --destructive-foreground: 0 0% 98%;
+}
+
+.dark {
+  --background: 240 6% 7%;
+  --foreground: 240 5% 92%;
+  --card: 240 6% 10%;
+  --card-foreground: 240 5% 92%;
+  --muted: 240 5% 15%;
+  --muted-foreground: 240 4% 60%;
+  --border: 240 5% 18%;
+  --primary: 0 0% 95%;
+  --primary-foreground: 240 6% 10%;
+  --accent: 240 5% 16%;
+  --accent-foreground: 240 5% 92%;
+  --destructive: 0 62% 52%;
+  --destructive-foreground: 0 0% 98%;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-foreground antialiased text-sm;
+}
+
+/* All numbers line up in tables, KPIs, and the schedule board */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full border-2 border-solid border-transparent bg-clip-padding;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
