@@ -17,14 +17,10 @@ import {
   DRIVEWAY_TIER_DEFS,
   SHOVELING_TIER_DEFS,
   addOnIsIncluded,
-  formatCents,
-  formatMonthly,
   getDrivewayTier,
   getShovelingTier,
-  monthlyCents,
   selectionLines,
   selectionSummary,
-  tierMonthlyFromCents,
   MONTHLY_INSTALLMENTS,
   type AddOnKey,
   type DrivewaySize,
@@ -68,8 +64,8 @@ export function PackageSelector({
   const [pack, setPack] = useState<ShovelingTier>("NONE");
   const [addOns, setAddOns] = useState<AddOnKey[]>([]);
 
-  // Starting prices on this page are quoted for a single-car driveway; the
-  // exact size is captured in the Aurora quote form.
+  // Prices are not published; every pass is quoted to the property. The
+  // exact driveway size is captured in the Aurora quote form.
   const size: DrivewaySize = "ONE_CAR";
   const [card, setCard] = useState<CardState>({ kind: "idle" });
 
@@ -84,12 +80,6 @@ export function PackageSelector({
   );
 
   const summary = selection ? selectionSummary(selection) : "";
-
-  // Live "from" price for the chosen tier and driveway size. Walkway packs
-  // and add-ons are quoted to the property, so they are not folded in here.
-  const monthlyFrom = tier
-    ? monthlyCents(getDrivewayTier(tier).priceCents[size])
-    : null;
 
   /** Everything the shareable card needs, derived from the live selection. */
   const cardData: PackageCardData | null = useMemo(() => {
@@ -194,10 +184,9 @@ export function PackageSelector({
         </div>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          Starting prices are for a single-car driveway, split into{" "}
+          Every pass is quoted to your exact property, then split into{" "}
           {MONTHLY_INSTALLMENTS} equal monthly payments across the winter.
-          Larger and rural driveways are quoted to your exact property before
-          anything is billed.{" "}
+          Nothing is billed until you approve your quote.{" "}
           <strong className="text-foreground">
             Free quote, no payment today.
           </strong>
@@ -361,16 +350,10 @@ export function PackageSelector({
             <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/10 p-5">
               <p className="eyebrow text-primary">Your selection</p>
               <p className="mt-2 text-lg font-bold tracking-tight">{summary}</p>
-              {monthlyFrom !== null && (
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  Driveway pass from{" "}
-                  <strong className="text-foreground">
-                    {formatMonthly(monthlyFrom)}/month
-                  </strong>{" "}
-                  for a single-car driveway. Mention this package in the form
-                  so we quote the right thing.
-                </p>
-              )}
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Mention this package in the form so we quote the right thing
+                for your property.
+              </p>
             </div>
           )}
 
@@ -404,11 +387,6 @@ export function PackageSelector({
       {tier && (
         <StickyBar
           summary={summary}
-          priceLabel={
-            monthlyFrom !== null
-              ? `From ${formatMonthly(monthlyFrom)}/mo`
-              : null
-          }
           onQuote={scrollToForm}
           smsHref={smsHref}
         />
@@ -471,20 +449,13 @@ function TierCard({
 
       <div className="mt-5 border-t border-surface-border pt-4">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Starting at
+          Pricing
         </p>
-        <p className="mt-1 flex items-baseline gap-1">
-          <span className="text-3xl font-bold tracking-tight">
-            {formatMonthly(tierMonthlyFromCents(tier))}
-          </span>
-          <span className="text-sm font-medium text-muted-foreground">
-            /month
-          </span>
+        <p className="mt-1 text-lg font-bold tracking-tight">
+          Quoted to your property
         </p>
         <p className="mt-1 text-xs leading-snug text-muted-foreground">
-          Single-car driveway · {MONTHLY_INSTALLMENTS} monthly payments ·{" "}
-          {formatCents(tierMonthlyFromCents(tier) * MONTHLY_INSTALLMENTS)} per
-          season
+          Free quote in 24 hours · {MONTHLY_INSTALLMENTS} monthly payments
         </p>
       </div>
 
@@ -655,12 +626,10 @@ function CardPreview({
 
 function StickyBar({
   summary,
-  priceLabel,
   onQuote,
   smsHref,
 }: {
   summary: string;
-  priceLabel: string | null;
   onQuote: () => void;
   smsHref: string;
 }) {
@@ -687,11 +656,6 @@ function StickyBar({
           </p>
           <p className="truncate text-sm font-semibold">
             {summary}
-            {priceLabel && (
-              <span className="ml-2 font-normal text-muted-foreground">
-                {priceLabel}
-              </span>
-            )}
           </p>
         </div>
         <a

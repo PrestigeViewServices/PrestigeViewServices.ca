@@ -33,17 +33,10 @@ import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
   MONTHLY_INSTALLMENTS,
-  formatMonthly,
-  tierMonthlyFromCents,
 } from "@/lib/content/winter-packages";
 import { siteConfig } from "@/lib/site";
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
-
-// Advertised entry price: the cheapest tier's single-car monthly payment.
-const STARTING_MONTHLY = formatMonthly(
-  Math.min(...DRIVEWAY_TIER_DEFS.map(tierMonthlyFromCents))
-);
 
 export const metadata: Metadata = {
   title:
@@ -178,7 +171,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Passes start at ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[0]))} per month for a single-car driveway on Bronze, up to ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[DRIVEWAY_TIER_DEFS.length - 1]))} per month for white-glove Platinum, spread over ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Larger and rural driveways are quoted to your exact property. Send a quote request and we confirm your price within 24 hours, free and with no obligation — nothing is collected today.`,
+    a: `Every pass is quoted to your property, because driveway size, layout, and town all change the work. Pick the tier you want, send a quote request, and we confirm your price within 24 hours, free and with no obligation. Your seasonal rate is then split into ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter, and nothing is collected today.`,
   },
   {
     q: "Do military members get a discount on snow passes?",
@@ -234,13 +227,6 @@ export default function WinterPackagesPage() {
           name: `${t.name} seasonal snow pass`,
           description: t.blurb,
           availability: "https://schema.org/InStock",
-          priceCurrency: "CAD",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: (tierMonthlyFromCents(t) / 100).toFixed(2),
-            priceCurrency: "CAD",
-            unitText: "per month, starting price for a single-car driveway",
-          },
           url: `${siteConfig.url}/winter-packages#packages`,
         })),
       },
@@ -293,9 +279,9 @@ export default function WinterPackagesPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Seasonal snow passes for Petawawa and Pembroke from{" "}
+              Seasonal snow passes for Petawawa and Pembroke,{" "}
               <strong className="font-semibold text-white">
-                {STARTING_MONTHLY}/month
+                quoted free to your property
               </strong>
               . Storms trigger us automatically, so you never make a call.{" "}
               <strong className="font-semibold text-white">Pembroke</strong>{" "}

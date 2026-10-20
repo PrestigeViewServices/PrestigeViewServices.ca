@@ -8,6 +8,7 @@ import {
   Phone,
   Snowflake,
   Leaf,
+  Droplets,
   Building2,
 } from "lucide-react";
 import {
@@ -43,6 +44,14 @@ const featuredLinks = [
     tileIcon: "bg-amber-400/20 text-amber-300",
   },
   {
+    href: "/services/gutter-cleaning",
+    label: "Gutters",
+    icon: Droplets,
+    cls: "text-teal-300 hover:bg-teal-400/10",
+    tile: "border-teal-400/30 bg-teal-400/10 hover:bg-teal-400/20",
+    tileIcon: "bg-teal-400/20 text-teal-300",
+  },
+  {
     href: "/winter-packages",
     label: "Snow Removal",
     icon: Snowflake,
@@ -65,6 +74,7 @@ const exploreLinks = [
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
   { href: "/services/fall-cleanup", label: "Fall Cleanups" },
+  { href: "/services/gutter-cleaning", label: "Gutter Cleaning" },
   { href: "/winter-packages", label: "Residential Snow Plans" },
   { href: "/commercial-snow-removal", label: "Commercial Snow Removal" },
   { href: "/service-areas", label: "Service Areas" },

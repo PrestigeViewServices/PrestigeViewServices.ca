@@ -69,7 +69,7 @@ export function StickyCta() {
         <div className="container-max flex items-center justify-between gap-3 py-3">
           <div className="hidden sm:block">
             <p className="text-sm font-semibold leading-tight">
-              Fall cleanups &amp; winter snow routes are filling
+              Fall cleanups, gutters &amp; snow routes are filling
             </p>
             <p className="text-xs text-muted-foreground">
               Free quote in one business day · Homes &amp; businesses
