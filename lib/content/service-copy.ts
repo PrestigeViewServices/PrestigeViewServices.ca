@@ -389,13 +389,13 @@ export const serviceCopy: Record<string, ServiceCopy> = {
   "snow-removal": {
     intro: [
       "Valley winters do not negotiate. When 30 centimetres lands overnight, you either dig for an hour before work or you watch PVS clear the driveway from your kitchen window with a coffee in hand. We know which morning we would pick.",
-      "Our seasonal contracts cover your driveway, apron and walkways for the whole winter, paid in simple equal monthly payments: unlimited visits during qualifying snowfalls, priority routing for contract customers, and salt available for ice days. Equipment is set by town: Pembroke routes are cleared with plow trucks, and Petawawa routes are cleared with tractors only, whose blowers throw snow clear instead of burying your lawn or mailbox.",
+      "Our seasonal contracts cover your driveway, apron and walkways for the whole winter at one seasonal price: unlimited visits during qualifying snowfalls, priority routing for contract customers, and salt available for ice days. Equipment is set by town: Pembroke routes are cleared with plow trucks, and Petawawa routes are cleared with tractors only, whose blowers throw snow clear instead of burying your lawn or mailbox.",
       "Contracts are capped per route so the machine is never too far away mid-storm. Routes fill up before the first flake flies, so the earlier you reserve, the better your placement on the run.",
     ],
     benefits: [
       {
-        title: "One easy monthly payment",
-        body: "No per-storm math, no surprise invoices in February. Your seasonal price is split into equal monthly payments and covers every qualifying snowfall.",
+        title: "One price for the season",
+        body: "No per-storm math, no surprise invoices in February. Your seasonal price covers every qualifying snowfall.",
       },
       {
         title: "Cleared before you need out",

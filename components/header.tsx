@@ -34,15 +34,6 @@ import { formatPhone } from "@/lib/utils";
 // flow is more valuable than any informational page.
 const featuredLinks = [
   {
-    href: "/fall-winter",
-    label: "Fall Cleanup",
-    icon: Leaf,
-    // Amber = fall, frost = winter. The two colours are the season theme.
-    cls: "text-amber-300 hover:bg-amber-400/10",
-    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
-    tileIcon: "bg-amber-400/20 text-amber-300",
-  },
-  {
     href: "/winter-packages",
     label: "Snow Removal",
     icon: Snowflake,
@@ -58,15 +49,24 @@ const featuredLinks = [
     tile: "border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20",
     tileIcon: "bg-cyan-400/20 text-cyan-200",
   },
+  {
+    href: "/fall-winter",
+    label: "Fall Cleanup",
+    icon: Leaf,
+    // Amber = fall, frost = winter. The two colours are the season theme.
+    cls: "text-amber-300 hover:bg-amber-400/10",
+    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
+    tileIcon: "bg-amber-400/20 text-amber-300",
+  },
 ] as const;
 
 const exploreLinks = [
   { href: "/account", label: "My Account · Prestige Club" },
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
-  { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/winter-packages", label: "Residential Snow Plans" },
   { href: "/commercial-snow-removal", label: "Commercial Snow Removal" },
+  { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
   { href: "/guides", label: "Tips & Guides" },

@@ -135,7 +135,7 @@ export default function FallWinterPage() {
               </li>
               <li className="flex items-center gap-2">
                 <Snowflake className="h-4 w-4 text-primary" />
-                Monthly payments on snow passes
+                One flat price for the whole winter
               </li>
             </ul>
           </div>
@@ -206,9 +206,8 @@ export default function FallWinterPage() {
               Seasonal snow passes, storm by storm, all winter
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Your driveway and walkway cleared every storm, with monthly
-              payment options and priority routes for Gold and Platinum
-              passes. Routes are capped in both towns; reserving now locks
+              Your driveway and walkway cleared every storm, with priority
+              routes for Gold and Platinum passes. Routes are capped in both towns; reserving now locks
               your spot before the snow flies.
             </p>
             <ul className="mt-5 space-y-2 text-sm text-muted-foreground">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Leaf, ArrowRight } from "lucide-react";
+import { Snowflake, ArrowRight } from "lucide-react";
 import { getSiteContent, splitAccents } from "@/lib/site-content";
 
 /**
@@ -17,7 +17,7 @@ export async function SeasonBanner() {
     <div className="relative z-20 border-b border-amber-400/25 bg-gradient-to-r from-blue-950 via-slate-900 to-amber-950/70">
       <div className="container-max flex flex-col items-center justify-center gap-2 py-2.5 text-center sm:flex-row sm:gap-4 sm:text-left">
         <p className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Leaf className="h-4 w-4 shrink-0 text-amber-300" aria-hidden />
+          <Snowflake className="h-4 w-4 shrink-0 text-sky-300" aria-hidden />
           <span>
             {splitAccents(seasonBanner.line1).map((seg, i) =>
               seg.accent ? (

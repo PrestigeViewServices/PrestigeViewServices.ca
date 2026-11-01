@@ -100,7 +100,7 @@ const STEPS = [
   {
     icon: FileCheck2,
     title: "Written quote",
-    body: "A fixed seasonal price split into monthly payments, or clear per-event rates. Your choice.",
+    body: "One fixed seasonal price, or clear per-event rates. Your choice.",
   },
   {
     icon: Radar,
@@ -116,7 +116,7 @@ const FAQS = [
   },
   {
     q: "Do you offer seasonal contracts or per-event pricing?",
-    a: "Both. Most businesses choose a seasonal contract because it locks in one price for the winter, split into equal monthly payments, with no surprise bills after a heavy month. Per-event pricing suits sites that only need occasional clearing.",
+    a: "Both. Most businesses choose a seasonal contract because it locks in one price for the whole winter, with no surprise bills after a heavy storm. Per-event pricing suits sites that only need occasional clearing.",
   },
   {
     q: "Can you clear before we open?",
