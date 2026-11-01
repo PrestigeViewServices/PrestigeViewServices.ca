@@ -22,15 +22,15 @@ export const offers: Offer[] = [
   // early-bird and 15% exterior bundle were both retired 2026-08-23 at the
   // owner's request. These offers sell timing and bundling instead.
   {
-    id: "fall-cleanup",
+    id: "winter-reserve",
     active: true,
-    eyebrow: "Booking Now",
-    headline: "Fall Cleanups Are Open Across the Ottawa Valley",
-    body: "Every leaf and branch cleared, the lawn cut to winter height, and the beds tidied so your property goes into the snow looking sharp and comes out of it healthy. Book before the rush and pick your week.",
-    ctaLabel: "Book My Fall Cleanup",
-    ctaHref: "/request-service?service=fall-cleanup",
-    accent: "lawn",
-    division: "lawnpros",
+    eyebrow: "Winter Routes Filling",
+    headline: "Reserve Your Driveway for the Whole Winter",
+    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Plow trucks in Pembroke, tractors in Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    ctaLabel: "Reserve My Spot",
+    ctaHref: "/winter-packages#packages",
+    accent: "snowland",
+    division: "snowland",
     showInModal: true,
   },
   {
@@ -45,15 +45,15 @@ export const offers: Offer[] = [
     division: "clearview",
   },
   {
-    id: "winter-reserve",
+    id: "fall-cleanup",
     active: true,
-    eyebrow: "Winter Routes Filling",
-    headline: "Reserve Your Driveway for the Whole Winter",
-    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Plow trucks in Pembroke, tractors in Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
-    ctaLabel: "Reserve My Spot",
-    ctaHref: "/winter-packages#packages",
-    accent: "snowland",
-    division: "snowland",
+    eyebrow: "Booking Now",
+    headline: "Fall Cleanups Are Open Across the Ottawa Valley",
+    body: "Every leaf and branch cleared, the lawn cut to winter height, and the beds tidied so your property goes into the snow looking sharp and comes out of it healthy. Book before the rush and pick your week.",
+    ctaLabel: "Book My Fall Cleanup",
+    ctaHref: "/request-service?service=fall-cleanup",
+    accent: "lawn",
+    division: "lawnpros",
   },
 ];
 

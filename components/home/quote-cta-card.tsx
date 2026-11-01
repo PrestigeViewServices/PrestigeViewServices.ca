@@ -11,7 +11,7 @@ import { cn, formatPhone } from "@/lib/utils";
  */
 const POINTS = [
   "Free quote within one business day",
-  "Fall cleanups, gutters & seasonal snow",
+  "Residential & commercial snow removal",
   "Fully insured, locally owned",
 ];
 

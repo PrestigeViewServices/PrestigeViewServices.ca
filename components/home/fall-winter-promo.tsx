@@ -17,26 +17,6 @@ import {
  */
 const CARDS = [
   {
-    key: "fall",
-    eyebrow: "Book now, before the freeze",
-    eyebrowIcon: Leaf,
-    eyebrowCls: "text-amber-300",
-    title: "Fall Cleanup",
-    pitch:
-      "Leaves hauled, beds cut back, gutters cleared, final cut at winter height. Your yard goes under the snow clean and comes out healthy.",
-    points: [
-      "Leaves mulched or hauled away",
-      "Gutters cleared before ice dams form",
-      "One visit, property winter-ready",
-    ],
-    img: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
-    alt: "Ottawa Valley yard cleared and trimmed after a PVS fall cleanup",
-    href: "/services/fall-cleanup",
-    cta: "Book my fall cleanup",
-    ring: "hover:border-amber-300/50",
-    btn: "bg-amber-400 text-slate-950 hover:bg-amber-300",
-  },
-  {
     key: "snow",
     eyebrow: "Winter routes filling",
     eyebrowIcon: Snowflake,
@@ -52,7 +32,7 @@ const CARDS = [
     img: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
     alt: "Driveway cleared edge to edge by a PVS tractor after a snowfall",
     href: "/winter-packages",
-    cta: "See snow plans & pricing",
+    cta: "See snow plans",
     ring: "hover:border-sky-300/50",
     btn: "bg-gradient-primary text-white hover:brightness-110",
   },
@@ -76,23 +56,43 @@ const CARDS = [
     ring: "hover:border-cyan-300/50",
     btn: "border border-cyan-300/40 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/20",
   },
+  {
+    key: "fall",
+    eyebrow: "Last few weeks to book",
+    eyebrowIcon: Leaf,
+    eyebrowCls: "text-amber-300",
+    title: "Fall Cleanup",
+    pitch:
+      "Leaves hauled, beds cut back, gutters cleared, final cut at winter height. Your yard goes under the snow clean and comes out healthy.",
+    points: [
+      "Leaves mulched or hauled away",
+      "Gutters cleared before ice dams form",
+      "One visit, property winter-ready",
+    ],
+    img: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
+    alt: "Ottawa Valley yard cleared and trimmed after a PVS fall cleanup",
+    href: "/services/fall-cleanup",
+    cta: "Book my fall cleanup",
+    ring: "hover:border-amber-300/50",
+    btn: "bg-amber-400 text-slate-950 hover:bg-amber-300",
+  },
 ] as const;
 
 export function FallWinterPromo() {
   return (
     <section className="container-max py-16 sm:py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <p className="eyebrow justify-center text-amber-300">
-          <Leaf className="h-3.5 w-3.5" aria-hidden />
-          This season
-          <Snowflake className="h-3.5 w-3.5 text-sky-300" aria-hidden />
+        <p className="eyebrow justify-center text-sky-300">
+          <Snowflake className="h-3.5 w-3.5" aria-hidden />
+          Snow season is here
         </p>
         <h2 className="heading-section mt-3 text-balance">
-          Fall cleanup now. <span className="text-gradient-season">Snow handled all winter.</span>
+          One plan. <span className="text-gradient-season">Snow handled all winter.</span>
         </h2>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Pick what you need. Book the cleanup and a snow plan together and
-          your property is covered from the last leaf to the spring thaw.
+          Homes and businesses across Petawawa and Pembroke. Routes are capped
+          so response times hold through every storm, and each one closes once
+          it is full.
         </p>
       </div>
 

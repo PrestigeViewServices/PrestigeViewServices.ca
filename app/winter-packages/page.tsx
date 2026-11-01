@@ -33,17 +33,12 @@ import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
   MONTHLY_INSTALLMENTS,
-  formatMonthly,
-  tierMonthlyFromCents,
+  formatTierRange,
 } from "@/lib/content/winter-packages";
 import { siteConfig } from "@/lib/site";
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
 
-// Advertised entry price: the cheapest tier's single-car monthly payment.
-const STARTING_MONTHLY = formatMonthly(
-  Math.min(...DRIVEWAY_TIER_DEFS.map(tierMonthlyFromCents))
-);
 
 export const metadata: Metadata = {
   title:
@@ -178,7 +173,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Passes start at ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[0]))} per month for a single-car driveway on Bronze, up to ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[DRIVEWAY_TIER_DEFS.length - 1]))} per month for white-glove Platinum, spread over ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Larger and rural driveways are quoted to your exact property. Send a quote request and we confirm your price within 24 hours, free and with no obligation — nothing is collected today.`,
+    a: `Every property is quoted individually. As a guide, a full season runs roughly ${DRIVEWAY_TIER_DEFS.map((t) => `${formatTierRange(t)} on ${t.name}`).join(", ")}, depending on your driveway. Your exact price is confirmed in a free quote within 24 hours and split into ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Nothing is collected today.`,
   },
   {
     q: "Do military members get a discount on snow passes?",
@@ -236,10 +231,10 @@ export default function WinterPackagesPage() {
           availability: "https://schema.org/InStock",
           priceCurrency: "CAD",
           priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: (tierMonthlyFromCents(t) / 100).toFixed(2),
+            "@type": "PriceSpecification",
+            minPrice: t.priceRange.low,
+            maxPrice: t.priceRange.high,
             priceCurrency: "CAD",
-            unitText: "per month, starting price for a single-car driveway",
           },
           url: `${siteConfig.url}/winter-packages#packages`,
         })),
@@ -293,11 +288,8 @@ export default function WinterPackagesPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Seasonal snow passes for Petawawa and Pembroke from{" "}
-              <strong className="font-semibold text-white">
-                {STARTING_MONTHLY}/month
-              </strong>
-              . Storms trigger us automatically, so you never make a call.{" "}
+              Seasonal snow passes for Petawawa and Pembroke, paid in easy
+              monthly payments. Storms trigger us automatically, so you never make a call.{" "}
               <strong className="font-semibold text-white">Pembroke</strong>{" "}
               driveways are cleared by plow truck,{" "}
               <strong className="font-semibold text-white">Petawawa</strong>{" "}
