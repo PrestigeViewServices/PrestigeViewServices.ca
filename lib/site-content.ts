@@ -84,6 +84,49 @@ export function defaultOffers(): OfferContent[] {
   }));
 }
 
+// ---- Stale-override guard -------------------------------------------------
+//
+// A saved edit is stored with a fingerprint of the code default it replaced.
+// When a deploy changes that code default (new season, new copy), the old
+// edit no longer matches and is ignored: the new site copy goes live on its
+// own, and the admin editor flags the old edit as replaced. Without this, an
+// edit saved months ago silently blocks every later copy update.
+
+type Envelope = { __pvs: 1; base: string; data: unknown };
+
+function fingerprint(v: unknown): string {
+  const str = JSON.stringify(v);
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+function defaultFor(key: SiteContentKey): unknown {
+  if (key === "hero") return DEFAULT_HERO;
+  if (key === "seasonBanner") return DEFAULT_SEASON_BANNER;
+  return defaultOffers();
+}
+
+function isEnvelope(v: unknown): v is Envelope {
+  return (
+    !!v &&
+    typeof v === "object" &&
+    !Array.isArray(v) &&
+    (v as Record<string, unknown>).__pvs === 1
+  );
+}
+
+/**
+ * The stored value if it was saved against the CURRENT code default, else
+ * null. Legacy rows (saved before fingerprints existed) count as stale.
+ */
+function liveValue(key: SiteContentKey, raw: unknown): unknown | null {
+  if (!isEnvelope(raw)) return null;
+  return raw.base === fingerprint(defaultFor(key)) ? raw.data : null;
+}
+
+export type SectionStatus = "default" | "customized" | "replaced";
+
 // ---- Read ------------------------------------------------------------------
 
 const KEYS = ["seasonBanner", "hero", "offers"] as const;
@@ -160,14 +203,16 @@ export async function getSiteContent(
       where: { key: { in: [...KEYS] } },
     });
     for (const row of rows) {
+      const value = liveValue(row.key as SiteContentKey, row.value);
+      if (value === null) continue; // stale edit: the newer code copy wins
       if (row.key === "seasonBanner") {
-        const v = sanitizeSeasonBanner(row.value);
+        const v = sanitizeSeasonBanner(value);
         if (v) data.seasonBanner = v;
       } else if (row.key === "hero") {
-        const v = sanitizeHero(row.value);
+        const v = sanitizeHero(value);
         if (v) data.hero = v;
       } else if (row.key === "offers") {
-        const v = sanitizeOffers(row.value);
+        const v = sanitizeOffers(value);
         if (v) data.offers = v;
       }
     }
@@ -217,10 +262,15 @@ export async function saveSiteContentKey(
   key: SiteContentKey,
   value: SeasonBannerContent | HeroContent | OfferContent[]
 ): Promise<void> {
+  const envelope: Envelope = {
+    __pvs: 1,
+    base: fingerprint(defaultFor(key)),
+    data: value,
+  };
   await db.siteContent.upsert({
     where: { key },
-    create: { key, value: value as object },
-    update: { value: value as object },
+    create: { key, value: envelope as object },
+    update: { value: envelope as object },
   });
 }
 
@@ -231,20 +281,34 @@ export async function resetSiteContentKey(
   await db.siteContent.deleteMany({ where: { key } });
 }
 
-/** Which sections carry a stored override (for "Customized" chips). */
-export async function customizedKeys(
+/**
+ * Per-section status for the admin editor:
+ * - default: the site shows the code copy, nothing saved
+ * - customized: a saved edit is live
+ * - replaced: an edit was saved, but the site copy has since been updated
+ *   in code, so the new copy is live and the old edit is ignored
+ */
+export async function sectionStatuses(
   db: PrismaClient | null
-): Promise<SiteContentKey[]> {
-  if (!db) return [];
+): Promise<Record<SiteContentKey, SectionStatus>> {
+  const out: Record<SiteContentKey, SectionStatus> = {
+    seasonBanner: "default",
+    hero: "default",
+    offers: "default",
+  };
+  if (!db) return out;
   try {
     const rows = await db.siteContent.findMany({
       where: { key: { in: [...KEYS] } },
-      select: { key: true },
     });
-    return rows.map((r) => r.key as SiteContentKey);
+    for (const r of rows) {
+      const key = r.key as SiteContentKey;
+      out[key] = liveValue(key, r.value) === null ? "replaced" : "customized";
+    }
   } catch {
-    return [];
+    // fall through with defaults
   }
+  return out;
 }
 
 /**

@@ -23,7 +23,7 @@ const CARDS = [
     eyebrowCls: "text-sky-300",
     title: "Residential Snow Removal",
     pitch:
-      "One seasonal plan, paid monthly. Storms trigger us automatically, so your driveway is open before you need out. You never make a call.",
+      "One seasonal plan for the whole winter. Storms trigger us automatically, so your driveway is open before you need out. You never make a call.",
     points: [
       "Pembroke: cleared by plow truck",
       "Petawawa: cleared by tractor only",

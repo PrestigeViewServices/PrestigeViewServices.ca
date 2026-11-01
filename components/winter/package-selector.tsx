@@ -22,7 +22,6 @@ import {
   getShovelingTier,
   selectionLines,
   selectionSummary,
-  MONTHLY_INSTALLMENTS,
   type AddOnKey,
   type DrivewaySize,
   type DrivewayTier,
@@ -170,8 +169,8 @@ export function PackageSelector({
             Pick your package
           </h2>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Every pass covers your driveway and apron for the whole winter,
-            paid in {MONTHLY_INSTALLMENTS} easy monthly payments. Moving up the
+            Every pass covers your driveway and apron for the whole winter.
+            Moving up the
             tiers buys speed: an earlier trigger, more passes per storm, and a
             tighter completion window.
           </p>
@@ -189,9 +188,8 @@ export function PackageSelector({
         </div>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          Ranges are estimates for the full winter season. Your exact price
-          depends on your driveway and is confirmed in your free quote, then
-          split into {MONTHLY_INSTALLMENTS} equal monthly payments.{" "}
+          Select a package to see its estimated season range. Every driveway
+          is different, so your official price comes from a free quote.{" "}
           <strong className="text-foreground">
             Free quote, no payment today.
           </strong>
@@ -356,14 +354,19 @@ export function PackageSelector({
               <p className="eyebrow text-primary">Your selection</p>
               <p className="mt-2 text-lg font-bold tracking-tight">{summary}</p>
               {rangeLabel !== null && (
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  Estimated{" "}
-                  <strong className="text-foreground">
-                    {rangeLabel} per season
-                  </strong>
-                  . Your exact price is confirmed in the quote. Mention this
-                  package in the form so we quote the right thing.
-                </p>
+                <>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    Estimated range:{" "}
+                    <strong className="text-foreground">
+                      {rangeLabel} per season
+                    </strong>
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    This is an estimate, not a price. Submit the quote form
+                    below and we will send your official quote for your
+                    property within 24 hours.
+                  </p>
+                </>
               )}
             </div>
           )}
@@ -371,7 +374,7 @@ export function PackageSelector({
           <ul className="mt-6 space-y-2.5 text-sm text-muted-foreground">
             {[
               "Route spot confirmed within 24 hours",
-              "No payment today, billed monthly once confirmed",
+              "No payment today, nothing owed until you approve your quote",
               "Storms trigger your clearing automatically",
             ].map((p) => (
               <li key={p} className="flex items-start gap-2.5">
@@ -398,7 +401,7 @@ export function PackageSelector({
       {tier && (
         <StickyBar
           summary={summary}
-          priceLabel={rangeLabel !== null ? `${rangeLabel} / season` : null}
+          priceLabel={rangeLabel !== null ? `Est. ${rangeLabel} / season` : null}
           onQuote={scrollToForm}
           smsHref={smsHref}
         />
@@ -460,15 +463,23 @@ function TierCard({
       </p>
 
       <div className="mt-5 border-t border-surface-border pt-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Estimated season price
-        </p>
-        <p className="mt-1 text-2xl font-bold tracking-tight">
-          {formatTierRange(tier)}
-        </p>
-        <p className="mt-1 text-xs leading-snug text-muted-foreground">
-          Exact price confirmed in your quote · pay monthly
-        </p>
+        {selected ? (
+          <>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Estimated season range
+            </p>
+            <p className="mt-1 text-2xl font-bold tracking-tight">
+              {formatTierRange(tier)}
+            </p>
+            <p className="mt-1 text-xs leading-snug text-muted-foreground">
+              Estimate only. Request a quote for your official price.
+            </p>
+          </>
+        ) : (
+          <p className="text-xs leading-snug text-muted-foreground">
+            Select to see the estimated range for this package.
+          </p>
+        )}
       </div>
 
       <ul className="mt-5 space-y-2.5 text-sm">

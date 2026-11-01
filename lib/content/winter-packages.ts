@@ -492,10 +492,6 @@ export const COMPARISON_ROWS: {
   label: string;
   render: (t: DrivewayTierDef) => boolean | string;
 }[] = [
-  {
-    label: "Estimated season price",
-    render: (t) => formatTierRange(t),
-  },
   { label: "Trigger depth", render: (t) => t.compare.triggerDepth },
   { label: "Response time", render: (t) => t.compare.responseTime },
   { label: "Passes per storm", render: (t) => t.compare.passesPerStorm },

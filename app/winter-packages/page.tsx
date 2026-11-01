@@ -32,8 +32,6 @@ import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
 import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
-  MONTHLY_INSTALLMENTS,
-  formatTierRange,
 } from "@/lib/content/winter-packages";
 import { siteConfig } from "@/lib/site";
 
@@ -44,7 +42,7 @@ export const metadata: Metadata = {
   title:
     "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
   description:
-    "Seasonal snow removal in Pembroke (plow trucks) & Petawawa (tractors). Auto-dispatch every storm, monthly payments, live tracking in your portal. Commercial lots too. Military discount.",
+    "Seasonal snow removal in Pembroke (plow trucks) & Petawawa (tractors). Auto-dispatch every storm, one seasonal price, live tracking in your portal. Commercial lots too. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
@@ -149,7 +147,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do seasonal passes get billed?",
-    a: `One seasonal rate for the whole winter, split into ${MONTHLY_INSTALLMENTS} equal monthly payments — no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then confirm your payment schedule, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
+    a: `One seasonal rate for the whole winter, with no per-storm invoices and no surprise bills after a heavy storm. We quote your property first, then confirm your payment details, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
   },
   {
     q: "Can I upgrade mid-season?",
@@ -173,7 +171,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Every property is quoted individually. As a guide, a full season runs roughly ${DRIVEWAY_TIER_DEFS.map((t) => `${formatTierRange(t)} on ${t.name}`).join(", ")}, depending on your driveway. Your exact price is confirmed in a free quote within 24 hours and split into ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Nothing is collected today.`,
+    a: `Every property is quoted individually, because driveway size, slope, and walkways all change the work. Pick a package above to see its estimated range, then send a quote request and we confirm your official price within 24 hours. Nothing is collected today.`,
   },
   {
     q: "Do military members get a discount on snow passes?",
@@ -229,13 +227,6 @@ export default function WinterPackagesPage() {
           name: `${t.name} seasonal snow pass`,
           description: t.blurb,
           availability: "https://schema.org/InStock",
-          priceCurrency: "CAD",
-          priceSpecification: {
-            "@type": "PriceSpecification",
-            minPrice: t.priceRange.low,
-            maxPrice: t.priceRange.high,
-            priceCurrency: "CAD",
-          },
           url: `${siteConfig.url}/winter-packages#packages`,
         })),
       },
@@ -288,8 +279,8 @@ export default function WinterPackagesPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Seasonal snow passes for Petawawa and Pembroke, paid in easy
-              monthly payments. Storms trigger us automatically, so you never make a call.{" "}
+              Seasonal snow passes for Petawawa and Pembroke, one price for
+              the whole winter. Storms trigger us automatically, so you never make a call.{" "}
               <strong className="font-semibold text-white">Pembroke</strong>{" "}
               driveways are cleared by plow truck,{" "}
               <strong className="font-semibold text-white">Petawawa</strong>{" "}
