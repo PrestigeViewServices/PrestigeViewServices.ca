@@ -24,6 +24,7 @@ import { SamImage } from "@/components/sam";
 import { OfferCountdown } from "@/components/winter/offer-countdown";
 import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
+import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
 import {
   CommercialSnowStrip,
   EquipmentByTown,
@@ -345,6 +346,9 @@ export default function WinterPackagesPage() {
 
       {/* ── Equipment by town + commercial ── */}
       <EquipmentByTown />
+
+      {/* ── Live fleet map ── */}
+      <LiveFleetMapSection />
 
       {/* ── Customer portal showcase ── */}
       <PortalShowcase />

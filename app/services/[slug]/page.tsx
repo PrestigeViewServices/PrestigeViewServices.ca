@@ -20,6 +20,7 @@ import {
 } from "@/components/service-ambience";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -266,6 +267,8 @@ export default async function ServiceDetailPage(
           description="Snow routes run in Pembroke and Petawawa, and the machine is set by town. Other Valley towns are not on snow routes yet."
         />
       )}
+
+      {service.division === "snowland" && <LiveFleetMapSection />}
 
       {showSnowPromo && snowOffer && (
         <section className="container-max pt-8 pb-2">

@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
 import { AuroraLeadForm } from "@/components/AuroraLeadForm";
 import { QuotePhoto } from "@/components/quote-photo";
 import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
@@ -287,6 +288,9 @@ export default function CommercialSnowPage() {
         description="Pembroke commercial lots are cleared with our plow trucks. Petawawa properties are cleared with tractors only, which handle tight lots, storefront aprons, and walk-adjacent areas cleanly."
         showCommercial={false}
       />
+
+      {/* ── Live fleet map ── */}
+      <LiveFleetMapSection />
 
       {/* ── Process + form ── */}
       <section className="container-max grid gap-10 py-14 lg:grid-cols-12">

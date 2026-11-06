@@ -93,6 +93,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/live-map"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Live Plow Map
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/services"
                   className="text-primary hover:text-foreground transition-colors"
                 >
