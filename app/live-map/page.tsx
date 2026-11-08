@@ -24,7 +24,7 @@ import { formatPhone } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Live Tractor Map | Track Our Snow Fleet in Pembroke & Petawawa",
   description:
-    "Watch Prestige View Services snow tractors clear Pembroke and Petawawa in real time. Live GPS fleet map for every snow event.",
+    "Watch our 4 John Deere snow tractors clear Pembroke and Petawawa in real time. Live GPS fleet map for every snow event.",
   alternates: { canonical: "/live-map" },
   openGraph: {
     title: "Live Tractor Map | Prestige View Services",
@@ -36,10 +36,19 @@ export const metadata: Metadata = {
   },
 };
 
-const HERO_STATS = [
-  { icon: Tractor, value: "100%", label: "Tractor fleet" },
-  { icon: MapPinned, value: "2 towns", label: "Pembroke & Petawawa" },
-  { icon: Radio, value: "Live", label: "GPS every storm" },
+const FLEET = [
+  {
+    town: "Pembroke",
+    model: "5100M",
+    class: "Utility tractor",
+    body: "The bigger machine for Pembroke routes, built to move through the heavy, wet river snow Pembroke gets without slowing down.",
+  },
+  {
+    town: "Petawawa",
+    model: "4066R",
+    class: "Compact utility tractor",
+    body: "Nimble on Petawawa's narrow and garrison-style driveways, with tight passes that keep lawn edges and mailboxes clean.",
+  },
 ];
 
 const WHY_TRACTORS = [
@@ -115,8 +124,8 @@ const FAQS = [
     a: "No. Every route in Pembroke and Petawawa is cleared by tractor. Tractors throw snow clear instead of banking it, and handle tight driveways cleanly.",
   },
   {
-    q: "Which towns are on the map?",
-    a: "Pembroke and Petawawa, the towns our snow routes run in.",
+    q: "Which tractors are on the map?",
+    a: "Our fleet of 4 John Deere tractors. Pembroke routes run the John Deere 5100M and Petawawa routes run the John Deere 4066R.",
   },
   {
     q: "How do I get my driveway on the route?",
@@ -131,7 +140,7 @@ export default function LiveMapPage() {
     <>
       <ServiceAmbience theme="snow" />
 
-      {/* ── Hero ── */}
+      {/* ── Hero (compact, so the map is near the top) ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <Image
@@ -140,63 +149,44 @@ export default function LiveMapPage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-60"
+            className="object-cover object-center opacity-50"
           />
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-r from-[#0A1220] via-[#0A1220]/85 to-[#0A1220]/30"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-[#0A1220] via-[#0A1220]/85 to-[#0A1220]/40"
           />
         </div>
-        <div className="container-max py-16 sm:py-24">
-          <div className="max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200">
-              <span className="relative flex h-2.5 w-2.5" aria-hidden>
+        <div className="container-max flex flex-col gap-5 py-8 sm:py-10 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-200">
+              <span className="relative flex h-2 w-2" aria-hidden>
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
-              Live fleet · GPS tracked
+              Live · 4 tractors · GPS tracked
             </p>
-            <h1 className="heading-section mt-5 text-balance text-white sm:text-6xl">
-              Where&apos;s the tractor?{" "}
-              <span className="text-sky-300">Watch us clear the Valley live.</span>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-balance text-white sm:text-4xl">
+              Where&apos;s the tractor? <span className="text-sky-300">Watch us live.</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Every snow event, our tractors are on this map in real time. See
-              exactly which streets are being cleared across Pembroke and
-              Petawawa, and when the crew is heading your way.
+            <p className="mt-2 text-sm leading-relaxed text-sky-50/80 sm:text-base">
+              Every snow event, our tractors clear Pembroke and Petawawa in real
+              time, right here on the map.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="xl">
-                <a href="#map">
-                  <Radio className="h-4 w-4" aria-hidden />
-                  Open the live map
-                </a>
-              </Button>
-              <Button asChild size="xl" variant="outline">
-                <Link href="/winter-packages">
-                  Get on the route
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </Button>
-            </div>
           </div>
-
-          <dl className="mt-12 grid max-w-2xl grid-cols-3 gap-3">
-            {HERO_STATS.map((s) => (
-              <div
-                key={s.label}
-                className="rounded-2xl border border-white/10 bg-black/35 p-4 backdrop-blur"
-              >
-                <s.icon className="h-5 w-5 text-sky-300" aria-hidden />
-                <dd className="mt-2 text-xl font-bold text-white sm:text-2xl">{s.value}</dd>
-                <dt className="text-xs text-sky-100/75 sm:text-sm">{s.label}</dt>
-              </div>
-            ))}
-          </dl>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <a href="#map">
+                <Radio className="h-4 w-4" aria-hidden />
+                Open the map
+              </a>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/winter-packages">
+                Get on the route
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -212,6 +202,51 @@ export default function LiveMapPage() {
             Tractors show only while they are on route. A still map means the
             fleet is parked between storms.
           </p>
+        </div>
+      </section>
+
+      {/* ── The fleet ── */}
+      <section className="container-max py-12">
+        <div className="max-w-2xl">
+          <p className="eyebrow text-primary">
+            <Tractor className="h-3.5 w-3.5" aria-hidden />
+            Meet the fleet
+          </p>
+          <h2 className="heading-section mt-2 text-balance">
+            4 John Deere tractors on the map
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Every machine you see moving is one of ours, matched to the town
+            it clears.
+          </p>
+        </div>
+        <div className="mt-8 grid gap-5 md:grid-cols-2">
+          {FLEET.map((f) => (
+            <article
+              key={f.town}
+              className="surface-card relative overflow-hidden p-6 sm:p-7"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-4 -top-6 text-[7rem] font-black leading-none text-white/[0.04]"
+              >
+                {f.model}
+              </span>
+              <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-300">
+                <MapPinned className="h-3.5 w-3.5" aria-hidden />
+                {f.town} routes
+              </p>
+              <h3 className="mt-3 text-2xl font-bold">
+                John Deere <span className="text-emerald-300">{f.model}</span>
+              </h3>
+              <p className="mt-1 text-sm font-medium text-muted-foreground">
+                {f.class}
+              </p>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                {f.body}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
 
