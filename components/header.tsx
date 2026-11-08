@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { UserRound } from "lucide-react";
 import { siteConfig } from "@/lib/site";
+import { PORTAL_LOGIN_URL } from "@/lib/content/winter-packages";
 import { formatPhone } from "@/lib/utils";
 
 // Top-tier conversion routes, pinned at the top of the mobile sheet AND
@@ -67,6 +68,7 @@ const exploreLinks = [
   { href: "/winter-packages", label: "Residential Snow Plans" },
   { href: "/live-map", label: "Live Tractor Map" },
   { href: "/customer-portal", label: "Customer Portal" },
+  { href: PORTAL_LOGIN_URL, label: "Customer Portal Login" },
   { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },

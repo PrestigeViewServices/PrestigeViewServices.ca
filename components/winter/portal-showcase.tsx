@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   PORTAL_FEATURES,
+  PORTAL_LOGIN_URL,
   getDrivewayTier,
   portalTierLabel,
   type PortalFeature,
@@ -93,6 +94,14 @@ export function PortalShowcase() {
                 >
                   See everything the portal does
                 </Link>
+                <a
+                  href={PORTAL_LOGIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Customer login
+                </a>
               </div>
 
               <p className="mt-5 flex items-start gap-2 text-xs text-muted-foreground">

@@ -389,6 +389,11 @@ export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
 // /winter-packages showcase, the tier cards, the comparison table, and the
 // FAQ all read from this file, so edit claims here only.
 
+/** Customer-facing Aurora portal sign-in page. Only the login page is ever
+ *  linked publicly, never a dashboard URL. */
+export const PORTAL_LOGIN_URL =
+  "https://portal.aurorasuite.ca/019c9c29-0b6e-730b-ba79-b11f45624999/login";
+
 export type PortalFeature = {
   key: string;
   title: string;

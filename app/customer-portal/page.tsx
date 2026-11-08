@@ -5,6 +5,7 @@ import {
   BellRing,
   Camera,
   Check,
+  LogIn,
   Crown,
   History,
   Minus,
@@ -24,6 +25,7 @@ import { PhoneMockup } from "@/components/winter/portal-showcase";
 import {
   DRIVEWAY_TIERS,
   PORTAL_FEATURES,
+  PORTAL_LOGIN_URL,
   getDrivewayTier,
   portalTierLabel,
 } from "@/lib/content/winter-packages";
@@ -107,7 +109,7 @@ const FAQS = [
   },
   {
     q: "How do I get my login?",
-    a: "We set up your portal account when we confirm your route spot and send you the login details. Already a customer and missing yours? Call or text us and we will resend it.",
+    a: "We set up your portal account when we confirm your route spot and send you the login details. Sign in any time with the Customer login button on this page. Missing your details? Call or text us and we will resend them.",
   },
   {
     q: "Can I upgrade my pass to get more portal features?",
@@ -143,7 +145,10 @@ export default function CustomerPortalPage() {
               </Link>
             </Button>
             <Button asChild size="xl" variant="outline">
-              <a href="#compare">What each pass includes</a>
+              <a href={PORTAL_LOGIN_URL} target="_blank" rel="noopener noreferrer">
+                <LogIn className="h-4 w-4" aria-hidden />
+                Customer login
+              </a>
             </Button>
           </div>
           <p className="mt-5 flex items-start gap-2 text-sm text-muted-foreground">
@@ -298,9 +303,14 @@ export default function CustomerPortalPage() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </Button>
-          <Link href="/live-map" className="text-sm font-medium text-sky-300 hover:underline">
-            Or watch the public tractor map
-          </Link>
+          <a
+            href={PORTAL_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-sky-300 hover:underline"
+          >
+            Already a customer? Log in
+          </a>
         </div>
       </section>
 
