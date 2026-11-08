@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { LiveFleetMap } from "@/components/winter/live-fleet-map";
+import { PortalStrip } from "@/components/winter/portal-showcase";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
 
@@ -204,6 +205,12 @@ export default function LiveMapPage() {
           </p>
         </div>
       </section>
+
+      {/* ── Portal upsell: the public map shows the fleet, the portal shows YOUR driveway ── */}
+      <PortalStrip
+        title="Want to see when the tractor reaches your driveway?"
+        body="This map shows the whole fleet. Seasonal customers get a private Aurora portal that follows their own route, sends a “cleared” alert, and saves a photo of every visit."
+      />
 
       {/* ── The fleet ── */}
       <section className="container-max py-12">

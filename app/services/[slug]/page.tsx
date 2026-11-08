@@ -21,6 +21,7 @@ import {
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
+import { PortalStrip } from "@/components/winter/portal-showcase";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -269,6 +270,7 @@ export default async function ServiceDetailPage(
       )}
 
       {service.division === "snowland" && <LiveFleetMapSection />}
+      {service.division === "snowland" && <PortalStrip />}
 
       {showSnowPromo && snowOffer && (
         <section className="container-max pt-8 pb-2">

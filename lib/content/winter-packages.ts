@@ -383,9 +383,16 @@ export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
 // tractors). Bronze has no portal access. The full experience is what sells
 // Gold and Platinum, so each feature declares which tiers unlock it.
 //
-// ⚠️ MARKETING CLAIMS. Confirm each line against what the portal actually
-// shows customers before launch, then edit here — the showcase section, the
-// tier cards, the comparison table, and the FAQ all read from this file.
+// MARKETING CLAIMS. All seven features below were confirmed by the owner
+// against the live Aurora customer portal on 2026-11-08. Re-check this list
+// whenever Aurora changes the portal. The /customer-portal page, the
+// /winter-packages showcase, the tier cards, the comparison table, and the
+// FAQ all read from this file, so edit claims here only.
+
+/** Customer-facing Aurora portal sign-in page. Only the login page is ever
+ *  linked publicly, never a dashboard URL. */
+export const PORTAL_LOGIN_URL =
+  "https://portal.aurorasuite.ca/019c9c29-0b6e-730b-ba79-b11f45624999/login";
 
 export type PortalFeature = {
   key: string;

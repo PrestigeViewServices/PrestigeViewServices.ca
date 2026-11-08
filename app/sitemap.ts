@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/winter-packages`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/fall-winter`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/live-map`, lastModified: now, changeFrequency: "daily", priority: 0.85 },
+    { url: `${base}/customer-portal`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/meet-sam`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/seasonal-planner`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },

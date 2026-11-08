@@ -10,12 +10,14 @@ import {
   Receipt,
   Send,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   PORTAL_FEATURES,
+  PORTAL_LOGIN_URL,
   getDrivewayTier,
   portalTierLabel,
   type PortalFeature,
@@ -87,11 +89,19 @@ export function PortalShowcase() {
                   </a>
                 </Button>
                 <Link
-                  href="#compare"
+                  href="/customer-portal"
                   className="text-sm font-medium text-sky-300 hover:underline"
                 >
-                  Compare all four passes
+                  See everything the portal does
                 </Link>
+                <a
+                  href={PORTAL_LOGIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Customer login
+                </a>
               </div>
 
               <p className="mt-5 flex items-start gap-2 text-xs text-muted-foreground">
@@ -167,7 +177,7 @@ function FeatureItem({ feature }: { feature: PortalFeature }) {
  * Stylized portal dashboard in a phone frame. Decorative only, so the whole
  * thing is hidden from assistive tech; the real content is the feature list.
  */
-function PhoneMockup() {
+export function PhoneMockup() {
   return (
     <div aria-hidden className="relative mx-auto w-full max-w-[300px]">
       {/* Glow behind the phone. */}
@@ -314,5 +324,43 @@ function PhoneMockup() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Slim promo band for the customer portal, used on the home page, the live
+ * map, and the snow service pages. Links to /customer-portal.
+ */
+export function PortalStrip({
+  className,
+  title = "Know the moment your driveway is clear.",
+  body = "Seasonal customers get a private Aurora portal: watch the tractor head to your driveway, get a “cleared” alert, and see the photo that proves it.",
+}: {
+  className?: string;
+  title?: string;
+  body?: string;
+}) {
+  return (
+    <section className={className ?? "container-max py-8"}>
+      <Link
+        href="/customer-portal"
+        className="group flex flex-col gap-5 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-[#0B1526] via-[#0A1220] to-sky-950/60 p-5 transition-colors hover:border-sky-300/50 sm:flex-row sm:items-center sm:p-7"
+      >
+        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-sky-400/15 text-sky-300">
+          <Smartphone className="h-6 w-6" aria-hidden />
+        </span>
+        <span className="flex-1">
+          <span className="block text-xs font-bold uppercase tracking-[0.14em] text-sky-300">
+            Customer portal · powered by Aurora
+          </span>
+          <span className="mt-1 block text-lg font-semibold text-white">{title}</span>
+          <span className="mt-1 block text-sm leading-relaxed text-sky-100/75">{body}</span>
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-sky-300">
+          See the portal
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
+        </span>
+      </Link>
+    </section>
   );
 }
