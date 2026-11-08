@@ -66,6 +66,7 @@ const exploreLinks = [
   { href: "/services", label: "All Services" },
   { href: "/winter-packages", label: "Residential Snow Plans" },
   { href: "/live-map", label: "Live Tractor Map" },
+  { href: "/customer-portal", label: "Customer Portal" },
   { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },

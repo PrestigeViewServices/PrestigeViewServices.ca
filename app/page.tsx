@@ -15,6 +15,7 @@ import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { PortalStrip } from "@/components/winter/portal-showcase";
 import { QuoteCtaCard } from "@/components/home/quote-cta-card";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
@@ -57,6 +58,9 @@ export default async function HomePage() {
           title="Tractors on every route. Pembroke and Petawawa."
           description="No plow trucks. Every driveway on our routes is cleared by tractor. Here is what clears yours this season."
         />
+      </Reveal>
+      <Reveal>
+        <PortalStrip />
       </Reveal>
       <Reveal>
         <ServicesOverview />
