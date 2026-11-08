@@ -1,29 +1,23 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, Building2, Check, MapPin, Tractor, Truck } from "lucide-react";
+import { Check, MapPin, Tractor } from "lucide-react";
 import { SNOW_TOWNS } from "@/lib/content/snow-coverage";
 import { cn } from "@/lib/utils";
 
 /**
- * "Which machine clears my driveway?" — Pembroke runs plow trucks,
- * Petawawa runs tractors only. Reads from lib/content/snow-coverage.ts.
- *
- * `showCommercial` adds the commercial snow strip underneath so every
- * winter page also tells businesses we take their lots.
+ * "Which machine clears my driveway?" — tractors, on every route in both
+ * towns. Reads from lib/content/snow-coverage.ts.
  */
 export function EquipmentByTown({
   id = "equipment",
   eyebrow = "Your town, your equipment",
-  title = "Plow trucks in Pembroke. Tractors in Petawawa.",
-  description = "We match the machine to the town so every route runs at its best. Here is exactly what shows up at your property this winter.",
-  showCommercial = true,
+  title = "Tractors on every route. Pembroke and Petawawa.",
+  description = "No plow trucks. Every driveway on our routes is cleared by tractor. Here is exactly what shows up at your property this winter.",
   className,
 }: {
   id?: string;
   eyebrow?: string;
   title?: string;
   description?: string;
-  showCommercial?: boolean;
   className?: string;
 }) {
   return (
@@ -41,7 +35,7 @@ export function EquipmentByTown({
 
       <div className="mt-9 grid gap-5 md:grid-cols-2">
         {SNOW_TOWNS.map((town) => {
-          const Icon = town.slug === "pembroke" ? Truck : Tractor;
+          const Icon = Tractor;
           return (
             <article
               key={town.slug}
@@ -89,38 +83,6 @@ export function EquipmentByTown({
           );
         })}
       </div>
-
-      {showCommercial && <CommercialSnowStrip className="mt-5" />}
     </section>
-  );
-}
-
-/** Slim "we do commercial too" band. Used on every winter surface. */
-export function CommercialSnowStrip({ className }: { className?: string }) {
-  return (
-    <Link
-      href="/commercial-snow-removal"
-      className={cn(
-        "group flex flex-col gap-4 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-blue-950/80 via-slate-900 to-sky-950/60 p-5 transition-colors hover:border-sky-300/50 sm:flex-row sm:items-center sm:p-6",
-        className
-      )}
-    >
-      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-sky-400/15 text-sky-300">
-        <Building2 className="h-6 w-6" aria-hidden />
-      </span>
-      <span className="flex-1">
-        <span className="block text-base font-semibold text-white">
-          Own a business or manage a property? We do commercial snow removal too.
-        </span>
-        <span className="mt-1 block text-sm text-sky-100/75">
-          Parking lots, storefronts, plazas, multi-unit residential, and
-          walkways, plowed and salted on a seasonal contract or per event.
-        </span>
-      </span>
-      <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-sky-300">
-        Commercial snow quote
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
-      </span>
-    </Link>
   );
 }

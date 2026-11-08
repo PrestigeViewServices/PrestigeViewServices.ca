@@ -58,7 +58,7 @@ export type SiteContentData = {
 export const DEFAULT_SEASON_BANNER: SeasonBannerContent = {
   enabled: true,
   line1: "Winter routes are filling: *reserve your snow removal* now",
-  line2: "Pembroke plow trucks · Petawawa tractors · Commercial lots",
+  line2: "Tractors on every route · Pembroke & Petawawa · Live tractor map",
   ctaLabel: "See Snow Plans",
   ctaHref: "/winter-packages#packages",
 };
@@ -67,7 +67,7 @@ export const DEFAULT_HERO: HeroContent = {
   headlineTop: "Snow Removal Done Right.",
   headlineAccent: "All Winter Long.",
   subtext:
-    "Seasonal snow removal that clears your driveway every storm without a phone call. Plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Free quotes in one business day.",
+    "Seasonal snow removal that clears your driveway every storm without a phone call. Tractors on every route in Pembroke and Petawawa. Free quotes in one business day.",
 };
 
 export function defaultOffers(): OfferContent[] {

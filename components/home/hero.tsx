@@ -11,9 +11,8 @@ import {
   Star,
   Medal,
   Snowflake,
-  Truck,
   Tractor,
-  Building2,
+  Radio,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
@@ -32,8 +31,8 @@ const HERO_PHOTOS = [
     alt: "PVS tractor snow-blowing a Petawawa driveway at sunrise after an overnight storm",
   },
   {
-    src: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-    alt: "PVS plow truck clearing a Pembroke commercial lot during an overnight snowfall",
+    src: "/images/gallery/snow-removal/tractor-night-street-snowblowing.webp",
+    alt: "PVS tractor snow-blowing along a Pembroke street at night during a storm",
   },
   {
     src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
@@ -107,7 +106,7 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
               <Snowflake className="h-3 w-3" />
               Snow removal
               <span className="text-sky-200/60">·</span>
-              <span>Residential &amp; commercial</span>
+              <span>Residential</span>
             </span>
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
               <MapPin className="h-3.5 w-3.5" />
@@ -140,11 +139,11 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
               <Link
-                href="/commercial-snow-removal"
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-400/10 backdrop-blur px-8 text-base font-semibold text-cyan-100 hover:border-cyan-300/60 hover:bg-cyan-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                href="/live-map"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/10 backdrop-blur px-8 text-base font-semibold text-emerald-100 hover:border-emerald-300/60 hover:bg-emerald-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                <Building2 className="h-4 w-4" />
-                Commercial Snow
+                <Radio className="h-4 w-4" />
+                Live Tractor Map
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
@@ -178,15 +177,12 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           </div>
 
           <p className="mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-white/10 bg-black/30 px-4 py-2.5 text-xs text-sky-100/85 backdrop-blur sm:text-sm lg:justify-start">
-            <Truck className="h-4 w-4 text-sky-300" aria-hidden />
-            <span><strong className="text-white">Pembroke:</strong> plow trucks</span>
-            <span className="text-sky-100/40">|</span>
             <Tractor className="h-4 w-4 text-sky-300" aria-hidden />
-            <span><strong className="text-white">Petawawa:</strong> tractors only</span>
+            <span><strong className="text-white">Pembroke &amp; Petawawa:</strong> tractors on every route</span>
             <span className="text-sky-100/40">|</span>
-            <Link href="/commercial-snow-removal" className="inline-flex items-center gap-1 font-semibold text-sky-300 hover:underline">
-              <Building2 className="h-4 w-4" aria-hidden />
-              Commercial lots too
+            <Link href="/live-map" className="inline-flex items-center gap-1 font-semibold text-sky-300 hover:underline">
+              <Radio className="h-4 w-4" aria-hidden />
+              Track them live
             </Link>
           </p>
         </motion.div>

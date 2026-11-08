@@ -294,7 +294,7 @@ export default async function ServiceAreaCombinationPage(
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href="/commercial-snow-removal">Commercial snow removal</Link>
+                  <Link href="/live-map">Live tractor map</Link>
                 </Button>
               </div>
             </div>

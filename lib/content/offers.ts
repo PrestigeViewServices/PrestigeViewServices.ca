@@ -26,7 +26,7 @@ export const offers: Offer[] = [
     active: true,
     eyebrow: "Winter Routes Filling",
     headline: "Reserve Your Driveway for the Whole Winter",
-    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Plow trucks in Pembroke, tractors in Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
+    body: "Seasonal snow contracts mean you never call, never negotiate, and never shovel. Tractors on every route in Pembroke and Petawawa. Routes are capped so response times hold through a storm, and each one closes once it is full.",
     ctaLabel: "Reserve My Spot",
     ctaHref: "/winter-packages#packages",
     accent: "snowland",

@@ -45,8 +45,8 @@ export function monthlyContractCents(
 export type WinterTown = "PEMBROKE" | "PETAWAWA" | "OTHER";
 
 /**
- * Route assignment by town. Pembroke is serviced by PLOW TRUCKS, Petawawa
- * by TRACTORS ONLY. Matching is case-insensitive "contains" so
+ * Route assignment by town. Both towns are serviced by TRACTORS (no plow
+ * trucks). Matching is case-insensitive "contains" so
  * "City of Pembroke" or "petawawa, on" still route correctly.
  */
 export function winterTown(city: string | null | undefined): WinterTown {
@@ -62,7 +62,7 @@ export const WINTER_TOWN_META: Record<
 > = {
   PEMBROKE: {
     label: "Pembroke",
-    equipment: "Plow truck",
+    equipment: "Tractor",
     cls: "border-orange-500/30 bg-orange-500/10 text-orange-200",
   },
   PETAWAWA: {
