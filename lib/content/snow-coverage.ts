@@ -1,11 +1,10 @@
 /**
  * Snow coverage by town, single source of truth.
  *
- * Equipment is assigned per town, not per package: every Pembroke route
- * runs on plow trucks, every Petawawa route runs on tractors only. Every
- * page that talks about winter service (home, /fall-winter,
- * /winter-packages, the snow service + town pages, /commercial-snow-removal)
- * reads from here, so changing a town's equipment is a one-line edit.
+ * Every route in both towns runs on tractors. PVS does not use plow trucks.
+ * Every page that talks about winter service (home, /fall-winter,
+ * /winter-packages, /live-map, the snow service + town pages) reads from
+ * here, so changing a town's equipment is a one-line edit.
  */
 
 export type SnowTown = {
@@ -24,23 +23,23 @@ export const SNOW_TOWNS: SnowTown[] = [
   {
     slug: "pembroke",
     name: "Pembroke",
-    equipment: "Plow trucks",
-    headline: "Pembroke routes run on plow trucks",
-    body: "Pembroke driveways and lots are cleared with our plow trucks. Trucks cover ground fast between stops, push heavy, wet river snow without stalling, and handle the bigger commercial lots on the same run.",
+    equipment: "Tractors",
+    headline: "Pembroke routes run on tractors",
+    body: "Pembroke driveways are cleared by tractor, the same as Petawawa. Tractors handle the heavy, wet river snow Pembroke gets without stalling, and clear tight driveways cleanly.",
     points: [
-      "Truck-mounted plows on every Pembroke route",
-      "Fast between stops, so the whole run is open sooner",
+      "Tractors on every Pembroke route",
+      "Built for heavy, wet river snow",
       "City windrow at the end of the driveway cleared every visit",
     ],
-    img: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-    alt: "PVS plow truck clearing a Pembroke lot during an overnight snowfall",
+    img: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
+    alt: "PVS tractor clearing a Pembroke driveway at night during a snowfall",
   },
   {
     slug: "petawawa",
     name: "Petawawa",
     equipment: "Tractors only",
     headline: "Petawawa routes run on tractors only",
-    body: "Every Petawawa driveway is cleared by tractor with a snowblower, never a truck. Blowers throw snow clear of the driveway instead of piling it into banks, so your lawn edges, mailbox, and sightlines stay intact all winter.",
+    body: "Every Petawawa driveway is cleared by tractor with a snowblower. Blowers throw snow clear of the driveway instead of piling it into banks, so your lawn edges, mailbox, and sightlines stay intact all winter.",
     points: [
       "Tractor-mounted snowblowers on every Petawawa route",
       "Snow thrown clear, not banked across your lawn",
@@ -57,4 +56,4 @@ export function snowTown(slug: string): SnowTown | undefined {
 
 /** One-sentence summary for FAQs and meta descriptions. */
 export const SNOW_EQUIPMENT_SUMMARY =
-  "Pembroke routes are cleared with plow trucks, and Petawawa routes are cleared with tractors only.";
+  "Every route in Pembroke and Petawawa is cleared by tractor. We do not run plow trucks.";

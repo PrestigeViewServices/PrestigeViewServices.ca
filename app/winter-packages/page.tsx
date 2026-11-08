@@ -15,7 +15,6 @@ import {
   Snowflake,
   Star,
   Tractor,
-  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
@@ -26,7 +25,6 @@ import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
 import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
 import {
-  CommercialSnowStrip,
   EquipmentByTown,
 } from "@/components/winter/equipment-by-town";
 import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
@@ -43,13 +41,13 @@ export const metadata: Metadata = {
   title:
     "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
   description:
-    "Seasonal snow removal in Pembroke (plow trucks) & Petawawa (tractors). Auto-dispatch every storm, one seasonal price, live tracking in your portal. Commercial lots too. Military discount.",
+    "Seasonal snow removal in Pembroke & Petawawa, tractors on every route. Auto-dispatch every storm, one seasonal price, live tracking in your portal. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
       "Seasonal Snow Passes in Petawawa & Pembroke | Prestige View Services",
     description:
-      "Storms trigger us automatically, you never make a call. Pembroke runs plow trucks, Petawawa runs tractors. Track your route live in your customer portal. Bronze to Platinum passes. Military discount.",
+      "Storms trigger us automatically, you never make a call. Tractors on every route in Pembroke and Petawawa. Track your route live in your customer portal. Bronze to Platinum passes. Military discount.",
     url: "/winter-packages",
     type: "website",
     images: [
@@ -85,8 +83,7 @@ const TRUST_STRIP = [
   { icon: Medal, label: "Military and veterans always save 10%" },
   { icon: Radar, label: "Auto-dispatch, no calling needed" },
   { icon: Camera, label: "Live tracking in your portal" },
-  { icon: Truck, label: "Pembroke: plow trucks" },
-  { icon: Tractor, label: "Petawawa: tractors only" },
+  { icon: Tractor, label: "Tractors on every route" },
 ];
 
 /**
@@ -106,7 +103,7 @@ const PROOF = [
   },
   {
     title: "Fully insured",
-    body: "$2M commercial general liability on every property we touch, residential or commercial. Certificate on request.",
+    body: "$2M commercial general liability on every property we touch. Certificate on request.",
   },
 ];
 
@@ -164,11 +161,7 @@ const WINTER_FAQS = [
   },
   {
     q: "What equipment will clear my driveway?",
-    a: `It depends on your town. ${SNOW_EQUIPMENT_SUMMARY} Trucks cover Pembroke's longer distances between stops quickly; tractor-mounted blowers throw Petawawa snow clear of the driveway instead of banking it across your lawn.`,
-  },
-  {
-    q: "Do you do commercial snow removal?",
-    a: "Yes. We plow and salt parking lots, storefronts, plazas, offices, and multi-unit properties in Pembroke and Petawawa, on a seasonal contract or per event. Request a commercial quote at prestigeviewservices.ca/commercial-snow-removal and we will book a free site walk.",
+    a: `A tractor. ${SNOW_EQUIPMENT_SUMMARY} Tractors handle tight driveways cleanly, and tractor-mounted blowers throw snow clear of the driveway instead of banking it across your lawn.`,
   },
   {
     q: "How much does a seasonal pass cost?",
@@ -272,7 +265,7 @@ export default function WinterPackagesPage() {
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Pembroke · Petawawa · Commercial
+              Pembroke · Petawawa · Tractors on every route
             </p>
 
             <h1 className="heading-section mt-5 text-balance">
@@ -282,10 +275,10 @@ export default function WinterPackagesPage() {
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
               Seasonal snow passes for Petawawa and Pembroke, one price for
               the whole winter. Storms trigger us automatically, so you never make a call.{" "}
-              <strong className="font-semibold text-white">Pembroke</strong>{" "}
-              driveways are cleared by plow truck,{" "}
-              <strong className="font-semibold text-white">Petawawa</strong>{" "}
-              driveways by tractor only.
+              Every driveway in{" "}
+              <strong className="font-semibold text-white">Pembroke</strong> and{" "}
+              <strong className="font-semibold text-white">Petawawa</strong> is
+              cleared by tractor.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -344,7 +337,7 @@ export default function WinterPackagesPage() {
         </ol>
       </section>
 
-      {/* ── Equipment by town + commercial ── */}
+      {/* ── Equipment by town ── */}
       <EquipmentByTown />
 
       {/* ── Live fleet map ── */}
@@ -479,8 +472,6 @@ export default function WinterPackagesPage() {
               </a>
             </Button>
           </div>
-
-          <CommercialSnowStrip className="mt-7" />
 
           <p className="mt-7 text-sm text-sky-100/70">
             Looking for the other seasons?{" "}

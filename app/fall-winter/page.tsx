@@ -21,7 +21,7 @@ import { formatPhone } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Fall Cleanups & Snow Removal in Petawawa & Pembroke",
   description:
-    "Fall cleanups and gutter cleaning before the freeze, then seasonal snow removal all winter: plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Book before the routes fill.",
+    "Fall cleanups and gutter cleaning before the freeze, then seasonal snow removal all winter, with tractors on every route in Pembroke and Petawawa. Book before the routes fill.",
   alternates: { canonical: "/fall-winter" },
   openGraph: {
     title: "Get Your Property Ready for Fall & Winter | Prestige View Services",
@@ -107,8 +107,8 @@ export default function FallWinterPage() {
             </h1>
             <p className="mt-4 max-w-xl text-lg text-muted-foreground">
               Leaves, beds, and gutters handled before freeze-up, then your
-              driveway or lot cleared every storm until spring. Plow trucks in
-              Pembroke, tractors in Petawawa, and commercial properties too.
+              driveway cleared every storm until spring, by tractor, in both
+              Pembroke and Petawawa.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -221,11 +221,7 @@ export default function FallWinterPage() {
               </li>
               <li className="flex items-center gap-2">
                 <ArrowRight className="h-4 w-4 text-primary" />
-                Pembroke cleared by plow truck, Petawawa by tractor only
-              </li>
-              <li className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 text-primary" />
-                Commercial lots, storefronts &amp; multi-unit properties too
+                Tractors on every route, Pembroke and Petawawa
               </li>
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">

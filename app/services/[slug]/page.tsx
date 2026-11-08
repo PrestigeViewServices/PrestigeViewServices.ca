@@ -43,7 +43,7 @@ export async function generateMetadata(
       : `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
   const description =
     service.division === "snowland"
-      ? `${service.shortDescription} Plow trucks in Pembroke, tractors in Petawawa. Commercial lots too. Free custom quote within one business day.`
+      ? `${service.shortDescription} Tractors on every route in Pembroke and Petawawa. Free custom quote within one business day.`
       : `${service.shortDescription} Trusted by Petawawa & Pembroke homeowners, free quote within one business day.`;
   return {
     title,
@@ -219,7 +219,7 @@ export default async function ServiceDetailPage(
             <div className="min-w-0">
               <p className="eyebrow text-primary mb-2">
                 {service.division === "snowland"
-                  ? `${categoryLabel} · Pembroke plow trucks · Petawawa tractors`
+                  ? `${categoryLabel} · Tractors in Pembroke & Petawawa`
                   : `${categoryLabel} · Petawawa & Pembroke`}
               </p>
               <h1 className="heading-section text-balance">

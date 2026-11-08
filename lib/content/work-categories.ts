@@ -456,7 +456,7 @@ export const workCategories: WorkCategory[] = [
     shortName: "Snow",
     division: "snowland",
     description:
-      "Residential and commercial snow plowing, walkway clearing, and seasonal contracts to keep your property safe all winter.",
+      "Residential snow clearing by tractor, walkway clearing, and seasonal contracts to keep your property safe all winter.",
     icon: Snowflake,
     photos: [
       {
@@ -472,13 +472,6 @@ export const workCategories: WorkCategory[] = [
         caption: "Driveway open · bluebird day",
         width: 1350,
         height: 1800,
-      },
-      {
-        src: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-        alt: "PVS truck clearing a commercial gas station lot during an overnight snowfall in Pembroke",
-        caption: "Commercial lots · overnight",
-        width: 1200,
-        height: 1600,
       },
       {
         src: "/images/gallery/snow-removal/tractor-cab-route-tablet.webp",

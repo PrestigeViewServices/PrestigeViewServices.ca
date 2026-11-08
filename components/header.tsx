@@ -8,7 +8,6 @@ import {
   Phone,
   Snowflake,
   Leaf,
-  Building2,
   Radio,
 } from "lucide-react";
 import {
@@ -43,23 +42,12 @@ const featuredLinks = [
     tileIcon: "bg-sky-400/20 text-sky-300",
   },
   {
-    href: "/commercial-snow-removal",
-    label: "Commercial",
-    icon: Building2,
-    cls: "text-cyan-200 hover:bg-cyan-400/10",
-    tile: "border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20",
-    tileIcon: "bg-cyan-400/20 text-cyan-200",
-  },
-  {
     href: "/live-map",
     label: "Live Map",
     icon: Radio,
     cls: "text-emerald-300 hover:bg-emerald-400/10",
     tile: "border-emerald-400/30 bg-emerald-400/10 hover:bg-emerald-400/20",
     tileIcon: "bg-emerald-400/20 text-emerald-300",
-    // A 4th pill overflows the desktop bar below xl; at lg it lives in the
-    // Explore dropdown instead (still pinned in the mobile sheet).
-    wideOnly: true,
   },
   {
     href: "/fall-winter",
@@ -77,8 +65,7 @@ const exploreLinks = [
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
   { href: "/winter-packages", label: "Residential Snow Plans" },
-  { href: "/commercial-snow-removal", label: "Commercial Snow Removal" },
-  { href: "/live-map", label: "Live Plow Map" },
+  { href: "/live-map", label: "Live Tractor Map" },
   { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
@@ -119,7 +106,7 @@ export function Header() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`${"wideOnly" in l ? "hidden xl:inline-flex" : "inline-flex"} items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold transition-colors xl:px-4 ${l.cls}`}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold transition-colors xl:px-4 ${l.cls}`}
               >
                 <Icon className="h-4 w-4" />
                 {l.label}

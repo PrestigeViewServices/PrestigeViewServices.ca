@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Radio } from "lucide-react";
+import { ArrowRight, Radio, Tractor } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,16 +38,16 @@ export function LiveFleetMap({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
           </span>
-          Live fleet map
+          Live tractor map
         </span>
         <span className="hidden items-center gap-1.5 text-sky-200/70 sm:inline-flex">
-          <Radio className="h-3.5 w-3.5" aria-hidden />
+          <Tractor className="h-3.5 w-3.5" aria-hidden />
           GPS · Pembroke & Petawawa
         </span>
       </div>
       <iframe
         src={FLEET_MAP_SRC}
-        title="Prestige View Services live snow fleet map"
+        title="Prestige View Services live snow tractor map"
         loading="lazy"
         allowFullScreen
         className={cn(
@@ -73,13 +73,13 @@ export function LiveFleetMapSection({
     <section id={id} className={cn("container-max scroll-mt-24 py-14", className)}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="eyebrow text-primary">Track the plows</p>
+          <p className="eyebrow text-primary">Track the tractors</p>
           <h2 className="heading-section mt-2 text-balance">
-            Watch our tractors and trucks live, every snow event
+            Watch our tractors live, every snow event
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            No guessing, no calling to ask where the plow is. Every machine on
-            the route is GPS-tracked, so you can see where the crew is working
+            No guessing, no calling to ask where we are. Every tractor on the
+            route is GPS-tracked, so you can see which streets are being cleared
             right now.
           </p>
         </div>
