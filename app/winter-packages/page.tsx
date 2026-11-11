@@ -15,7 +15,6 @@ import {
   Snowflake,
   Star,
   Tractor,
-  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
@@ -26,38 +25,31 @@ import { SeasonCountdown } from "@/components/winter/season-countdown";
 import { SNOW_SEASON } from "@/lib/content/snow-season";
 import { PackageSelector } from "@/components/winter/package-selector";
 import { PortalShowcase } from "@/components/winter/portal-showcase";
+import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
 import {
-  CommercialSnowStrip,
   EquipmentByTown,
 } from "@/components/winter/equipment-by-town";
 import { SNOW_EQUIPMENT_SUMMARY } from "@/lib/content/snow-coverage";
 import {
   COMPARISON_ROWS,
   DRIVEWAY_TIER_DEFS,
-  MONTHLY_INSTALLMENTS,
-  formatMonthly,
-  tierMonthlyFromCents,
 } from "@/lib/content/winter-packages";
 import { siteConfig } from "@/lib/site";
 
 const TEL = siteConfig.phone.replace(/[^0-9+]/g, "");
 
-// Advertised entry price: the cheapest tier's single-car monthly payment.
-const STARTING_MONTHLY = formatMonthly(
-  Math.min(...DRIVEWAY_TIER_DEFS.map(tierMonthlyFromCents))
-);
 
 export const metadata: Metadata = {
   title:
     "Snow Removal Petawawa & Pembroke | Seasonal Snow Passes | Prestige View Services",
   description:
-    "Seasonal snow removal in Pembroke (plow trucks) & Petawawa (tractors). Auto-dispatch every storm, monthly payments, live tracking in your portal. Commercial lots too. Military discount.",
+    "Seasonal snow removal in Pembroke & Petawawa, tractors on every route. Auto-dispatch every storm, one seasonal price, live tracking in your portal. Military discount.",
   alternates: { canonical: "/winter-packages" },
   openGraph: {
     title:
       "Seasonal Snow Passes in Petawawa & Pembroke | Prestige View Services",
     description:
-      "Storms trigger us automatically, you never make a call. Pembroke runs plow trucks, Petawawa runs tractors. Track your route live in your customer portal. Bronze to Platinum passes. Military discount.",
+      "Storms trigger us automatically, you never make a call. Tractors on every route in Pembroke and Petawawa. Track your route live in your customer portal. Bronze to Platinum passes. Military discount.",
     url: "/winter-packages",
     type: "website",
     images: [
@@ -93,8 +85,7 @@ const TRUST_STRIP = [
   { icon: Medal, label: "Military and veterans always save 10%" },
   { icon: Radar, label: "Auto-dispatch, no calling needed" },
   { icon: Camera, label: "Live tracking in your portal" },
-  { icon: Truck, label: "Pembroke: plow trucks" },
-  { icon: Tractor, label: "Petawawa: tractors only" },
+  { icon: Tractor, label: "Tractors on every route" },
 ];
 
 /**
@@ -114,7 +105,7 @@ const PROOF = [
   },
   {
     title: "Fully insured",
-    body: "$2M commercial general liability on every property we touch, residential or commercial. Certificate on request.",
+    body: "$2M commercial general liability on every property we touch. Certificate on request.",
   },
 ];
 
@@ -156,7 +147,7 @@ const WINTER_FAQS = [
   },
   {
     q: "How do seasonal passes get billed?",
-    a: `One seasonal rate for the whole winter, split into ${MONTHLY_INSTALLMENTS} equal monthly payments — no per-storm invoices and no surprise bills after a heavy month. We quote your property first, then confirm your payment schedule, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
+    a: `One seasonal rate for the whole winter, with no per-storm invoices and no surprise bills after a heavy storm. We quote your property first, then confirm your payment details, and on Silver and up your quote, invoices, and payments all live in your customer portal. Nothing is collected when you send a quote request.`,
   },
   {
     q: "Can I upgrade mid-season?",
@@ -172,15 +163,11 @@ const WINTER_FAQS = [
   },
   {
     q: "What equipment will clear my driveway?",
-    a: `It depends on your town. ${SNOW_EQUIPMENT_SUMMARY} Trucks cover Pembroke's longer distances between stops quickly; tractor-mounted blowers throw Petawawa snow clear of the driveway instead of banking it across your lawn.`,
-  },
-  {
-    q: "Do you do commercial snow removal?",
-    a: "Yes. We plow and salt parking lots, storefronts, plazas, offices, and multi-unit properties in Pembroke and Petawawa, on a seasonal contract or per event. Request a commercial quote at prestigeviewservices.ca/commercial-snow-removal and we will book a free site walk.",
+    a: `A tractor. ${SNOW_EQUIPMENT_SUMMARY} Tractors handle tight driveways cleanly, and tractor-mounted blowers throw snow clear of the driveway instead of banking it across your lawn.`,
   },
   {
     q: "How much does a seasonal pass cost?",
-    a: `Passes start at ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[0]))} per month for a single-car driveway on Bronze, up to ${formatMonthly(tierMonthlyFromCents(DRIVEWAY_TIER_DEFS[DRIVEWAY_TIER_DEFS.length - 1]))} per month for white-glove Platinum, spread over ${MONTHLY_INSTALLMENTS} equal monthly payments across the winter. Larger and rural driveways are quoted to your exact property. Send a quote request and we confirm your price within 24 hours, free and with no obligation — nothing is collected today.`,
+    a: `Every property is quoted individually, because driveway size, slope, and walkways all change the work. Pick a package above to see its estimated range, then send a quote request and we confirm your official price within 24 hours. Nothing is collected today.`,
   },
   {
     q: "Do military members get a discount on snow passes?",
@@ -236,13 +223,6 @@ export default function WinterPackagesPage() {
           name: `${t.name} seasonal snow pass`,
           description: t.blurb,
           availability: "https://schema.org/InStock",
-          priceCurrency: "CAD",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: (tierMonthlyFromCents(t) / 100).toFixed(2),
-            priceCurrency: "CAD",
-            unitText: "per month, starting price for a single-car driveway",
-          },
           url: `${siteConfig.url}/winter-packages#packages`,
         })),
       },
@@ -287,7 +267,7 @@ export default function WinterPackagesPage() {
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              {SNOW_SEASON.name} · Starts {SNOW_SEASON.launchDisplay} · Pembroke · Petawawa
+              {SNOW_SEASON.name} · Starts {SNOW_SEASON.launchDisplay} · Tractors on every route
             </p>
 
             <h1 className="heading-section mt-5 text-balance">
@@ -295,15 +275,12 @@ export default function WinterPackagesPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-sky-50/85 sm:text-lg">
-              Seasonal snow passes for Petawawa and Pembroke from{" "}
-              <strong className="font-semibold text-white">
-                {STARTING_MONTHLY}/month
-              </strong>
-              . Storms trigger us automatically, so you never make a call.{" "}
-              <strong className="font-semibold text-white">Pembroke</strong>{" "}
-              driveways are cleared by plow truck,{" "}
-              <strong className="font-semibold text-white">Petawawa</strong>{" "}
-              driveways by tractor only.
+              Seasonal snow passes for Petawawa and Pembroke, one price for
+              the whole winter. Storms trigger us automatically, so you never make a call.{" "}
+              Every driveway in{" "}
+              <strong className="font-semibold text-white">Pembroke</strong> and{" "}
+              <strong className="font-semibold text-white">Petawawa</strong> is
+              cleared by tractor.
             </p>
 
             <div className="mt-7">
@@ -369,8 +346,11 @@ export default function WinterPackagesPage() {
         </ol>
       </section>
 
-      {/* ── Equipment by town + commercial ── */}
+      {/* ── Equipment by town ── */}
       <EquipmentByTown />
+
+      {/* ── Live fleet map ── */}
+      <LiveFleetMapSection />
 
       {/* ── Customer portal showcase ── */}
       <PortalShowcase />
@@ -501,8 +481,6 @@ export default function WinterPackagesPage() {
               </a>
             </Button>
           </div>
-
-          <CommercialSnowStrip className="mt-7" />
 
           <p className="mt-7 text-sm text-sky-100/70">
             Looking for the other seasons?{" "}

@@ -120,7 +120,7 @@ export const roles: Role[] = [
       "Reliable transportation",
     ],
     niceToHave: [
-      "Experience operating skid-steers, plow trucks, or pressure washers",
+      "Experience operating skid-steers, tractors, or pressure washers",
       "First Aid / WHMIS",
       "Snow plowing experience",
     ],

@@ -25,7 +25,6 @@ const LEAD_PAGES = [
   "/request-service",
   "/contact",
   "/winter-packages",
-  "/commercial-snow-removal",
   "/refer",
   "/r/",
 ];

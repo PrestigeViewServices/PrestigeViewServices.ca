@@ -20,6 +20,8 @@ import {
 } from "@/components/service-ambience";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { LiveFleetMapSection } from "@/components/winter/live-fleet-map";
+import { PortalStrip } from "@/components/winter/portal-showcase";
 import { siteConfig } from "@/lib/site";
 
 type Params = { slug: string };
@@ -42,7 +44,7 @@ export async function generateMetadata(
       : `${service.name} in Petawawa, Pembroke & Ottawa Valley`;
   const description =
     service.division === "snowland"
-      ? `${service.shortDescription} Plow trucks in Pembroke, tractors in Petawawa. Commercial lots too. Free custom quote within one business day.`
+      ? `${service.shortDescription} Tractors on every route in Pembroke and Petawawa. Free custom quote within one business day.`
       : `${service.shortDescription} Trusted by Petawawa & Pembroke homeowners, free quote within one business day.`;
   return {
     title,
@@ -218,7 +220,7 @@ export default async function ServiceDetailPage(
             <div className="min-w-0">
               <p className="eyebrow text-primary mb-2">
                 {service.division === "snowland"
-                  ? `${categoryLabel} · Pembroke plow trucks · Petawawa tractors`
+                  ? `${categoryLabel} · Tractors in Pembroke & Petawawa`
                   : `${categoryLabel} · Petawawa & Pembroke`}
               </p>
               <h1 className="heading-section text-balance">
@@ -266,6 +268,9 @@ export default async function ServiceDetailPage(
           description="Snow routes run in Pembroke and Petawawa, and the machine is set by town. Other Valley towns are not on snow routes yet."
         />
       )}
+
+      {service.division === "snowland" && <LiveFleetMapSection />}
+      {service.division === "snowland" && <PortalStrip />}
 
       {showSnowPromo && snowOffer && (
         <section className="container-max pt-8 pb-2">

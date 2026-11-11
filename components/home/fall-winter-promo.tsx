@@ -2,23 +2,62 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  Building2,
   Check,
   Leaf,
+  Radio,
   Snowflake,
   Tractor,
-  Truck,
 } from "lucide-react";
 
 /**
  * The seasonal push on the home page. Three doors, one per thing we are
- * selling hardest right now: fall cleanups, residential snow, commercial
- * snow. Each card states the outcome, three proof points, and one CTA.
+ * selling hardest right now: fall cleanups, residential snow, and the live
+ * fleet map. Each card states the outcome, three proof points, and one CTA.
  */
 const CARDS = [
   {
+    key: "snow",
+    eyebrow: "Winter routes filling",
+    eyebrowIcon: Snowflake,
+    eyebrowCls: "text-sky-300",
+    title: "Residential Snow Removal",
+    pitch:
+      "One seasonal plan for the whole winter. Storms trigger us automatically, so your driveway is open before you need out. You never make a call.",
+    points: [
+      "Pembroke: cleared by tractor",
+      "Petawawa: cleared by tractor",
+      "City windrow and walkways available",
+    ],
+    img: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
+    alt: "Driveway cleared edge to edge by a PVS tractor after a snowfall",
+    href: "/winter-packages",
+    cta: "See snow plans",
+    ring: "hover:border-sky-300/50",
+    btn: "bg-gradient-primary text-white hover:brightness-110",
+  },
+  {
+    key: "live-map",
+    eyebrow: "New this winter",
+    eyebrowIcon: Radio,
+    eyebrowCls: "text-emerald-300",
+    title: "Live Tractor Map",
+    pitch:
+      "Every snow event, watch our tractors clear Pembroke and Petawawa in real time. No calling to ask where we are.",
+    points: [
+      "GPS on every tractor",
+      "Live during every storm",
+      "Works on any phone",
+    ],
+    img: "/images/gallery/snow-removal/tractors-staged-night-snowfall.webp",
+    alt: "PVS tractors staged and ready during a night snowfall",
+    href: "/live-map",
+    cta: "Open the live map",
+    ring: "hover:border-emerald-300/50",
+    btn: "border border-emerald-300/40 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20",
+  },
+  {
     key: "fall",
-    eyebrow: "Book now, before the freeze",
+    eyebrow: "Last few weeks to book",
     eyebrowIcon: Leaf,
     eyebrowCls: "text-amber-300",
     title: "Fall Cleanup",
@@ -36,63 +75,23 @@ const CARDS = [
     ring: "hover:border-amber-300/50",
     btn: "bg-amber-400 text-slate-950 hover:bg-amber-300",
   },
-  {
-    key: "snow",
-    eyebrow: "Winter routes filling",
-    eyebrowIcon: Snowflake,
-    eyebrowCls: "text-sky-300",
-    title: "Residential Snow Removal",
-    pitch:
-      "One seasonal plan, paid monthly. Storms trigger us automatically, so your driveway is open before you need out. You never make a call.",
-    points: [
-      "Pembroke: cleared by plow truck",
-      "Petawawa: cleared by tractor only",
-      "City windrow and walkways available",
-    ],
-    img: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
-    alt: "Driveway cleared edge to edge by a PVS tractor after a snowfall",
-    href: "/winter-packages",
-    cta: "See snow plans & pricing",
-    ring: "hover:border-sky-300/50",
-    btn: "bg-gradient-primary text-white hover:brightness-110",
-  },
-  {
-    key: "commercial",
-    eyebrow: "For businesses",
-    eyebrowIcon: Building2,
-    eyebrowCls: "text-cyan-300",
-    title: "Commercial Snow Removal",
-    pitch:
-      "Lots, storefronts, plazas, and multi-unit properties plowed and salted so customers and tenants get in safely, open to close.",
-    points: [
-      "Seasonal contracts or per-event",
-      "Lots plowed, walks shovelled & salted",
-      "Certificate of insurance on request",
-    ],
-    img: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-    alt: "PVS plow truck clearing a commercial lot during an overnight snowfall",
-    href: "/commercial-snow-removal",
-    cta: "Get a commercial quote",
-    ring: "hover:border-cyan-300/50",
-    btn: "border border-cyan-300/40 bg-cyan-400/10 text-cyan-100 hover:bg-cyan-400/20",
-  },
 ] as const;
 
 export function FallWinterPromo() {
   return (
     <section className="container-max py-16 sm:py-20">
       <div className="mx-auto max-w-2xl text-center">
-        <p className="eyebrow justify-center text-amber-300">
-          <Leaf className="h-3.5 w-3.5" aria-hidden />
-          This season
-          <Snowflake className="h-3.5 w-3.5 text-sky-300" aria-hidden />
+        <p className="eyebrow justify-center text-sky-300">
+          <Snowflake className="h-3.5 w-3.5" aria-hidden />
+          Snow season is here
         </p>
         <h2 className="heading-section mt-3 text-balance">
-          Fall cleanup now. <span className="text-gradient-season">Snow handled all winter.</span>
+          One plan. <span className="text-gradient-season">Snow handled all winter.</span>
         </h2>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Pick what you need. Book the cleanup and a snow plan together and
-          your property is covered from the last leaf to the spring thaw.
+          Homes across Petawawa and Pembroke. Routes are capped
+          so response times hold through every storm, and each one closes once
+          it is full.
         </p>
       </div>
 
@@ -123,9 +122,8 @@ export function FallWinterPromo() {
               </p>
               <ul className="mt-4 space-y-2 text-sm">
                 {c.points.map((p) => {
-                  const Icon = p.startsWith("Pembroke")
-                    ? Truck
-                    : p.startsWith("Petawawa")
+                  const Icon =
+                    p.startsWith("Pembroke") || p.startsWith("Petawawa")
                       ? Tractor
                       : Check;
                   return (

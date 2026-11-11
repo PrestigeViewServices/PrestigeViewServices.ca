@@ -8,10 +8,10 @@
  * Everything (UI, estimator, admin view, reservation form) reads from this
  * file, so updating prices here updates the whole site.
  *
- * The site displays each tier's price as a MONTHLY payment: the single-car
- * seasonal price divided into MONTHLY_INSTALLMENTS equal payments, rounded to
- * a .99 price point (see monthlyCents). Editing a tier's `priceCents` is
- * therefore all it takes to change the advertised monthly number.
+ * PUBLIC PRICING: exact prices are no longer shown anywhere on the site.
+ * Customers only ever see each tier's `priceRange` (estimated seasonal
+ * range). `priceCents` stays internal: it feeds the admin estimate on each
+ * reservation. To change what customers see, edit `priceRange`.
  *
  * Money is stored as integer cents to keep arithmetic exact.
  */
@@ -111,6 +111,12 @@ export type DrivewayTierDef = {
    * each reservation.
    */
   priceCents: Record<DrivewaySize, number>;
+  /**
+   * The ONLY price customers see: an estimated seasonal range in whole
+   * dollars. Exact pricing is never published; it is confirmed in the quote.
+   * Set by the owner (Nov 2026).
+   */
+  priceRange: { low: number; high: number };
 };
 
 export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
@@ -142,6 +148,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       THREE_PLUS_CAR: 86500,
       LONG_RURAL: 113500,
     },
+    priceRange: { low: 500, high: 600 },
   },
   {
     slug: "SILVER",
@@ -171,6 +178,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       THREE_PLUS_CAR: 109500,
       LONG_RURAL: 138500,
     },
+    priceRange: { low: 650, high: 750 },
   },
   {
     slug: "GOLD",
@@ -201,6 +209,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       THREE_PLUS_CAR: 138500,
       LONG_RURAL: 176000,
     },
+    priceRange: { low: 800, high: 950 },
   },
   {
     slug: "PLATINUM",
@@ -234,6 +243,7 @@ export const DRIVEWAY_TIER_DEFS: DrivewayTierDef[] = [
       THREE_PLUS_CAR: 178500,
       LONG_RURAL: 226000,
     },
+    priceRange: { low: 1000, high: 1250 },
   },
 ];
 
@@ -373,9 +383,16 @@ export function addOnIsIncluded(key: AddOnKey, tier: DrivewayTier): boolean {
 // tractors). Bronze has no portal access. The full experience is what sells
 // Gold and Platinum, so each feature declares which tiers unlock it.
 //
-// ⚠️ MARKETING CLAIMS. Confirm each line against what the portal actually
-// shows customers before launch, then edit here — the showcase section, the
-// tier cards, the comparison table, and the FAQ all read from this file.
+// MARKETING CLAIMS. All seven features below were confirmed by the owner
+// against the live Aurora customer portal on 2026-11-08. Re-check this list
+// whenever Aurora changes the portal. The /customer-portal page, the
+// /winter-packages showcase, the tier cards, the comparison table, and the
+// FAQ all read from this file, so edit claims here only.
+
+/** Customer-facing Aurora portal sign-in page. Only the login page is ever
+ *  linked publicly, never a dashboard URL. */
+export const PORTAL_LOGIN_URL =
+  "https://portal.aurorasuite.ca/019c9c29-0b6e-730b-ba79-b11f45624999/login";
 
 export type PortalFeature = {
   key: string;
@@ -482,10 +499,6 @@ export const COMPARISON_ROWS: {
   label: string;
   render: (t: DrivewayTierDef) => boolean | string;
 }[] = [
-  {
-    label: "Monthly price (from)",
-    render: (t) => `${formatMonthly(tierMonthlyFromCents(t))}/mo`,
-  },
   { label: "Trigger depth", render: (t) => t.compare.triggerDepth },
   { label: "Response time", render: (t) => t.compare.responseTime },
   { label: "Passes per storm", render: (t) => t.compare.passesPerStorm },
@@ -496,6 +509,12 @@ export const COMPARISON_ROWS: {
   { label: "Priority routing", render: (t) => t.compare.priorityRouting },
   { label: "Spot caps", render: (t) => t.compare.spotCap },
 ];
+
+/** Public price range for a tier, e.g. "$500 – $600". */
+export function formatTierRange(t: DrivewayTierDef): string {
+  const f = (n: number) => fmt.format(n);
+  return `${f(t.priceRange.low)} – ${f(t.priceRange.high)}`;
+}
 
 /** Plus-or-minus margin used when showing a price range to customers. */
 export const ESTIMATE_MARGIN = 0.1;

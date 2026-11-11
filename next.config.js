@@ -83,7 +83,12 @@ const nextConfig = {
   // links and any lingering search results land on the services hub instead
   // of a 404. Permanent so the ranking signal transfers.
   async redirects() {
-    return [{ source: "/care-plans", destination: "/services", permanent: true }];
+    return [
+      { source: "/care-plans", destination: "/services", permanent: true },
+      // Commercial snow removal was discontinued. Old links and search
+      // results land on the residential snow plans instead of a 404.
+      { source: "/commercial-snow-removal", destination: "/winter-packages", permanent: true },
+    ];
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

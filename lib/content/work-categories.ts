@@ -292,6 +292,20 @@ export const workCategories: WorkCategory[] = [
     icon: Droplets,
     photos: [
       {
+        src: "/images/gallery/gutter-cleaning/harnessed-tech-flushing-roof-gutters.webp",
+        alt: "Harnessed PVS technician on a roof flushing gutters with a hose at a stone two-storey home in the Ottawa Valley",
+        caption: "Gutter flush · harnessed and roped in",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/gutter-cleaning/gutter-flush-stone-two-storey-home.webp",
+        alt: "PVS crew on the roof of a large stone and stucco home flushing gutters, ladder and pressure washer staged on the lawn",
+        caption: "Full-home gutter flush · two-storey",
+        width: 1200,
+        height: 1600,
+      },
+      {
         src: "/images/gallery/gutter-cleaning/gutter-debris-before.jpg",
         alt: "Residential gutter packed with leaves and shingle grit before a Prestige View Services gutter cleaning in the Ottawa Valley",
         caption: "Clogged gutter · before",
@@ -347,6 +361,27 @@ export const workCategories: WorkCategory[] = [
       "Recurring lawn mowing, edging, and seasonal cleanups for homes across Petawawa, Pembroke, and the Ottawa Valley.",
     icon: Scissors,
     photos: [
+      {
+        src: "/images/gallery/lawn-mowing/two-person-crew-mow-trim-firepit.webp",
+        alt: "Two-person PVS lawn crew mowing with a stand-on mower and string-trimming around a stone fire pit patio",
+        caption: "Two-person crew · mow and trim",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/lawn-mowing/stand-on-mower-fence-line-stripes.webp",
+        alt: "PVS crew member on a stand-on mower cutting clean stripes along a backyard fence line in Petawawa",
+        caption: "Fence-line stripes · stand-on mower",
+        width: 1200,
+        height: 1600,
+      },
+      {
+        src: "/images/gallery/lawn-mowing/string-trimming-brick-bungalow-hedge.webp",
+        alt: "PVS crew member string-trimming along the foundation of a brick bungalow beside a tall cedar hedge",
+        caption: "Edging and trimming · brick bungalow",
+        width: 1125,
+        height: 1500,
+      },
       {
         src: "/images/gallery/lawn-mowing/stand-on-mower-backyard-stripes.webp",
         alt: "Stand-on mower on a freshly striped backyard lawn beside a garden in Petawawa",
@@ -421,7 +456,7 @@ export const workCategories: WorkCategory[] = [
     shortName: "Snow",
     division: "snowland",
     description:
-      "Residential and commercial snow plowing, walkway clearing, and seasonal contracts to keep your property safe all winter.",
+      "Residential snow clearing by tractor, walkway clearing, and seasonal contracts to keep your property safe all winter.",
     icon: Snowflake,
     photos: [
       {
@@ -437,13 +472,6 @@ export const workCategories: WorkCategory[] = [
         caption: "Driveway open · bluebird day",
         width: 1350,
         height: 1800,
-      },
-      {
-        src: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-        alt: "PVS truck clearing a commercial gas station lot during an overnight snowfall in Pembroke",
-        caption: "Commercial lots · overnight",
-        width: 1200,
-        height: 1600,
       },
       {
         src: "/images/gallery/snow-removal/tractor-cab-route-tablet.webp",

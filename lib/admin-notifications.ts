@@ -25,6 +25,8 @@ export type NotificationKind =
   | "ticket"
   | "redemption"
   | "claim"
+  | "field-lead"
+  | "field-issue"
   | "system";
 
 export const KIND_META: Record<
@@ -80,6 +82,16 @@ export const KIND_META: Record<
     label: "Bonus claim",
     href: "/admin/club/approvals",
     cls: "bg-orange-500/15 text-orange-200 border-orange-500/25",
+  },
+  "field-lead": {
+    label: "Upsell lead",
+    href: "/admin/game-plan/leads",
+    cls: "bg-emerald-500/15 text-emerald-200 border-emerald-500/25",
+  },
+  "field-issue": {
+    label: "Field issue",
+    href: "/admin/game-plan/issues",
+    cls: "bg-red-500/15 text-red-200 border-red-500/25",
   },
   system: {
     label: "System",

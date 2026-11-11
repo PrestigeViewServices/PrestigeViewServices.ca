@@ -14,11 +14,12 @@ import { getDb, isDbReady, missingDbEnvVars } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { NotConfigured } from "@/components/admin/not-configured";
 import {
-  customizedKeys,
   getSiteContent,
+  sectionStatuses,
   resetSiteContentKey,
   saveSiteContentKey,
   type OfferContent,
+  type SectionStatus,
   type SiteContentKey,
 } from "@/lib/site-content";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,9 @@ export default async function SiteContentPage() {
     );
   }
   const db = getDb()!;
-  const [content, customized] = await Promise.all([
+  const [content, status] = await Promise.all([
     getSiteContent(db),
-    customizedKeys(db),
+    sectionStatuses(db),
   ]);
 
   return (
@@ -85,6 +86,11 @@ export default async function SiteContentPage() {
           in another tab to check your work. &ldquo;Reset section&rdquo; brings
           the original copy back, so nothing can be broken for good.
         </p>
+        <p className="mt-2 max-w-2xl text-xs text-muted-foreground">
+          When the site copy is updated in a new release, any older edit to
+          that section is replaced automatically so the update always shows.
+          The fields below always match what is live right now.
+        </p>
       </header>
 
       {/* ================= Hero ================= */}
@@ -93,7 +99,7 @@ export default async function SiteContentPage() {
           icon={<Sparkles className="h-5 w-5" />}
           title="Homepage hero"
           sub="The big headline visitors see first."
-          customized={customized.includes("hero")}
+          status={status.hero}
         />
         <FieldText
           name="headlineTop"
@@ -122,7 +128,7 @@ export default async function SiteContentPage() {
           icon={<Megaphone className="h-5 w-5" />}
           title="Season banner"
           sub="The slim amber strip above the hero."
-          customized={customized.includes("seasonBanner")}
+          status={status.seasonBanner}
         />
         <label className="flex items-center gap-2.5 text-sm font-medium">
           <input
@@ -169,7 +175,7 @@ export default async function SiteContentPage() {
           icon={<MonitorPlay className="h-5 w-5" />}
           title="Seasonal offers"
           sub={`The "What to Book Right Now" cards on the homepage. "Feature in popup" also puts that one offer in the once-per-visit popup across the site — pick at most one.`}
-          customized={customized.includes("offers")}
+          status={status.offers}
         />
         {content.offers.map((o, i) => (
           <OfferEditor key={o.id} offer={o} index={i} />
@@ -223,12 +229,12 @@ function SectionHeader({
   icon,
   title,
   sub,
-  customized,
+  status,
 }: {
   icon: React.ReactNode;
   title: string;
   sub: string;
-  customized: boolean;
+  status: SectionStatus;
 }) {
   return (
     <div>
@@ -237,13 +243,24 @@ function SectionHeader({
           {icon}
         </span>
         <h2 className="text-lg font-semibold">{title}</h2>
-        {customized && (
+        {status === "customized" && (
           <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
             Customized
           </span>
         )}
+        {status === "replaced" && (
+          <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+            Updated copy live
+          </span>
+        )}
       </div>
       <p className="mt-1.5 text-xs text-muted-foreground">{sub}</p>
+      {status === "replaced" && (
+        <p className="mt-2 rounded-lg border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-xs text-amber-100">
+          Your older edit to this section was replaced by the updated site
+          copy shown below. Edit and save to customize it again.
+        </p>
+      )}
     </div>
   );
 }

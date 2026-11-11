@@ -10,11 +10,9 @@ import {
   MapPin,
   Star,
   Medal,
-  Leaf,
   Snowflake,
-  Truck,
   Tractor,
-  Building2,
+  Radio,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/lib/site";
@@ -33,20 +31,16 @@ const HERO_PHOTOS = [
     alt: "PVS tractor snow-blowing a Petawawa driveway at sunrise after an overnight storm",
   },
   {
-    src: "/images/gallery/landscaping/trimmed-hedge-cleared-yard-ottawa-valley.webp",
-    alt: "Ottawa Valley yard raked clear and trimmed after a PVS fall cleanup",
-  },
-  {
-    src: "/images/gallery/snow-removal/pvs-truck-commercial-lot-night.webp",
-    alt: "PVS plow truck clearing a Pembroke commercial lot during an overnight snowfall",
-  },
-  {
-    src: "/images/gallery/gutter-cleaning/crew-ladder-gutters.jpg",
-    alt: "PVS crew on ladders clearing leaves out of a home's gutters before winter",
+    src: "/images/gallery/snow-removal/tractor-night-street-snowblowing.webp",
+    alt: "PVS tractor snow-blowing along a Pembroke street at night during a storm",
   },
   {
     src: "/images/gallery/snow-removal/night-tractor-snowblowing-headlights.webp",
     alt: "PVS tractor snow-blowing a driveway at night under its own headlights mid-storm",
+  },
+  {
+    src: "/images/gallery/snow-removal/tractor-cleared-driveway-bluebird-day.webp",
+    alt: "Driveway cleared edge to edge by a PVS tractor on a bright winter morning",
   },
 ];
 
@@ -108,12 +102,11 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           className="min-w-0 max-w-3xl text-center lg:col-span-7 lg:text-left mx-auto lg:mx-0"
         >
           <p className="eyebrow mb-5 flex-wrap justify-center gap-y-2 text-sky-200 lg:justify-start">
-            <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-300">
-              <Leaf className="h-3 w-3" />
-              Fall cleanups
-              <span className="text-amber-200/60">·</span>
-              <Snowflake className="h-3 w-3 text-sky-300" />
-              <span className="text-sky-300">Snow removal</span>
+            <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-0.5 text-sky-300">
+              <Snowflake className="h-3 w-3" />
+              Snow removal
+              <span className="text-sky-200/60">·</span>
+              <span>Residential</span>
             </span>
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
               <MapPin className="h-3.5 w-3.5" />
@@ -146,11 +139,11 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
               <Link
-                href="/services/fall-cleanup"
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-amber-300/40 bg-amber-400/10 backdrop-blur px-8 text-base font-semibold text-amber-100 hover:border-amber-300/60 hover:bg-amber-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                href="/live-map"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/10 backdrop-blur px-8 text-base font-semibold text-emerald-100 hover:border-emerald-300/60 hover:bg-emerald-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
-                <Leaf className="h-4 w-4" />
-                Fall Cleanups
+                <Radio className="h-4 w-4" />
+                Live Tractor Map
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
@@ -184,15 +177,12 @@ export function Hero({ content = DEFAULT_HERO }: { content?: HeroContent }) {
           </div>
 
           <p className="mt-6 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-white/10 bg-black/30 px-4 py-2.5 text-xs text-sky-100/85 backdrop-blur sm:text-sm lg:justify-start">
-            <Truck className="h-4 w-4 text-sky-300" aria-hidden />
-            <span><strong className="text-white">Pembroke:</strong> plow trucks</span>
-            <span className="text-sky-100/40">|</span>
             <Tractor className="h-4 w-4 text-sky-300" aria-hidden />
-            <span><strong className="text-white">Petawawa:</strong> tractors only</span>
+            <span><strong className="text-white">Pembroke &amp; Petawawa:</strong> tractors on every route</span>
             <span className="text-sky-100/40">|</span>
-            <Link href="/commercial-snow-removal" className="inline-flex items-center gap-1 font-semibold text-sky-300 hover:underline">
-              <Building2 className="h-4 w-4" aria-hidden />
-              Commercial lots too
+            <Link href="/live-map" className="inline-flex items-center gap-1 font-semibold text-sky-300 hover:underline">
+              <Radio className="h-4 w-4" aria-hidden />
+              Track them live
             </Link>
           </p>
         </motion.div>

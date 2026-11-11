@@ -14,6 +14,7 @@ import { ReviewCta } from "@/components/review-cta";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
 import { siteConfig } from "@/lib/site";
+import { PORTAL_LOGIN_URL } from "@/lib/content/winter-packages";
 import { formatPhone } from "@/lib/utils";
 
 export function Footer() {
@@ -85,11 +86,29 @@ export function Footer() {
               ))}
               <li>
                 <Link
-                  href="/commercial-snow-removal"
+                  href="/live-map"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Commercial Snow Removal
+                  Live Tractor Map
                 </Link>
+              </li>
+              <li>
+                <Link
+                  href="/customer-portal"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Customer Portal
+                </Link>
+              </li>
+              <li>
+                <a
+                  href={PORTAL_LOGIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Customer Portal Login
+                </a>
               </li>
               <li>
                 <Link

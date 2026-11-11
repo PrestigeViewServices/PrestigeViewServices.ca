@@ -78,6 +78,41 @@ export async function uploadPhotoBuffer(
   });
 }
 
+/**
+ * Uploads a crew job photo under pvs/crew/<folder> (e.g. stops/<stopId>).
+ * Phones send 3 to 8 MB JPEGs; the client downsizes before upload and
+ * Cloudinary serves an auto-quality version, so the stored original is fine.
+ */
+export async function uploadCrewPhoto(
+  buffer: Buffer,
+  folder: string
+): Promise<UploadedPhoto> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error("Cloudinary is not configured");
+  }
+  configure();
+  const safe = folder.toLowerCase().replace(/[^a-z0-9/_-]/g, "-");
+  return new Promise<UploadedPhoto>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: `pvs/crew/${safe}`,
+        resource_type: "image",
+        transformation: [{ quality: "auto", fetch_format: "auto" }],
+      },
+      (err, result) => {
+        if (err || !result) return reject(err ?? new Error("Upload failed"));
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+          width: result.width,
+          height: result.height,
+        });
+      }
+    );
+    stream.end(buffer);
+  });
+}
+
 /** Removes a photo from Cloudinary by public_id. Best-effort. */
 export async function deletePhotoByPublicId(publicId: string) {
   if (!isCloudinaryConfigured()) return;

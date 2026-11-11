@@ -16,6 +16,7 @@ import { ReviewsPreview } from "@/components/home/reviews-preview";
 import { FaqSection } from "@/components/faq-section";
 import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
+import { PortalStrip } from "@/components/winter/portal-showcase";
 import { QuoteCtaCard } from "@/components/home/quote-cta-card";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
@@ -23,15 +24,15 @@ import { getSiteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
   title:
-    "Property Care in Petawawa, Pembroke & the Ottawa Valley | Prestige View Services",
+    "Snow Removal in Petawawa & Pembroke | Prestige View Services",
   description:
-    "Fall cleanups and seasonal snow removal for homes and businesses in Petawawa & Pembroke. Plow trucks in Pembroke, tractors in Petawawa, commercial lots too. Free quote in one business day.",
+    "Seasonal snow removal for homes in Petawawa & Pembroke. Tractors on every route, live tractor map every storm. Free quote in one business day.",
   alternates: { canonical: "/" },
   openGraph: {
     title:
-      "Get Your Property Winter-Ready | Prestige View Services",
+      "Seasonal Snow Removal, Petawawa & Pembroke | Prestige View Services",
     description:
-      "Fall cleanups, gutters & winter snow contracts from one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
+      "Seasonal snow contracts for homes from one local, veteran-operated crew. Military & veteran discount. Free quotes in one business day.",
     url: "/",
     type: "website",
   },
@@ -56,9 +57,12 @@ export default async function HomePage() {
         <EquipmentByTown
           id="snow-equipment"
           eyebrow="Snow removal, town by town"
-          title="Pembroke gets plow trucks. Petawawa gets tractors."
-          description="Every winter route runs on the machine that suits it best. Here is what clears your driveway or lot this season."
+          title="Tractors on every route. Pembroke and Petawawa."
+          description="No plow trucks. Every driveway on our routes is cleared by tractor. Here is what clears yours this season."
         />
+      </Reveal>
+      <Reveal>
+        <PortalStrip />
       </Reveal>
       <Reveal>
         <ServicesOverview />
@@ -104,9 +108,9 @@ export default async function HomePage() {
         <section className="container-max pb-20">
           <div className="grid items-center gap-8 overflow-hidden rounded-3xl border border-sky-400/20 bg-gradient-to-br from-blue-950 via-slate-900 to-amber-950/40 p-6 sm:p-10 lg:grid-cols-2">
             <div>
-              <p className="eyebrow text-amber-300">Last call before the snow</p>
+              <p className="eyebrow text-sky-300">Winter routes are filling</p>
               <h2 className="heading-section mt-3 text-balance text-white">
-                Get your fall cleanup and winter plan locked in today
+                Lock in your snow removal before the first big storm
               </h2>
               <p className="mt-4 text-base leading-relaxed text-sky-100/80">
                 Routes are capped so response times hold through every storm.

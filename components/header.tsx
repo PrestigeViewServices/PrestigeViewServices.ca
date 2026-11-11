@@ -8,7 +8,7 @@ import {
   Phone,
   Snowflake,
   Leaf,
-  Building2,
+  Radio,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,21 +27,13 @@ import { Button } from "@/components/ui/button";
 import { BrandLockup } from "@/components/brand-lockup";
 import { UserRound } from "lucide-react";
 import { siteConfig } from "@/lib/site";
+import { PORTAL_LOGIN_URL } from "@/lib/content/winter-packages";
 import { formatPhone } from "@/lib/utils";
 
 // Top-tier conversion routes, pinned at the top of the mobile sheet AND
 // the desktop "Explore" dropdown. Pushing the estimator + reservation
 // flow is more valuable than any informational page.
 const featuredLinks = [
-  {
-    href: "/fall-winter",
-    label: "Fall Cleanup",
-    icon: Leaf,
-    // Amber = fall, frost = winter. The two colours are the season theme.
-    cls: "text-amber-300 hover:bg-amber-400/10",
-    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
-    tileIcon: "bg-amber-400/20 text-amber-300",
-  },
   {
     href: "/winter-packages",
     label: "Snow Removal",
@@ -51,12 +43,21 @@ const featuredLinks = [
     tileIcon: "bg-sky-400/20 text-sky-300",
   },
   {
-    href: "/commercial-snow-removal",
-    label: "Commercial",
-    icon: Building2,
-    cls: "text-cyan-200 hover:bg-cyan-400/10",
-    tile: "border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20",
-    tileIcon: "bg-cyan-400/20 text-cyan-200",
+    href: "/live-map",
+    label: "Live Map",
+    icon: Radio,
+    cls: "text-emerald-300 hover:bg-emerald-400/10",
+    tile: "border-emerald-400/30 bg-emerald-400/10 hover:bg-emerald-400/20",
+    tileIcon: "bg-emerald-400/20 text-emerald-300",
+  },
+  {
+    href: "/fall-winter",
+    label: "Fall Cleanup",
+    icon: Leaf,
+    // Amber = fall, frost = winter. The two colours are the season theme.
+    cls: "text-amber-300 hover:bg-amber-400/10",
+    tile: "border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20",
+    tileIcon: "bg-amber-400/20 text-amber-300",
   },
 ] as const;
 
@@ -64,9 +65,11 @@ const exploreLinks = [
   { href: "/account", label: "My Account · Prestige Club" },
   { href: "/refer", label: "Refer a Friend" },
   { href: "/services", label: "All Services" },
-  { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/winter-packages", label: "Residential Snow Plans" },
-  { href: "/commercial-snow-removal", label: "Commercial Snow Removal" },
+  { href: "/live-map", label: "Live Tractor Map" },
+  { href: "/customer-portal", label: "Customer Portal" },
+  { href: PORTAL_LOGIN_URL, label: "Customer Portal Login" },
+  { href: "/services/fall-cleanup", label: "Fall Cleanups" },
   { href: "/service-areas", label: "Service Areas" },
   { href: "/our-work", label: "Our Work" },
   { href: "/guides", label: "Tips & Guides" },

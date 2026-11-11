@@ -24,7 +24,6 @@ const popularBundles = [
   "Fall Cleanup + Gutter Cleaning",
   "Fall Cleanup + Seasonal Snow Plan",
   "Snow Plan + Walkway Shovelling",
-  "Commercial Snow + Salting",
 ];
 
 export default async function QuotePage() {

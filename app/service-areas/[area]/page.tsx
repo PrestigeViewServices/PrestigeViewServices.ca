@@ -234,8 +234,7 @@ export default async function ServiceAreaPage(
                 {area.snowStatus === "expanding"
                   ? `Our snow routes now reach ${area.name} and spots are limited while the route grows. `
                   : "Routes are capped, so reserve before they fill. "}
-                Homes on seasonal plans, and businesses on commercial
-                contracts.
+                Tractors on every route, and you can track them live.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -246,7 +245,7 @@ export default async function ServiceAreaPage(
                 </Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/commercial-snow-removal">Commercial</Link>
+                <Link href="/live-map">Live map</Link>
               </Button>
             </div>
           </div>
