@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { FaqSection } from "@/components/faq-section";
 import { ServiceAmbience } from "@/components/service-ambience";
 import { LiveFleetMap } from "@/components/winter/live-fleet-map";
+import { WeatherWidget } from "@/components/weather/weather-widget";
 import { PortalStrip } from "@/components/winter/portal-showcase";
 import { siteConfig } from "@/lib/site";
 import { formatPhone } from "@/lib/utils";
@@ -192,6 +193,8 @@ export default function LiveMapPage() {
       </section>
 
       {/* ── Map ── */}
+      <WeatherWidget id="snow-status" showMapLink={false} className="pb-0" />
+
       <section id="map" className="container-max scroll-mt-24 py-10">
         <LiveFleetMap tall />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">

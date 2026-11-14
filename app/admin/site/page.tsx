@@ -5,6 +5,7 @@ import {
   SlidersHorizontal,
   ArrowRight,
   MessageSquareQuote,
+  CloudSnow,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 
@@ -30,6 +31,12 @@ export default async function SiteModificationsPage() {
       </header>
 
       <div className="grid gap-5 sm:grid-cols-2">
+        <Tile
+          href="/admin/site/snow-status"
+          icon={<CloudSnow className="h-5 w-5" />}
+          title="Snow event status"
+          body="One tap during a storm: Storm watch, Crews deployed, Cleanup, Routes complete. Shows on every public page within a minute."
+        />
         <Tile
           href="/admin/site/content"
           icon={<FileEdit className="h-5 w-5" />}
