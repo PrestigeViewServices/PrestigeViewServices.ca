@@ -2,9 +2,10 @@
  * Local weather for the service area, from Open-Meteo (free, no API key,
  * Environment Canada GEM model among its sources).
  *
- * Fetched SERVER-SIDE only (app/api/site/weather) and cached for 15 minutes,
- * so visitors never hit Open-Meteo directly, the CSP stays untouched, and
- * traffic spikes during a storm cost us nothing.
+ * Fetched SERVER-SIDE only (app/api/site/weather) behind a short CDN cache
+ * (data is never more than ~15 minutes old), so visitors never hit
+ * Open-Meteo directly, the CSP stays untouched, and storm-night traffic
+ * spikes cost us nothing.
  */
 
 export type TownKey = "petawawa" | "pembroke";
@@ -105,7 +106,10 @@ async function fetchTown(t: (typeof TOWNS)[number]): Promise<TownWeather> {
     wind_speed_unit: "kmh",
   });
   const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
-    next: { revalidate: 900 },
+    // No Next.js data cache: it serves a stale copy first after a quiet
+    // period (e.g. overnight), which could mean hours-old weather. The CDN
+    // header in app/api/site/weather is the only cache.
+    cache: "no-store",
     signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);

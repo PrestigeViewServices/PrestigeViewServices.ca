@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { getWeather } from "@/lib/weather";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Current conditions + next-24h snowfall for Petawawa and Pembroke.
- * Upstream fetches are cached 15 min (lib/weather.ts); the CDN cache here
- * means a storm-night traffic spike never reaches Open-Meteo.
+ *
+ * The CDN cache is the ONLY cache: fresh for 10 min, then at most one more
+ * 5 min stale serve while it refreshes, so data is never older than ~15 min.
+ * Past that the CDN fetches fresh before answering. A failed fetch is never
+ * cached, so the next request retries Open-Meteo immediately.
  */
 export async function GET() {
   const weather = await getWeather();
@@ -15,8 +19,8 @@ export async function GET() {
     {
       headers: {
         "Cache-Control": weather
-          ? "public, s-maxage=600, stale-while-revalidate=1800"
-          : "public, s-maxage=60",
+          ? "public, s-maxage=600, stale-while-revalidate=300"
+          : "no-store",
       },
     }
   );
