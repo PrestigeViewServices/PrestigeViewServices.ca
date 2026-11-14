@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { timeAgo, useSnowStatus } from "./use-site-weather";
+import { timeAgo, useNow, useSnowStatus } from "./use-site-weather";
 
 const TONES = {
   idle: "",
@@ -29,6 +29,7 @@ const DOTS = {
  */
 export function SnowStatusBar() {
   const status = useSnowStatus();
+  const now = useNow();
   const [dismissed, setDismissed] = useState<string | null>(null);
 
   const stamp = status ? `${status.phase}:${status.updatedAt ?? ""}` : "";
@@ -67,7 +68,7 @@ export function SnowStatusBar() {
           <span className="hidden opacity-80 sm:inline"> · {status.detail}</span>
           {status.updatedAt && (
             <span className="ml-1.5 whitespace-nowrap text-xs opacity-60">
-              Updated {timeAgo(status.updatedAt)}
+              Updated {timeAgo(status.updatedAt, now)}
             </span>
           )}
         </p>

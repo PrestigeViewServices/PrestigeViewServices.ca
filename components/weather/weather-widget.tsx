@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SNOW_TRIGGER_CM, type TownWeather, type WeatherIcon } from "@/lib/weather";
 import { PHASE_DEFS, TIMELINE } from "@/lib/snow-status-phases";
-import { timeAgo, useSnowStatus, useWeather } from "./use-site-weather";
+import { timeAgo, useNow, useSnowStatus, useWeather } from "./use-site-weather";
 
 const ICONS: Record<WeatherIcon, LucideIcon> = {
   sun: Sun,
@@ -60,6 +60,7 @@ export function WeatherWidget({
 }) {
   const weather = useWeather();
   const status = useSnowStatus();
+  const now = useNow();
   const step = status?.step ?? 0;
   const live = status?.phase === "deployed" || status?.phase === "cleanup";
 
@@ -84,7 +85,7 @@ export function WeatherWidget({
             </p>
             {status?.updatedAt && (
               <p className="mt-1 text-xs text-sky-200/50">
-                Updated {timeAgo(status.updatedAt)}
+                Updated {timeAgo(status.updatedAt, now)}
               </p>
             )}
 
@@ -130,7 +131,14 @@ export function WeatherWidget({
 
           {/* ---- Local weather ---- */}
           <div className="p-6 sm:p-8">
-            <p className="eyebrow text-sky-300">Local weather</p>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="eyebrow text-sky-300">Local weather</p>
+              {weather && (
+                <p className="text-[11px] text-sky-200/50">
+                  Updated {timeAgo(weather.fetchedAt, now)} · refreshes automatically
+                </p>
+              )}
+            </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {weather === undefined &&
                 [0, 1].map((i) => (
