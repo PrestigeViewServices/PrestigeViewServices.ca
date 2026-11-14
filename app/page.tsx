@@ -17,6 +17,7 @@ import { AccountSavingsBanner } from "@/components/account-savings-banner";
 import { EquipmentByTown } from "@/components/winter/equipment-by-town";
 import { PortalStrip } from "@/components/winter/portal-showcase";
 import { QuoteCtaCard } from "@/components/home/quote-cta-card";
+import { WeatherWidget } from "@/components/weather/weather-widget";
 import { Reveal } from "@/components/ui/reveal";
 import { homeFaqs } from "@/lib/content/faq";
 import { getSiteContent } from "@/lib/site-content";
@@ -48,6 +49,7 @@ export default async function HomePage() {
       <SeasonBanner />
       <Hero content={content.hero} />
       <TrustMarquee />
+      <WeatherWidget id="weather" />
       <Reveal>
         <FallWinterPromo />
       </Reveal>

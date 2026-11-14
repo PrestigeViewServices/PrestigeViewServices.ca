@@ -35,6 +35,7 @@ import {
   Sparkles,
   AlertTriangle,
   Users,
+  CloudSnow,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -115,6 +116,7 @@ const groups: NavGroup[] = [
     items: [
       { href: "/admin/accounts", label: "Accounts", icon: Contact },
       { href: "/admin/dispatch", label: "Crew Dispatch", icon: Truck },
+      { href: "/admin/site/snow-status", label: "Snow Status", icon: CloudSnow },
     ],
   },
   {

@@ -13,6 +13,7 @@ import { SeasonAmbience } from "@/components/season-ambience";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { HideOnAdmin } from "@/components/site-chrome";
+import { SnowStatusBar } from "@/components/weather/snow-status-bar";
 import { siteConfig } from "@/lib/site";
 import { services } from "@/lib/content/services";
 import { serviceAreas } from "@/lib/content/service-areas";
@@ -174,6 +175,8 @@ export default function RootLayout({
           {/* Fall & winter drift behind every public page */}
           <SeasonAmbience />
           <Header />
+          {/* Storm update strip, only while a snow event is active */}
+          <SnowStatusBar />
         </HideOnAdmin>
         <main id="main" className="flex-1">
           {children}
