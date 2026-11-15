@@ -25,6 +25,7 @@ export function AdminLoginForm({
     hasPassword: boolean;
     hasEmail: boolean;
     hasSessionSecret: boolean;
+    hasDatabase?: boolean;
     maskedEmail: string | null;
   };
 }) {
@@ -146,6 +147,10 @@ export function AdminLoginForm({
                 <Check2
                   ok={diagnostics.hasSessionSecret}
                   label="ADMIN_SESSION_SECRET"
+                />
+                <Check2
+                  ok={Boolean(diagnostics.hasDatabase)}
+                  label="DATABASE_URL"
                 />
               </ul>
               <p className="mt-2 leading-relaxed">

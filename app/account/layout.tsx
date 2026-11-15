@@ -28,12 +28,13 @@ export default async function AccountLayout({
     return (
       <section className="container-max py-16">
         <div className="mx-auto max-w-lg surface-card p-8 text-center">
-          <h1 className="text-xl font-bold">Accounts aren&apos;t open yet</h1>
+          <h1 className="text-xl font-bold">
+            Online accounts are briefly unavailable
+          </h1>
           <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-            The customer portal needs a session secret
-            (CUSTOMER_SESSION_SECRET) before accounts can be created. In the
-            meantime, call us at {siteConfig.phoneDisplay}, we&apos;re happy to
-            help directly.
+            We&apos;re doing some maintenance on the customer portal. Call or
+            text us at {siteConfig.phoneDisplay} and we&apos;ll take care of
+            you directly.
           </p>
         </div>
       </section>
